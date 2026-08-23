@@ -1,1 +1,1 @@
-{"version":1,"label":"3.1","semanticVersion":"3.1","updatedAt":"2026-08-22T07:55:00+09:00","note":"atomic multi-operator game actions, six-operator concurrency safety, no lost updates"}
+{"version":1,"label":"3.2","semanticVersion":"3.2","updatedAt":"2026-08-23T20:52:00+09:00","note":"fix intermittent partial member roster after navigation; use one member pager and reset roster to page 1 on re-entry"}
