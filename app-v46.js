@@ -12,11 +12,14 @@ function pollMs46(view){
 }
 function compactView46(view){return view==='queue'||view==='playing'||view==='stats'}
 async function compactState46(){
+ const requestedView=currentView||'members',requestedGroup=String(currentGroupId||'');
  const u=new URL(STATE_V46);if(currentGroupId)u.searchParams.set('groupId',currentGroupId);u.searchParams.set('t',Date.now());
  const r=await fetch(u,{headers:{authorization:'Bearer '+T},cache:'no-store'});const x=await r.json().catch(()=>({}));
  if(!r.ok){if(r.status===401){reloginLatest();throw new Error('로그인이 만료되었습니다.')}throw new Error(x.error||'상태 조회에 실패했습니다.')}
+ if(String(currentGroupId||'')!==requestedGroup||String(currentView||'members')!==requestedView||!compactView46(currentView||'members'))return x;
  const sig=JSON.stringify([x.data,x.user?.role,x.user?.globalAdmin,x.group?.groupId]);const changed=sig!==lastCompactSig46;lastCompactSig46=sig;
  S=x.data;me=x.user;group=x.group;groups=x.groups||groups;currentGroupId=group.groupId;localStorage.setItem(GROUP_KEY,currentGroupId);normalizeClient();if(changed)renderAll();
+ return x;
 }
 const loadState45=loadState;
 loadState=async function(force=false){
@@ -44,11 +47,12 @@ renderMembers=function(){
 };
 window.searchMembers46=function(v){memberQuery46=String(v||'');memberPage46=1;renderMembers();const i=$('memberSearchInput46');if(i){i.focus();try{i.setSelectionRange(i.value.length,i.value.length)}catch{}}};
 window.memberPageGo46=function(p){memberPage46=Math.max(1,Number(p)||1);renderMembers();window.scrollTo(0,0)};
+window.resetMemberList46=function(){memberQuery46='';memberPage46=1;renderMembers()};
 window.refreshMembers46=function(){lastPoll46.members=0;loadState(true).catch(showError)};
 
 const goView45=goView;
 goView=function(id){
- const prev=currentView;goView45(id);if(id==='members'&&prev!==id){memberPage46=1;lastPoll46.members=0}
+ const prev=currentView;goView45(id);if(id==='members'&&prev!==id){memberPage46=1;memberQuery46='';lastPoll46.members=0}
  lastPoll46[id]=0;loadState(true).catch(()=>{});
 };
 document.addEventListener('visibilitychange',()=>{if(!document.hidden&&T){lastPoll46[currentView]=0;loadState(true).catch(()=>{})}});
