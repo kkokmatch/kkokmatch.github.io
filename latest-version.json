@@ -1,1 +1,1 @@
-{"version":1,"label":"3.9","semanticVersion":"3.9","updatedAt":"2026-08-24T22:55:00+09:00","note":"temporary recovery marker to stop legacy mobile auto-update reload loop before v4.6 rollout"}
+{"version":1,"label":"4.6","semanticVersion":"4.6","updatedAt":"2026-08-24T23:02:00+09:00","note":"remove legacy automatic reload scripts from startup; keep updates manual-only to prevent mobile login loops"}
