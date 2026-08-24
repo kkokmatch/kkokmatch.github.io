@@ -1,1 +1,1 @@
-{"version":1,"label":"3.7","semanticVersion":"3.7","updatedAt":"2026-08-24T15:02:00+09:00","note":"fix member reselect navigation; faster same-name member registration and login lookup; move version refresh control beside logout with update prompt"}
+{"version":1,"label":"3.8","semanticVersion":"3.8","updatedAt":"2026-08-24T15:49:00+09:00","note":"developer last-group login, own-membership switching, group ON/OFF, initial PIN guidance and change flow, 10-member roster pages"}
