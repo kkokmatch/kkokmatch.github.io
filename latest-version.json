@@ -1,1 +1,1 @@
-{"version":1,"label":"3.6","semanticVersion":"3.6","updatedAt":"2026-08-24T14:47:00+09:00","note":"same-name individual member creation fixed with dedicated v3.6 save path; exact duplicate only when name, birth year, gender, grade, type and role all match"}
+{"version":1,"label":"3.7","semanticVersion":"3.7","updatedAt":"2026-08-24T15:02:00+09:00","note":"fix member reselect navigation; faster same-name member registration and login lookup; move version refresh control beside logout with update prompt"}
