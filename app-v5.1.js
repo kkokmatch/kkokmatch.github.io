@@ -10,14 +10,19 @@ window.refreshApp50=window.refreshApp51;window.refreshApp49=window.refreshApp51;
 const renderHeaderPrev51=renderHeader;renderHeader=function(){const r=renderHeaderPrev51();ensure51();return r};
 const renderSettingsPrev51=renderSettings;renderSettings=function(){const r=renderSettingsPrev51();const box=typeof $==='function'?$('settings'):null;if(box&&me?.globalAdmin===true&&String(me?.displayName||'').trim()==='박태영'){const card=[...box.querySelectorAll('.card')].find(c=>String(c.textContent||'').includes('프로그램 버전'));if(card){const m=card.querySelector('.meta');if(m)m.textContent='콕매치 v5.1 · 실사용 QA 안정화 · 화면전환/투표 즉시표시 보정'}}return r};
 
-/* v5.1 hotfix: keep an already-rendered full member roster visible while a transient thin state is passing through. */
+/* v5.1 hotfix: keep an already-rendered full member roster visible while a transient thin state is passing through in the same group. */
+let stableMemberGroup51='';
 const renderMembersPrev51=renderMembers;
 renderMembers=function(){
  const box=typeof $==='function'?$('members'):document.getElementById('members');
  const stateCount=Array.isArray(S?.members)?S.members.length:0;
  const renderedCount=box?.querySelectorAll?.('.memberCard')?.length||0;
- if(box&&renderedCount>1&&stateCount<=1)return;
- return renderMembersPrev51();
+ const gid=String(currentGroupId||'');
+ if(box&&renderedCount>1&&stateCount<=1&&stableMemberGroup51===gid)return;
+ const r=renderMembersPrev51();
+ if(stateCount>1)stableMemberGroup51=gid;
+ else if(stableMemberGroup51!==gid)stableMemberGroup51=gid;
+ return r;
 };
 
 /* v5.1 hotfix: apply the final poll title/schedule/creator layout synchronously instead of waiting for the old RAF/MutationObserver pass. */
