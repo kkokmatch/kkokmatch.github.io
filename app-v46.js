@@ -17,6 +17,7 @@ async function compactState46(){
  const r=await fetch(u,{headers:{authorization:'Bearer '+T},cache:'no-store'});const x=await r.json().catch(()=>({}));
  if(!r.ok){if(r.status===401){reloginLatest();throw new Error('로그인이 만료되었습니다.')}throw new Error(x.error||'상태 조회에 실패했습니다.')}
  if(String(currentGroupId||'')!==requestedGroup||String(currentView||'members')!==requestedView||!compactView46(currentView||'members'))return x;
+ window.__kokmatchMemberCount46=Number(x.memberCount||0);
  const sig=JSON.stringify([x.data,x.user?.role,x.user?.globalAdmin,x.group?.groupId]);const changed=sig!==lastCompactSig46;lastCompactSig46=sig;
  S=x.data;me=x.user;group=x.group;groups=x.groups||groups;currentGroupId=group.groupId;localStorage.setItem(GROUP_KEY,currentGroupId);normalizeClient();if(changed)renderAll();
  return x;
@@ -25,6 +26,8 @@ const loadState45=loadState;
 loadState=async function(force=false){
  if(!T||reloginBusy)return;if(document.hidden&&!force)return;
  const view=currentView||'members',now=Date.now(),last=Number(lastPoll46[view]||0),gap=pollMs46(view);
+ /* After login is established, the member roster has its own lightweight API. Do not fetch the full app state again. */
+ if(view==='members'&&me&&currentGroupId){lastPoll46.members=now;return}
  if(!force&&last&&now-last<gap)return;if(actionBusy46&&!force)return;if(stateBusy46)return stateBusy46;
  lastPoll46[view]=now;
  stateBusy46=(compactView46(view)?compactState46():loadState45()).finally(()=>{stateBusy46=null});
@@ -40,7 +43,7 @@ function filteredMembers46(){
 }
 const renderMembers45=renderMembers;
 renderMembers=function(){
- const all=S.members,filtered=filteredMembers46(),pages=Math.max(1,Math.ceil(filtered.length/MEMBER_PAGE_SIZE46));memberPage46=Math.min(Math.max(1,memberPage46),pages);const start=(memberPage46-1)*MEMBER_PAGE_SIZE46,page=filtered.slice(start,start+MEMBER_PAGE_SIZE46);
+ const all=Array.isArray(S?.members)?S.members:[],filtered=filteredMembers46(),pages=Math.max(1,Math.ceil(filtered.length/MEMBER_PAGE_SIZE46));memberPage46=Math.min(Math.max(1,memberPage46),pages);const start=(memberPage46-1)*MEMBER_PAGE_SIZE46,page=filtered.slice(start,start+MEMBER_PAGE_SIZE46);
  S.members=page;try{renderMembers45()}finally{S.members=all}
  const box=$('members');if(!box)return;const title=box.querySelector('.title');if(title&&!box.querySelector('.memberSearch46'))title.insertAdjacentHTML('afterend',`<div class="memberSearch46"><div class="memberSearchRow46"><input id="memberSearchInput46" value="${esc(memberQuery46)}" placeholder="이름·급수·초대인 검색" oninput="searchMembers46(this.value)"><button class="btn ghost" onclick="refreshMembers46()">새로고침</button></div><div class="meta">전체 ${all.length}명 · 검색 ${filtered.length}명 · 한 화면 최대 ${MEMBER_PAGE_SIZE46}명</div></div>`);
  if(pages>1)box.insertAdjacentHTML('beforeend',`<div class="memberPager46"><button class="btn ghost" ${memberPage46<=1?'disabled':''} onclick="memberPageGo46(${memberPage46-1})">이전</button><span><b>${memberPage46}</b> / ${pages}</span><button class="btn ghost" ${memberPage46>=pages?'disabled':''} onclick="memberPageGo46(${memberPage46+1})">다음</button></div>`);
@@ -48,14 +51,16 @@ renderMembers=function(){
 window.searchMembers46=function(v){memberQuery46=String(v||'');memberPage46=1;renderMembers();const i=$('memberSearchInput46');if(i){i.focus();try{i.setSelectionRange(i.value.length,i.value.length)}catch{}}};
 window.memberPageGo46=function(p){memberPage46=Math.max(1,Number(p)||1);renderMembers();window.scrollTo(0,0)};
 window.resetMemberList46=function(){memberQuery46='';memberPage46=1;renderMembers()};
-window.refreshMembers46=function(){lastPoll46.members=0;loadState(true).catch(showError)};
+window.refreshMembers46=function(){lastPoll46.members=0;if(typeof window.enterMembers42==='function')return window.enterMembers42(true);return loadState45(true).catch(showError)};
 
 const goView45=goView;
 goView=function(id){
  const prev=currentView;goView45(id);if(id==='members'&&prev!==id){memberPage46=1;memberQuery46='';lastPoll46.members=0}
- lastPoll46[id]=0;loadState(true).catch(()=>{});
+ lastPoll46[id]=0;
+ if(id==='members'&&me&&currentGroupId)return;
+ loadState(true).catch(()=>{});
 };
-document.addEventListener('visibilitychange',()=>{if(!document.hidden&&T){lastPoll46[currentView]=0;loadState(true).catch(()=>{})}});
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&T){lastPoll46[currentView]=0;if(currentView==='members'&&me){if(typeof window.enterMembers42==='function')window.enterMembers42(false);return}loadState(true).catch(()=>{})}});
 
 const renderSettings45=renderSettings;
 renderSettings=function(){renderSettings45();const box=$('settings');if(!box)return;[...box.querySelectorAll('.meta')].forEach(el=>{if((el.textContent||'').includes('콕매치 v45'))el.textContent='콕매치 v46 · 10명 단위 회원명부 · 스마트 동기화'})};
