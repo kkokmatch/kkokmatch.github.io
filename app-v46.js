@@ -1,6 +1,6 @@
 (()=>{
 const STATE_V46='https://wjelumpbjklfrdjxbesj.supabase.co/functions/v1/kokmatch-state-v46';
-const MEMBER_PAGE_SIZE46=80;
+const MEMBER_PAGE_SIZE46=10;
 let memberQuery46='',memberPage46=1,stateBusy46=null,actionBusy46=0,lastCompactSig46='';
 const lastPoll46={};
 
@@ -54,7 +54,7 @@ goView=function(id){
 document.addEventListener('visibilitychange',()=>{if(!document.hidden&&T){lastPoll46[currentView]=0;loadState(true).catch(()=>{})}});
 
 const renderSettings45=renderSettings;
-renderSettings=function(){renderSettings45();const box=$('settings');if(!box)return;[...box.querySelectorAll('.meta')].forEach(el=>{if((el.textContent||'').includes('콕매치 v45'))el.textContent='콕매치 v46 · 400명급 모임 최적화 · 스마트 동기화'})};
+renderSettings=function(){renderSettings45();const box=$('settings');if(!box)return;[...box.querySelectorAll('.meta')].forEach(el=>{if((el.textContent||'').includes('콕매치 v45'))el.textContent='콕매치 v46 · 10명 단위 회원명부 · 스마트 동기화'})};
 
 if(me)renderAll();
 })();
