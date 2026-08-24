@@ -1,1 +1,1 @@
-{"version":1,"label":"3.2","semanticVersion":"3.2","updatedAt":"2026-08-23T20:52:00+09:00","note":"fix intermittent partial member roster after navigation; use one member pager and reset roster to page 1 on re-entry"}
+{"version":1,"label":"3.3","semanticVersion":"3.3","updatedAt":"2026-08-24T11:58:00+09:00","note":"single-pass login after 5am reset; show birth year and group choice before PIN; improve past poll dots and poll schedule/creator display"}
