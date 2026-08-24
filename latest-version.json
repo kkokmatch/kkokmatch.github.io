@@ -1,1 +1,1 @@
-{"version":1,"label":"4.9","semanticVersion":"4.9","updatedAt":"2026-08-25T00:11:00+09:00","note":"stabilize game-notification settings UI to stop button flicker; add collapsible iPhone and Galaxy notification setup guides"}
+{"version":1,"label":"5.0","semanticVersion":"5.0","updatedAt":"2026-08-25T00:30:00+09:00","note":"persist notification setup guides until user closes them; ignore scroll gestures; remove standalone home-screen guide card; fade past calendar dates further"}
