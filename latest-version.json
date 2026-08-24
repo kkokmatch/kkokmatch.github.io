@@ -1,1 +1,1 @@
-{"version":1,"label":"3.8","semanticVersion":"3.8","updatedAt":"2026-08-24T15:49:00+09:00","note":"developer last-group login, own-membership switching, group ON/OFF, initial PIN guidance and change flow, 10-member roster pages"}
+{"version":1,"label":"3.9","semanticVersion":"3.9","updatedAt":"2026-08-24T16:23:00+09:00","note":"safe automatic updater; fixed current-version detection; logout button fixed on the right; update button expands left without clipping logout"}
