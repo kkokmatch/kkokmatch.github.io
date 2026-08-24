@@ -1,1 +1,1 @@
-{"version":1,"label":"4.2","semanticVersion":"4.2","updatedAt":"2026-08-24T17:18:00+09:00","note":"fix member-roster loading race after badge visibility changes; ignore stale compact-state responses after navigation; single authoritative full-roster load on member view"}
+{"version":1,"label":"4.3","semanticVersion":"4.3","updatedAt":"2026-08-24T20:36:00+09:00","note":"PWA game push notifications for pending-group assignment and game-start court alerts; per-device notification opt-in"}
