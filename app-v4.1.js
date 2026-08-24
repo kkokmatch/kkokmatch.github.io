@@ -2,7 +2,7 @@
 const VER42='4.2';
 const FULL_STATE42='https://wjelumpbjklfrdjxbesj.supabase.co/functions/v1/kokmatch-multi-api';
 const DEV_NAME42='박태영';
-let memberReady42=false,memberGroup42='',memberReq42=null,memberSeq42=0;
+let memberReady42=false,memberGroup42='',memberReq42=null,memberReqGroup42='',memberReqSeq42=0,memberSeq42=0;
 let latest42=VER42,refreshBusy42=false;
 
 function developer42(){return !!me&&me.globalAdmin===true&&String(me.displayName||'').trim()===DEV_NAME42}
@@ -14,6 +14,7 @@ roleBadge=function(m){
  return roleBadgePrev42(m);
 };
 
+function invalidateMembers42(){memberReady42=false;memberSeq42++;memberReq42=null;memberReqGroup42='';memberReqSeq42=0}
 function showRosterLoading42(){
  const b=$('members');if(!b)return;
  const currentGroup=String(memberGroup42||'');
@@ -29,17 +30,18 @@ async function fetchFull42(force=false){
  if(!T||!currentGroupId)return null;
  const gid=currentGroupId;
  if(!force&&memberReady42&&memberGroup42===gid)return {data:S};
- if(memberReq42&&memberGroup42===gid)return memberReq42;
- const seq=++memberSeq42;memberReady42=false;memberGroup42=gid;
+ if(memberReq42&&memberReqGroup42===gid&&memberReqSeq42===memberSeq42)return memberReq42;
+ const seq=++memberSeq42;memberReady42=false;memberGroup42=gid;memberReqGroup42=gid;memberReqSeq42=seq;
  showRosterLoading42();
- memberReq42=(async()=>{
+ const promise=(async()=>{
   const u=new URL(FULL_STATE42);u.searchParams.set('api','state');u.searchParams.set('groupId',gid);u.searchParams.set('t',Date.now());
   const r=await fetch(u,{headers:{authorization:'Bearer '+T},cache:'no-store'});const x=await r.json().catch(()=>({}));
   if(!r.ok){if(r.status===401){reloginLatest();throw new Error('로그인이 만료되었습니다.')}throw new Error(x.error||'전체 회원명단을 불러오지 못했습니다.')}
   if(seq!==memberSeq42||gid!==currentGroupId)return x;
   applyFull42(x,gid);return x;
- })().finally(()=>{if(seq===memberSeq42)memberReq42=null});
- return memberReq42;
+ })();
+ memberReq42=promise;
+ try{return await promise}finally{if(memberReq42===promise){memberReq42=null;memberReqGroup42='';memberReqSeq42=0}}
 }
 function renderFullPage42(){
  if(currentView!=='members'||!memberReady42||memberGroup42!==currentGroupId)return;
@@ -64,18 +66,18 @@ renderMembers=function(){
  }
  return renderMembersPrev42();
 };
-window.refreshMembers46=function(){memberReady42=false;return enterMembers42(true)};
+window.refreshMembers46=function(){invalidateMembers42();return enterMembers42(true)};
 
 document.addEventListener('pointerdown',e=>{
  const btn=e.target.closest?.('#nav button[data-v="members"]');
  if(!btn||currentView==='members')return;
- memberReady42=false;memberSeq42++;
+ invalidateMembers42();
  queueMicrotask(()=>{if(currentView==='members')enterMembers42(true)});
 },{capture:true,passive:true});
 const goViewPrev42=goView;
 goView=function(id){
  const target=String(id||''),prev=currentView;
- if(target==='members'&&prev!=='members'){memberReady42=false;memberSeq42++}
+ if(target==='members'&&prev!=='members')invalidateMembers42()
  const r=goViewPrev42(id);
  if(target==='members'&&prev!=='members')queueMicrotask(()=>{if(currentView==='members')enterMembers42(true)});
  return r;
@@ -83,7 +85,7 @@ goView=function(id){
 
 const badgeSetPrev42=window.setAdminBadgeVisibility43;
 if(typeof badgeSetPrev42==='function')window.setAdminBadgeVisibility43=async function(mode){
- await badgeSetPrev42(mode);memberReady42=false;memberSeq42++;
+ await badgeSetPrev42(mode);invalidateMembers42();
 };
 
 function stripVersionCard42(){
