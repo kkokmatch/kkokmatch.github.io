@@ -1,1 +1,1 @@
-{"version":1,"label":"4.6","semanticVersion":"4.6","updatedAt":"2026-08-24T23:02:00+09:00","note":"remove legacy automatic reload scripts from startup; keep updates manual-only to prevent mobile login loops"}
+{"version":1,"label":"4.7","semanticVersion":"4.7","updatedAt":"2026-08-24T23:18:00+09:00","note":"use lightweight member-roster API; prevent duplicate full-state fetches; stabilize iOS roster loading and speed up mobile roster navigation"}
