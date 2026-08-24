@@ -1,22 +1,26 @@
-self.addEventListener('install',event=>{self.skipWaiting()});
+self.addEventListener('install',event=>{event.waitUntil(self.skipWaiting())});
 self.addEventListener('activate',event=>{event.waitUntil(self.clients.claim())});
+self.addEventListener('message',event=>{if(event.data?.type==='SKIP_WAITING')self.skipWaiting()});
 
 self.addEventListener('push',event=>{
   let payload={};
   try{payload=event.data?event.data.json():{}}catch{try{payload={body:event.data?.text?.()||''}}catch{payload={}}}
-  const title=payload.title||'콕매치';
+  const declared=payload.notification&&typeof payload.notification==='object'?payload.notification:{};
+  const title=payload.title||declared.title||'콕매치';
+  const body=payload.body||declared.body||'게임 알림이 도착했습니다.';
+  const data=payload.data||{};
   const options={
-    body:payload.body||'게임 알림이 도착했습니다.',
+    body,
     tag:payload.tag||('kokmatch-'+Date.now()),
     renotify:true,
     requireInteraction:true,
     silent:false,
-    data:payload.data||{},
+    data,
     timestamp:Date.now()
   };
   event.waitUntil((async()=>{
     const clients=await self.clients.matchAll({type:'window',includeUncontrolled:true});
-    for(const client of clients){try{client.postMessage({type:'KOKMATCH_PUSH_RECEIVED',payload:{title,body:options.body,tag:options.tag,data:options.data}})}catch{}}
+    for(const client of clients){try{client.postMessage({type:'KOKMATCH_PUSH_RECEIVED',payload:{title,body,tag:options.tag,data}})}catch{}}
     await self.registration.showNotification(title,options);
   })());
 });
@@ -25,6 +29,7 @@ self.addEventListener('notificationclick',event=>{
   event.notification.close();
   const data=event.notification.data||{};
   const view=data.view||'';
+  const clubId=data.clubId||'';
   event.waitUntil((async()=>{
     const list=await self.clients.matchAll({type:'window',includeUncontrolled:true});
     if(list.length){
@@ -33,7 +38,9 @@ self.addEventListener('notificationclick',event=>{
       try{client.postMessage({type:'KOKMATCH_PUSH_CLICK',view,data})}catch{}
       return;
     }
-    const q=view?'?pushView='+encodeURIComponent(view):'';
-    await self.clients.openWindow('/'+q);
+    const p=new URLSearchParams();
+    if(view)p.set('pushView',view);
+    if(clubId)p.set('pushClub',clubId);
+    await self.clients.openWindow('/'+(p.toString()?'?'+p.toString():''));
   })());
 });
