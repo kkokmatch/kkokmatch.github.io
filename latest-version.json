@@ -1,1 +1,1 @@
-{"version":1,"label":"3.5","semanticVersion":"3.5","updatedAt":"2026-08-24T14:22:00+09:00","note":"duplicate-name login selection shows name, birth year, grade and role; selected membership logs in with group PIN"}
+{"version":1,"label":"3.6","semanticVersion":"3.6","updatedAt":"2026-08-24T14:47:00+09:00","note":"same-name individual member creation fixed with dedicated v3.6 save path; exact duplicate only when name, birth year, gender, grade, type and role all match"}
