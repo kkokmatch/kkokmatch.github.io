@@ -1,1 +1,1 @@
-{"version":1,"label":"3.3","semanticVersion":"3.3","updatedAt":"2026-08-24T11:58:00+09:00","note":"single-pass login after 5am reset; show birth year and group choice before PIN; improve past poll dots and poll schedule/creator display"}
+{"version":1,"label":"3.4","semanticVersion":"3.4","updatedAt":"2026-08-24T13:31:00+09:00","note":"role-aware bulk registration; manager and organizer initial PIN 000000; align bulk and individual member defaults"}
