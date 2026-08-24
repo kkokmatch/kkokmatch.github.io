@@ -8,6 +8,50 @@ async function latestCheck51(){try{const r=await fetch('/latest-version.json?t='
 window.refreshApp51=async function(target=''){if(refreshBusy51)return;refreshBusy51=true;update51();try{const v=String(target||await latestCheck51()||CUR51).replace(/^v/i,'');try{if(typeof saveRefreshState==='function')saveRefreshState()}catch{}location.replace('/?v='+encodeURIComponent(v)+'&refresh='+Date.now())}catch(e){refreshBusy51=false;update51();if(typeof showError==='function')showError(e)}};
 window.refreshApp50=window.refreshApp51;window.refreshApp49=window.refreshApp51;
 const renderHeaderPrev51=renderHeader;renderHeader=function(){const r=renderHeaderPrev51();ensure51();return r};
-const renderSettingsPrev51=renderSettings;renderSettings=function(){const r=renderSettingsPrev51();const box=typeof $==='function'?$('settings'):null;if(box&&me?.globalAdmin===true&&String(me?.displayName||'').trim()==='박태영'){const card=[...box.querySelectorAll('.card')].find(c=>String(c.textContent||'').includes('프로그램 버전'));if(card){const m=card.querySelector('.meta');if(m)m.textContent='콕매치 v5.1 · 실사용 QA 안정화 · 동시성/권한 검증 완료'}}return r};
-setTimeout(()=>{ensure51();latestCheck51()},0);setInterval(()=>latestCheck51(),60000);
+const renderSettingsPrev51=renderSettings;renderSettings=function(){const r=renderSettingsPrev51();const box=typeof $==='function'?$('settings'):null;if(box&&me?.globalAdmin===true&&String(me?.displayName||'').trim()==='박태영'){const card=[...box.querySelectorAll('.card')].find(c=>String(c.textContent||'').includes('프로그램 버전'));if(card){const m=card.querySelector('.meta');if(m)m.textContent='콕매치 v5.1 · 실사용 QA 안정화 · 화면전환/투표 즉시표시 보정'}}return r};
+
+/* v5.1 hotfix: keep an already-rendered full member roster visible while a transient thin state is passing through. */
+const renderMembersPrev51=renderMembers;
+renderMembers=function(){
+ const box=typeof $==='function'?$('members'):document.getElementById('members');
+ const stateCount=Array.isArray(S?.members)?S.members.length:0;
+ const renderedCount=box?.querySelectorAll?.('.memberCard')?.length||0;
+ if(box&&renderedCount>1&&stateCount<=1)return;
+ return renderMembersPrev51();
+};
+
+/* v5.1 hotfix: apply the final poll title/schedule/creator layout synchronously instead of waiting for the old RAF/MutationObserver pass. */
+function selectedPollDate51(){
+ const b=document.querySelector('#stats .pollCalDay21.selected');
+ const s=String(b?.getAttribute('onclick')||'');
+ return (s.match(/selectPollDate22\('([0-9]{4}-[0-9]{2}-[0-9]{2})'\)/)||[])[1]||(typeof todayKst==='function'?todayKst():'');
+}
+function pollDateLabel51(date){const a=String(date||'').split('-').map(Number);return a.length===3&&a[0]?`${a[0]}년 ${a[1]}월 ${a[2]}일`:String(date||'')}
+function pollMainTitle51(p){const loc=String(p?.location||'').trim();if(loc)return /운동$/.test(loc)?loc:`${loc} 운동`;let t=String(p?.title||'운동 참석 투표').trim();t=t.replace(/^\d{1,2}월\s*\d{1,2}일\s*\d{1,2}:\d{2}\s*/,'');return t||'운동 참석 투표'}
+function decoratePollNow51(){
+ const box=typeof $==='function'?$('stats'):document.getElementById('stats');if(!box)return;
+ const date=selectedPollDate51();
+ const ps=(Array.isArray(S?.attendancePolls)?S.attendancePolls:[]).filter(p=>String(p?.date||'')===date).slice().sort((a,b)=>String(a.time||'').localeCompare(String(b.time||'')));
+ const cards=[...box.querySelectorAll('.pollWrap90 .pollCard21')];
+ cards.forEach((card,i)=>{
+  const p=ps[i];if(!p)return;
+  const title=card.querySelector('.pollTitle21');if(!title)return;
+  const ended=title.querySelector('.pollEndedBadge22')?.outerHTML||'';
+  const time=p.time&&p.endTime?`${esc(p.time)} ~ ${esc(p.endTime)}`:esc(p.time||'');
+  const when=[pollDateLabel51(p.date),time].filter(Boolean).join(' · ');
+  const creator=String(p.createdBy||'').trim()||'정보 없음';
+  const sig=[p.id,p.title,p.date,p.time,p.endTime,p.location,p.createdBy,ended].join('|');
+  if(title.dataset.v51sig===sig&&title.querySelector('.pollMainTitle33'))return;
+  title.dataset.v51sig=sig;
+  title.innerHTML=`<div class="pollMainTitle33">${esc(pollMainTitle51(p))} ${ended}</div><div class="pollSchedule33">${when}</div><div class="pollCreator33">투표 생성자 · ${esc(creator)}</div>`;
+ });
+}
+const renderStatsPrev51=renderStats;
+renderStats=function(){const r=renderStatsPrev51();decoratePollNow51();return r};
+for(const n of ['selectPollDate22','movePollMonth22']){
+ const f=window[n];if(typeof f==='function')window[n]=function(...a){const r=f.apply(this,a);decoratePollNow51();return r};
+}
+document.addEventListener('click',e=>{if(e.target?.closest?.('#stats .pollCalDay21'))queueMicrotask(decoratePollNow51)},false);
+
+setTimeout(()=>{ensure51();latestCheck51();if(me&&currentView==='stats')decoratePollNow51()},0);setInterval(()=>latestCheck51(),60000);
 })();
