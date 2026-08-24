@@ -11,17 +11,12 @@ roleBadge=function(m){if(adminMember42(m)&&String(S?.adminBadgeVisibility||'all'
 
 function invalidateMembers42(){memberReady42=false;memberLoadedAt42=0}
 function hasFullRoster42(){const got=Array.isArray(S?.members)?S.members.length:0,expected=Number(window.__kokmatchMemberCount46||0);return got>0&&(!expected||got>=expected)}
-function showRosterLoading42(){
- const b=$('members');if(!b)return;
- if(hasFullRoster42())return;
- b.innerHTML='<div class="title"><h2>회원명부</h2></div><div class="empty">회원명단을 불러오는 중입니다...</div>';
-}
+function showRosterLoading42(){const b=$('members');if(!b||hasFullRoster42())return;b.innerHTML='<div class="title"><h2>회원명부</h2></div><div class="empty">회원명단을 불러오는 중입니다...</div>'}
 function applyRoster42(x,gid){
  if(String(gid)!==String(currentGroupId||''))return false;
  const members=Array.isArray(x?.members)?x.members:[];
  S={...(S||{}),members,adminBadgeVisibility:String(x?.adminBadgeVisibility||S?.adminBadgeVisibility||'all')};
- window.__kokmatchMemberCount46=Number(x?.memberCount||members.length);
- normalizeClient();memberReady42=true;memberGroup42=gid;memberLoadedAt42=Date.now();return true;
+ window.__kokmatchMemberCount46=Number(x?.memberCount||members.length);normalizeClient();memberReady42=true;memberGroup42=gid;memberLoadedAt42=Date.now();return true;
 }
 async function fetchRoster42(force=false){
  if(!T||!currentGroupId)return null;const gid=String(currentGroupId);
@@ -45,11 +40,7 @@ function renderFullPage42(){
  try{if(typeof window.resetMemberList46==='function')window.resetMemberList46();else renderMembers();$('memberSearchInput46')?.blur()}catch(e){console.error('render roster v4.7',e);try{renderMembers()}catch{}}
 }
 async function enterMembers42(force=true){
- try{await fetchRoster42(force);renderFullPage42()}catch(e){
-  if(currentView==='members'){
-   const b=$('members');if(b)b.innerHTML=`<div class="title"><h2>회원명부</h2></div><div class="warn">${esc(e.message||'회원명단을 불러오지 못했습니다.')}</div><button class="btn pri" onclick="enterMembers42(true)">다시 불러오기</button>`
-  }
- }
+ try{await fetchRoster42(force);renderFullPage42()}catch(e){if(currentView==='members'){const b=$('members');if(b)b.innerHTML=`<div class="title"><h2>회원명부</h2></div><div class="warn">${esc(e.message||'회원명단을 불러오지 못했습니다.')}</div><button class="btn pri" onclick="enterMembers42(true)">다시 불러오기</button>`}}
 }
 window.enterMembers42=enterMembers42;
 
@@ -67,7 +58,7 @@ const goViewPrev42=goView;
 goView=function(id){
  const target=String(id||''),prev=currentView;if(target==='members'&&prev!=='members')invalidateMembers42();
  const r=goViewPrev42(id);
- if(target==='members'&&prev!=='members')queueMicrotask(()=>{if(currentView==='members')enterMembers42(true)});
+ if(target==='members'&&prev!=='members')queueMicrotask(()=>{if(currentView==='members')enterMembers42(false)});
  return r;
 };
 
@@ -82,5 +73,5 @@ function stripVersionCard42(){
 const renderSettingsPrev42=renderSettings;
 renderSettings=function(){const r=renderSettingsPrev42();const box=$('settings');if(!box)return r;if(!developer42()){stripVersionCard42();return r}return r};
 
-setTimeout(()=>{if(T&&me&&currentView==='members')enterMembers42(true)},0);
+setTimeout(()=>{if(T&&me&&currentView==='members')enterMembers42(false)},0);
 })();
