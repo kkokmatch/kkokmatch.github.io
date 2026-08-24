@@ -1,1 +1,1 @@
-{"version":1,"label":"5.0","semanticVersion":"5.0","updatedAt":"2026-08-25T00:30:00+09:00","note":"persist notification setup guides until user closes them; ignore scroll gestures; remove standalone home-screen guide card; fade past calendar dates further"}
+{"version":1,"label":"5.1","semanticVersion":"5.1","updatedAt":"2026-08-25T03:45:00+09:00","note":"final isolated real-use QA stabilization: concurrency/permission fixes, poll/guest limit validation, QA cleanup and legacy test endpoint lockdown"}
