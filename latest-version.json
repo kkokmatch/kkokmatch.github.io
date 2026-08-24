@@ -1,1 +1,1 @@
-{"version":1,"label":"3.4","semanticVersion":"3.4","updatedAt":"2026-08-24T13:31:00+09:00","note":"role-aware bulk registration; manager and organizer initial PIN 000000; align bulk and individual member defaults"}
+{"version":1,"label":"3.5","semanticVersion":"3.5","updatedAt":"2026-08-24T14:22:00+09:00","note":"duplicate-name login selection shows name, birth year, grade and role; selected membership logs in with group PIN"}
