@@ -1,1 +1,1 @@
-{"version":1,"label":"4.3","semanticVersion":"4.3","updatedAt":"2026-08-24T20:36:00+09:00","note":"PWA game push notifications for pending-group assignment and game-start court alerts; per-device notification opt-in"}
+{"version":1,"label":"4.4","semanticVersion":"4.4","updatedAt":"2026-08-24T21:39:00+09:00","note":"fix iOS service-worker push subscription activation; add immediate test push; show foreground in-app popup plus system notifications"}
