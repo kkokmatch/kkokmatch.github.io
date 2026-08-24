@@ -1,1 +1,1 @@
-{"version":1,"label":"3.9","semanticVersion":"3.9","updatedAt":"2026-08-24T16:23:00+09:00","note":"safe automatic updater; fixed current-version detection; logout button fixed on the right; update button expands left without clipping logout"}
+{"version":1,"label":"4.0","semanticVersion":"4.0","updatedAt":"2026-08-24T16:36:00+09:00","note":"stabilize member roster scrolling; suppress redundant member renders; stable refresh/logout header controls; safe updater handoff"}
