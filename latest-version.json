@@ -1,1 +1,1 @@
-{"version":1,"label":"4.5","semanticVersion":"4.5","updatedAt":"2026-08-24T22:39:00+09:00","note":"fix mobile login reload loop caused by legacy auto-updater version marker reset; keep session stable after login"}
+{"version":1,"label":"3.9","semanticVersion":"3.9","updatedAt":"2026-08-24T22:55:00+09:00","note":"temporary recovery marker to stop legacy mobile auto-update reload loop before v4.6 rollout"}
