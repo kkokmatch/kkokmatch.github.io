@@ -1,0 +1,27 @@
+name: Validate v49
+on:
+  push:
+    branches: [main, feature/v4.9-push-settings-ui-20260825]
+    paths:
+      - 'app-v4.9.js'
+      - 'index.html'
+      - 'latest-version.json'
+      - '.github/workflows/validate-v49.yml'
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: JavaScript syntax
+        run: node --check app-v4.9.js
+      - name: Version wiring
+        run: |
+          grep -q '<title>콕매치 v4.9</title>' index.html
+          grep -q '/app-v4.9.js?v=4.9' index.html
+          grep -q '"semanticVersion":"4.9"' latest-version.json
+      - name: Push settings UI guards
+        run: |
+          grep -q '#gamePushCard43,#gamePushCard48{display:none!important}' app-v4.9.js
+          grep -q '아이폰 알림 설정방법' app-v4.9.js
+          grep -q '갤럭시 알림 설정방법' app-v4.9.js
+          grep -q 'push49.known' app-v4.9.js

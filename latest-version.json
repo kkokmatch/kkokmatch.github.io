@@ -1,1 +1,1 @@
-{"version":1,"label":"4.8","semanticVersion":"4.8","updatedAt":"2026-08-24T23:34:00+09:00","note":"fix iPhone push enrollment with Declarative Web Push fallback; retain legacy service-worker push for older iOS and Android"}
+{"version":1,"label":"4.9","semanticVersion":"4.9","updatedAt":"2026-08-25T00:11:00+09:00","note":"stabilize game-notification settings UI to stop button flicker; add collapsible iPhone and Galaxy notification setup guides"}
