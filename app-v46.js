@@ -11,6 +11,7 @@ function pollMs46(view){
  return 15000;
 }
 function compactView46(view){return view==='queue'||view==='playing'||view==='stats'}
+function memberSessionReady46(){return !!(me&&currentGroupId&&String(me.groupId||'')===String(currentGroupId))}
 async function compactState46(){
  const requestedView=currentView||'members',requestedGroup=String(currentGroupId||'');
  const u=new URL(STATE_V46);if(currentGroupId)u.searchParams.set('groupId',currentGroupId);u.searchParams.set('t',Date.now());
@@ -26,8 +27,8 @@ const loadState45=loadState;
 loadState=async function(force=false){
  if(!T||reloginBusy)return;if(document.hidden&&!force)return;
  const view=currentView||'members',now=Date.now(),last=Number(lastPoll46[view]||0),gap=pollMs46(view);
- /* After login is established, the member roster has its own lightweight API. Do not fetch the full app state again. */
- if(view==='members'&&me&&currentGroupId){lastPoll46.members=now;return}
+ /* Once the current session/group is established, the member roster uses its own lightweight API. */
+ if(view==='members'&&memberSessionReady46()){lastPoll46.members=now;return}
  if(!force&&last&&now-last<gap)return;if(actionBusy46&&!force)return;if(stateBusy46)return stateBusy46;
  lastPoll46[view]=now;
  stateBusy46=(compactView46(view)?compactState46():loadState45()).finally(()=>{stateBusy46=null});
@@ -55,12 +56,12 @@ window.refreshMembers46=function(){lastPoll46.members=0;if(typeof window.enterMe
 
 const goView45=goView;
 goView=function(id){
- const prev=currentView;goView45(id);if(id==='members'&&prev!==id){memberPage46=1;memberQuery46='';lastPoll46.members=0}
+ const prev=currentView;const r=goView45(id);if(id==='members'&&prev!==id){memberPage46=1;memberQuery46='';lastPoll46.members=0}
  lastPoll46[id]=0;
- if(id==='members'&&me&&currentGroupId)return;
- loadState(true).catch(()=>{});
+ if(id==='members'&&memberSessionReady46())return r;
+ loadState(true).catch(()=>{});return r;
 };
-document.addEventListener('visibilitychange',()=>{if(!document.hidden&&T){lastPoll46[currentView]=0;if(currentView==='members'&&me){if(typeof window.enterMembers42==='function')window.enterMembers42(false);return}loadState(true).catch(()=>{})}});
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&T){lastPoll46[currentView]=0;if(currentView==='members'&&memberSessionReady46()){if(typeof window.enterMembers42==='function')window.enterMembers42(false);return}loadState(true).catch(()=>{})}});
 
 const renderSettings45=renderSettings;
 renderSettings=function(){renderSettings45();const box=$('settings');if(!box)return;[...box.querySelectorAll('.meta')].forEach(el=>{if((el.textContent||'').includes('콕매치 v45'))el.textContent='콕매치 v46 · 10명 단위 회원명부 · 스마트 동기화'})};
