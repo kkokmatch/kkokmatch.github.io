@@ -1,1 +1,1 @@
-{"version":1,"label":"4.7","semanticVersion":"4.7","updatedAt":"2026-08-24T23:18:00+09:00","note":"use lightweight member-roster API; prevent duplicate full-state fetches; stabilize iOS roster loading and speed up mobile roster navigation"}
+{"version":1,"label":"4.8","semanticVersion":"4.8","updatedAt":"2026-08-24T23:34:00+09:00","note":"fix iPhone push enrollment with Declarative Web Push fallback; retain legacy service-worker push for older iOS and Android"}
