@@ -1,4 +1,5 @@
 name: QA group switch v5.2
+# isolated fixture includes developer, manager, organizer, temp organizer, member and guest
 on:
   push:
     paths:
