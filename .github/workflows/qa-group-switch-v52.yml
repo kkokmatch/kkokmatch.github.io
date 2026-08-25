@@ -18,21 +18,25 @@ jobs:
       - run: npm install --no-save playwright@1.55.0
       - run: npx playwright install --with-deps chromium
       - name: Serve app
-        run: nohup python3 -m http.server 4173 >/tmp/kkokmatch-http.log 2>&1 &
+        run: |
+          nohup python3 -m http.server 4173 >/tmp/kkokmatch-http.log 2>&1 &
+          for i in {1..20}; do curl -fsS http://127.0.0.1:4173/ >/dev/null && break; sleep .2; done
       - name: Multi-role group switch browser QA
         env:
           QA_DEV_TOKEN: qa-sw-dev-20260825-a7K3p
           QA_MANAGER_TOKEN: qa-sw-manager-20260825-b8L4q
           QA_ORGANIZER_TOKEN: qa-sw-organizer-20260825-c9M5r
+          QA_TEMP_TOKEN: qa-sw-temp-20260825-f2Q8u
           QA_MEMBER_TOKEN: qa-sw-member-20260825-d0N6s
           QA_GUEST_TOKEN: qa-sw-guest-20260825-e1P7t
         run: |
-          cat > /tmp/qa-switch.mjs <<'EOF'
+          cat > qa-switch.mjs <<'EOF'
           import { chromium } from 'playwright';
           const roles=[
             ['developer',process.env.QA_DEV_TOKEN],
             ['manager',process.env.QA_MANAGER_TOKEN],
             ['organizer',process.env.QA_ORGANIZER_TOKEN],
+            ['tempOrganizer',process.env.QA_TEMP_TOKEN],
             ['member',process.env.QA_MEMBER_TOKEN],
             ['guest',process.env.QA_GUEST_TOKEN],
           ];
@@ -49,7 +53,7 @@ jobs:
               await page.goto('http://127.0.0.1:4173/?qa='+role,{waitUntil:'domcontentloaded',timeout:30000});
               await page.waitForFunction(()=>document.title.includes('5.2'),null,{timeout:15000});
               await page.waitForFunction(()=>{const b=document.querySelector('#groupBtn');return b&&!b.disabled&&b.textContent.includes('__QA_SWITCH_A_20260825')},null,{timeout:30000});
-              await page.waitForSelector('#members .memberCard',{timeout:30000});
+              await page.waitForFunction(()=>{const n=document.querySelector('#members .memberSearch46 .meta');return n&&n.textContent.includes('전체 150명')},null,{timeout:30000});
               const before=await page.locator('#members .memberCard').count();
               const t0=Date.now();
               await page.click('#groupBtn');
@@ -60,7 +64,7 @@ jobs:
               const after=await page.locator('#members .memberCard').count();
               const who=(await page.locator('#who').textContent())||'';
               const gid=await page.evaluate(()=>localStorage.getItem('kokmatch_group_id'));
-              console.log(JSON.stringify({role,ms,before,after,who,gid,dialogs,errors}));
+              console.log('QA_RESULT '+JSON.stringify({role,ms,before,after,who,gid,dialogs,errors}));
               if(gid!==B||after<1||dialogs.length||errors.length)failed=true;
               if(ms>8000){console.error(role+' switch too slow: '+ms+'ms');failed=true}
             }catch(e){console.error(role+' QA failed',e);failed=true}
@@ -69,4 +73,4 @@ jobs:
           await browser.close();
           if(failed)process.exit(1);
           EOF
-          node /tmp/qa-switch.mjs
+          node qa-switch.mjs
