@@ -45,7 +45,7 @@ jobs:
           let failed=false;
           for(const [role,token] of roles){
             const context=await browser.newContext({viewport:{width:390,height:844}});
-            await context.addInitScript(({token,A})=>{localStorage.setItem('kokmatch_token',token);localStorage.setItem('kokmatch_group_id',A)}, {token,A});
+            await context.addInitScript(({token,A})=>{localStorage.setItem('kokmatch_v1_6_reset_once','done');localStorage.setItem('kokmatch_token',token);localStorage.setItem('kokmatch_group_id',A)}, {token,A});
             const page=await context.newPage();
             const dialogs=[];page.on('dialog',async d=>{dialogs.push(d.message());await d.dismiss()});
             const errors=[];page.on('console',m=>{if(m.type()==='error')errors.push(m.text())});page.on('pageerror',e=>errors.push(String(e)));
