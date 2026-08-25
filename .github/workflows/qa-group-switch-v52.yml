@@ -1,0 +1,72 @@
+name: QA group switch v5.2
+on:
+  push:
+    paths:
+      - '.github/workflows/qa-group-switch-v52.yml'
+      - 'app-v5.1.js'
+      - 'app-v5.2.js'
+  workflow_dispatch:
+jobs:
+  qa:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install --no-save playwright@1.55.0
+      - run: npx playwright install --with-deps chromium
+      - name: Serve app
+        run: nohup python3 -m http.server 4173 >/tmp/kkokmatch-http.log 2>&1 &
+      - name: Multi-role group switch browser QA
+        env:
+          QA_DEV_TOKEN: qa-sw-dev-20260825-a7K3p
+          QA_MANAGER_TOKEN: qa-sw-manager-20260825-b8L4q
+          QA_ORGANIZER_TOKEN: qa-sw-organizer-20260825-c9M5r
+          QA_MEMBER_TOKEN: qa-sw-member-20260825-d0N6s
+          QA_GUEST_TOKEN: qa-sw-guest-20260825-e1P7t
+        run: |
+          cat > /tmp/qa-switch.mjs <<'EOF'
+          import { chromium } from 'playwright';
+          const roles=[
+            ['developer',process.env.QA_DEV_TOKEN],
+            ['manager',process.env.QA_MANAGER_TOKEN],
+            ['organizer',process.env.QA_ORGANIZER_TOKEN],
+            ['member',process.env.QA_MEMBER_TOKEN],
+            ['guest',process.env.QA_GUEST_TOKEN],
+          ];
+          const A='grp_qa_switch_a_20260825', B='grp_qa_switch_b_20260825';
+          const browser=await chromium.launch({headless:true});
+          let failed=false;
+          for(const [role,token] of roles){
+            const context=await browser.newContext({viewport:{width:390,height:844}});
+            await context.addInitScript(({token,A})=>{localStorage.setItem('kokmatch_token',token);localStorage.setItem('kokmatch_group_id',A)}, {token,A});
+            const page=await context.newPage();
+            const dialogs=[];page.on('dialog',async d=>{dialogs.push(d.message());await d.dismiss()});
+            const errors=[];page.on('console',m=>{if(m.type()==='error')errors.push(m.text())});page.on('pageerror',e=>errors.push(String(e)));
+            try{
+              await page.goto('http://127.0.0.1:4173/?qa='+role,{waitUntil:'domcontentloaded',timeout:30000});
+              await page.waitForFunction(()=>document.title.includes('5.2'),null,{timeout:15000});
+              await page.waitForFunction(()=>{const b=document.querySelector('#groupBtn');return b&&!b.disabled&&b.textContent.includes('__QA_SWITCH_A_20260825')},null,{timeout:30000});
+              await page.waitForSelector('#members .memberCard',{timeout:30000});
+              const before=await page.locator('#members .memberCard').count();
+              const t0=Date.now();
+              await page.click('#groupBtn');
+              await page.getByRole('button',{name:/__QA_SWITCH_B_20260825/}).click();
+              await page.waitForFunction(()=>{const b=document.querySelector('#groupBtn');return b&&b.textContent.includes('__QA_SWITCH_B_20260825')&&!b.textContent.includes('전환 중')},null,{timeout:30000});
+              await page.waitForFunction(()=>{const n=document.querySelector('#members .memberSearch46 .meta');return n&&n.textContent.includes('전체 150명')},null,{timeout:30000});
+              const ms=Date.now()-t0;
+              const after=await page.locator('#members .memberCard').count();
+              const who=(await page.locator('#who').textContent())||'';
+              const gid=await page.evaluate(()=>localStorage.getItem('kokmatch_group_id'));
+              console.log(JSON.stringify({role,ms,before,after,who,gid,dialogs,errors}));
+              if(gid!==B||after<1||dialogs.length||errors.length)failed=true;
+              if(ms>8000){console.error(role+' switch too slow: '+ms+'ms');failed=true}
+            }catch(e){console.error(role+' QA failed',e);failed=true}
+            await context.close();
+          }
+          await browser.close();
+          if(failed)process.exit(1);
+          EOF
+          node /tmp/qa-switch.mjs
