@@ -9,8 +9,6 @@ window.refreshApp51=async function(target=''){if(refreshBusy51)return;refreshBus
 window.refreshApp50=window.refreshApp51;window.refreshApp49=window.refreshApp51;
 const renderHeaderPrev51=renderHeader;renderHeader=function(){const r=renderHeaderPrev51();ensure51();return r};
 const renderSettingsPrev51=renderSettings;renderSettings=function(){const r=renderSettingsPrev51();const box=typeof $==='function'?$('settings'):null;if(box&&me?.globalAdmin===true&&String(me?.displayName||'').trim()==='박태영'){const card=[...box.querySelectorAll('.card')].find(c=>String(c.textContent||'').includes('프로그램 버전'));if(card){const m=card.querySelector('.meta');if(m)m.textContent='콕매치 v5.1 · 실사용 QA 안정화 · 화면전환/투표 즉시표시 보정'}}return r};
-
-/* v5.1 hotfix: keep an already-rendered full member roster visible while a transient thin state is passing through in the same group. */
 let stableMemberGroup51='';
 const renderMembersPrev51=renderMembers;
 renderMembers=function(){
@@ -24,8 +22,6 @@ renderMembers=function(){
  else if(stableMemberGroup51!==gid)stableMemberGroup51=gid;
  return r;
 };
-
-/* v5.1 hotfix: apply the final poll title/schedule/creator layout synchronously instead of waiting for the old RAF/MutationObserver pass. */
 function selectedPollDate51(){
  const b=document.querySelector('#stats .pollCalDay21.selected');
  const s=String(b?.getAttribute('onclick')||'');
@@ -57,6 +53,6 @@ for(const n of ['selectPollDate22','movePollMonth22']){
  const f=window[n];if(typeof f==='function')window[n]=function(...a){const r=f.apply(this,a);decoratePollNow51();return r};
 }
 document.addEventListener('click',e=>{if(e.target?.closest?.('#stats .pollCalDay21'))queueMicrotask(decoratePollNow51)},false);
-
 setTimeout(()=>{ensure51();latestCheck51();if(me&&currentView==='stats')decoratePollNow51()},0);setInterval(()=>latestCheck51(),60000);
 })();
+(()=>{if(window.__kokmatchV52Loader)return;window.__kokmatchV52Loader=true;const s=document.createElement('script');s.src='/app-v5.2.js?v=5.2&hotfix=1';s.async=false;s.onerror=()=>console.error('콕매치 v5.2 로드 실패');document.body.appendChild(s)})();
