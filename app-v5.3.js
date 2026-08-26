@@ -54,4 +54,4 @@ style53();watchVersion53();
 setTimeout(()=>{watchVersion53();if(T)loadProfiles53().catch(()=>{});try{renderHeader();renderNav();if(currentView==='settings')renderSettings();if(currentView==='queue')decorateQueue53()}catch{}},0);
 setInterval(()=>syncUpdateButton53(),60000);
 })();
-(()=>{if(window.__kokmatchV54Loader)return;window.__kokmatchV54Loader=true;const s=document.createElement('script');s.src='/app-v5.4.js?v=5.4&hotfix=1';s.async=false;s.onerror=()=>console.error('콕매치 v5.4 로드 실패');document.body.appendChild(s)})();
+(()=>{if(window.__kokmatchV54Loader)return;window.__kokmatchV54Loader=true;const s=document.createElement('script');s.src='/app-v5.4.js?v=5.4&hotfix=2';s.async=false;s.onerror=()=>console.error('콕매치 v5.4 로드 실패');document.body.appendChild(s)})();
