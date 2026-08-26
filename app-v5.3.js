@@ -21,7 +21,8 @@ function fallbackAvatar53(m,extra=''){if(avatarPrev53){const h=String(avatarPrev
 function avatarHtml53(m,extra=''){const p=profiles53[profileKey53(m)]?.image||'';return p?`<div class="avatar profileAvatar53 ${extra}"><img src="${p}" alt="${esc(m?.name||'프로필')} 프로필"></div>`:fallbackAvatar53(m,extra)}
 try{avatar=function(m){return avatarHtml53(m)}}catch{window.avatar=(m)=>avatarHtml53(m)}
 
-function decorateQueue53(){const box=typeof $==='function'?$('queue'):document.getElementById('queue');if(!box||typeof sortedQueue!=='function')return;const ids=sortedQueue();const cards=[...box.querySelectorAll('.queueCard')];cards.forEach((card,i)=>{const id=ids[i],m=id&&typeof M==='function'?M(id):null;if(!m)return;card.querySelectorAll('.avatar').forEach(a=>a.remove());const ord=card.querySelector('.ord');if(ord)ord.insertAdjacentHTML('afterend',avatarHtml53(m,'queueProfile53'));const meta=card.querySelector('.meta');if(meta){meta.textContent=String(meta.textContent||'').replace(/^\s*(남|여)\s*·\s*/,'')}})}
+function clearIdentityMarks53(card){if(!card)return;card.querySelectorAll('.avatar,.genderPerson54,.genderAvatar39,.profileAvatar53,.queueProfile53').forEach(el=>el.remove())}
+function decorateQueue53(){const box=typeof $==='function'?$('queue'):document.getElementById('queue');if(!box||typeof sortedQueue!=='function')return;const ids=sortedQueue();const cards=[...box.querySelectorAll('.queueCard')];cards.forEach((card,i)=>{const id=ids[i],m=id&&typeof M==='function'?M(id):null;if(!m)return;clearIdentityMarks53(card);const ord=card.querySelector('.ord');if(ord)ord.insertAdjacentHTML('afterend',avatarHtml53(m,'queueProfile53'));const meta=card.querySelector('.meta');if(meta){meta.textContent=String(meta.textContent||'').replace(/^\s*(남|여)\s*·\s*/,'')}})}
 const renderQueuePrev53=renderQueue;
 renderQueue=function(){const r=renderQueuePrev53();decorateQueue53();return r};
 
