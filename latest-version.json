@@ -1,1 +1,1 @@
-{"version":1,"label":"5.2","semanticVersion":"5.2","updatedAt":"2026-08-25T16:58:00+09:00","note":"multi-group switching optimization: target-only auth validation, parallel roster/state loading, role-common fast switching"}
+{"version":1,"label":"5.3","semanticVersion":"5.3","updatedAt":"2026-08-26T15:03:00+09:00","note":"stable first login after daily session reset and self-service member profile photos"}
