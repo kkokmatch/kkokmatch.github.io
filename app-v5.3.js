@@ -7,20 +7,25 @@ function style53(){if(document.getElementById('v53style'))return;const s=documen
 #topActions52{display:flex!important}
 .profileAvatar53{width:42px!important;height:42px!important;min-width:42px!important;border-radius:50%!important;overflow:hidden!important;display:flex!important;align-items:center!important;justify-content:center!important;background:#eef2f7!important;color:#6b7280!important;font-size:22px!important;border:1px solid #dbe2ea!important;padding:0!important}
 .profileAvatar53 img{width:100%!important;height:100%!important;object-fit:cover!important;display:block!important}
+.queueProfile53{width:38px!important;height:38px!important;min-width:38px!important;font-size:19px!important;margin-left:2px}
 .profileCard53{margin-bottom:12px}.profileHead53{display:flex;align-items:center;gap:14px}.profilePreview53{width:76px;height:76px;border-radius:50%;overflow:hidden;display:flex;align-items:center;justify-content:center;background:#eef2f7;border:1px solid #dbe2ea;font-size:34px;color:#6b7280;flex:0 0 76px}.profilePreview53 img{width:100%;height:100%;object-fit:cover}.profileBtns53{display:flex;gap:7px;flex-wrap:wrap;margin-top:9px}.profileHelp53{font-size:12px;line-height:1.45;margin-top:8px;color:#6b7280}
 `;document.head.appendChild(s)}
 function markVersion53(){document.title='콕매치 v5.3';document.documentElement.dataset.kokmatchVersion='5.3';const v=document.getElementById('currentVersion52');if(v&&v.textContent!=='v5.3')v.textContent='v5.3'}
 function watchVersion53(){markVersion53();const v=document.getElementById('currentVersion52');if(v&&!v.dataset.v53watch){v.dataset.v53watch='1';new MutationObserver(()=>{if(v.textContent!=='v5.3')v.textContent='v5.3'}).observe(v,{childList:true,characterData:true,subtree:true})}}
 function profileKey53(m){return String(m?.id||'')}
-function avatarHtml53(m){const p=profiles53[profileKey53(m)]?.image||'';return p?`<div class="avatar profileAvatar53"><img src="${p}" alt="${esc(m?.name||'프로필')} 프로필"></div>`:'<div class="avatar profileAvatar53" aria-label="기본 프로필">👤</div>'}
-try{avatar=function(m){return avatarHtml53(m)}}catch{window.avatar=avatarHtml53}
+function avatarHtml53(m,extra=''){const p=profiles53[profileKey53(m)]?.image||'';return p?`<div class="avatar profileAvatar53 ${extra}"><img src="${p}" alt="${esc(m?.name||'프로필')} 프로필"></div>`:`<div class="avatar profileAvatar53 ${extra}" aria-label="기본 프로필">👤</div>`}
+try{avatar=function(m){return avatarHtml53(m)}}catch{window.avatar=(m)=>avatarHtml53(m)}
+
+function decorateQueue53(){const box=typeof $==='function'?$('queue'):document.getElementById('queue');if(!box||typeof sortedQueue!=='function')return;const ids=sortedQueue();const cards=[...box.querySelectorAll('.queueCard')];cards.forEach((card,i)=>{const id=ids[i],m=id&&typeof M==='function'?M(id):null;if(!m)return;card.querySelector('.queueProfile53')?.remove();const ord=card.querySelector('.ord');if(ord)ord.insertAdjacentHTML('afterend',avatarHtml53(m,'queueProfile53'));const meta=card.querySelector('.meta');if(meta){meta.textContent=String(meta.textContent||'').replace(/^\s*(남|여)\s*·\s*/,'')}})}
+const renderQueuePrev53=renderQueue;
+renderQueue=function(){const r=renderQueuePrev53();decorateQueue53();return r};
 
 async function profileJson53(url,opt={}){const r=await fetch(url,opt);const x=await r.json().catch(()=>({}));if(!r.ok){const e=new Error(x.error||'프로필 처리 중 오류가 발생했습니다.');e.status=r.status;throw e}return x}
 async function loadProfiles53(force=false){if(!T||!currentGroupId||String(currentGroupId)==='__global__')return;const gid=String(currentGroupId);if(!force&&profileGroup53===gid)return;if(profileLoading53)return profileLoading53;profileLoading53=(async()=>{try{const u=new URL(PROFILE53);u.searchParams.set('groupId',gid);u.searchParams.set('t',Date.now());const x=await profileJson53(u,{headers:{authorization:'Bearer '+T},cache:'no-store'});if(String(currentGroupId)!==gid)return;profiles53=x.profiles||{};profileGroup53=gid;try{renderMembers();renderQueue();if(currentView==='settings')renderSettings()}catch{}}finally{profileLoading53=null}})();return profileLoading53}
 function resetProfiles53(){profiles53={};profileGroup53=''}
 
 const renderAllPrev53=renderAll;
-renderAll=function(){const r=renderAllPrev53();style53();watchVersion53();const gid=String(currentGroupId||'');if(gid&&gid!=='__global__'&&profileGroup53!==gid){resetProfiles53();queueMicrotask(()=>loadProfiles53().catch(()=>{}))}return r};
+renderAll=function(){const r=renderAllPrev53();style53();watchVersion53();decorateQueue53();const gid=String(currentGroupId||'');if(gid&&gid!=='__global__'&&profileGroup53!==gid){resetProfiles53();queueMicrotask(()=>loadProfiles53().catch(()=>{}))}return r};
 
 /* A 05:00 session reset can leave one old polling request in flight. If its 401 arrives while a new login is being established, it must not delete the newly-issued token. */
 const reloginPrev53=reloginLatest;
@@ -41,5 +46,5 @@ const goViewPrev53=goView;
 goView=function(id){const r=goViewPrev53(id);if(id==='settings'||id==='members'||id==='queue')loadProfiles53().catch(()=>{});return r};
 
 style53();watchVersion53();
-setTimeout(()=>{watchVersion53();if(T)loadProfiles53().catch(()=>{});try{renderHeader();renderNav();if(currentView==='settings')renderSettings()}catch{}},0);
+setTimeout(()=>{watchVersion53();if(T)loadProfiles53().catch(()=>{});try{renderHeader();renderNav();if(currentView==='settings')renderSettings();if(currentView==='queue')decorateQueue53()}catch{}},0);
 })();
