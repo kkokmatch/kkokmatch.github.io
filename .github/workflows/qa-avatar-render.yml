@@ -1,0 +1,50 @@
+name: QA avatar render
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/qa-avatar-render.yml'
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install --no-save playwright@1.55.0
+      - run: npx playwright install --with-deps chromium
+      - name: Serve
+        run: |
+          nohup python3 -m http.server 4173 >/tmp/http.log 2>&1 &
+          for i in {1..30}; do curl -fsS http://127.0.0.1:4173/ >/dev/null && break; sleep .2; done
+      - name: Render no-photo queue
+        run: |
+          cat > qa-avatar.mjs <<'EOF'
+          import { chromium } from 'playwright';
+          const browser=await chromium.launch({headless:true});
+          const page=await browser.newPage({viewport:{width:390,height:844}});
+          await page.goto('http://127.0.0.1:4173/?qa=avatar',{waitUntil:'domcontentloaded'});
+          await page.waitForFunction(()=>document.documentElement.dataset.kokmatchVersion==='5.3',{timeout:20000});
+          await page.evaluate(()=>{
+            T=''; currentGroupId='qa-avatar'; currentView='queue';
+            S=emptyClientState();
+            S.members=[
+              {id:'m1',name:'남자회원',year:1990,gender:'남',age:'30',cls:'C',type:'member',role:'member',totalGames:0,state:'waiting',joinedAt:Date.now()-600000},
+              {id:'m2',name:'여자회원',year:1991,gender:'여',age:'30',cls:'C',type:'member',role:'member',totalGames:0,state:'waiting',joinedAt:Date.now()-300000}
+            ];
+            S.queue=['m1','m2'];S.pendingGames=[];S.games=[];S.history=[];S.pairCounts={};
+            me={memberId:'m1',displayName:'남자회원',role:'member',globalAdmin:false,groupId:'qa-avatar'};
+            group={groupId:'qa-avatar',name:'QA'};groups=[];normalizeClient();renderAll();goView('queue');
+          });
+          await page.waitForTimeout(1000);
+          const cards=await page.locator('#queue .queueCard').evaluateAll(cs=>cs.map(c=>({html:c.outerHTML,text:c.textContent,avatars:c.querySelectorAll('.avatar').length,imgs:c.querySelectorAll('img').length})));
+          console.log('QA_CARDS '+JSON.stringify(cards));
+          await page.screenshot({path:'avatar-render.png',fullPage:true});
+          await browser.close();
+          EOF
+          node qa-avatar.mjs
+      - uses: actions/upload-artifact@v4
+        with:
+          name: avatar-render
+          path: avatar-render.png
