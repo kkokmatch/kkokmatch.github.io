@@ -1,7 +1,7 @@
 (()=>{
 if(window.__kokmatchV54Fix9)return;
 window.__kokmatchV54Fix9=true;
-window.__kokmatchProfileUiPatch='9.1';
+window.__kokmatchProfileUiPatch='9.0';
 
 function parsed9(m){try{const d=document.createElement('div');d.innerHTML=typeof avatar==='function'?String(avatar(m)||''):'';return d.firstElementChild}catch{return null}}
 function src9(m){const x=parsed9(m)?.querySelector?.('img');return x?String(x.getAttribute('src')||x.src||''):''}
