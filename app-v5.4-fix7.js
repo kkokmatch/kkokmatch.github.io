@@ -87,8 +87,9 @@ function bind7(avatar,m,kind){
  let badge=avatar.querySelector('.profileGender70');
  if(!badge){badge=document.createElement('span');badge.className='profileGender70';avatar.appendChild(badge)}
  const female=String(m.gender||'')==='여';
- badge.className='profileGender70 '+(female?'female':'male');
- badge.textContent=female?'여':'남';
+ const cls='profileGender70 '+(female?'female':'male'),txt=female?'여':'남';
+ if(badge.className!==cls)badge.className=cls;
+ if(badge.textContent!==txt)badge.textContent=txt;
  const open=e=>{e?.stopPropagation?.();e?.preventDefault?.();popup7(img.currentSrc||img.src,String(m.name||''))};
  avatar.onclick=open;
  avatar.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){open(e)}};
