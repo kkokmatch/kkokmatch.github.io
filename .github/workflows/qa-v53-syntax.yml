@@ -1,0 +1,12 @@
+name: QA v5.3 syntax
+on:
+  push:
+    paths:
+      - '.github/workflows/qa-v53-syntax.yml'
+      - 'app-v5.3.js'
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: node --check app-v5.3.js
