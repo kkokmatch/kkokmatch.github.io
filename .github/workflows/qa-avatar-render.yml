@@ -45,6 +45,7 @@ jobs:
             S.queue=['m1','m2'];S.pendingGames=[];S.games=[];S.history=[];S.pairCounts={};
             me={memberId:'m1',displayName:'남자회원',role:'member',globalAdmin:false,groupId:gid};
             group={groupId:gid,name:'QA'};groups=[];normalizeClient();renderAll();
+            document.getElementById('login')?.classList.add('hide');
             document.querySelectorAll('.view').forEach(v=>v.classList.toggle('on',v.id==='queue'));
           },{gid,token});
           await seed('qa-no-photo','');
@@ -75,7 +76,7 @@ jobs:
           node qa-avatar.mjs
       - uses: actions/upload-artifact@v4
         with:
-          name: avatar-render-fixed
+          name: avatar-render-visible
           path: |
             no-photo.png
             with-photo.png
