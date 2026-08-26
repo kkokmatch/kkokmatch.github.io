@@ -5,6 +5,7 @@ on:
       - '.github/workflows/qa-v54-hotfix3.yml'
       - 'app-v5.4.js'
       - 'app-v5.4-fix4.js'
+      - 'app-v5.4-fix5.js'
       - 'app-v5.4-hotfix-loader.js'
       - 'index.html'
 jobs:
@@ -21,46 +22,25 @@ jobs:
           import { chromium } from 'playwright';
           const token='qa_vvn0c5leJpwUYXfZrEvfRyJDuiKS-ZqL';
           const b=await chromium.launch({headless:true});
-          const p=await b.newPage({viewport:{width:390,height:844}});
-          const errors=[];p.on('pageerror',e=>errors.push(String(e)));
-          await p.goto('https://kkokmatch.github.io/?qa=hotfix3&t='+Date.now(),{waitUntil:'networkidle'});
+          const p=await b.newPage({viewport:{width:390,height:844}});const errors=[];p.on('pageerror',e=>errors.push(String(e)));
+          await p.goto('https://kkokmatch.github.io/?qa=hotfix5&t='+Date.now(),{waitUntil:'networkidle'});
           await p.waitForFunction(()=>window.__kokmatchV54Hotfix3===true,{timeout:30000});
-          if(!(await p.evaluate(()=>window.__kokmatchV54Fix4===true))){await p.addScriptTag({url:'https://kkokmatch.github.io/app-v5.4-fix4.js?v=4&t='+Date.now()});}
-          await p.waitForFunction(()=>window.__kokmatchV54Fix4===true,{timeout:10000});
-          await p.evaluate(({token})=>{
-            T=token;currentGroupId='grp_qa_profile54';currentView='queue';S=emptyClientState();
-            S.members=[
-             {id:'qa_profile_m1',name:'QA프로필',gender:'남',age:'30',cls:'C',type:'member',role:'manager',totalGames:0,state:'waiting',joinedAt:Date.now()-30000},
-             {id:'m2',name:'여자B',gender:'여',age:'30',cls:'B',type:'member',role:'member',totalGames:0,state:'waiting',joinedAt:Date.now()-20000},
-             {id:'m3',name:'남자C',gender:'남',age:'40',cls:'D',type:'member',role:'organizer',totalGames:0,state:'matched',joinedAt:Date.now()-10000},
-             {id:'m4',name:'여자D',gender:'여',age:'20',cls:'A',type:'member',role:'member',totalGames:0,state:'matched',joinedAt:Date.now()-10000}
-            ];S.queue=['qa_profile_m1','m2'];S.pendingGames=[{id:'p1',players:['m3','m4'],createdAt:Date.now()-10000}];S.games=[];S.history=[];S.pairCounts={};
-            me={memberId:'qa_profile_m1',displayName:'QA프로필',role:'manager',groupId:'grp_qa_profile54'};group={groupId:'grp_qa_profile54',name:'QA'};groups=[];normalizeClient();draft.splice(0,draft.length,'qa_profile_m1','m2',null,null);renderAll();
-            document.getElementById('login')?.classList.add('hide');document.querySelectorAll('.view').forEach(v=>v.classList.toggle('on',v.id==='queue'));
-          },{token});
-          const pending=await p.locator('.pendingCard .pendingSlot').first().evaluate(el=>({classes:el.className,label:el.querySelector('.slotLabel')?.className,name:el.querySelector('.slotName')?.className,meta:el.querySelector('.meta')?.className}));
-          const composer=await p.locator('.composer54 .pendingSlot.filled').first().evaluate(el=>({classes:el.className,label:el.querySelector('.slotLabel')?.className,name:el.querySelector('.slotName')?.className,meta:el.querySelector('.meta')?.className}));
-          console.log('PENDING',pending,'COMPOSER',composer);
-          for(const c of ['pendingSlot53','pendingSlot54'])if(!composer.classes.includes(c))throw new Error('composer missing '+c);
-          if(composer.label!==pending.label||composer.name!==pending.name||composer.meta!==pending.meta)throw new Error('composer child layout classes mismatch');
-          const parentClass=await p.locator('.composer54 .slots').getAttribute('class');if(!parentClass.includes('pendingGrid'))throw new Error('composer grid mismatch');
-          await p.evaluate(()=>{currentView='settings';goView('settings')});
-          await p.waitForSelector('#profileFile53',{state:'attached'});
-          const png=Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAusB9Y9ZKxkAAAAASUVORK5CYII=','base64');
-          await p.locator('#profileFile53').setInputFiles({name:'profile-test.png',mimeType:'image/png',buffer:png});
-          await p.waitForFunction(()=>document.querySelector('#profileCard53 .profilePreview53 img'),{timeout:10000});
-          await p.waitForTimeout(1200);
-          const ui=await p.evaluate(()=>({preview:document.querySelectorAll('#profileCard53 .profilePreview53 img').length,member:document.querySelectorAll('#members .memberCard img').length,queue:document.querySelectorAll('#queue .queueCard img').length}));
-          console.log('PROFILE_UI',ui,'ERRORS',errors);
-          if(ui.preview!==1||ui.member<1||ui.queue<1)throw new Error('profile did not apply immediately');
-          const res=await p.request.get('https://wjelumpbjklfrdjxbesj.supabase.co/functions/v1/kokmatch-profile-v53?groupId=grp_qa_profile54&t='+Date.now(),{headers:{authorization:'Bearer '+token}});if(!res.ok())throw new Error('profile GET failed '+res.status());const json=await res.json();const image=json.profiles?.qa_profile_m1?.image||'';console.log('SERVER_IMAGE_LEN',image.length);if(image.length<100)throw new Error('profile not persisted on server');
-          await p.evaluate(()=>{currentView='queue';goView('queue')});
-          await p.screenshot({path:'hotfix3.png',fullPage:true});
-          if(errors.length)throw new Error('page errors '+errors.join('|'));
-          await b.close();
+          if(!(await p.evaluate(()=>window.__kokmatchV54Fix4===true)))await p.addScriptTag({url:'https://kkokmatch.github.io/app-v5.4-fix4.js?v=4&t='+Date.now()});
+          if(!(await p.evaluate(()=>window.__kokmatchV54Fix5===true)))await p.addScriptTag({url:'https://kkokmatch.github.io/app-v5.4-fix5.js?v=5&t='+Date.now()});
+          await p.waitForFunction(()=>window.__kokmatchV54Fix4===true&&window.__kokmatchV54Fix5===true,{timeout:10000});
+          await p.evaluate(({token})=>{T=token;currentGroupId='grp_qa_profile54';currentView='queue';S=emptyClientState();S.members=[{id:'qa_profile_m1',name:'QA프로필',gender:'남',age:'30',cls:'C',type:'member',role:'manager',totalGames:0,state:'waiting',joinedAt:Date.now()-30000},{id:'m2',name:'여자B',gender:'여',age:'30',cls:'B',type:'member',role:'member',totalGames:0,state:'waiting',joinedAt:Date.now()-20000},{id:'m3',name:'남자C',gender:'남',age:'40',cls:'D',type:'member',role:'organizer',totalGames:0,state:'matched',joinedAt:Date.now()-10000},{id:'m4',name:'여자D',gender:'여',age:'20',cls:'A',type:'member',role:'member',totalGames:0,state:'matched',joinedAt:Date.now()-10000}];S.queue=['qa_profile_m1','m2'];S.pendingGames=[{id:'p1',players:['m3','m4'],createdAt:Date.now()-10000}];S.games=[];S.history=[];S.pairCounts={};me={memberId:'qa_profile_m1',displayName:'QA프로필',role:'manager',groupId:'grp_qa_profile54'};group={groupId:'grp_qa_profile54',name:'QA'};groups=[];normalizeClient();draft.splice(0,draft.length,'qa_profile_m1','m2',null,null);renderAll();document.getElementById('login')?.classList.add('hide');document.querySelectorAll('.view').forEach(v=>v.classList.toggle('on',v.id==='queue'))},{token});
+          const snap=loc=>loc.evaluate(el=>{const c=getComputedStyle(el),r=el.getBoundingClientRect();return {cls:el.className,padding:c.padding,minHeight:c.minHeight,bg:c.backgroundColor,radius:c.borderRadius,display:c.display,dir:c.flexDirection,height:Math.round(r.height),name:el.querySelector('.slotName')?.className,meta:el.querySelector('.meta')?.className,gender:el.querySelectorAll('.genderPerson54').length,role:el.querySelectorAll('.roleBadge').length}});
+          const pending=await snap(p.locator('.pendingCard:not(.composer54) .pendingSlot').first()),composer=await snap(p.locator('.composer54 .pendingSlot').first());console.log('PENDING',pending,'COMPOSER',composer);
+          for(const k of ['padding','minHeight','bg','radius','display','dir','height','name','meta','gender','role'])if(String(pending[k])!==String(composer[k]))throw new Error(`layout mismatch ${k}: ${pending[k]} != ${composer[k]}`);
+          if(!p.locator('.composer54 .pendingHead'))throw new Error('composer pendingHead missing');
+          await p.evaluate(()=>{currentView='settings';goView('settings')});await p.waitForSelector('#profileFile53',{state:'attached'});
+          const png=Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAusB9Y9ZKxkAAAAASUVORK5CYII=','base64');await p.locator('#profileFile53').setInputFiles({name:'profile-test.png',mimeType:'image/png',buffer:png});await p.waitForFunction(()=>document.querySelector('#profileCard53 .profilePreview53 img'),{timeout:10000});await p.waitForTimeout(1200);
+          const ui=await p.evaluate(()=>({preview:document.querySelectorAll('#profileCard53 .profilePreview53 img').length,member:document.querySelectorAll('#members .memberCard img').length,queue:document.querySelectorAll('#queue .queueCard img').length}));console.log('PROFILE_UI',ui);if(ui.preview!==1||ui.member<1||ui.queue<1)throw new Error('profile did not apply immediately');
+          const res=await p.request.get('https://wjelumpbjklfrdjxbesj.supabase.co/functions/v1/kokmatch-profile-v53?groupId=grp_qa_profile54&t='+Date.now(),{headers:{authorization:'Bearer '+token}}),json=await res.json(),image=json.profiles?.qa_profile_m1?.image||'';console.log('SERVER_IMAGE_LEN',image.length);if(!res.ok()||image.length<100)throw new Error('profile not persisted');
+          await p.evaluate(()=>{currentView='queue';goView('queue')});await p.screenshot({path:'hotfix5.png',fullPage:true});if(errors.length)throw new Error(errors.join('|'));await b.close();
           EOF
           node qa.mjs
       - uses: actions/upload-artifact@v4
         with:
-          name: hotfix3-screen
-          path: hotfix3.png
+          name: hotfix5-screen
+          path: hotfix5.png
