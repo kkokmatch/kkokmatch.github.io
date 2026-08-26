@@ -4,6 +4,7 @@ on:
     paths:
       - '.github/workflows/qa-v54-hotfix3.yml'
       - 'app-v5.4.js'
+      - 'app-v5.4-fix4.js'
       - 'app-v5.4-hotfix-loader.js'
       - 'index.html'
 jobs:
@@ -24,6 +25,8 @@ jobs:
           const errors=[];p.on('pageerror',e=>errors.push(String(e)));
           await p.goto('https://kkokmatch.github.io/?qa=hotfix3&t='+Date.now(),{waitUntil:'networkidle'});
           await p.waitForFunction(()=>window.__kokmatchV54Hotfix3===true,{timeout:30000});
+          if(!(await p.evaluate(()=>window.__kokmatchV54Fix4===true))){await p.addScriptTag({url:'https://kkokmatch.github.io/app-v5.4-fix4.js?v=4&t='+Date.now()});}
+          await p.waitForFunction(()=>window.__kokmatchV54Fix4===true,{timeout:10000});
           await p.evaluate(({token})=>{
             T=token;currentGroupId='grp_qa_profile54';currentView='queue';S=emptyClientState();
             S.members=[
@@ -38,14 +41,15 @@ jobs:
           const pending=await p.locator('.pendingCard .pendingSlot').first().evaluate(el=>({classes:el.className,label:el.querySelector('.slotLabel')?.className,name:el.querySelector('.slotName')?.className,meta:el.querySelector('.meta')?.className}));
           const composer=await p.locator('.composer54 .pendingSlot.filled').first().evaluate(el=>({classes:el.className,label:el.querySelector('.slotLabel')?.className,name:el.querySelector('.slotName')?.className,meta:el.querySelector('.meta')?.className}));
           console.log('PENDING',pending,'COMPOSER',composer);
-          if(!composer.classes.includes('pendingSlot')||composer.label!==pending.label||composer.name!==pending.name||composer.meta!==pending.meta)throw new Error('composer is not using pending layout structure');
+          for(const c of ['pendingSlot53','pendingSlot54'])if(!composer.classes.includes(c))throw new Error('composer missing '+c);
+          if(composer.label!==pending.label||composer.name!==pending.name||composer.meta!==pending.meta)throw new Error('composer child layout classes mismatch');
           const parentClass=await p.locator('.composer54 .slots').getAttribute('class');if(!parentClass.includes('pendingGrid'))throw new Error('composer grid mismatch');
           await p.evaluate(()=>{currentView='settings';goView('settings')});
           await p.waitForSelector('#profileFile53');
-          const png=Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAQAAAAECAIAAAAmkwkpAAAAFElEQVR4nGP8z8AARAwMjIwgAwAA//8DAAcrAQfL5wAAAABJRU5ErkJggg==','base64');
+          const png=Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAusB9Y9ZKxkAAAAASUVORK5CYII=','base64');
           await p.locator('#profileFile53').setInputFiles({name:'profile-test.png',mimeType:'image/png',buffer:png});
           await p.waitForFunction(()=>document.querySelector('#profileCard53 .profilePreview53 img'),{timeout:10000});
-          await p.waitForTimeout(1000);
+          await p.waitForTimeout(1200);
           const ui=await p.evaluate(()=>({preview:document.querySelectorAll('#profileCard53 .profilePreview53 img').length,member:document.querySelectorAll('#members .memberCard img').length,queue:document.querySelectorAll('#queue .queueCard img').length}));
           console.log('PROFILE_UI',ui,'ERRORS',errors);
           if(ui.preview!==1||ui.member<1||ui.queue<1)throw new Error('profile did not apply immediately');
