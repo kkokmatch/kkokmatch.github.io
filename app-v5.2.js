@@ -46,3 +46,4 @@ const renderHeaderPrev52=renderHeader;renderHeader=function(){const r=renderHead
 const renderSettingsPrev52=renderSettings;renderSettings=function(){const r=renderSettingsPrev52();const box=typeof $==='function'?$('settings'):null;if(box&&me?.globalAdmin===true&&String(me?.displayName||'').trim()==='박태영'){const card=[...box.querySelectorAll('.card')].find(c=>String(c.textContent||'').includes('프로그램 버전'));if(card){const m=card.querySelector('.meta');if(m)m.textContent='콕매치 v5.2 · 다중모임 전환 고속화 · 역할 공통 전환 안정화'}}return r};
 setTimeout(()=>{ensureTop52();latestCheck52()},0);setInterval(()=>latestCheck52(),60000);
 })();
+(()=>{if(window.__kokmatchV53Loader)return;window.__kokmatchV53Loader=true;const s=document.createElement('script');s.src='/app-v5.3.js?v=5.3&hotfix=1';s.async=false;s.onerror=()=>console.error('콕매치 v5.3 로드 실패');document.body.appendChild(s)})();
