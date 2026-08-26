@@ -1,0 +1,33 @@
+name: QA profile click diagnostic
+on:
+  push:
+    paths:
+      - '.github/workflows/qa-profile-click-diag.yml'
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-node@v4
+        with: {node-version: 22}
+      - run: npm install --no-save playwright@1.55.0
+      - run: npx playwright install --with-deps chromium
+      - name: diagnose click routing
+        run: |
+          cat > diag.mjs <<'EOF'
+          import { chromium } from 'playwright';
+          const PROFILE='https://wjelumpbjklfrdjxbesj.supabase.co/functions/v1/kokmatch-profile-v53';
+          const png='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAusB9Y9ZKxkAAAAASUVORK5CYII=';
+          const b=await chromium.launch({headless:true});const p=await b.newPage({viewport:{width:390,height:844}});
+          await p.route(PROFILE+'**',async route=>{const u=new URL(route.request().url());if(u.searchParams.get('full')==='1')return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({image:png,fullImage:png})});return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({profiles:{qa_profile_m1:{image:png}}})})});
+          await p.goto('https://kkokmatch.github.io/?diag=click&t='+Date.now(),{waitUntil:'networkidle'});
+          await p.waitForFunction(()=>window.__kokmatchV54Fix9===true&&window.__kokmatchProfileUiPatch==='9.0',{timeout:15000});
+          await p.evaluate(()=>{T='qa-local-only';currentGroupId='grp_diag_click';localStorage.removeItem('kokmatch_draft_v54_grp_diag_click');S=emptyClientState();S.members=[{id:'qa_profile_m1',name:'남자A',gender:'남',age:'30',cls:'C',type:'member',role:'admin',totalGames:0,state:'waiting',joinedAt:Date.now()-30000},{id:'m2',name:'여자B',gender:'여',age:'30',cls:'B',type:'member',role:'member',totalGames:0,state:'waiting',joinedAt:Date.now()-20000}];S.queue=['qa_profile_m1','m2'];S.pendingGames=[];S.games=[];S.history=[];S.pairCounts={};group={groupId:'grp_diag_click',name:'QA'};groups=[];normalizeClient();me={memberId:'qa_profile_m1',displayName:'남자A',role:'admin',globalAdmin:true,groupId:'grp_diag_click'};draft.splice(0,draft.length,null,null,null,null);renderAll();goView('queue');document.getElementById('login')?.classList.add('hide')});
+          await p.waitForTimeout(400);await p.waitForSelector('#queue .queueCard');
+          const before=await p.evaluate(()=>{const c=document.querySelector('#queue .queueCard');return {can:canGame(),draft:[...draft],stored:localStorage.getItem('kokmatch_draft_v54_grp_diag_click'),onclickType:typeof c?.onclick,onclick:String(c?.onclick||'').slice(0,300),windowDraftType:typeof window.draftClick,same:window.draftClick===draftClick,member:c?.dataset.memberId80,html:c?.outerHTML.slice(0,800)}});console.log('BEFORE',before);
+          await p.locator('#queue .queueCard').first().locator('.queueInfo53,.queueInfo48').first().click();await p.waitForTimeout(150);
+          const afterClick=await p.evaluate(()=>({draft:[...draft],stored:localStorage.getItem('kokmatch_draft_v54_grp_diag_click')}));console.log('AFTER_CLICK',afterClick);
+          await p.evaluate(()=>{draft.splice(0,draft.length,null,null,null,null);localStorage.setItem('kokmatch_draft_v54_grp_diag_click',JSON.stringify(draft));window.draftClick('qa_profile_m1')});await p.waitForTimeout(150);
+          const afterDirect=await p.evaluate(()=>({draft:[...draft],stored:localStorage.getItem('kokmatch_draft_v54_grp_diag_click')}));console.log('AFTER_DIRECT',afterDirect);
+          await b.close();
+          EOF
+          node diag.mjs
