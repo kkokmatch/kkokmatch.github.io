@@ -4,11 +4,13 @@ const PROFILE53='https://wjelumpbjklfrdjxbesj.supabase.co/functions/v1/kokmatch-
 let profiles53={},profileGroup53='',profileLoading53=null,loginGuard53=false,loginGrace53=0;
 
 function style53(){if(document.getElementById('v53style'))return;const s=document.createElement('style');s.id='v53style';s.textContent=`
-#topActions52{display:none!important}
+#topActions52{display:flex!important}
 .profileAvatar53{width:42px!important;height:42px!important;min-width:42px!important;border-radius:50%!important;overflow:hidden!important;display:flex!important;align-items:center!important;justify-content:center!important;background:#eef2f7!important;color:#6b7280!important;font-size:22px!important;border:1px solid #dbe2ea!important;padding:0!important}
 .profileAvatar53 img{width:100%!important;height:100%!important;object-fit:cover!important;display:block!important}
 .profileCard53{margin-bottom:12px}.profileHead53{display:flex;align-items:center;gap:14px}.profilePreview53{width:76px;height:76px;border-radius:50%;overflow:hidden;display:flex;align-items:center;justify-content:center;background:#eef2f7;border:1px solid #dbe2ea;font-size:34px;color:#6b7280;flex:0 0 76px}.profilePreview53 img{width:100%;height:100%;object-fit:cover}.profileBtns53{display:flex;gap:7px;flex-wrap:wrap;margin-top:9px}.profileHelp53{font-size:12px;line-height:1.45;margin-top:8px;color:#6b7280}
 `;document.head.appendChild(s)}
+function markVersion53(){document.title='콕매치 v5.3';document.documentElement.dataset.kokmatchVersion='5.3';const v=document.getElementById('currentVersion52');if(v&&v.textContent!=='v5.3')v.textContent='v5.3'}
+function watchVersion53(){markVersion53();const v=document.getElementById('currentVersion52');if(v&&!v.dataset.v53watch){v.dataset.v53watch='1';new MutationObserver(()=>{if(v.textContent!=='v5.3')v.textContent='v5.3'}).observe(v,{childList:true,characterData:true,subtree:true})}}
 function profileKey53(m){return String(m?.id||'')}
 function avatarHtml53(m){const p=profiles53[profileKey53(m)]?.image||'';return p?`<div class="avatar profileAvatar53"><img src="${p}" alt="${esc(m?.name||'프로필')} 프로필"></div>`:'<div class="avatar profileAvatar53" aria-label="기본 프로필">👤</div>'}
 try{avatar=function(m){return avatarHtml53(m)}}catch{window.avatar=avatarHtml53}
@@ -18,7 +20,7 @@ async function loadProfiles53(force=false){if(!T||!currentGroupId||String(curren
 function resetProfiles53(){profiles53={};profileGroup53=''}
 
 const renderAllPrev53=renderAll;
-renderAll=function(){const r=renderAllPrev53();style53();const gid=String(currentGroupId||'');if(gid&&gid!=='__global__'&&profileGroup53!==gid){resetProfiles53();queueMicrotask(()=>loadProfiles53().catch(()=>{}))}return r};
+renderAll=function(){const r=renderAllPrev53();style53();watchVersion53();const gid=String(currentGroupId||'');if(gid&&gid!=='__global__'&&profileGroup53!==gid){resetProfiles53();queueMicrotask(()=>loadProfiles53().catch(()=>{}))}return r};
 
 /* A 05:00 session reset can leave one old polling request in flight. If its 401 arrives while a new login is being established, it must not delete the newly-issued token. */
 const reloginPrev53=reloginLatest;
@@ -29,7 +31,7 @@ submitLogin=async function(...args){const before=String(T||'');loginGuard53=true
 function profilePreview53(){const id=String(me?.memberId||'');const p=profiles53[id]?.image||'';return p?`<div class="profilePreview53"><img src="${p}" alt="내 프로필 사진"></div>`:'<div class="profilePreview53">👤</div>'}
 function profileCard53(){const usable=!!me?.memberId;return `<div class="card profileCard53" id="profileCard53"><div class="profileHead53">${profilePreview53()}<div><div class="name">내 프로필 사진</div><div class="meta">회원명부와 개인 게임대기에 표시됩니다.</div>${usable?`<div class="profileBtns53"><label class="btn pri" for="profileFile53">사진 변경</label><input id="profileFile53" type="file" accept="image/jpeg,image/png,image/webp" style="display:none" onchange="changeProfile53(this)">${profiles53[String(me.memberId||'')]?.image?'<button class="btn ghost" onclick="deleteProfile53()">기본 사진으로</button>':''}</div>`:'<div class="profileHelp53">회원으로 연결된 계정에서 설정할 수 있습니다.</div>'}</div></div><div class="profileHelp53">선택한 사진은 정사각형으로 자동 맞춤되며 프로필용으로 축소 저장됩니다.</div></div>`}
 const renderSettingsPrev53=renderSettings;
-renderSettings=function(){const r=renderSettingsPrev53();style53();const box=typeof $==='function'?$('settings'):document.getElementById('settings');if(!box||box.querySelector('#profileCard53'))return r;const first=box.querySelector('.card');if(first)first.insertAdjacentHTML('beforebegin',profileCard53());else box.insertAdjacentHTML('afterbegin',profileCard53());return r};
+renderSettings=function(){const r=renderSettingsPrev53();style53();watchVersion53();const box=typeof $==='function'?$('settings'):document.getElementById('settings');if(!box||box.querySelector('#profileCard53'))return r;const first=box.querySelector('.card');if(first)first.insertAdjacentHTML('beforebegin',profileCard53());else box.insertAdjacentHTML('afterbegin',profileCard53());return r};
 
 function imageToProfile53(file){return new Promise((resolve,reject)=>{if(!file||!/^image\/(jpeg|png|webp)$/i.test(file.type||''))return reject(new Error('JPG, PNG, WebP 사진만 사용할 수 있습니다.'));if(file.size>12*1024*1024)return reject(new Error('원본 사진은 12MB 이하만 선택할 수 있습니다.'));const rd=new FileReader();rd.onerror=()=>reject(new Error('사진을 읽지 못했습니다.'));rd.onload=()=>{const im=new Image();im.onerror=()=>reject(new Error('사진 형식을 확인해주세요.'));im.onload=()=>{try{const size=Math.min(im.naturalWidth,im.naturalHeight),sx=(im.naturalWidth-size)/2,sy=(im.naturalHeight-size)/2,c=document.createElement('canvas');c.width=256;c.height=256;const g=c.getContext('2d');g.drawImage(im,sx,sy,size,size,0,0,256,256);let data=c.toDataURL('image/jpeg',.8);if(data.length>210000)data=c.toDataURL('image/jpeg',.65);if(data.length>210000)return reject(new Error('사진 용량을 줄인 뒤 다시 선택해주세요.'));resolve(data)}catch(e){reject(e)}};im.src=String(rd.result||'')};rd.readAsDataURL(file)})}
 window.changeProfile53=async function(input){const f=input?.files?.[0];if(!f)return;const label=document.querySelector('label[for="profileFile53"]');const old=label?.textContent;if(label){label.textContent='저장 중…';label.style.pointerEvents='none'}try{const image=await imageToProfile53(f);const x=await profileJson53(PROFILE53,{method:'POST',headers:{'content-type':'application/json',authorization:'Bearer '+T},body:JSON.stringify({action:'save_profile',groupId:currentGroupId,image}),cache:'no-store'});profiles53[String(me.memberId)]={image:x.image||image,updatedAt:new Date().toISOString()};profileGroup53=String(currentGroupId);renderAll();if(currentView==='settings')renderSettings()}catch(e){if(typeof showError==='function')showError(e);else alert(e.message)}finally{if(input)input.value='';if(label){label.textContent=old||'사진 변경';label.style.pointerEvents=''}}};
@@ -38,6 +40,6 @@ window.deleteProfile53=async function(){if(!me?.memberId)return;try{await profil
 const goViewPrev53=goView;
 goView=function(id){const r=goViewPrev53(id);if(id==='settings'||id==='members'||id==='queue')loadProfiles53().catch(()=>{});return r};
 
-document.title='콕매치 v5.3';document.documentElement.dataset.kokmatchVersion='5.3';style53();
-setTimeout(()=>{if(T)loadProfiles53().catch(()=>{});try{renderHeader();renderNav();if(currentView==='settings')renderSettings()}catch{}},0);
+style53();watchVersion53();
+setTimeout(()=>{watchVersion53();if(T)loadProfiles53().catch(()=>{});try{renderHeader();renderNav();if(currentView==='settings')renderSettings()}catch{}},0);
 })();
