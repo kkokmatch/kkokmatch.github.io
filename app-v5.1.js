@@ -55,4 +55,4 @@ for(const n of ['selectPollDate22','movePollMonth22']){
 document.addEventListener('click',e=>{if(e.target?.closest?.('#stats .pollCalDay21'))queueMicrotask(decoratePollNow51)},false);
 setTimeout(()=>{ensure51();latestCheck51();if(me&&currentView==='stats')decoratePollNow51()},0);setInterval(()=>latestCheck51(),60000);
 })();
-(()=>{if(window.__kokmatchV52Loader)return;window.__kokmatchV52Loader=true;const s=document.createElement('script');s.src='/app-v5.2.js?v=5.2&hotfix=1';s.async=false;s.onerror=()=>console.error('콕매치 v5.2 로드 실패');document.body.appendChild(s)})();
+(()=>{if(window.__kokmatchV52Loader)return;window.__kokmatchV52Loader=true;const s=document.createElement('script');s.src='/app-v5.2.js?v=5.2&hotfix=2';s.async=false;s.onerror=()=>console.error('콕매치 v5.2 로드 실패');document.body.appendChild(s)})();
