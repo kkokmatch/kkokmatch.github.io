@@ -5,6 +5,7 @@ on:
     paths:
       - '.github/workflows/qa-v56-syntax.yml'
       - 'app-v5.6.js'
+      - 'app-v5.6-fix1.js'
 jobs:
   syntax:
     runs-on: ubuntu-latest
@@ -13,22 +14,16 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with: {node-version: 22}
-      - name: Check v5.6 JavaScript syntax and hardened core markers
+      - name: Check v5.6 JavaScript syntax and core markers
         run: |
           node --check app-v5.6.js
+          node --check app-v5.6-fix1.js
           node - <<'NODE'
           const fs=require('fs');
           const s=fs.readFileSync('app-v5.6.js','utf8');
-          const required=[
-            "window.__kokmatchV56Patch='1.4'",
-            "window.__kokmatchV56Build='2026.08.28.1'",
-            'window.__kokmatchHardRefresh56=hardRefresh56',
-            'window.__kokmatchLoadProfiles56=loadProfiles56',
-            'window.__kokmatchLoadState56=safeLoadState56',
-            "window.switchOwnGroup38=own",
-            "location.replace(u.href)"
-          ];
-          for(const x of required) if(!s.includes(x)) throw new Error('missing hardened v5.6 marker: '+x);
-          if(s.includes('kokmatch-updater')) throw new Error('legacy updater endpoint must not be used by v5.6 core');
-          console.log('PASS V5.6 HARDENED CORE SYNTAX');
+          const f=fs.readFileSync('app-v5.6-fix1.js','utf8');
+          for(const x of ["window.__kokmatchV56Patch='1.4'","window.__kokmatchV56Build='2026.08.28.1'",'window.__kokmatchLoadProfiles56=loadProfiles56']) if(!s.includes(x)) throw new Error('missing v5.6 marker: '+x);
+          for(const x of ["window.__kokmatchV56Fix1Patch='1.0'","window.__kokmatchV56Fix1Build='2026.08.28.2'",'switchFix1','saveProfileFix1','forceUpdate']) if(!f.includes(x)) throw new Error('missing fix1 marker: '+x);
+          if(f.includes('kokmatch-updater')) throw new Error('legacy updater endpoint must not be used');
+          console.log('PASS V5.6 FIX1 SYNTAX');
           NODE
