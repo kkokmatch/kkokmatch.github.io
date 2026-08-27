@@ -8,9 +8,27 @@ on:
 jobs:
   syntax:
     runs-on: ubuntu-latest
+    timeout-minutes: 2
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with: {node-version: 22}
-      - name: Check v5.6 JavaScript syntax
-        run: node --check app-v5.6.js
+      - name: Check v5.6 JavaScript syntax and hardened core markers
+        run: |
+          node --check app-v5.6.js
+          node - <<'NODE'
+          const fs=require('fs');
+          const s=fs.readFileSync('app-v5.6.js','utf8');
+          const required=[
+            "window.__kokmatchV56Patch='1.4'",
+            "window.__kokmatchV56Build='2026.08.28.1'",
+            'window.__kokmatchHardRefresh56=hardRefresh56',
+            'window.__kokmatchLoadProfiles56=loadProfiles56',
+            'window.__kokmatchLoadState56=safeLoadState56',
+            "window.switchOwnGroup38=own",
+            "location.replace(u.href)"
+          ];
+          for(const x of required) if(!s.includes(x)) throw new Error('missing hardened v5.6 marker: '+x);
+          if(s.includes('kokmatch-updater')) throw new Error('legacy updater endpoint must not be used by v5.6 core');
+          console.log('PASS V5.6 HARDENED CORE SYNTAX');
+          NODE
