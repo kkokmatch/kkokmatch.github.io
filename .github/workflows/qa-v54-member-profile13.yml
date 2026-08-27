@@ -33,6 +33,7 @@ jobs:
           if(!ready)throw new Error('fix13 not loaded on production');
           await p.evaluate(({thumb})=>{
             T='qa-token';currentGroupId='qa-group';
+            S=emptyClientState();S.members=[{id:'m1',name:'QA회원',gender:'남',cls:'C',state:'waiting',type:'member'}];normalizeClient();
             const box=document.getElementById('members');box.innerHTML='';box.classList.remove('hide');
             const card=document.createElement('div');card.className='memberCard';
             const id=document.createElement('div');id.className='avatar profileIdentity80 profileTap80 profileAvatar53 male';id.dataset.memberId='m1';id.dataset.photo='1';id.dataset.gender='남';id.setAttribute('role','button');
