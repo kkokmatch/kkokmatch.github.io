@@ -1,7 +1,8 @@
 (()=>{
 if(window.__kokmatchV54Fix15)return;
 window.__kokmatchV54Fix15=true;
-window.__kokmatchStatsUsabilityPatch='15.1';
+window.__kokmatchStatsUsabilityPatch='15.0';
+window.__kokmatchStatsUsabilityPerfPatch='15.1';
 
 const PAGE_SIZE15=20,MAX_DIFF_DAYS15=30;
 let page15=1,lastTable15=null,raf15=0,rangeMsgTimer15=0;
