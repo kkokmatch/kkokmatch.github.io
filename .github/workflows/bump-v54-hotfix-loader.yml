@@ -7,6 +7,7 @@ on:
       - 'app-v5.4-hotfix-loader.js'
       - 'app-v5.4-fix11.js'
       - 'app-v5.4-fix12.js'
+      - 'app-v5.4-fix16.js'
 permissions:
   contents: write
 jobs:
@@ -21,7 +22,7 @@ jobs:
           import re
           p=Path('index.html')
           s=p.read_text(encoding='utf-8')
-          n=re.sub(r'/app-v5\.4-hotfix-loader\.js\?v=[^"<]+', '/app-v5.4-hotfix-loader.js?v=11.0', s)
+          n=re.sub(r'/app-v5\.4-hotfix-loader\.js\?v=[^"<]+', '/app-v5.4-hotfix-loader.js?v=12.0', s)
           if n != s:
               p.write_text(n,encoding='utf-8')
           PY
