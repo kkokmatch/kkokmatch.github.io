@@ -1,1 +1,1 @@
-{"version":3,"label":"5.6","semanticVersion":"5.6","updatedAt":"2026-08-28T00:14:00+09:00","note":"login identity display, profile persistence and stable group switching patch 1.2"}
+{"version":4,"label":"5.6","semanticVersion":"5.6","build":"2026.08.28.1","updatedAt":"2026-08-28T07:21:00+09:00","note":"앱 최신본 강제 적용, 프로필 사진 즉시 동기화, 로그인 상태 모임전환 경쟁 상태 수정"}
