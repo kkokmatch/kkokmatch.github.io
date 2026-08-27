@@ -1,14 +1,16 @@
 (()=>{
-if(window.__kokmatchV56)return;window.__kokmatchV56=true;window.__kokmatchV56Patch='1.0';
+if(window.__kokmatchV56)return;window.__kokmatchV56=true;window.__kokmatchV56Patch='1.1';
 const VERSION='5.6',PROFILE='https://wjelumpbjklfrdjxbesj.supabase.co/functions/v1/kokmatch-profile-v53';
-let cacheGroup='',profiles={},loadSeq=0,lastGroup='';
+let cacheGroup='',profiles={},loadSeq=0,lastGroup='',versionGuardBusy=false;
 const token=()=>String(window.T||'');const gid=()=>String(window.currentGroupId||'');
 const esc56=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function gender56(m){const g=String(m?.gender||'').trim().toLowerCase();return ['여','여자','여성','f','female'].includes(g)?'여':'남'}
 function photo56(m){const g=gid(),id=String(m?.id||'');return cacheGroup===g?String(profiles?.[id]?.image||''):''}
 function avatar56(m){const p=photo56(m),female=gender56(m)==='여';return p?`<div class="avatar profileAvatar53 ${female?'female':'male'}"><img src="${p}" alt="${esc56(m?.name||'프로필')} 프로필"></div>`:`<div class="avatar ${female?'female':'male'}">●</div>`}
 function lockAvatar56(){try{Object.defineProperty(window,'avatar',{configurable:true,enumerable:true,get:()=>avatar56,set:()=>{}})}catch{try{window.avatar=avatar56;avatar=avatar56}catch{}}}
-function lockVersion56(){try{Object.defineProperty(window,'__kokmatchVersionLock',{configurable:true,enumerable:true,get:()=>VERSION,set:()=>{}})}catch{window.__kokmatchVersionLock=VERSION}document.documentElement.dataset.kokmatchVersion=VERSION;document.title='콕매치 v'+VERSION;const ids=['currentVersion51','currentVersion52'];ids.forEach(id=>{const e=document.getElementById(id);if(e)e.textContent='v'+VERSION})}
+function writeVersion56(){if(versionGuardBusy)return;versionGuardBusy=true;try{if(document.documentElement.dataset.kokmatchVersion!==VERSION)document.documentElement.dataset.kokmatchVersion=VERSION;if(document.title!=='콕매치 v'+VERSION)document.title='콕매치 v'+VERSION;for(const id of ['currentVersion51','currentVersion52']){const e=document.getElementById(id);if(e&&e.textContent!=='v'+VERSION)e.textContent='v'+VERSION}}finally{versionGuardBusy=false}}
+function lockVersion56(){try{Object.defineProperty(window,'__kokmatchVersionLock',{configurable:true,enumerable:true,get:()=>VERSION,set:()=>{}})}catch{window.__kokmatchVersionLock=VERSION}writeVersion56()}
+const versionMo56=new MutationObserver(()=>queueMicrotask(writeVersion56));function startVersionGuard56(){lockVersion56();try{versionMo56.observe(document.documentElement,{attributes:true,attributeFilter:['data-kokmatch-version']});const t=document.querySelector('title');if(t)versionMo56.observe(t,{childList:true,subtree:true,characterData:true})}catch{}}
 function memberById56(id){try{return id&&typeof M==='function'?M(String(id)):null}catch{return null}}
 function memberForCard56(card){let id='';const p=card?.querySelector?.('.pairBtn')?.getAttribute('onclick')||'';const hit=p.match(/openPairs\(['"]([^'"]+)['"]\)/);if(hit)id=hit[1];if(!id)id=String(card?.dataset?.memberId80||card?.dataset?.memberId56||'');const m=memberById56(id);if(m){card.dataset.memberId56=String(m.id);card.dataset.memberId80=String(m.id)}return m}
 function queueMembers56(){try{return typeof sortedQueue==='function'?sortedQueue().map(id=>memberById56(id)):[]}catch{return []}}
@@ -24,7 +26,7 @@ function watch56(){const g=gid();if(g!==lastGroup){lastGroup=g;cacheGroup=g;prof
 function wrap56(name){try{const f=window[name];if(typeof f!=='function'||f.__v56)return;const w=function(){const r=f.apply(this,arguments);queueMicrotask(()=>{watch56();canonicalize56()});return r};w.__v56=true;window[name]=w;try{eval(`${name}=window[name]`)}catch{}}catch{}}
 ['renderMembers','renderQueue','renderAll','renderHeader'].forEach(wrap56);
 for(const n of ['changeProfile53','deleteProfile53']){try{const f=window[n];if(typeof f==='function'&&!f.__v56){const w=async function(){const r=await f.apply(this,arguments);await loadProfiles56(gid(),true);return r};w.__v56=true;window[n]=w;try{eval(`${n}=window[n]`)}catch{}}}catch{}}
-let raf=0;const mo=new MutationObserver(()=>{if(raf)return;raf=requestAnimationFrame(()=>{raf=0;canonicalize56()})});function start56(){lockVersion56();lockAvatar56();const m=document.getElementById('members'),q=document.getElementById('queue');if(m)mo.observe(m,{childList:true,subtree:true});if(q)mo.observe(q,{childList:true,subtree:true});watch56();canonicalize56()}
+let raf=0;const mo=new MutationObserver(()=>{if(raf)return;raf=requestAnimationFrame(()=>{raf=0;canonicalize56()})});function start56(){startVersionGuard56();lockAvatar56();const m=document.getElementById('members'),q=document.getElementById('queue');if(m)mo.observe(m,{childList:true,subtree:true});if(q)mo.observe(q,{childList:true,subtree:true});watch56();canonicalize56()}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start56,{once:true});else start56();
-setInterval(()=>{lockVersion56();lockAvatar56();watch56()},250);
+setInterval(()=>{lockVersion56();lockAvatar56();watch56()},200);
 })();
