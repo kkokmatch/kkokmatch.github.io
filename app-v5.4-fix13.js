@@ -48,4 +48,10 @@ window.addEventListener('keydown',e=>{if(e.key!=='Enter'&&e.key!==' ')return;con
 const mo13=new MutationObserver(()=>style13());
 function boot13(){style13();const box=document.getElementById('members');if(box)mo13.observe(box,{childList:true,subtree:true})}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot13,{once:true});else boot13();
+
+// 이전 hotfix loader가 캐시되어 있어도 최신 개인별 통계 디자인을 이어서 불러온다.
+setTimeout(()=>{
+ if(window.__kokmatchV54Fix14)return;
+ const s=document.createElement('script');s.src='/app-v5.4-fix14.js?v=14.0&t='+Date.now();s.async=false;document.body.appendChild(s)
+},0);
 })();
