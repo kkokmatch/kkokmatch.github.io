@@ -11,6 +11,9 @@ on:
       - 'app-v5.4-fix8.js'
       - 'app-v5.4-fix9.js'
       - 'app-v5.4-fix10.js'
+      - 'app-v5.4-fix12.js'
+      - 'app-v5.4-fix14.js'
+      - 'app-v5.4-fix15.js'
       - 'app-v5.4-hotfix-loader.js'
       - 'index.html'
 jobs:
