@@ -14,45 +14,45 @@ jobs:
         with: {node-version: 22}
       - run: npm install --no-save playwright@1.55.0
       - run: npx playwright install --with-deps webkit
-      - name: verify iOS member profile opens app high-res viewer
+      - name: verify iOS member profile routes to shared viewer
         run: |
           cat > qa.mjs <<'EOF'
           import { webkit, devices } from 'playwright';
-          const PROFILE='https://wjelumpbjklfrdjxbesj.supabase.co/functions/v1/kokmatch-profile-v53';
           const thumb='data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==';
-          const full='data:image/gif;base64,R0lGODlhAQABAIAAAAD/AP///ywAAAAAAQABAAACAUwAOw==';
           const b=await webkit.launch({headless:true});
           const p=await b.newPage({...devices['iPhone 13']});
           const errors=[];p.on('pageerror',e=>errors.push(String(e)));
-          await p.route(PROFILE+'**',route=>route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({image:thumb,fullImage:full,updatedAt:'2026-08-27T00:00:00Z'})}));
           let ready=false;
           for(let i=0;i<8&&!ready;i++){
             await p.goto('https://kkokmatch.github.io/?qa=profile13&t='+Date.now(),{waitUntil:'domcontentloaded'});
-            try{await p.waitForFunction(()=>window.__kokmatchV54Fix13===true&&window.__kokmatchMemberProfileTapPatch==='13.0'&&window.__kokmatchVersionLock==='5.4',{timeout:12000});ready=true}catch{}
+            try{await p.waitForFunction(()=>window.__kokmatchV54Fix13===true&&window.__kokmatchMemberProfileTapPatch==='13.0'&&typeof window.openProfilePhoto80==='function'&&window.__kokmatchVersionLock==='5.4',{timeout:12000});ready=true}catch{}
           }
-          if(!ready)throw new Error('fix13 not loaded on production');
+          if(!ready)throw new Error('fix13/shared viewer not loaded on production');
           await p.evaluate(({thumb})=>{
-            T='qa-token';currentGroupId='qa-group';
-            S=emptyClientState();S.members=[{id:'m1',name:'QA회원',gender:'남',cls:'C',state:'waiting',type:'member'}];normalizeClient();
             const box=document.getElementById('members');box.innerHTML='';box.classList.remove('hide');
             const card=document.createElement('div');card.className='memberCard';
             const id=document.createElement('div');id.className='avatar profileIdentity80 profileTap80 profileAvatar53 male';id.dataset.memberId='m1';id.dataset.photo='1';id.dataset.gender='남';id.setAttribute('role','button');
             const im=document.createElement('img');im.src=thumb;im.alt='QA 프로필';id.appendChild(im);card.appendChild(id);box.appendChild(card);
+            window.__qaOriginalViewer=window.openProfilePhoto80;window.__qaViewerCalls=[];
+            window.openProfilePhoto80=(el)=>window.__qaViewerCalls.push({mid:el?.dataset?.memberId||'',photo:el?.dataset?.photo||''});
           },{thumb});
           const css=await p.locator('#members .profileIdentity80 img').evaluate(el=>({pointer:getComputedStyle(el).pointerEvents,callout:getComputedStyle(el).getPropertyValue('-webkit-touch-callout'),select:getComputedStyle(el).getPropertyValue('-webkit-user-select')}));
           if(css.pointer!=='none')throw new Error('member image still receives pointer events '+JSON.stringify(css));
           const ctxPrevented=await p.locator('#members .profileIdentity80').evaluate(el=>{const ev=new Event('contextmenu',{bubbles:true,cancelable:true});el.dispatchEvent(ev);return ev.defaultPrevented});
           if(!ctxPrevented)throw new Error('iOS image context menu was not prevented');
-          await p.waitForSelector('#profilePhotoModal80.on',{state:'visible',timeout:5000});
-          await p.waitForFunction(full=>document.querySelector('#profilePhotoModal80 .profilePhotoImg80')?.getAttribute('src')===full,full,{timeout:5000});
-          await p.evaluate(()=>window.closeProfilePhoto80?.());
+          let calls=await p.evaluate(()=>window.__qaViewerCalls.slice());
+          if(calls.length!==1||calls[0].mid!=='m1')throw new Error('contextmenu did not route to shared viewer '+JSON.stringify(calls));
+          await p.waitForTimeout(550);
           await p.locator('#members .profileIdentity80').evaluate(el=>el.dispatchEvent(new PointerEvent('pointerup',{bubbles:true,cancelable:true,pointerType:'touch',isPrimary:true})));
-          await p.waitForSelector('#profilePhotoModal80.on',{state:'visible',timeout:5000});
-          const src=await p.locator('#profilePhotoModal80 .profilePhotoImg80').getAttribute('src');
-          if(src!==full)throw new Error('member profile did not show high-res image');
+          calls=await p.evaluate(()=>window.__qaViewerCalls.slice());
+          if(calls.length!==2||calls[1].mid!=='m1')throw new Error('touch pointer did not route to shared viewer '+JSON.stringify(calls));
+          await p.waitForTimeout(550);
+          await p.locator('#members .profileIdentity80').evaluate(el=>el.dispatchEvent(new MouseEvent('click',{bubbles:true,cancelable:true})));
+          calls=await p.evaluate(()=>window.__qaViewerCalls.slice());
+          if(calls.length<3||calls.at(-1).mid!=='m1')throw new Error('normal member click did not route to shared viewer '+JSON.stringify(calls));
           const version=await p.evaluate(()=>({title:document.title,data:document.documentElement.dataset.kokmatchVersion,lock:window.__kokmatchVersionLock}));
           if(version.title!=='콕매치 v5.4'||version.data!=='5.4'||version.lock!=='5.4')throw new Error('version changed '+JSON.stringify(version));
           if(errors.length)throw new Error(errors.join(' | '));
-          console.log('PASS profile13',css,ctxPrevented,version);await b.close();
+          console.log('PASS profile13',css,ctxPrevented,calls,version);await b.close();
           EOF
           node qa.mjs
