@@ -1,0 +1,42 @@
+name: QA v5.4 feedback 16
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/qa-v54-feedback16.yml'
+      - 'app-v5.4-fix16.js'
+      - 'app-v5.4-hotfix-loader.js'
+      - 'index.html'
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-node@v4
+        with: {node-version: 22}
+      - run: npm install --no-save playwright@1.55.0
+      - run: npx playwright install --with-deps webkit
+      - name: verify feedback form on iPhone
+        run: |
+          cat > qa.mjs <<'EOF'
+          import { webkit, devices } from 'playwright';
+          const FEEDBACK='https://wjelumpbjklfrdjxbesj.supabase.co/functions/v1/kokmatch-feedback-v54';
+          const b=await webkit.launch({headless:true});
+          const p=await b.newPage({...devices['iPhone 13']});
+          const sent=[];const errors=[];p.on('pageerror',e=>errors.push(String(e)));p.on('dialog',d=>d.accept());
+          await p.route(FEEDBACK+'**',async route=>{sent.push({body:route.request().postDataJSON(),auth:route.request().headers()['authorization']||''});await route.fulfill({status:200,contentType:'application/json',body:'{"success":true}'})});
+          let ready=false;for(let i=0;i<10&&!ready;i++){await p.goto('https://kkokmatch.github.io/?qa=feedback16&t='+Date.now(),{waitUntil:'domcontentloaded'});try{await p.waitForFunction(()=>window.__kokmatchFeedbackPatch==='16.0'&&window.__kokmatchVersionLock==='5.4',{timeout:12000});ready=true}catch{}}
+          if(!ready)throw new Error('feedback patch not loaded');
+          await p.evaluate(()=>{T='qa-token';currentGroupId='grp_qa';S=emptyClientState();S.members=[{id:'self',name:'QA회원',gender:'남',age:'30',cls:'C',type:'member',role:'member',state:'waiting',totalGames:0}];group={groupId:'grp_qa',name:'QA모임'};groups=[];me={role:'member',displayName:'QA회원',memberId:'self',globalAdmin:false,groupId:'grp_qa'};normalizeClient();renderAll();const l=document.getElementById('login');if(l){l.classList.add('hide');l.style.display='none'}});
+          const logout=p.locator('.topActions16 .logout'),feedback=p.locator('.topActions16 .feedbackBtn16');await logout.waitFor({state:'visible'});await feedback.waitFor({state:'visible'});
+          const boxes=await Promise.all([logout.boundingBox(),feedback.boundingBox()]);if(!boxes[0]||!boxes[1]||boxes[1].y<=boxes[0].y)throw new Error('feedback button is not below logout');
+          const top=await p.locator('.toprow').boundingBox();if(!top||top.x<0||top.x+top.width>391)throw new Error('header overflow');
+          await feedback.click();await p.waitForSelector('#feedbackTarget16',{state:'visible'});
+          const opts=await p.locator('#feedbackTarget16 option').allTextContents();for(const label of ['개발자','모임장','운영진'])if(!opts.includes(label))throw new Error('missing target '+label);
+          const max=await p.locator('#feedbackContent16').getAttribute('maxlength');if(max!=='100')throw new Error('maxlength is not 100');
+          await p.locator('#feedbackTarget16').selectOption('manager');await p.locator('#feedbackContent16').fill('가'.repeat(100));await p.waitForTimeout(50);
+          if((await p.locator('#feedbackCount16').textContent())?.trim()!=='100 / 100')throw new Error('counter failed');
+          await p.locator('#feedbackSend16').click();await p.waitForFunction(()=>!document.getElementById('modal')?.classList.contains('on'));if(sent.length!==1)throw new Error('feedback request count '+sent.length);
+          const x=sent[0];if(x.auth!=='Bearer qa-token'||x.body?.groupId!=='grp_qa'||x.body?.targetRole!=='manager'||Array.from(x.body?.content||'').length!==100)throw new Error('feedback payload failed '+JSON.stringify(x));
+          const version=await p.evaluate(()=>({title:document.title,data:document.documentElement.dataset.kokmatchVersion,lock:window.__kokmatchVersionLock}));if(version.title!=='콕매치 v5.4'||version.data!=='5.4'||version.lock!=='5.4')throw new Error('version changed '+JSON.stringify(version));if(errors.length)throw new Error(errors.join(' | '));console.log('PASS feedback16',opts,version);await b.close();
+          EOF
+          node qa.mjs
