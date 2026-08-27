@@ -24,7 +24,7 @@ jobs:
           import re
           p=Path('index.html')
           s=p.read_text(encoding='utf-8')
-          n=re.sub(r'/app-v5\.4-hotfix-loader\.js\?v=[^"<]+', '/app-v5.4-hotfix-loader.js?v=14.0', s)
+          n=re.sub(r'/app-v5\.4-hotfix-loader\.js\?v=[^"<]+', '/app-v5.4-hotfix-loader.js?v=15.0', s)
           if n != s:
               p.write_text(n,encoding='utf-8')
           PY
