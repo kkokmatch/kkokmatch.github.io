@@ -1,4 +1,4 @@
-name: Refresh v5.5 fix2 cache
+name: Refresh v5.5 fix3 cache
 on:
   push:
     branches: [main]
@@ -17,13 +17,13 @@ jobs:
         run: |
           python - <<'PY'
           from pathlib import Path
-          p=Path('index.html')
-          s=p.read_text()
           import re
-          ns,n=re.subn(r'app-v5\.4-hotfix-loader\.js\?v=[0-9.]+','app-v5.4-hotfix-loader.js?v=14.1',s)
+          p=Path('index.html')
+          s=p.read_text(encoding='utf-8')
+          ns,n=re.subn(r'app-v5\.4-hotfix-loader\.js\?v=[0-9.]+','app-v5.4-hotfix-loader.js?v=15.0',s)
           if n!=1:
               raise SystemExit(f'loader reference replacements={n}')
-          p.write_text(ns)
+          p.write_text(ns,encoding='utf-8')
           PY
       - name: commit
         run: |
@@ -31,5 +31,5 @@ jobs:
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
           git add index.html
           git diff --cached --quiet && exit 0
-          git commit -m 'Use v5.5 fix2 loader cache key'
+          git commit -m 'Use v5.5 fix3 loader cache key'
           git push
