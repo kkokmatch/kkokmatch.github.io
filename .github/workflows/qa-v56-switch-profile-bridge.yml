@@ -1,0 +1,51 @@
+name: QA v5.6 switch profile bridge
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'app-v5.6.js'
+      - 'app-v5.6-statebridge.js'
+      - 'app-v5.4-hotfix-loader.js'
+      - '.github/workflows/qa-v56-switch-profile-bridge.yml'
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/setup-node@v4
+        with: {node-version: 22}
+      - run: npm install --no-save playwright@1.55.0
+      - run: npx playwright install --with-deps webkit
+      - name: Verify lexical state bridge, switch unlock and profile reload
+        run: |
+          cat > qa.mjs <<'EOF'
+          import {webkit,devices} from 'playwright';
+          const AUTH='https://wjelumpbjklfrdjxbesj.supabase.co/functions/v1/kokmatch-auth-v38';
+          const MULTI='https://wjelumpbjklfrdjxbesj.supabase.co/functions/v1/kokmatch-multi-api';
+          const PROFILE='https://wjelumpbjklfrdjxbesj.supabase.co/functions/v1/kokmatch-profile-v53';
+          const ROSTER='https://wjelumpbjklfrdjxbesj.supabase.co/functions/v1/kokmatch-roster-v47';
+          const img='data:image/jpeg;base64,QA_PROFILE_IMAGE';
+          const members=[{id:'self',name:'QA사용자',year:'1989',gender:'남',cls:'C',type:'member',role:'member',state:'out',totalGames:0},{id:'f1',name:'여회원',year:'1992',gender:'여',cls:'D',type:'member',role:'member',state:'out',totalGames:0}];
+          const state=gid=>({data:{dayKey:'2026-08-28',courtCount:2,courtNames:['1코트','2코트'],members,queue:[],pendingGames:[],games:[],history:[],pairCounts:{},attendancePolls:[]},group:{groupId:gid,name:gid==='grp_b'?'B모임':'A모임'},groups:[],user:{role:'member',displayName:'QA사용자',memberId:'self',globalAdmin:false,groupId:gid}});
+          const browser=await webkit.launch({headless:true});const p=await browser.newPage({...devices['iPhone 13']});p.setDefaultTimeout(20000);
+          const dialogs=[];const errors=[];p.on('dialog',async d=>{dialogs.push(d.message());await d.dismiss()});p.on('pageerror',e=>errors.push(String(e)));
+          await p.route(AUTH+'**',async route=>{const b=route.request().postDataJSON?.()||{};if(b.action==='switch_group')return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({success:true,token:'token-'+b.groupId,groupId:b.groupId,groupName:b.groupId==='grp_b'?'B모임':'A모임',role:'member',memberId:'self'})});if(b.action==='my_memberships')return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({memberships:[{groupId:'grp_a',groupName:'A모임',memberId:'self',role:'member'},{groupId:'grp_b',groupName:'B모임',memberId:'self',role:'member'}]})});return route.fulfill({status:200,contentType:'application/json',body:'{}'})});
+          await p.route(MULTI+'**',async route=>{const u=new URL(route.request().url());if(u.searchParams.get('api')==='state'){const gid=u.searchParams.get('groupId')||'grp_a';return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify(state(gid))})}return route.fulfill({status:200,contentType:'application/json',body:'{"success":true}'})});
+          await p.route(PROFILE+'**',async route=>{const u=new URL(route.request().url()),gid=u.searchParams.get('groupId');return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({profiles:gid==='grp_b'?{self:{image:img}}:{}})})});
+          await p.route(ROSTER+'**',route=>route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({members,memberCount:2,adminBadgeVisibility:'all'})}));
+          await p.goto('https://kkokmatch.github.io/?qa=v56bridge&t='+Date.now(),{waitUntil:'domcontentloaded'});
+          await p.waitForFunction(()=>window.__kokmatchV56===true&&window.__kokmatchV56StateBridge===true&&window.__kokmatchVersionLock==='5.6');
+          await p.evaluate(()=>{T='token-grp_a';currentGroupId='grp_a';S={dayKey:'2026-08-28',courtCount:2,courtNames:['1코트','2코트'],members:[{id:'self',name:'QA사용자',year:'1989',gender:'남',cls:'C',type:'member',role:'member',state:'out',totalGames:0},{id:'f1',name:'여회원',year:'1992',gender:'여',cls:'D',type:'member',role:'member',state:'out',totalGames:0}],queue:[],pendingGames:[],games:[],history:[],pairCounts:{},attendancePolls:[]};group={groupId:'grp_a',name:'A모임'};groups=[];me={role:'member',displayName:'QA사용자',memberId:'self',globalAdmin:false,groupId:'grp_a'};currentView='members';renderAll();document.getElementById('login')?.classList.add('hide')});
+          await p.waitForFunction(()=>window.T==='token-grp_a'&&window.currentGroupId==='grp_a'&&window.me?.memberId==='self');
+          const ok=await p.evaluate(()=>window.switchOwnGroup38('grp_b'));
+          if(ok!==true)throw new Error('switch returned '+ok);
+          await p.waitForFunction(()=>currentGroupId==='grp_b'&&group?.groupId==='grp_b'&&window.currentGroupId==='grp_b'&&window.group?.groupId==='grp_b');
+          await p.waitForTimeout(700);
+          const x=await p.evaluate(()=>{const card=[...document.querySelectorAll('#members .memberCard')].find(c=>c.dataset.memberId56==='self'||c.querySelector(':scope>.profileIdentity80')?.dataset.memberId==='self');const ident=card?.querySelector(':scope>.profileIdentity80');const btn=document.getElementById('groupBtn');return{src:ident?.querySelector('img')?.getAttribute('src')||'',photo:ident?.dataset.photo||'',busy:window.__kokmatchGroupSwitching12===true,disabled:!!btn?.disabled,cls:btn?.className||'',group:currentGroupId,wgroup:window.currentGroupId}});
+          if(x.src!==img||x.photo!=='1')throw new Error('profile not restored '+JSON.stringify(x));
+          if(x.busy||/groupSwitching12|switching52/.test(x.cls))throw new Error('switch UI stuck '+JSON.stringify(x));
+          if(dialogs.length)throw new Error('unexpected dialog '+dialogs.join(' | '));if(errors.length)throw new Error('page errors '+errors.join(' | '));
+          const back=await p.evaluate(()=>window.switchOwnGroup38('grp_a'));if(back!==true)throw new Error('second switch returned '+back);await p.waitForFunction(()=>currentGroupId==='grp_a'&&group?.groupId==='grp_a');
+          console.log('PASS v5.6 lexical bridge switch/profile',x);await browser.close();
+          EOF
+          node qa.mjs
