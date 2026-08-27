@@ -1,7 +1,7 @@
 (()=>{
 if(window.__kokmatchV54Fix15)return;
 window.__kokmatchV54Fix15=true;
-window.__kokmatchStatsUsabilityPatch='15.0';
+window.__kokmatchStatsUsabilityPatch='15.1';
 
 const PAGE_SIZE15=20,MAX_DIFF_DAYS15=30;
 let page15=1,lastTable15=null,raf15=0,rangeMsgTimer15=0;
@@ -10,7 +10,7 @@ function date15(s){const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(String(s||''));retur
 function fmt15(d){return d&&Number.isFinite(d.getTime())?d.toISOString().slice(0,10):''}
 function add15(s,n){const d=date15(s);if(!d)return s;d.setUTCDate(d.getUTCDate()+n);return fmt15(d)}
 function diff15(a,b){const A=date15(a),B=date15(b);return A&&B?Math.round((B-A)/86400000):0}
-function esc15(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[c]))}
+function esc15(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 
 function style15(){
  if(document.getElementById('v54fix15style'))return;
@@ -36,7 +36,7 @@ function canonicalBadge15(btn){
  const age=String(m[1]||'').replace(/대/g,'').trim(),grade=m[2];if(!age)return;
  const expected=`grade-${grade.toLowerCase()}50`;
  const current=btn.querySelector('.gradeBadge50');
- if(current&&current.classList.contains(expected)&&String(current.textContent||'').replace(/\s+/g,'').toUpperCase()===age+grade){btn.dataset.grade15=grade;return}
+ if(current&&current.classList.contains(expected)&&String(current.textContent||'').replace(/\s+/g,'').toUpperCase()===age+grade){if(btn.dataset.grade15!==grade)btn.dataset.grade15=grade;return}
  try{
   if(typeof ageTag==='function'){
    const html=ageTag({age,cls:grade});
@@ -54,11 +54,12 @@ function pager15(){
  const rows=[...(table.tBodies?.[0]?.rows||[])].filter(r=>r.cells.length>1);
  const pages=Math.max(1,Math.ceil(rows.length/PAGE_SIZE15));page15=Math.min(Math.max(1,page15),pages);
  const start=(page15-1)*PAGE_SIZE15,end=start+PAGE_SIZE15;
- rows.forEach((r,i)=>{r.hidden=!(i>=start&&i<end);r.style.display=r.hidden?'none':''});
- let p=table.closest('.recordBox11')?.nextElementSibling;
- if(!p||!p.classList.contains('statsPager15')){p=document.createElement('div');p.className='statsPager15';table.closest('.recordBox11')?.insertAdjacentElement('afterend',p)}
- if(!p)return;
- if(rows.length<=PAGE_SIZE15){p.remove();return}
+ rows.forEach((r,i)=>{const hide=!(i>=start&&i<end);if(r.hidden!==hide)r.hidden=hide;if(r.style.display!==(hide?'none':''))r.style.display=hide?'none':''});
+ const host=table.closest('.recordBox11');if(!host)return;
+ let p=host.nextElementSibling;
+ if(rows.length<=PAGE_SIZE15){if(p?.classList.contains('statsPager15'))p.remove();return}
+ if(!p||!p.classList.contains('statsPager15')){p=document.createElement('div');p.className='statsPager15';host.insertAdjacentElement('afterend',p)}
+ const sig=`${page15}|${pages}|${rows.length}`;if(p.dataset.sig15===sig)return;p.dataset.sig15=sig;
  p.innerHTML=`<button type="button" data-page15="prev" ${page15<=1?'disabled':''}>이전</button><span class="pagerCount15">${page15} / ${pages} · 총 ${rows.length}명</span><button type="button" data-page15="next" ${page15>=pages?'disabled':''}>다음</button>`
 }
 
@@ -66,13 +67,14 @@ function rangeNote15(msg='',warn=false){
  const box=document.querySelector('#stats .statsPeriodBox11');if(!box)return;
  let n=box.nextElementSibling;
  if(!n||!n.classList.contains('rangeNote15')){n=document.createElement('div');n.className='rangeNote15';box.insertAdjacentElement('afterend',n)}
- n.classList.toggle('warn',warn);n.textContent=msg||'최대 31일 조회 · 개인별 기록은 20명씩 표시';
+ const text=msg||'최대 31일 조회 · 개인별 기록은 20명씩 표시';
+ if(n.classList.contains('warn')!==warn)n.classList.toggle('warn',warn);
+ if(n.textContent!==text)n.textContent=text;
  if(warn){clearTimeout(rangeMsgTimer15);rangeMsgTimer15=setTimeout(()=>rangeNote15(),2400)}
 }
 function clampRange15(target){
  const from=document.getElementById('statsFrom11'),to=document.getElementById('statsTo11');if(!from||!to||!from.value||!to.value)return;
- let f=from.value,t=to.value;if(f>t)return;
- if(diff15(f,t)<=MAX_DIFF_DAYS15)return;
+ const f=from.value,t=to.value;if(f>t||diff15(f,t)<=MAX_DIFF_DAYS15)return;
  if(target===from)to.value=add15(f,MAX_DIFF_DAYS15);else from.value=add15(t,-MAX_DIFF_DAYS15);
  rangeNote15('최대 31일까지 조회할 수 있어 기간을 자동 조정했습니다.',true)
 }
