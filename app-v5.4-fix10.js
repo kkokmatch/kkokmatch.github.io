@@ -12,14 +12,16 @@ function style10(){
  const s=document.createElement('style');s.id='v54fix10style';s.textContent=`
 .login input{font-size:16px!important;touch-action:manipulation;-webkit-user-select:text!important;user-select:text!important}
 .loginBusy10{opacity:.68;pointer-events:none}
-.profileIdentity80.genderFallback80{position:relative!important;overflow:visible!important;font-weight:950!important;border-radius:50%!important;display:grid!important;place-items:center!important;cursor:default!important;user-select:none!important}
+.profileIdentity80.genderVisual10{position:relative!important;overflow:visible!important}
+.profileIdentity80.genderFallback80{font-weight:950!important;border-radius:50%!important;display:grid!important;place-items:center!important;cursor:default!important;user-select:none!important}
 .profileIdentity80.genderFallback80 svg{display:block!important;width:24px!important;height:24px!important;fill:currentColor!important}
 .profileIdentity80.genderFallback80.male{background:#eaf2ff!important;color:#2768e8!important;border:1px solid #b8cef9!important}
 .profileIdentity80.genderFallback80.female{background:#fff0f4!important;color:#e34e67!important;border:1px solid #f4bdc9!important}
-.genderBadge10,.profileIdentity80 .profileGender80{position:absolute!important;right:-4px!important;bottom:-3px!important;min-width:18px!important;width:18px!important;height:18px!important;border-radius:999px!important;display:grid!important;place-items:center!important;font-size:9px!important;font-weight:950!important;line-height:1!important;background:#fff!important;border:2px solid currentColor!important;box-shadow:none!important;z-index:3!important;pointer-events:none!important;box-sizing:border-box!important}
-.genderBadge10.male,.profileIdentity80 .profileGender80.male{color:#2768e8!important;background:#fff!important;border-color:#2768e8!important}
-.genderBadge10.female,.profileIdentity80 .profileGender80.female{color:#e34e67!important;background:#fff!important;border-color:#e34e67!important}
-@media(max-width:374px){.profileIdentity80.genderFallback80 svg{width:22px!important;height:22px!important}.genderBadge10,.profileIdentity80 .profileGender80{min-width:17px!important;width:17px!important;height:17px!important;font-size:8px!important;right:-3px!important;bottom:-2px!important}}
+.profileIdentity80.genderVisual10>.genderBadge10,.profileIdentity80.genderVisual10>.profileGender80{display:none!important}
+.profileIdentity80.genderVisual10::after{content:attr(data-gender)!important;position:absolute!important;right:-4px!important;bottom:-3px!important;min-width:18px!important;width:18px!important;height:18px!important;border-radius:999px!important;display:grid!important;place-items:center!important;font-size:9px!important;font-weight:950!important;line-height:1!important;background:#fff!important;border:2px solid currentColor!important;box-shadow:none!important;z-index:5!important;pointer-events:none!important;box-sizing:border-box!important}
+.profileIdentity80.genderVisual10.male::after{color:#2768e8!important;background:#fff!important;border-color:#2768e8!important}
+.profileIdentity80.genderVisual10.female::after{color:#e34e67!important;background:#fff!important;border-color:#e34e67!important}
+@media(max-width:374px){.profileIdentity80.genderFallback80 svg{width:22px!important;height:22px!important}.profileIdentity80.genderVisual10::after{min-width:17px!important;width:17px!important;height:17px!important;font-size:8px!important;right:-3px!important;bottom:-2px!important}}
  `;document.head.appendChild(s)
 }
 function esc10(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
@@ -82,18 +84,16 @@ window.renderLoginName=renderName10;window.startLogin=start10;window.submitLogin
 
 function member10(id){try{return id&&typeof M==='function'?M(String(id)):null}catch{return null}}
 function avatarVisual10(el){
- if(!(el instanceof Element))return;const m=member10(el.dataset.memberId);if(!m)return;const female=String(m.gender||'')==='여',gender=female?'여':'남',cls=female?'female':'male',photo=el.dataset.photo==='1'&&!!el.querySelector('img');el.dataset.gender=gender;
- const sig=`${gender}|${photo?'1':'0'}|${photo?String(el.querySelector('img')?.getAttribute('src')||''):''}`;
- const intact=photo?(!!el.querySelector('img')&&el.querySelector('.profileGender80')?.textContent===gender):(!!el.querySelector('svg')&&el.querySelector('.genderBadge10')?.textContent===gender);
- if(el.dataset.visual10===sig&&intact)return;el.dataset.visual10=sig;
- el.classList.toggle('male',!female);el.classList.toggle('female',female);
- if(photo){let b=el.querySelector('.profileGender80');if(!b){b=document.createElement('span');el.appendChild(b)}b.className=`profileGender80 ${cls}`;b.textContent=gender;return}
- el.classList.add('genderFallback80','genderAvatar39');el.classList.remove('profileTap80','profileAvatar53');el.removeAttribute('role');el.removeAttribute('tabindex');el.setAttribute('aria-label',female?'여성':'남성');el.innerHTML=`<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="7" r="4"></circle><path d="M4.5 21c.5-5 3.2-8 7.5-8s7 3 7.5 8z"></path></svg><span class="genderBadge10 ${cls}">${gender}</span>`
+ if(!(el instanceof Element))return;const m=member10(el.dataset.memberId);if(!m)return;const female=String(m.gender||'')==='여',gender=female?'여':'남',photo=el.dataset.photo==='1'&&!!el.querySelector('img');el.dataset.gender=gender;el.classList.add('genderVisual10');el.classList.toggle('male',!female);el.classList.toggle('female',female);
+ const sig=`${gender}|${photo?'1':'0'}|${photo?String(el.querySelector('img')?.getAttribute('src')||''):''}`;const intact=photo?!!el.querySelector('img'):!!el.querySelector('svg');if(el.dataset.visual10===sig&&intact)return;el.dataset.visual10=sig;
+ el.querySelectorAll(':scope>.genderBadge10,:scope>.profileGender80').forEach(x=>x.remove());
+ if(photo){el.classList.remove('genderFallback80','genderAvatar39');return}
+ el.classList.add('genderFallback80','genderAvatar39');el.classList.remove('profileTap80','profileAvatar53');el.removeAttribute('role');el.removeAttribute('tabindex');el.setAttribute('aria-label',female?'여성':'남성');el.innerHTML=`<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="7" r="4"></circle><path d="M4.5 21c.5-5 3.2-8 7.5-8s7 3 7.5 8z"></path></svg>`
 }
 function decorate10(){style10();document.querySelectorAll('#members .profileIdentity80,#queue .profileIdentity80').forEach(avatarVisual10)}
 let raf10=0;function schedule10(){if(raf10)return;raf10=requestAnimationFrame(()=>{raf10=0;decorate10()})}
 try{const rm=renderMembers;renderMembers=function(){const r=rm();schedule10();return r};const rq=renderQueue;renderQueue=function(){const r=rq();schedule10();return r};const ra=renderAll;renderAll=function(){const r=ra();schedule10();return r}}catch{}
-const mo10=new MutationObserver(schedule10);function startVisual10(){style10();const a=document.getElementById('members'),b=document.getElementById('queue');if(a)mo10.observe(a,{childList:true,subtree:true});if(b)mo10.observe(b,{childList:true,subtree:true});schedule10()}
+const mo10=new MutationObserver(schedule10);function startVisual10(){style10();const a=document.getElementById('members'),b=document.getElementById('queue');if(a)mo10.observe(a,{childList:true,subtree:true,attributes:true,attributeFilter:['class','data-gender','data-photo']});if(b)mo10.observe(b,{childList:true,subtree:true,attributes:true,attributeFilter:['class','data-gender','data-photo']});schedule10()}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',startVisual10,{once:true});else startVisual10();
 
 function boot10(){style10();if(T){if(me)loginRoot10()?.classList.add('hide');else setTimeout(recover10,120)}else renderName10()}
