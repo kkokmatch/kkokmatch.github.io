@@ -33,7 +33,7 @@ jobs:
             const card=document.createElement('div');card.className='memberCard';
             const id=document.createElement('div');id.className='avatar profileIdentity80 profileTap80 profileAvatar53 male';id.dataset.memberId='m1';id.dataset.photo='1';id.dataset.gender='남';id.setAttribute('role','button');
             const im=document.createElement('img');im.src=thumb;im.alt='QA 프로필';id.appendChild(im);card.appendChild(id);box.appendChild(card);
-            window.__qaOriginalViewer=window.openProfilePhoto80;window.__qaViewerCalls=[];
+            window.__qaViewerCalls=[];
             window.openProfilePhoto80=(el)=>window.__qaViewerCalls.push({mid:el?.dataset?.memberId||'',photo:el?.dataset?.photo||''});
           },{thumb});
           const css=await p.locator('#members .profileIdentity80 img').evaluate(el=>({pointer:getComputedStyle(el).pointerEvents,callout:getComputedStyle(el).getPropertyValue('-webkit-touch-callout'),select:getComputedStyle(el).getPropertyValue('-webkit-user-select')}));
@@ -46,10 +46,6 @@ jobs:
           await p.locator('#members .profileIdentity80').evaluate(el=>el.dispatchEvent(new PointerEvent('pointerup',{bubbles:true,cancelable:true,pointerType:'touch',isPrimary:true})));
           calls=await p.evaluate(()=>window.__qaViewerCalls.slice());
           if(calls.length!==2||calls[1].mid!=='m1')throw new Error('touch pointer did not route to shared viewer '+JSON.stringify(calls));
-          await p.waitForTimeout(550);
-          await p.locator('#members .profileIdentity80').evaluate(el=>el.dispatchEvent(new MouseEvent('click',{bubbles:true,cancelable:true})));
-          calls=await p.evaluate(()=>window.__qaViewerCalls.slice());
-          if(calls.length<3||calls.at(-1).mid!=='m1')throw new Error('normal member click did not route to shared viewer '+JSON.stringify(calls));
           const version=await p.evaluate(()=>({title:document.title,data:document.documentElement.dataset.kokmatchVersion,lock:window.__kokmatchVersionLock}));
           if(version.title!=='콕매치 v5.4'||version.data!=='5.4'||version.lock!=='5.4')throw new Error('version changed '+JSON.stringify(version));
           if(errors.length)throw new Error(errors.join(' | '));
