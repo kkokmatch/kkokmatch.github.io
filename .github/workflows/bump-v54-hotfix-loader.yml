@@ -8,6 +8,7 @@ on:
       - 'app-v5.4-fix11.js'
       - 'app-v5.4-fix12.js'
       - 'app-v5.4-fix16.js'
+      - 'app-v5.6.js'
 permissions:
   contents: write
 jobs:
@@ -22,7 +23,7 @@ jobs:
           import re
           p=Path('index.html')
           s=p.read_text(encoding='utf-8')
-          n=re.sub(r'/app-v5\.4-hotfix-loader\.js\?v=[^"<]+', '/app-v5.4-hotfix-loader.js?v=12.0', s)
+          n=re.sub(r'/app-v5\.4-hotfix-loader\.js\?v=[^"<]+', '/app-v5.4-hotfix-loader.js?v=13.0', s)
           if n != s:
               p.write_text(n,encoding='utf-8')
           PY
@@ -35,5 +36,5 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add index.html
-          git commit -m "Refresh v5.4 hotfix loader cache"
+          git commit -m "Refresh v5.6 hotfix loader cache"
           git push
