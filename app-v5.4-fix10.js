@@ -22,13 +22,14 @@ function style10(){
 @media(max-width:374px){.profileIdentity80.genderFallback80 svg{width:22px!important;height:22px!important}.genderBadge10,.profileIdentity80 .profileGender80{min-width:17px!important;width:17px!important;height:17px!important;font-size:8px!important;right:-3px!important;bottom:-2px!important}}
  `;document.head.appendChild(s)
 }
-function esc10(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function esc10(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[c]))}
 function storageSet10(k,v){try{localStorage.setItem(k,v);return true}catch{return false}}
 function storageRemove10(k){try{localStorage.removeItem(k)}catch{}}
 function loginBox10(){return typeof $==='function'?$('loginBox'):document.getElementById('loginBox')}
 function loginRoot10(){return typeof $==='function'?$('login'):document.getElementById('login')}
 function err10(msg){const e=document.getElementById('loginErr');if(e)e.textContent=String(msg||'')}
 function busy10(on){const b=loginBox10();b?.classList.toggle('loginBusy10',!!on);b?.querySelectorAll('button,input').forEach(x=>x.disabled=!!on)}
+function releaseScreen10(box){if(!box)return;box.classList.remove('loginBusy10');box.querySelectorAll('button,input').forEach(x=>x.disabled=false)}
 function prepInput10(el){if(!el)return;el.setAttribute('autocapitalize','off');el.setAttribute('spellcheck','false');el.style.fontSize='16px'}
 function blur10(){try{if(document.activeElement instanceof HTMLElement)document.activeElement.blur()}catch{}}
 function apiError10(x,status){const e=new Error(String(x?.error||x?.message||`로그인 처리 중 오류가 발생했습니다. (${status})`));e.status=status;return e}
@@ -41,25 +42,25 @@ async function req10(api,method='POST',body=null,token='',params={}){
  }catch(e){if(e?.name==='AbortError'){const x=new Error('서버 응답이 늦어 로그인에 실패했습니다. 다시 눌러주세요.');x.status=0;throw x}throw e}finally{clearTimeout(tm)}
 }
 function renderName10(message=''){
- style10();const box=loginBox10();if(!box)return;
+ style10();const box=loginBox10();if(!box)return;releaseScreen10(box);
  pendingLoginName='';pendingLoginPin='';
  box.innerHTML=`<h1>🏸 콕매치</h1><div class="meta" style="font-size:14px;margin-bottom:18px">모임 회원 로그인</div><div class="field"><label>등록된 이름</label><input id="loginName" type="text" autocomplete="username" enterkeyhint="next" placeholder="이름"></div><button id="loginNext10" class="btn pri" type="button" style="width:100%">다음</button><div id="loginErr" class="error">${esc10(message)}</div><div class="note" style="margin-top:12px">일반회원은 <b>소속 모임 PIN</b>, 모임관리자·게임편성자는 <b>본인 역할 PIN</b>으로 로그인합니다.</div>`;
- const inp=document.getElementById('loginName');prepInput10(inp);document.getElementById('loginNext10')?.addEventListener('click',()=>start10());inp?.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.isComposing){e.preventDefault();start10()}});
+ releaseScreen10(box);const inp=document.getElementById('loginName');prepInput10(inp);document.getElementById('loginNext10')?.addEventListener('click',()=>start10());inp?.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.isComposing){e.preventDefault();start10()}});
  loginRoot10()?.classList.remove('hide');
 }
 function renderPin10(name,roleLabel='PIN',message=''){
- const box=loginBox10();if(!box)return;
+ const box=loginBox10();if(!box)return;releaseScreen10(box);
  box.innerHTML=`<h2>${esc10(roleLabel||'PIN')} 인증</h2><div class="authName">${esc10(name)}</div><div class="field"><label>PIN</label><input id="loginPin" class="pinInput39" type="tel" inputmode="numeric" pattern="[0-9]*" maxlength="12" autocomplete="off" enterkeyhint="done" placeholder="PIN 입력"></div><button id="loginSubmit10" class="btn pri" type="button" style="width:100%">로그인</button><div id="loginErr" class="error">${esc10(message)}</div><button id="loginBack10" class="btn ghost" type="button" style="width:100%;margin-top:8px">← 이름 다시 입력</button>`;
- const pin=document.getElementById('loginPin');prepInput10(pin);pin?.addEventListener('input',()=>{const v=pin.value.replace(/\D/g,'').slice(0,12);if(pin.value!==v)pin.value=v});pin?.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.isComposing){e.preventDefault();submit10()}});document.getElementById('loginSubmit10')?.addEventListener('click',()=>submit10());document.getElementById('loginBack10')?.addEventListener('click',()=>renderName10());setTimeout(()=>pin?.focus(),40)
+ releaseScreen10(box);const pin=document.getElementById('loginPin');prepInput10(pin);pin?.addEventListener('input',()=>{const v=pin.value.replace(/\D/g,'').slice(0,12);if(pin.value!==v)pin.value=v});pin?.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.isComposing){e.preventDefault();submit10()}});document.getElementById('loginSubmit10')?.addEventListener('click',()=>submit10());document.getElementById('loginBack10')?.addEventListener('click',()=>renderName10());setTimeout(()=>pin?.focus(),40)
 }
 function renderChoices10(x){
- const box=loginBox10();if(!box)return;const choices=Array.isArray(x?.choices)?x.choices:[];
+ const box=loginBox10();if(!box)return;releaseScreen10(box);const choices=Array.isArray(x?.choices)?x.choices:[];
  box.innerHTML=`<h2>모임 선택</h2><div class="authName">${esc10(pendingLoginName)}</div><div class="note">접속할 모임을 선택해주세요.</div><div id="loginChoices10" class="choiceList"></div><div id="loginErr" class="error"></div><button id="loginBack10" class="btn ghost" type="button" style="width:100%;margin-top:9px">처음으로</button>`;
- const list=document.getElementById('loginChoices10');for(const c of choices){const b=document.createElement('button');b.type='button';b.className='choiceBtn';b.innerHTML=`<b>${esc10(c.groupName||'모임')}</b><span class="meta">${esc10(c.roleLabel||'')}</span>`;b.addEventListener('click',()=>submit10(String(c.groupId||'')));list?.appendChild(b)}document.getElementById('loginBack10')?.addEventListener('click',()=>renderName10())
+ releaseScreen10(box);const list=document.getElementById('loginChoices10');for(const c of choices){const b=document.createElement('button');b.type='button';b.className='choiceBtn';b.innerHTML=`<b>${esc10(c.groupName||'모임')}</b><span class="meta">${esc10(c.roleLabel||'')}</span>`;b.addEventListener('click',()=>submit10(String(c.groupId||'')));list?.appendChild(b)}document.getElementById('loginBack10')?.addEventListener('click',()=>renderName10())
 }
 async function start10(){
- if(probeBusy10)return;const name=String(document.getElementById('loginName')?.value||'').trim().normalize?.('NFC')||String(document.getElementById('loginName')?.value||'').trim();err10('');if(!name){err10('이름을 입력해주세요.');return}
- probeBusy10=true;busy10(true);blur10();try{const x=await req10('login_probe','POST',{name});pendingLoginName=name;renderPin10(name,x?.roleLabel||'PIN')}catch(e){busy10(false);err10(e?.message||'로그인 정보를 확인하지 못했습니다.')}finally{probeBusy10=false}
+ if(probeBusy10)return;const raw=String(document.getElementById('loginName')?.value||'').trim();const name=typeof raw.normalize==='function'?raw.normalize('NFC'):raw;err10('');if(!name){err10('이름을 입력해주세요.');return}
+ probeBusy10=true;busy10(true);blur10();try{const x=await req10('login_probe','POST',{name});pendingLoginName=name;busy10(false);renderPin10(name,x?.roleLabel||'PIN')}catch(e){busy10(false);err10(e?.message||'로그인 정보를 확인하지 못했습니다.')}finally{probeBusy10=false}
 }
 async function state10(token,gid){
  let last=null;for(let i=0;i<3;i++){try{return await req10('state','GET',null,token,{groupId:gid})}catch(e){last=e;if(e?.status===401)throw e;if(i<2)await new Promise(r=>setTimeout(r,250+i*350))}}throw last||new Error('모임 정보를 불러오지 못했습니다.')
@@ -71,7 +72,7 @@ function applyState10(x){
 async function submit10(groupId=''){
  if(loginBusy10)return;const pin=String(document.getElementById('loginPin')?.value||pendingLoginPin||'').replace(/\D/g,'').trim();if(!pin){err10('PIN을 입력해주세요.');return}if(!pendingLoginName){renderName10('이름부터 다시 입력해주세요.');return}
  pendingLoginPin=pin;loginBusy10=true;busy10(true);blur10();let token='';try{
-  const x=await req10('login','POST',{name:pendingLoginName,pin,groupId:String(groupId||'')});if(x?.groupChoiceRequired){renderChoices10(x);return}token=String(x?.token||'');if(!token)throw new Error('로그인 토큰을 받지 못했습니다.');T=token;storageSet10(TOKEN10,token);if(x?.groupId){currentGroupId=String(x.groupId);storageSet10(GROUP10,currentGroupId)}const st=await state10(token,currentGroupId);applyState10(st)
+  const x=await req10('login','POST',{name:pendingLoginName,pin,groupId:String(groupId||'')});if(x?.groupChoiceRequired){busy10(false);renderChoices10(x);return}token=String(x?.token||'');if(!token)throw new Error('로그인 토큰을 받지 못했습니다.');T=token;storageSet10(TOKEN10,token);if(x?.groupId){currentGroupId=String(x.groupId);storageSet10(GROUP10,currentGroupId)}const st=await state10(token,currentGroupId);applyState10(st)
  }catch(e){if(e?.status===401&&token){T='';storageRemove10(TOKEN10)}if(loginBox10()?.querySelector('#loginPin')){busy10(false);err10(e?.message||'로그인에 실패했습니다.')}else renderPin10(pendingLoginName,'PIN',e?.message||'로그인에 실패했습니다.')}finally{loginBusy10=false;busy10(false)}
 }
 async function recover10(){
