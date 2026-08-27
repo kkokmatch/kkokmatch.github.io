@@ -22,7 +22,7 @@ function style10(){
 @media(max-width:374px){.profileIdentity80.genderFallback80 svg{width:22px!important;height:22px!important}.genderBadge10,.profileIdentity80 .profileGender80{min-width:17px!important;width:17px!important;height:17px!important;font-size:8px!important;right:-3px!important;bottom:-2px!important}}
  `;document.head.appendChild(s)
 }
-function esc10(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[c]))}
+function esc10(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function storageSet10(k,v){try{localStorage.setItem(k,v);return true}catch{return false}}
 function storageRemove10(k){try{localStorage.removeItem(k)}catch{}}
 function loginBox10(){return typeof $==='function'?$('loginBox'):document.getElementById('loginBox')}
@@ -83,7 +83,9 @@ window.renderLoginName=renderName10;window.startLogin=start10;window.submitLogin
 function member10(id){try{return id&&typeof M==='function'?M(String(id)):null}catch{return null}}
 function avatarVisual10(el){
  if(!(el instanceof Element))return;const m=member10(el.dataset.memberId);if(!m)return;const female=String(m.gender||'')==='여',gender=female?'여':'남',cls=female?'female':'male',photo=el.dataset.photo==='1'&&!!el.querySelector('img');el.dataset.gender=gender;
- const sig=`${gender}|${photo?'1':'0'}|${photo?String(el.querySelector('img')?.getAttribute('src')||''):''}`;if(el.dataset.visual10===sig)return;el.dataset.visual10=sig;
+ const sig=`${gender}|${photo?'1':'0'}|${photo?String(el.querySelector('img')?.getAttribute('src')||''):''}`;
+ const intact=photo?(!!el.querySelector('img')&&el.querySelector('.profileGender80')?.textContent===gender):(!!el.querySelector('svg')&&el.querySelector('.genderBadge10')?.textContent===gender);
+ if(el.dataset.visual10===sig&&intact)return;el.dataset.visual10=sig;
  el.classList.toggle('male',!female);el.classList.toggle('female',female);
  if(photo){let b=el.querySelector('.profileGender80');if(!b){b=document.createElement('span');el.appendChild(b)}b.className=`profileGender80 ${cls}`;b.textContent=gender;return}
  el.classList.add('genderFallback80','genderAvatar39');el.classList.remove('profileTap80','profileAvatar53');el.removeAttribute('role');el.removeAttribute('tabindex');el.setAttribute('aria-label',female?'여성':'남성');el.innerHTML=`<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="7" r="4"></circle><path d="M4.5 21c.5-5 3.2-8 7.5-8s7 3 7.5 8z"></path></svg><span class="genderBadge10 ${cls}">${gender}</span>`
