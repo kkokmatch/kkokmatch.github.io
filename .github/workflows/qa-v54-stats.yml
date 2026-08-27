@@ -1,0 +1,57 @@
+name: QA v5.4 stats
+on:
+  push:
+    paths:
+      - '.github/workflows/qa-v54-stats.yml'
+      - 'app-v5.4-fix11.js'
+      - 'app-v5.4-hotfix-loader.js'
+      - 'index.html'
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-node@v4
+        with: {node-version: 22}
+      - run: npm install --no-save playwright@1.55.0
+      - run: npx playwright install --with-deps chromium
+      - name: live production stats regression
+        run: |
+          cat > qa-stats.mjs <<'EOF'
+          import { chromium } from 'playwright';
+          const STATS='https://wjelumpbjklfrdjxbesj.supabase.co/functions/v1/kokmatch-stats-v54';
+          const b=await chromium.launch({headless:true});
+          const p=await b.newPage({viewport:{width:390,height:844}});
+          const errors=[];p.on('pageerror',e=>errors.push(String(e)));
+          const day='2026-08-27',month='2026-08';
+          const st=Date.parse('2026-08-27T10:00:00+09:00'),en=Date.parse('2026-08-27T10:30:00+09:00'),cap=Date.parse('2026-08-27T11:00:00+09:00');
+          const members=[
+            {id:'male1',name:'김남수',age:'38',year:'1988',cls:'C',gender:'남',role:'manager',type:'member',attendanceMonth:month,attendanceCount:2,attendanceHistory:{[month]:2},waitDay:day,waitTotalMs:1200000,totalGames:4},
+            {id:'female1',name:'박영희',age:'34',year:'1992',cls:'B',gender:'여',role:'member',type:'member',attendanceMonth:month,attendanceCount:0,attendanceHistory:{[month]:0},waitDay:day,waitTotalMs:0,totalGames:0},
+            {id:'p3',name:'이민호',age:'31',year:'1995',cls:'A',gender:'남',role:'member',type:'member',attendanceMonth:month,attendanceCount:1,attendanceHistory:{[month]:1},waitDay:day,waitTotalMs:0,totalGames:2},
+            {id:'p4',name:'최수진',age:'29',year:'1997',cls:'D',gender:'여',role:'member',type:'member',attendanceMonth:month,attendanceCount:0,attendanceHistory:{[month]:0},waitDay:day,waitTotalMs:0,totalGames:0}
+          ];
+          const game={gameId:'gqa11',businessDay:day,startedAt:st,endedAt:en,matchedAt:st-120000,durationMin:30,court:1,courtName:'1코트',players:['male1','female1','p3','p4'],playerNames:['김남수','박영희','이민호','최수진'],waitMsByPlayer:{male1:600000,female1:300000,p3:120000,p4:0},autoEnded:false};
+          await p.route(STATS+'**',async route=>{const u=new URL(route.request().url());const from=u.searchParams.get('from')||day,to=u.searchParams.get('to')||day,mon=u.searchParams.get('month')||month;return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({success:true,groupId:'grp_qa11',today:day,from,to,month:mon,selfMemberId:'male1',members,rangeGames:[game],monthGames:[game],baselines:[{memberId:'male1',gameCount:4,attendanceCount:2,capturedAtMs:cap},{memberId:'female1',gameCount:0,attendanceCount:0,capturedAtMs:cap},{memberId:'p3',gameCount:2,attendanceCount:1,capturedAtMs:cap},{memberId:'p4',gameCount:0,attendanceCount:0,capturedAtMs:cap}]})})});
+          let ready=false;
+          for(let i=0;i<18&&!ready;i++){
+            await p.goto('https://kkokmatch.github.io/?qa=stats11&t='+Date.now(),{waitUntil:'domcontentloaded'});
+            try{await p.waitForFunction(()=>window.__kokmatchV54Fix11===true&&window.__kokmatchStatsPatch==='11.0'&&window.__kokmatchVersionLock==='5.4',{timeout:5000});ready=true}catch{await p.waitForTimeout(1800)}
+          }
+          if(!ready)throw new Error('fix11 not ready on production');
+          await p.evaluate(({members,day,month})=>{T='qa-token';currentGroupId='grp_qa11';currentView='queue';S=emptyClientState();S.members=members.map((m,i)=>({...m,state:'waiting',joinedAt:Date.now()-(i+1)*60000}));S.queue=S.members.map(m=>m.id);S.pendingGames=[];S.games=[];S.history=[];S.pairCounts={};S.attendancePolls=[];S.adminBadgeVisibility='hidden';group={groupId:'grp_qa11',name:'QA 통계'};groups=[];me={memberId:'male1',displayName:'김남수',role:'manager',globalAdmin:false,groupId:'grp_qa11'};normalizeClient();draft.splice(0,draft.length,'female1',null,null,null);renderAll();document.getElementById('login')?.classList.add('hide');renderQueue()},{members,day,month});
+          await p.waitForTimeout(350);
+          const composer=await p.evaluate(()=>{const s=document.querySelector('#queue .pendingGrid .pendingSlot');const name=s?.querySelector('.slotName');const top=s?.querySelector('.slotBadges53,.slotBadges54,.slotBadges58');return {nameText:name?.textContent||'',roleInName:!!name?.querySelector('.roleBadge,.roleShuttle50'),topExists:!!top,topText:top?.textContent||''}});
+          console.log('COMPOSER',composer);if(composer.roleInName||/일반회원|일반/.test(composer.nameText))throw new Error('duplicate role badge remains beside grade');if(!composer.topExists)throw new Error('top-right badge container missing');
+          await p.evaluate(()=>goView('stats'));
+          await p.waitForSelector('#myStatsCard11',{state:'visible',timeout:10000});
+          const top=await p.evaluate(()=>({first:document.querySelector('#stats')?.firstElementChild?.className||'',from:document.querySelector('#statsFrom11')?.value||'',to:document.querySelector('#statsTo11')?.value||'',text:document.querySelector('#myStatsCard11')?.textContent||'',title:document.title,ver:document.documentElement.dataset.kokmatchVersion}));
+          console.log('TOP',top);if(!top.first.includes('pollWrap90'))throw new Error('poll is not first section');if(top.from!==day||top.to!==day)throw new Error('today range defaults failed '+JSON.stringify(top));if(!top.text.includes('1')||!top.text.includes('30분')||!top.text.includes('20분')||!top.text.includes('박영희')||!top.text.includes('이민호')||!top.text.includes('최수진'))throw new Error('my record summary/detail failed');
+          await p.locator('#personalToggle11').click();await p.waitForSelector('.statsTable11',{state:'visible'});
+          const z=await p.evaluate(()=>{const el=document.querySelector('.statZero11');if(!el)return null;const s=getComputedStyle(el);return {text:el.textContent,color:s.color,weight:Number(s.fontWeight)||0,count:document.querySelectorAll('.statZero11').length}});console.log('ZERO',z);if(!z||z.count<2||z.weight<700||z.color==='rgb(0, 0, 0)')throw new Error('zero value emphasis failed');
+          const first0=await p.locator('.statsTable11 tbody tr').first().locator('.nameBtn11').textContent();
+          await p.locator('th[data-sort11="games"]').click();const firstAsc=await p.locator('.statsTable11 tbody tr').first().locator('.nameBtn11').textContent();
+          await p.locator('th[data-sort11="games"]').click();const firstDesc=await p.locator('.statsTable11 tbody tr').first().locator('.nameBtn11').textContent();console.log('SORT',first0,firstAsc,firstDesc);if(firstAsc===firstDesc)throw new Error('sort direction did not toggle');
+          await p.locator('[data-member11="male1"]').click();await p.waitForSelector('#modal.on',{state:'visible'});const modal=await p.locator('#modalSheet').textContent();console.log('MODAL',modal);if(!modal.includes('김남수')||!modal.includes('같이 게임')||!modal.includes('30분')||!modal.includes('박영희')||!modal.includes('이민호')||!modal.includes('최수진')||!modal.includes('기록 보존 기능 적용 이전 경기 3건'))throw new Error('member monthly detail failed');
+          const end=await p.evaluate(()=>({title:document.title,data:document.documentElement.dataset.kokmatchVersion,lock:window.__kokmatchVersionLock,fix11:window.__kokmatchV54Fix11,patch:window.__kokmatchStatsPatch}));if(end.title!=='콕매치 v5.4'||end.data!=='5.4'||end.lock!=='5.4'||!end.fix11||end.patch!=='11.0')throw new Error('v5.4 lock changed '+JSON.stringify(end));if(errors.length)throw new Error(errors.join(' | '));console.log('PASS stats11',end);await b.close();
+          EOF
+          node qa-stats.mjs
