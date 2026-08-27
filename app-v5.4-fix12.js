@@ -2,10 +2,10 @@
 if(window.__kokmatchV54Fix12)return;
 window.__kokmatchV54Fix12=true;
 window.__kokmatchGroupSwitchPatch='12.1';
-window.__kokmatchStatsUiPatch='12.1';
+window.__kokmatchStatsUiPatch='12.2';
 
 const STATS_URL12='https://wjelumpbjklfrdjxbesj.supabase.co/functions/v1/kokmatch-stats-v54';
-const MAX_RANGE_DAYS12=8;
+const MAX_RANGE_DAYS12=31;
 
 function style12(){
  if(document.getElementById('v54fix12style'))return;
@@ -61,7 +61,7 @@ function decorateStats12(){
  const shell=box.querySelector('.statsShell11');if(!shell)return;
  shell.querySelectorAll('.statsTab11[data-tab11="games"],.statsTab11[data-tab11="days"]').forEach(x=>x.remove());
  let title=shell.querySelector('.statsSectionTitle12');if(!title){title=document.createElement('div');title.className='statsSectionTitle12';title.textContent='경기기록';shell.insertBefore(title,shell.firstChild)}
- const period=shell.querySelector('.statsPeriodBox11');if(period&&!shell.querySelector('.statsRangeNotice12'))period.insertAdjacentHTML('afterend','<div class="statsRangeNotice12">조회기간은 시작일 포함 최대 8일까지 선택할 수 있습니다.</div>');
+ const period=shell.querySelector('.statsPeriodBox11');if(period&&!shell.querySelector('.statsRangeNotice12'))period.insertAdjacentHTML('afterend','<div class="statsRangeNotice12">조회기간은 시작일 포함 최대 31일까지 선택할 수 있습니다.</div>');
  const on=shell.querySelector('.statsTab11.on');if(on&&!['mine','personal'].includes(String(on.dataset.tab11||''))){queueMicrotask(()=>shell.querySelector('.statsTab11[data-tab11="mine"]')?.click())}
  setRangeBounds12()
 }
@@ -88,10 +88,9 @@ async function runSwitch12(fn,id,args=[]){
  const target=String(id||'');if(!target)return;
  if(switching12)return;
  if(target===String(currentGroupId||'')){try{closeModal()}catch{};return}
- const before=String(currentGroupId||''),returnView=String(currentView||'members');
+ const returnView=String(currentView||'members');
  switching12=true;window.__kokmatchGroupSwitching12=true;deferred12=[];switchUi12(true);
  try{
-  // 회원명부 전환 경로가 가장 안정적이므로 내부 전환 중에만 members 상태로 둔다.
   try{currentView='members'}catch{}
   const r=await fn(target,...args);
   await new Promise(res=>setTimeout(res,140));
