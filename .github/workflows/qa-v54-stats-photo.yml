@@ -1,10 +1,13 @@
-name: QA v5.4 photo-style stats
+name: QA v5.4 personal stats redesign
 on:
   push:
     branches: [main]
     paths:
       - '.github/workflows/qa-v54-stats-photo.yml'
       - 'app-v5.4-fix11.js'
+      - 'app-v5.4-fix13.js'
+      - 'app-v5.4-fix14.js'
+      - 'app-v5.4-hotfix-loader.js'
       - 'index.html'
 jobs:
   test:
@@ -14,7 +17,7 @@ jobs:
         with: {node-version: 22}
       - run: npm install --no-save playwright@1.55.0
       - run: npx playwright install --with-deps webkit
-      - name: verify photo-style stats
+      - name: verify personal stats redesign
         run: |
           cat > qa.mjs <<'EOF'
           import { webkit, devices } from 'playwright';
@@ -36,13 +39,26 @@ jobs:
           await p.route(STATS+'**',route=>route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({success:true,groupId:'grp_qa',today,from:'2026-08-26',to:today,month:'2026-08',selfMemberId:'self',members:ms,rangeGames:games,monthGames:games,baselines:[]})}));
           await p.route(PROFILE+'**',route=>route.fulfill({status:200,contentType:'application/json',body:'{"profiles":{}}'}));
           await p.route(ROSTER+'**',route=>route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({members:ms,memberCount:4,adminBadgeVisibility:'all'})}));
-          for(let i=0;i<8;i++){await p.goto('https://kkokmatch.github.io/?qa=photo111&t='+Date.now(),{waitUntil:'domcontentloaded'});try{await p.waitForFunction(()=>window.__kokmatchStatsPatch==='11.1'&&window.__kokmatchVersionLock==='5.4',{timeout:12000});break}catch{if(i===7)throw new Error('stats 11.1 not loaded')}}
+          let loaded=false;for(let i=0;i<8&&!loaded;i++){await p.goto('https://kkokmatch.github.io/?qa=stats14&t='+Date.now(),{waitUntil:'domcontentloaded'});try{await p.waitForFunction(()=>window.__kokmatchStatsPatch==='11.1'&&window.__kokmatchPersonalStatsPatch==='14.0'&&window.__kokmatchVersionLock==='5.4',{timeout:12000});loaded=true}catch{}}
+          if(!loaded)throw new Error('stats redesign 14.0 not loaded');
           await p.evaluate(({ms,today})=>{T='qa-token';currentGroupId='grp_qa';S={dayKey:today,courtCount:4,courtNames:['1','2','3','4'],members:ms,queue:[],pendingGames:[],games:[],history:[],pairCounts:{},attendancePolls:[]};group={groupId:'grp_qa',name:'QA'};groups=[];me={role:'member',displayName:'QA사용자',memberId:'self',globalAdmin:false,groupId:'grp_qa'};normalizeClient();currentView='stats';renderAll();goView('stats');document.getElementById('login')?.classList.add('hide')},{ms,today});
           await p.waitForSelector('.statsPeriodGrid11',{state:'visible'});await p.waitForTimeout(220);
           const L=await p.evaluate(()=>{const e=document.querySelector('.statsPeriodGrid11'),a=document.getElementById('statsFrom11').getBoundingClientRect(),d=document.querySelector('.periodDash11').getBoundingClientRect(),z=document.getElementById('statsTo11').getBoundingClientRect();return{client:e.clientWidth,scroll:e.scrollWidth,aR:a.right,dL:d.left,dR:d.right,zL:z.left,tabs:document.querySelectorAll('.statsTab11').length,tilde:document.querySelector('.periodDash11').textContent}});if(L.tabs!==4||L.tilde.trim()!=='~'||L.scroll>L.client+2||L.aR>L.dL+1||L.dR>L.zL+1)throw new Error('period/tabs layout failed '+JSON.stringify(L));
-          await p.locator('[data-tab11="mine"]').click();await p.waitForSelector('.recordTable11 tbody tr');if(await p.locator('.recordTable11 tbody tr').count()!==2)throw new Error('my records mismatch');
-          await p.locator('[data-tab11="personal"]').click();await p.waitForSelector('.personalTable11 tbody tr');if(await p.locator('.personalTable11 tbody tr').count()!==4)throw new Error('personal rows mismatch');if(await p.locator('.personalTable11 .zeroStat11').count()<1)throw new Error('zero red-bold missing');
+          await p.locator('[data-tab11="personal"]').click();await p.waitForSelector('.personalTable11.statsPersonal14 tbody tr');await p.waitForTimeout(80);
+          if(await p.locator('.personalTable11 tbody tr').count()!==4)throw new Error('personal rows mismatch');
+          const head=await p.locator('.personalTable11 thead tr').evaluate(tr=>[...tr.cells].map(x=>x.textContent.trim()));
+          if(head.length!==7||head[0]!=='순위'||!head[1].startsWith('회원')||!head[2].startsWith('나이·급수')||head.includes('급수'))throw new Error('merged personal columns failed '+JSON.stringify(head));
+          const self=await p.locator('[data-detail11="self"]').first().evaluate(btn=>({name:btn.querySelector('.memberName14')?.textContent||'',gender:btn.querySelector('.memberGender14')?.textContent||'',next:btn.querySelector('.memberName14')?.nextElementSibling?.className||''}));
+          if(self.name!=='QA사용자'||self.gender!=='남'||!self.next.includes('memberGender14'))throw new Error('name/gender layout failed '+JSON.stringify(self));
+          const female=await p.locator('[data-detail11="p2"]').first().evaluate(btn=>({name:btn.querySelector('.memberName14')?.textContent||'',gender:btn.querySelector('.memberGender14')?.textContent||''}));
+          if(female.name!=='여자회원'||female.gender!=='여')throw new Error('female gender missing '+JSON.stringify(female));
+          const badge=await p.locator('.personBadgeLink14[data-detail11="self"]').textContent();if((badge||'').replace(/\s/g,'')!=='30C')throw new Error('combined age/grade badge failed '+badge);
+          const design=await p.locator('.personalTable11').evaluate(t=>{const r=t.querySelector('.rank11.r1'),n=t.querySelector('.personLink11'),z=t.querySelector('.zeroStat11'),h=t.tHead.rows[0].cells[0];const cs=e=>getComputedStyle(e);return{rankRadius:cs(r).borderRadius,rankBg:cs(r).backgroundColor,nameColor:cs(n).color,zeroColor:z?cs(z).color:'',headBg:cs(h).backgroundColor}});
+          if(design.rankRadius==='50%'||design.rankBg==='rgb(255, 225, 106)'||design.nameColor==='rgb(24, 60, 202)'||design.zeroColor==='rgb(214, 46, 61)'||design.headBg==='rgb(48, 75, 194)')throw new Error('old visual style still active '+JSON.stringify(design));
           await p.locator('[data-detail11="self"]').first().click();await p.waitForSelector('.statsDetailOverlay11.on');if((await p.locator('#statsDetailTitle11').textContent())?.includes('QA사용자님')!==true)throw new Error('detail title missing');if(await p.locator('#statsDetailBody11 .recordTable11 tbody tr').count()!==2)throw new Error('detail rows mismatch');await p.locator('.statsDetailClose11').click();
-          await p.locator('th[data-sort11="name"]').click();await p.waitForTimeout(60);await p.locator('[data-tab11="games"]').click();if(await p.locator('.gameTable11 tbody tr').count()!==2)throw new Error('games tab mismatch');await p.locator('[data-tab11="days"]').click();if(await p.locator('.gameTable11 tbody tr').count()!==2)throw new Error('days tab mismatch');if(errs.length)throw new Error(errs.join(' | '));console.log('PASS photo-style stats 11.1');await b.close();
+          await p.locator('th[data-sort11="name"]').click();await p.waitForSelector('.personalTable11.statsPersonal14');await p.waitForTimeout(80);if(await p.locator('.personalTable11 thead th').count()!==7)throw new Error('redesign lost after sort');
+          await p.locator('[data-tab11="games"]').click();if(await p.locator('.gameTable11 tbody tr').count()!==2)throw new Error('games tab mismatch');await p.locator('[data-tab11="days"]').click();if(await p.locator('.gameTable11 tbody tr').count()!==2)throw new Error('days tab mismatch');
+          const version=await p.evaluate(()=>({title:document.title,data:document.documentElement.dataset.kokmatchVersion,lock:window.__kokmatchVersionLock}));if(version.title!=='콕매치 v5.4'||version.data!=='5.4'||version.lock!=='5.4')throw new Error('version changed '+JSON.stringify(version));
+          if(errs.length)throw new Error(errs.join(' | '));console.log('PASS personal stats redesign 14.0',head,self,female,badge,design,version);await b.close();
           EOF
           node qa.mjs
