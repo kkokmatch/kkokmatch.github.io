@@ -1,5 +1,5 @@
 (()=>{
-if(window.__kokmatchV56StateBridge)return;window.__kokmatchV56StateBridge=true;window.__kokmatchV56Patch='1.3';
+if(window.__kokmatchV56StateBridge)return;window.__kokmatchV56StateBridge=true;window.__kokmatchV56StateBridgePatch='1.0';
 function sync56State(){
  try{window.T=typeof T!=='undefined'?String(T||''):String(window.T||'')}catch{}
  try{window.currentGroupId=typeof currentGroupId!=='undefined'?String(currentGroupId||''):String(window.currentGroupId||'')}catch{}
