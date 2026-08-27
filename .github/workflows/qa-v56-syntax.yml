@@ -1,0 +1,16 @@
+name: QA v5.6 syntax
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/qa-v56-syntax.yml'
+      - 'app-v5.6.js'
+jobs:
+  syntax:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: 22}
+      - name: Check v5.6 JavaScript syntax
+        run: node --check app-v5.6.js
