@@ -1,8 +1,7 @@
 name: Bump v5.6 hotfix loader
 
 on:
-  push:
-    branches: [main]
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -12,27 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Preload critical fixes and bump loader query
+      - name: Manual v5.6 loader maintenance
         run: |
-          python - <<'PY'
-          from pathlib import Path
-          import re
-          p=Path('index.html')
-          s=p.read_text(encoding='utf-8')
-          s=re.sub(r'(?:<script src="/app-v5\.6-fix[345]\.js\?v=[^"]+"></script>)+(?=<script src="/app-v5\.4-hotfix-loader\.js)', '', s)
-          repl='<script src="/app-v5.6-fix3.js?v=1.1.1"></script><script src="/app-v5.6-fix4.js?v=1.0.1"></script><script src="/app-v5.6-fix5.js?v=1.1.1"></script><script src="/app-v5.4-hotfix-loader.js?v=25.0"></script>'
-          n=re.sub(r'<script src="/app-v5\.4-hotfix-loader\.js\?v=[^"]+"></script>', repl, s)
-          if n != p.read_text(encoding='utf-8'):
-              p.write_text(n,encoding='utf-8')
-          PY
-      - name: Commit cache bust
-        run: |
-          if git diff --quiet -- index.html; then
-            echo "already current"
-            exit 0
-          fi
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add index.html
-          git commit -m "Preload v5.6 iPhone fixes"
-          git push
+          echo "Automatic index rewriting is disabled."
+          echo "Run only after explicit review of the mobile startup path."
