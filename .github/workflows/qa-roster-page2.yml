@@ -1,0 +1,48 @@
+name: QA roster page 2 identity
+on:
+  push:
+    paths:
+      - '.github/workflows/qa-roster-page2.yml'
+      - 'app-v46.js'
+      - 'app-v5.4-fix4.js'
+      - 'app-v5.4-fix8.js'
+      - 'app-v5.4-fix9.js'
+      - 'app-v5.4-fix10.js'
+      - 'app-v5.4-hotfix-loader.js'
+      - 'index.html'
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-node@v4
+        with: {node-version: 22}
+      - run: npm install --no-save playwright@1.55.0
+      - run: npx playwright install --with-deps chromium
+      - name: verify second roster page identity
+        run: |
+          cat > qa-page2.mjs <<'EOF'
+          import { chromium } from 'playwright';
+          const PROFILE='https://wjelumpbjklfrdjxbesj.supabase.co/functions/v1/kokmatch-profile-v53';
+          const b=await chromium.launch({headless:true});
+          const p=await b.newPage({viewport:{width:390,height:844}});
+          const errors=[];p.on('pageerror',e=>errors.push(String(e)));
+          const thumb='data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAP//////////////////////////////////////////////////////////////////////////////////////2wBDAf//////////////////////////////////////////////////////////////////////////////////////wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAX/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIQAxAAAAF//8QAFBABAAAAAAAAAAAAAAAAAAAAAP/aAAgBAQABBQJ//8QAFBEBAAAAAAAAAAAAAAAAAAAAAP/aAAgBAwEBPwF//8QAFBEBAAAAAAAAAAAAAAAAAAAAAP/aAAgBAgEBPwF//8QAFBABAAAAAAAAAAAAAAAAAAAAAP/aAAgBAQAGPwJ//8QAFBABAAAAAAAAAAAAAAAAAAAAAP/aAAgBAQABPyF//9oADAMBAAIAAwAAABAf/8QAFBEBAAAAAAAAAAAAAAAAAAAAAP/aAAgBAwEBPxB//8QAFBEBAAAAAAAAAAAAAAAAAAAAAP/aAAgBAgEBPxB//8QAFBABAAAAAAAAAAAAAAAAAAAAAP/aAAgBAQABPxB//9k=';
+          await p.route(PROFILE+'**',async route=>{const r=route.request(),u=new URL(r.url());if(r.method()==='GET'&&u.searchParams.get('full')==='1')return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({image:thumb,fullImage:thumb})});if(r.method()==='GET')return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({profiles:{male1:{image:thumb}}})});return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({success:true,image:thumb})})});
+          let ready=false;for(let i=0;i<8&&!ready;i++){await p.goto('https://kkokmatch.github.io/?qa=page2&t='+Date.now(),{waitUntil:'networkidle'});try{await p.waitForFunction(()=>window.__kokmatchV54Fix10===true&&window.__kokmatchProfileUiPatch==='10.0'&&window.__kokmatchVersionLock==='5.4',{timeout:12000});ready=true}catch{}}
+          if(!ready)throw new Error('fix10 not ready on production');
+          await p.evaluate(()=>{T='qa-token';currentGroupId='grp_qa_page2';currentView='members';S=emptyClientState();const members=[];for(let i=1;i<=12;i++)members.push({id:i===1?'male1':`m${i}`,name:`회원${String(i).padStart(2,'0')}`,gender:i%2===0?'여':'남',age:'30',cls:i%3===0?'B':'C',type:'member',role:i===1?'manager':'member',totalGames:0,state:'waiting',joinedAt:Date.now()-i*1000});S.members=members;S.queue=[];S.pendingGames=[];S.games=[];S.history=[];S.pairCounts={};group={groupId:'grp_qa_page2',name:'QA'};groups=[];me={memberId:'male1',displayName:'회원01',role:'manager',globalAdmin:false,groupId:'grp_qa_page2'};normalizeClient();renderAll();document.getElementById('login')?.classList.add('hide')});
+          await p.waitForTimeout(350);
+          await p.evaluate(()=>memberPageGo46(2));
+          await p.waitForTimeout(450);
+          const rows=await p.evaluate(()=>[...document.querySelectorAll('#members .memberCard')].map(c=>{const a=c.querySelector('.profileIdentity80');return {name:(c.querySelector('.name')?.textContent||'').trim(),id:a?.dataset.memberId||'',gender:a?.dataset.gender||'',photo:a?.dataset.photo||'',badge:getComputedStyle(a,'::after').content||''}}));
+          console.log('PAGE2',rows);
+          if(rows.length!==2)throw new Error('page2 row count '+rows.length);
+          const a=rows.find(x=>x.name.includes('회원11')),z=rows.find(x=>x.name.includes('회원12'));
+          if(!a||a.id!=='m11'||a.gender!=='남'||a.photo!=='0'||!String(a.badge).includes('남'))throw new Error('member11 identity mismatch '+JSON.stringify(a));
+          if(!z||z.id!=='m12'||z.gender!=='여'||z.photo!=='0'||!String(z.badge).includes('여'))throw new Error('member12 identity mismatch '+JSON.stringify(z));
+          if(rows.some(x=>x.id==='male1'||x.photo==='1'))throw new Error('page1 profile leaked into page2 '+JSON.stringify(rows));
+          if(errors.length)throw new Error(errors.join(' | '));
+          console.log('PASS page2 identity');await b.close();
+          EOF
+          node qa-page2.mjs
