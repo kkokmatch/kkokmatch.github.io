@@ -19,9 +19,9 @@ jobs:
           import re
           p=Path('index.html')
           s=p.read_text(encoding='utf-8')
-          # Remove any previous direct preload immediately before the hotfix loader, then reinsert once.
-          s=re.sub(r'<script src="/app-v5\.6-fix3\.js\?v=[^"]+"></script><script src="/app-v5\.6-fix4\.js\?v=[^"]+"></script>(?=<script src="/app-v5\.4-hotfix-loader\.js)', '', s)
-          repl='<script src="/app-v5.6-fix3.js?v=1.1.1"></script><script src="/app-v5.6-fix4.js?v=1.0.1"></script><script src="/app-v5.4-hotfix-loader.js?v=23.0"></script>'
+          # Remove previous direct v5.6 critical preloads immediately before the hotfix loader.
+          s=re.sub(r'(?:<script src="/app-v5\.6-fix[345]\.js\?v=[^"]+"></script>)+(?=<script src="/app-v5\.4-hotfix-loader\.js)', '', s)
+          repl='<script src="/app-v5.6-fix3.js?v=1.1.1"></script><script src="/app-v5.6-fix4.js?v=1.0.1"></script><script src="/app-v5.6-fix5.js?v=1.0.1"></script><script src="/app-v5.4-hotfix-loader.js?v=24.0"></script>'
           n=re.sub(r'<script src="/app-v5\.4-hotfix-loader\.js\?v=[^"]+"></script>', repl, s)
           if n != p.read_text(encoding='utf-8'):
               p.write_text(n,encoding='utf-8')
