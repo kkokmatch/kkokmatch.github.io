@@ -1,5 +1,12 @@
 (()=>{
 if(window.__kokmatchV54Fix4)return;window.__kokmatchV54Fix4=true;
+// 구형 프로필/성별 보정기는 서로 DOM을 덮어쓰므로 실행하지 않는다.
+window.__kokmatchV54Fix8=true;
+window.__kokmatchV54Fix9=true;
+window.__kokmatchV54Fix10=true;
+window.__kokmatchV54Fix18=true;
+window.__kokmatchV54Fix19=true;
+window.__kokmatchV54Fix20=true;
 function alignQueue54(){
  const box=typeof $==='function'?$('queue'):document.getElementById('queue');if(!box)return;
  const slots=[...box.querySelectorAll('.composer54 .pendingSlot')];
@@ -12,20 +19,9 @@ function alignQueue54(){
  });
  const grid=box.querySelector('.composer54 .slots');if(grid)grid.classList.add('pendingGrid');
 }
-function alignMembers54(){
- const box=typeof $==='function'?$('members'):document.getElementById('members');if(!box||!Array.isArray(S?.members))return;
- const cards=[...box.querySelectorAll('.memberCard')];
- cards.forEach((card,i)=>{
-  const m=S.members[i];if(!m||typeof avatar!=='function')return;
-  [...card.children].filter(el=>el?.classList?.contains('avatar')).forEach(el=>el.remove());
-  const h=String(avatar(m)||'');if(h)card.insertAdjacentHTML('afterbegin',h);
- });
-}
-function alignAll54(){alignQueue54();alignMembers54()}
 const rq=renderQueue;renderQueue=function(){const r=rq();alignQueue54();return r};
-const rm=renderMembers;renderMembers=function(){const r=rm();alignMembers54();return r};
-const ra=renderAll;renderAll=function(){const r=ra();alignAll54();return r};
-alignAll54();setTimeout(alignAll54,0);
+const ra=renderAll;renderAll=function(){const r=ra();alignQueue54();return r};
+alignQueue54();setTimeout(alignQueue54,0);
 })();
 
 (()=>{
@@ -50,5 +46,9 @@ window.addEventListener('pageshow',()=>{if(me&&group)clearResumeGuard54()});
 
 (()=>{
 if(window.__kokmatchV54FinalProfileBridge4)return;window.__kokmatchV54FinalProfileBridge4=true;
-let tries=0;const timer=setInterval(()=>{if(window.__kokmatchV54Fix20){clearInterval(timer);return}if(window.__kokmatchV54Fix6){clearInterval(timer);const add=(src,onload)=>{const s=document.createElement('script');s.src=src;s.async=false;s.onload=onload||null;s.onerror=()=>console.error('콕매치 회원명부/프로필 보정 로드 실패',src);document.body.appendChild(s)};const load20=()=>window.__kokmatchV54Fix20?null:add('/app-v5.4-fix20.js?v=20.0&t='+Date.now());const load19=()=>window.__kokmatchV54Fix19?load20():add('/app-v5.4-fix19.js?v=19.0&t='+Date.now(),load20);const load18=()=>window.__kokmatchV54Fix18?load19():add('/app-v5.4-fix18.js?v=18.2&t='+Date.now(),load19);const load9=()=>window.__kokmatchV54Fix9?load18():add('/app-v5.4-fix9.js?v=9.0&t='+Date.now(),load18);if(window.__kokmatchV54Fix8)load9();else add('/app-v5.4-fix8.js?v=8.0&t='+Date.now(),load9);return}if(++tries>=160)clearInterval(timer)},25);
+let tries=0;const timer=setInterval(()=>{
+ if(window.__kokmatchV54Fix21){clearInterval(timer);return}
+ if(window.__kokmatchV54Fix6){clearInterval(timer);const s=document.createElement('script');s.src='/app-v5.4-fix21.js?v=21.0&t='+Date.now();s.async=false;s.onerror=()=>console.error('콕매치 최종 프로필/성별 보정 로드 실패');document.body.appendChild(s);return}
+ if(++tries>=160)clearInterval(timer)
+},25);
 })();
