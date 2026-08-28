@@ -1,1 +1,1 @@
-{"version":4,"label":"5.6","semanticVersion":"5.6","build":"2026.08.28.1","updatedAt":"2026-08-28T07:21:00+09:00","note":"앱 최신본 강제 적용, 프로필 사진 즉시 동기화, 로그인 상태 모임전환 경쟁 상태 수정"}
+{"version":54,"label":"5.4","semanticVersion":"5.4","build":"2026.08.28.loopfix.1","updatedAt":"2026-08-28T11:20:00+09:00","note":"자동 업데이트 반복 이동 복구 안정본"}
