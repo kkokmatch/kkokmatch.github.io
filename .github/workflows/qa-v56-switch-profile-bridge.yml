@@ -45,13 +45,14 @@ jobs:
             await p.route(PROFILE+'**',async route=>{if(route.request().method()==='OPTIONS')return route.fulfill({status:200,body:'ok'});const gid=new URL(route.request().url()).searchParams.get('groupId');await sleep(2500);return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({profiles:gid==='grp_b'?{self:{image:img}}:{}})})});
             await p.route(ROSTER+'**',route=>route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({members,memberCount:2,adminBadgeVisibility:'all'})}));
             await p.goto('http://127.0.0.1:4173/?qa=v56fast&mode='+mode+'&t='+Date.now(),{waitUntil:'domcontentloaded'});
-            await p.waitForFunction(()=>window.__kokmatchV56===true&&window.__kokmatchV56Patch==='1.4'&&window.__kokmatchV56Fix3Patch==='1.0'&&window.__kokmatchV56Fix2Patch==='2.0'&&window.__kokmatchVersionLock==='5.6');
+            await p.waitForFunction(()=>window.__kokmatchV56===true&&window.__kokmatchV56Patch==='1.4'&&window.__kokmatchV56Fix3Patch==='1.1'&&window.__kokmatchV56Fix2Patch==='2.0'&&window.__kokmatchVersionLock==='5.6');
             await p.evaluate(({global,members})=>{T=global?'dev-token':'token-grp_a';currentGroupId='grp_a';S={dayKey:'2026-08-28',courtCount:2,courtNames:['1코트','2코트'],members,queue:[],pendingGames:[],games:[],history:[],pairCounts:{},attendancePolls:[]};group={groupId:'grp_a',name:'A모임'};groups=[{groupId:'grp_a',name:'A모임'},{groupId:'grp_b',name:'B모임'}];me={role:global?'admin':'member',displayName:'QA사용자',memberId:'self',globalAdmin:global,groupId:'grp_a'};currentView='members';localStorage.setItem('kokmatch_token',T);localStorage.setItem('kokmatch_group_id','grp_a');renderAll();document.getElementById('login')?.classList.add('hide')},{global,members});
             const started=Date.now();
             const ok=await p.evaluate(global=>global?window.adminSwitchGroup38('grp_b','members'):window.switchOwnGroup38('grp_b'),global);
             const elapsed=Date.now()-started;
             if(ok!==true)throw new Error(mode+' switch returned '+ok);
             if(elapsed>=2000)throw new Error(mode+' switch waited for profile: '+elapsed+'ms');
+            await p.waitForTimeout(100);
             const core=await p.evaluate(()=>({gid:currentGroupId,stateGid:group?.groupId,busy:window.__kokmatchGroupSwitching12===true,disabled:!!document.getElementById('groupBtn')?.disabled,token:String(T||''),version:document.documentElement.dataset.kokmatchVersion,title:document.title}));
             if(core.gid!=='grp_b'||core.stateGid!=='grp_b'||core.busy||core.disabled)throw new Error(mode+' core switch bad '+JSON.stringify(core));
             if(global&&core.token!=='dev-token')throw new Error('developer token changed '+core.token);
@@ -59,7 +60,7 @@ jobs:
             if(!global&&switchAuths!==1)throw new Error('member switch auth count '+switchAuths);
             await p.waitForFunction(img=>document.querySelector('#members .memberCard[data-member-id56="self"] > .profileIdentity80 img')?.getAttribute('src')===img,img);
             if(core.version!=='5.6'||core.title!=='콕매치 v5.6')throw new Error(mode+' version mismatch '+JSON.stringify(core));
-            console.log('PASS',mode,{elapsed,switchAuths,core});
+            console.log('PASS',mode,JSON.stringify({elapsed,switchAuths,core}));
             await p.close();
           }
           await run('member');
