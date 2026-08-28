@@ -2,7 +2,7 @@
 'use strict';
 if(window.__kokmatchV54Fix22)return;
 window.__kokmatchV54Fix22=true;
-window.__kokmatchRosterCanonical='22.1';
+window.__kokmatchRosterCanonical='22.2';
 
 function e22(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function jsId22(id){return String(id||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'")}
@@ -19,6 +19,7 @@ function roleBadge22(m){
  try{if(typeof isTemp==='function'&&isTemp(m))return '<span class="roleBadge role-temp">임시편성자</span>'}catch{}
  return '<span class="roleBadge role-member44">일반회원</span>';
 }
+function userFirst22(list){const a=Array.isArray(list)?list:[],id=String(me?.memberId||'');if(!id)return a.slice();const mine=a.find(m=>String(m?.id||'')===id);return mine?[mine,...a.filter(m=>String(m?.id||'')!==id)]:a.slice()}
 function replaceAvatar22(card,m){
  if(!card||!m||typeof avatar!=='function')return;
  let html='';try{html=String(avatar(m)||'')}catch{}
@@ -49,7 +50,7 @@ function patchActions22(card,m){
 }
 function patchVisibleInfo22(card,m){
  const info=card.querySelector('.memberInfo48')||card.children?.[1];if(!info)return;
- let line=info.querySelector('.memberMainLine45')||info.querySelector('.name');
+ const line=info.querySelector('.memberMainLine45')||info.querySelector('.name');
  if(line){line.classList.add('memberMainLine45');line.innerHTML=`<span class="memberName45">${e22(m.name)}</span>${grade22(m)}<span class="gamecnt">총 게임 ${Number(m.totalGames)||0}회</span>${roleBadge22(m)}`}
  const meta=info.querySelector(':scope > .meta')||info.querySelector('.meta');
  if(meta){const inv=inviter22(m);meta.innerHTML=`${e22(m.year||'')}년생 · ${e22(m.gender||'')}${inv?` <span class="inviteInfo45">· 초대 ${e22(inv)}</span>`:''}`}
@@ -58,7 +59,6 @@ function patchVisibleInfo22(card,m){
 }
 function finalizeRoster22(){
  const box=document.getElementById('members');if(!box)return;
- try{window.__kokmatchRestampMembers46?.()}catch(err){console.warn('roster22 restamp',err)}
  const cards=[...box.querySelectorAll('.memberCard')],seen=[];
  cards.forEach(card=>{
   const id=String(card.dataset.memberId46||card.dataset.memberId22||'');const m=getMember22(id);if(!m)return;
@@ -72,7 +72,11 @@ function finalizeRoster22(){
 window.__kokmatchFinalizeRoster22=finalizeRoster22;
 
 const rm22=renderMembers;
-renderMembers=function(){const r=rm22();finalizeRoster22();requestAnimationFrame(finalizeRoster22);return r};
+renderMembers=function(){
+ let original=null,reordered=false;
+ try{if(Array.isArray(S?.members)&&S.members.length&&me?.memberId){original=S.members;const next=userFirst22(original);if(next.length===original.length&&next.some((m,i)=>m!==original[i])){S.members=next;reordered=true}}}catch{}
+ try{const r=rm22();finalizeRoster22();requestAnimationFrame(finalizeRoster22);return r}finally{if(reordered&&original)S.members=original}
+};
 try{window.renderMembers=renderMembers}catch{}
 
 const ra22=renderAll;
