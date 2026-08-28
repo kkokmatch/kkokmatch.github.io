@@ -3,8 +3,10 @@ on:
   push:
     paths:
       - '.github/workflows/qa-profile-v21-webkit.yml'
+      - 'app-v46.js'
       - 'app-v5.4-fix4.js'
       - 'app-v5.4-fix21.js'
+      - 'app-v5.4-fix22.js'
       - 'app-v5.4-hotfix-loader.js'
   workflow_dispatch:
 jobs:
@@ -30,11 +32,11 @@ jobs:
           const p=await b.newPage({viewport:{width:390,height:844},userAgent:'Mozilla/5.0 (iPhone; CPU iPhone OS 18_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 KAKAOTALK'});
           const errors=[];p.on('pageerror',e=>errors.push(String(e)));
           await p.route('**/functions/v1/kokmatch-profile-v53**',async r=>r.fulfill({status:200,contentType:'application/json',body:JSON.stringify({profiles:{[PARK]:{image:photo}}})}));
-          let ready=false;for(let i=0;i<8&&!ready;i++){await p.goto('https://kkokmatch.github.io/?qa=real-roster-214&t='+Date.now(),{waitUntil:'networkidle'});try{await p.waitForFunction(()=>window.__kokmatchV54Fix21===true&&window.__kokmatchProfileCanonical==='21.2'&&window.__kokmatchLegacyProfileRemappersDisabled===true,{timeout:12000});ready=true}catch{}}if(!ready)throw new Error('fix21.2 not live');
+          let ready=false;for(let i=0;i<8&&!ready;i++){await p.goto('https://kkokmatch.github.io/?qa=real-roster-220&t='+Date.now(),{waitUntil:'networkidle'});try{await p.waitForFunction(()=>window.__kokmatchV54Fix21===true&&window.__kokmatchProfileCanonical==='21.2'&&window.__kokmatchV54Fix22===true&&window.__kokmatchRosterCanonical==='22.0'&&window.__kokmatchLegacyProfileRemappersDisabled===true,{timeout:12000});ready=true}catch{}}if(!ready)throw new Error('fix21.2/fix22.0 not live');
           await p.evaluate(({roster,PARK})=>{T='qa-token';currentGroupId='grp_4545db22c88d';S=emptyClientState();S.members=roster;S.queue=[];S.pendingGames=[];S.games=[];S.history=[];S.pairCounts={};group={groupId:'grp_4545db22c88d',name:'QA 실제명부'};groups=[];me={memberId:PARK,displayName:'박태영',role:'admin',globalAdmin:true,groupId:'grp_4545db22c88d'};normalizeClient();currentView='members';renderAll();document.getElementById('login')?.classList.add('hide')},{roster,PARK});
           await p.waitForTimeout(1000);
-          const readRows=()=>p.evaluate(()=>[...document.querySelectorAll('#members .memberCard')].map(c=>{const a=c.querySelector('.profileIdentity21'),on=c.querySelector('.pairBtn')?.getAttribute('onclick')||'';return{name:(c.querySelector('.memberName45')?.textContent||'').trim(),actionId:(on.match(/openPairs\(['\"]([^'\"]+)['\"]\)/)||[])[1]||'',id:a?.dataset.memberId||'',gender:a?.dataset.gender||'',photo:a?.dataset.photo||'',img:a?.querySelector('img')?.getAttribute('src')||'',text:(a?.textContent||'').trim(),hasPerson:!!a?.querySelector('svg.genderPersonIcon21'),aria:a?.getAttribute('aria-label')||''}}));
-          const verify=(label,rows)=>{console.log(label,rows);for(const r of rows){const m=byId.get(r.actionId);if(!m)throw new Error(label+' unknown action '+JSON.stringify(r));if(r.id!==m.id||r.name!==m.name||r.gender!==m.gender)throw new Error(label+' identity mismatch '+JSON.stringify({r,m}));if(m.id!==PARK){if(r.img)throw new Error(label+' Park/other photo leaked '+JSON.stringify({r,m}));if(r.photo!=='0'||!r.hasPerson||r.text!=='')throw new Error(label+' no-photo icon wrong '+JSON.stringify({r,m}));if(r.aria!==(m.gender==='여'?'여성':'남성'))throw new Error(label+' gender icon mismatch '+JSON.stringify({r,m}))}}};
+          const readRows=()=>p.evaluate(()=>[...document.querySelectorAll('#members .memberCard')].map(c=>{const a=c.querySelector('.profileIdentity21'),on=c.querySelector('.pairBtn')?.getAttribute('onclick')||'';return{name:(c.querySelector('.memberName45')?.textContent||'').trim(),actionId:(on.match(/openPairs\(['\"]([^'\"]+)['\"]\)/)||[])[1]||'',stamp:c.dataset.memberId46||'',final:c.dataset.memberId22||'',id:a?.dataset.memberId||'',gender:a?.dataset.gender||'',photo:a?.dataset.photo||'',img:a?.querySelector('img')?.getAttribute('src')||'',text:(a?.textContent||'').trim(),hasPerson:!!a?.querySelector('svg.genderPersonIcon21'),aria:a?.getAttribute('aria-label')||''}}));
+          const verify=(label,rows)=>{console.log(label,rows);for(const r of rows){const m=byId.get(r.actionId);if(!m)throw new Error(label+' unknown action '+JSON.stringify(r));if(r.stamp!==m.id||r.final!==m.id||r.id!==m.id||r.name!==m.name||r.gender!==m.gender)throw new Error(label+' canonical mismatch '+JSON.stringify({r,m}));if(m.id!==PARK){if(r.img)throw new Error(label+' Park/other photo leaked '+JSON.stringify({r,m}));if(r.photo!=='0'||!r.hasPerson||r.text!=='')throw new Error(label+' no-photo icon wrong '+JSON.stringify({r,m}));if(r.aria!==(m.gender==='여'?'여성':'남성'))throw new Error(label+' gender icon mismatch '+JSON.stringify({r,m}))}}};
           const page1=await readRows();if(page1.length!==10)throw new Error('PAGE1 count '+page1.length);verify('PAGE1',page1);
           await p.evaluate(()=>memberPageGo46(2));await p.waitForTimeout(700);
           const page2=await readRows();if(page2.length!==8)throw new Error('PAGE2 count '+page2.length);verify('PAGE2',page2);
@@ -42,6 +44,6 @@ jobs:
           const same=all.filter(r=>r.name==='배솜다리');if(same.length!==2||new Set(same.map(x=>x.id)).size!==2||!same.some(x=>x.gender==='여')||!same.some(x=>x.gender==='남'))throw new Error('same-name members collapsed '+JSON.stringify(same));
           await p.evaluate(({FEMALE_MANAGER})=>{me={memberId:FEMALE_MANAGER,displayName:'배솜다리',role:'manager',globalAdmin:false,groupId:'grp_4545db22c88d'};currentView='settings';renderAll()},{FEMALE_MANAGER});await p.waitForTimeout(400);
           const st=await p.evaluate(()=>({img:document.querySelector('#profileCard53 .profilePreview53 img')?.getAttribute('src')||'',text:document.querySelector('#profileCard53 .profilePreview53')?.textContent?.trim()||'',person:!!document.querySelector('#profileCard53 .profileFallback21 svg.genderPersonIcon21'),cls:document.querySelector('#profileCard53 .profileFallback21')?.className||'',aria:document.querySelector('#profileCard53 .profileFallback21')?.getAttribute('aria-label')||''}));if(st.img||st.text||!st.person||!st.cls.includes('female')||st.aria!=='여성')throw new Error('settings inherited Park photo / gender wrong '+JSON.stringify(st));
-          if(errors.length)throw new Error(errors.join(' | '));console.log('PASS page1+page2 18 unique IDs / duplicate names / human icons / no Park leakage');await b.close();
+          if(errors.length)throw new Error(errors.join(' | '));console.log('PASS page1+page2 exact IDs / actions / duplicate names / human icons / no Park leakage');await b.close();
           EOF
           node qa-webkit.mjs
