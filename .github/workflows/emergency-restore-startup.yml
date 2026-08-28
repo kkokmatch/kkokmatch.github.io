@@ -1,0 +1,29 @@
+name: Emergency restore startup
+
+on:
+  push:
+    paths:
+      - '.github/workflows/emergency-restore-startup.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  restore:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Restore known-good production entrypoint
+        run: |
+          git show 5682c32c2aee2532d67abe02a9cf2699be48d63a:index.html > index.html
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          if git diff --cached --quiet; then
+            echo "index.html already matches known-good startup"
+          else
+            git commit -m "Emergency restore known-good production entrypoint"
+            git push
+          fi
