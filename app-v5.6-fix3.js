@@ -2,8 +2,8 @@
 'use strict';
 if(window.__kokmatchV56Fix3)return;
 window.__kokmatchV56Fix3=true;
-window.__kokmatchV56Fix3Patch='1.0';
-window.__kokmatchV56Fix3Build='2026.08.28.5';
+window.__kokmatchV56Fix3Patch='1.1';
+window.__kokmatchV56Fix3Build='2026.08.28.6';
 const AUTH='https://wjelumpbjklfrdjxbesj.supabase.co/functions/v1/kokmatch-auth-v38';
 const MULTI='https://wjelumpbjklfrdjxbesj.supabase.co/functions/v1/kokmatch-multi-api';
 let switching=false,switchSeq=0,pinSeq=0;
@@ -14,6 +14,7 @@ function globalAdmin(){try{return !!(((typeof me!=='undefined'&&me)||window.me)?
 function setTok(v){v=String(v||'');try{T=v}catch{};window.T=v;try{localStorage.setItem('kokmatch_token',v)}catch{}}
 function setGid(v){v=String(v||'');try{currentGroupId=v}catch{};window.currentGroupId=v;try{localStorage.setItem('kokmatch_group_id',v)}catch{}}
 function busy(on){const b=document.getElementById('groupBtn');window.__kokmatchGroupSwitching12=!!on;if(!b)return;b.disabled=!!on;b.classList.toggle('groupSwitching12',!!on);b.classList.toggle('switching52',!!on);if(on){b.dataset.v56fix3Old=b.textContent||'';b.textContent='모임 변경 중…'}else if(b.textContent==='모임 변경 중…'){b.textContent=b.dataset.v56fix3Old||b.dataset.v56fix1Old||'모임 변경'}if(!on)delete b.dataset.v56fix3Old}
+function releaseBusy(){try{if(typeof renderHeader==='function')renderHeader()}catch{};busy(false);queueMicrotask(()=>busy(false));requestAnimationFrame(()=>busy(false))}
 function error(e){const m=e?.message||String(e||'모임 변경 중 오류가 발생했습니다.');try{if(typeof showError==='function')showError(new Error(m));else alert(m)}catch{}}
 async function json(url,opt={}){const r=await fetch(url,{cache:'no-store',...opt}),x=await r.json().catch(()=>({}));if(!r.ok){const e=new Error(x.error||'요청 처리에 실패했습니다.');e.status=r.status;throw e}return x}
 async function fetchState(target,token){const u=new URL(MULTI);u.searchParams.set('api','state');u.searchParams.set('groupId',target);u.searchParams.set('_fix3',Date.now());const x=await json(u.toString(),{headers:{authorization:'Bearer '+token}});if(String(x?.group?.groupId||'')!==target)throw new Error('선택한 모임 정보를 불러오지 못했습니다.');return x}
@@ -45,7 +46,7 @@ async function fastSwitch(target,targetView=''){
   refreshProfilesLater(target,oldView);
   return true;
  }catch(e){console.warn('v5.6 fast group switch',e);pinSeq++;setTok(oldToken);setGid(oldGroup);try{const old=await fetchState(oldGroup,oldToken);apply(old,oldGroup,oldToken,oldView)}catch{};error(e);return false}
- finally{switching=false;busy(false);try{if(typeof renderHeader==='function')renderHeader()}catch{}}
+ finally{switching=false;releaseBusy()}
 }
 const own=id=>fastSwitch(id,''),adm=(id,v='members')=>fastSwitch(id,v),any=(id,v='members')=>fastSwitch(id,v);
 own.__v56fix3=true;adm.__v56fix3=true;any.__v56fix3=true;
