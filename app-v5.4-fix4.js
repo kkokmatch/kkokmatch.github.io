@@ -49,6 +49,6 @@ window.addEventListener('pageshow',()=>{if(me&&group)clearResumeGuard54()});
 })();
 
 (()=>{
-if(window.__kokmatchV54Fix8LoaderFrom4)return;window.__kokmatchV54Fix8LoaderFrom4=true;
-let tries=0;const timer=setInterval(()=>{if(window.__kokmatchV54Fix8){clearInterval(timer);return}if(window.__kokmatchV54Fix6){clearInterval(timer);const s=document.createElement('script');s.src='/app-v5.4-fix8.js?v=8.0&t='+Date.now();s.async=false;s.onerror=()=>console.error('콕매치 회원명부/프로필 보정 로드 실패');document.body.appendChild(s);return}if(++tries>=160)clearInterval(timer)},25);
+if(window.__kokmatchV54FinalProfileBridge4)return;window.__kokmatchV54FinalProfileBridge4=true;
+let tries=0;const timer=setInterval(()=>{if(window.__kokmatchV54Fix10){clearInterval(timer);return}if(window.__kokmatchV54Fix6){clearInterval(timer);const add=(src,onload)=>{const s=document.createElement('script');s.src=src;s.async=false;s.onload=onload||null;s.onerror=()=>console.error('콕매치 회원명부/프로필 보정 로드 실패',src);document.body.appendChild(s)};const load9=()=>window.__kokmatchV54Fix9?null:add('/app-v5.4-fix9.js?v=9.0&t='+Date.now());if(window.__kokmatchV54Fix8)load9();else add('/app-v5.4-fix8.js?v=8.0&t='+Date.now(),load9);return}if(++tries>=160)clearInterval(timer)},25);
 })();
