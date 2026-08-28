@@ -2,12 +2,13 @@
 'use strict';
 if(window.__kokmatchV54Fix26)return;
 window.__kokmatchV54Fix26=true;
-window.__kokmatchDirectTouch='26.0';
-document.documentElement.dataset.kokmatchDirectTouch='26.0';
+window.__kokmatchDirectTouch='26.1';
+document.documentElement.dataset.kokmatchDirectTouch='26.1';
 
 const AUTH26='https://wjelumpbjklfrdjxbesj.supabase.co/functions/v1/kokmatch-auth-v38';
 const MULTI26='https://wjelumpbjklfrdjxbesj.supabase.co/functions/v1/kokmatch-multi-api';
 let prepBusy26=false,groupBusy26=false,observer26=null;
+let sx26=0,sy26=0,st26=0,moved26=false;
 
 function trace26(msg){
  try{
@@ -15,14 +16,13 @@ function trace26(msg){
   if(!location.pathname.includes('ios-diagnostic'))return;
   let el=document.getElementById('kokmatchV26Status');
   if(!el){el=document.createElement('div');el.id='kokmatchV26Status';el.style.cssText='position:fixed;left:8px;right:8px;bottom:calc(74px + env(safe-area-inset-bottom));z-index:9999;background:#172033e8;color:#fff;border-radius:10px;padding:7px 10px;font:700 11px/1.35 -apple-system,BlinkMacSystemFont,sans-serif;pointer-events:none';document.body.appendChild(el)}
-  el.textContent='v26 · '+s;
+  el.textContent='v26.1 · '+s;
  }catch{}
 }
 function err26(e){trace26('오류: '+(e?.message||String(e)));try{typeof showError==='function'?showError(e):alert(e?.message||String(e))}catch{}}
 function token26(){try{return String(T||window.T||localStorage.getItem('kokmatch_token')||'')}catch{return String(window.T||localStorage.getItem('kokmatch_token')||'')}}
 function gid26(){try{return String(currentGroupId||window.currentGroupId||localStorage.getItem('kokmatch_group_id')||'')}catch{return String(window.currentGroupId||localStorage.getItem('kokmatch_group_id')||'')}}
 function me26(){try{return me||window.me||null}catch{return window.me||null}}
-function group26(){try{return group||window.group||null}catch{return window.group||null}}
 function members26(){try{return Array.isArray(S?.members)?S.members:(Array.isArray(window.S?.members)?window.S.members:[])}catch{return Array.isArray(window.S?.members)?window.S.members:[]}}
 function member26(id){id=String(id||'');return members26().find(m=>String(m?.id||'')===id)||null}
 function cardId26(card){return String(card?.dataset?.memberId22||card?.dataset?.memberId46||card?.dataset?.memberId||'')}
@@ -115,6 +115,28 @@ function prep26(){
   });
  }finally{prepBusy26=false}
 }
+function directCapture26(btn){
+ if(!btn)return false;
+ if(btn.id==='groupBtn'){openGroups26();return true}
+ const card=btn.closest?.('#members .memberCard');if(!card||!btn.closest?.('.memberBtns'))return false;
+ const id=cardId26(card);if(!id)return false;const t=String(btn.textContent||'').trim();
+ if(t==='수정')return edit26(id);
+ if(btn.classList.contains('enter')||t==='운동'||t==='입장')return attendance26(id,'waiting');
+ if(btn.classList.contains('watch')||t==='관람')return attendance26(id,'spectator');
+ if((btn.classList.contains('danger')&&t==='퇴장')||t==='퇴장')return attendance26(id,'out');
+ return false;
+}
+window.addEventListener('touchstart',ev=>{const t=ev.touches?.[0];if(!t)return;sx26=t.clientX;sy26=t.clientY;st26=Date.now();moved26=false},{capture:true,passive:true});
+window.addEventListener('touchmove',ev=>{const t=ev.touches?.[0];if(!t)return;if(Math.abs(t.clientX-sx26)>12||Math.abs(t.clientY-sy26)>12)moved26=true},{capture:true,passive:true});
+document.addEventListener('touchend',ev=>{
+ const t=ev.changedTouches?.[0];if(!t||moved26||Date.now()-st26>900)return;
+ let btn=ev.target?.closest?.('button');
+ if(!btn&&typeof document.elementsFromPoint==='function'){for(const el of document.elementsFromPoint(t.clientX,t.clientY)){const b=el?.closest?.('button');if(b){btn=b;break}}}
+ if(!directCapture26(btn))return;
+ try{ev.preventDefault();ev.stopPropagation();ev.stopImmediatePropagation()}catch{}
+ later26();
+},{capture:true,passive:false});
+
 function later26(){queueMicrotask(prep26);requestAnimationFrame(prep26);setTimeout(prep26,25);setTimeout(prep26,90);setTimeout(prep26,220);setTimeout(prep26,420)}
 try{const rm=renderMembers;renderMembers=function(...a){const r=rm.apply(this,a);later26();return r};window.renderMembers=renderMembers}catch{}
 try{const rh=renderHeader;renderHeader=function(...a){const r=rh.apply(this,a);later26();return r};window.renderHeader=renderHeader}catch{}
