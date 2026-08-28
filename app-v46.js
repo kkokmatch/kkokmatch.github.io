@@ -42,10 +42,36 @@ function filteredMembers46(){
  const q=memberQuery46.trim().toLowerCase();if(!q)return S.members;
  return S.members.filter(m=>[m.name,m.cls,m.gender,m.inviter,roleLabel(roleOf(m)),m.type==='guest'?'게스트':'일반회원'].some(v=>String(v||'').toLowerCase().includes(q)));
 }
+function jsId46(id){return String(id||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'")}
+function stampMemberCards46(page){
+ const box=$('members');if(!box)return;
+ const cards=[...box.querySelectorAll('.memberCard')];
+ const ids=[];
+ cards.forEach((card,i)=>{
+  const m=page[i];if(!m)return;
+  const id=String(m.id||'');if(!id)return;ids.push(id);
+  card.dataset.memberId46=id;
+  card.dataset.memberGender46=String(m.gender||'');
+  const safe=jsId46(id);
+  const pair=card.querySelector('.pairBtn');if(pair)pair.setAttribute('onclick',`openPairs('${safe}')`);
+  card.querySelectorAll('button[onclick]').forEach(btn=>{
+   const raw=String(btn.getAttribute('onclick')||'');
+   if(/^\s*setOther\s*\(/.test(raw)){
+    const state=(raw.match(/setOther\s*\(\s*['"][^'"]*['"]\s*,\s*['"]([^'"]+)['"]/)||[])[1];
+    if(state)btn.setAttribute('onclick',`setOther('${safe}','${state}')`);
+   }else if(/^\s*openEditMember\s*\(/.test(raw))btn.setAttribute('onclick',`openEditMember('${safe}')`);
+  });
+ });
+ window.__kokmatchVisibleMemberIds46=ids;
+ window.__kokmatchMemberPage46=memberPage46;
+}
+window.__kokmatchRestampMembers46=function(){
+ const all=Array.isArray(S?.members)?S.members:[],filtered=filteredMembers46(),start=(memberPage46-1)*MEMBER_PAGE_SIZE46,page=filtered.slice(start,start+MEMBER_PAGE_SIZE46);stampMemberCards46(page);return page.map(m=>String(m.id||''));
+};
 const renderMembers45=renderMembers;
 renderMembers=function(){
  const all=Array.isArray(S?.members)?S.members:[],filtered=filteredMembers46(),pages=Math.max(1,Math.ceil(filtered.length/MEMBER_PAGE_SIZE46));memberPage46=Math.min(Math.max(1,memberPage46),pages);const start=(memberPage46-1)*MEMBER_PAGE_SIZE46,page=filtered.slice(start,start+MEMBER_PAGE_SIZE46);
- S.members=page;try{renderMembers45()}finally{S.members=all}
+ S.members=page;try{renderMembers45();stampMemberCards46(page)}finally{S.members=all}
  const box=$('members');if(!box)return;const title=box.querySelector('.title');if(title&&!box.querySelector('.memberSearch46'))title.insertAdjacentHTML('afterend',`<div class="memberSearch46"><div class="memberSearchRow46"><input id="memberSearchInput46" value="${esc(memberQuery46)}" placeholder="이름·급수·초대인 검색" oninput="searchMembers46(this.value)"><button class="btn ghost" onclick="refreshMembers46()">새로고침</button></div><div class="meta">전체 ${all.length}명 · 검색 ${filtered.length}명 · 한 화면 최대 ${MEMBER_PAGE_SIZE46}명</div></div>`);
  if(pages>1)box.insertAdjacentHTML('beforeend',`<div class="memberPager46"><button class="btn ghost" ${memberPage46<=1?'disabled':''} onclick="memberPageGo46(${memberPage46-1})">이전</button><span><b>${memberPage46}</b> / ${pages}</span><button class="btn ghost" ${memberPage46>=pages?'disabled':''} onclick="memberPageGo46(${memberPage46+1})">다음</button></div>`);
 };
