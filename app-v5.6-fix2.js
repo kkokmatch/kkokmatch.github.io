@@ -18,7 +18,10 @@ function enforce(){
 }
 enforce();
 const root=document.documentElement,title=document.querySelector('title');
-try{new MutationObserver(enforce).observe(root,{attributes:true,attributeFilter:['data-kokmatch-version']})}catch{}
-try{if(title)new MutationObserver(enforce).observe(title,{childList:true,characterData:true,subtree:true})}catch{}
+const VersionMO=window.__kokmatchNativeMutationObserver56||window.MutationObserver;
+try{new VersionMO(enforce).observe(root,{attributes:true,attributeFilter:['data-kokmatch-version']})}catch{}
+try{if(title)new VersionMO(enforce).observe(title,{childList:true,characterData:true,subtree:true})}catch{}
+queueMicrotask(enforce);
+requestAnimationFrame(()=>{enforce();requestAnimationFrame(enforce)});
 setInterval(enforce,100);
 })();
