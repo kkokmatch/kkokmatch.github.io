@@ -2,8 +2,8 @@
 'use strict';
 if(window.__kokmatchV56Fix5)return;
 window.__kokmatchV56Fix5=true;
-window.__kokmatchV56Fix5Patch='1.0';
-window.__kokmatchV56Fix5Build='2026.08.28.8';
+window.__kokmatchV56Fix5Patch='1.1';
+window.__kokmatchV56Fix5Build='2026.08.28.9';
 let busySeenAt=0;
 function me56(){try{return (typeof me!=='undefined'&&me)||window.me||null}catch{return window.me||null}}
 function group56(){try{return (typeof group!=='undefined'&&group)||window.group||null}catch{return window.group||null}}
@@ -33,13 +33,17 @@ function ensure(){
  b.setAttribute('aria-label','모임 변경');
  b.style.pointerEvents='auto';
 }
-function activate(e){
+function activateGroup(e){
  const t=e.target instanceof Element?e.target.closest('#groupBtn'):null;if(!t||!me56())return;
  if(window.__kokmatchGroupSwitching12===true&&/모임\s*변경\s*중/.test(String(t.textContent||'')))return;
  e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();
  try{if(typeof window.openGroupSwitch56==='function')window.openGroupSwitch56();else if(typeof window.openGroupSwitch==='function')window.openGroupSwitch()}catch(err){console.error('v5.6 group button',err)}
 }
-if(!window.__kokmatchGroupCapture56){window.__kokmatchGroupCapture56=true;document.addEventListener('click',activate,true)}
+function profileTarget(e){const t=e.target instanceof Element?e.target:null;return t?.closest?.('#members .profileIdentity80,#queue .profileIdentity80,#playing .profileIdentity80')||null}
+function activateProfile(e){const card=profileTarget(e);if(!card)return;e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();try{window.openProfilePhoto80?.(card)}catch(err){console.error('v5.6 profile viewer',err)}}
+function blockProfileMenu(e){if(!profileTarget(e)&&!(e.target instanceof Element&&e.target.closest?.('#profileViewer56 img')))return;e.preventDefault();e.stopPropagation();e.stopImmediatePropagation()}
+if(!window.__kokmatchGroupCapture56){window.__kokmatchGroupCapture56=true;document.addEventListener('click',activateGroup,true)}
+if(!window.__kokmatchProfileCapture561){window.__kokmatchProfileCapture561=true;document.addEventListener('click',activateProfile,true);document.addEventListener('contextmenu',blockProfileMenu,true)}
 ensure();
 const MO=window.MutationObserver;
 try{new MO(()=>queueMicrotask(ensure)).observe(document.body,{subtree:true,childList:true,attributes:true,attributeFilter:['disabled','class']})}catch{}
