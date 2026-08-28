@@ -1,7 +1,5 @@
 (()=>{
 if(window.__kokmatchV54Fix4)return;window.__kokmatchV54Fix4=true;
-// 구형 프로필/성별 보정기는 회원명부 페이지가 바뀐 뒤 전체 S.members 인덱스로
-// 아바타를 다시 덮어써 2페이지에 1페이지 회원 정보가 섞이므로 실행하지 않는다.
 window.__kokmatchV54Fix6=true;
 window.__kokmatchV54Fix8=true;
 window.__kokmatchV54Fix9=true;
@@ -50,7 +48,9 @@ window.addEventListener('pageshow',()=>{if(me&&group)clearResumeGuard54()});
 (()=>{
 if(window.__kokmatchV54FinalProfileBridge4)return;window.__kokmatchV54FinalProfileBridge4=true;
 const add=(src,onload)=>{const s=document.createElement('script');s.src=src;s.async=false;s.onload=onload||null;s.onerror=()=>console.error('콕매치 최종 회원명부 보정 로드 실패',src);document.body.appendChild(s)};
-const load24=()=>window.__kokmatchV54Fix24?null:add('/app-v5.4-fix24.js?v=24.0&t='+Date.now());
+const load26=()=>window.__kokmatchV54Fix26?null:add('/app-v5.4-fix26.js?v=26.0&t='+Date.now());
+const load25=()=>window.__kokmatchV54Fix25?load26():add('/app-v5.4-fix25.js?v=25.1&t='+Date.now(),load26);
+const load24=()=>window.__kokmatchV54Fix24?load25():add('/app-v5.4-fix24.js?v=24.1&t='+Date.now(),load25);
 const load23=()=>window.__kokmatchV54Fix23?load24():add('/app-v5.4-fix23.js?v=23.1&t='+Date.now(),load24);
 const load22=()=>window.__kokmatchV54Fix22?load23():add('/app-v5.4-fix22.js?v=22.2&t='+Date.now(),load23);
 let tries=0;const timer=setInterval(()=>{
