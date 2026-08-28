@@ -27,7 +27,6 @@ const loadState45=loadState;
 loadState=async function(force=false){
  if(!T||reloginBusy)return;if(document.hidden&&!force)return;
  const view=currentView||'members',now=Date.now(),last=Number(lastPoll46[view]||0),gap=pollMs46(view);
- /* Once the current session/group is established, the member roster uses its own lightweight API. */
  if(view==='members'&&memberSessionReady46()){lastPoll46.members=now;return}
  if(!force&&last&&now-last<gap)return;if(actionBusy46&&!force)return;if(stateBusy46)return stateBusy46;
  lastPoll46[view]=now;
@@ -38,9 +37,16 @@ loadState=async function(force=false){
 const act45=act;
 act=async function(...args){actionBusy46++;try{const x=await act45(...args);lastPoll46[currentView]=Date.now();return x}finally{actionBusy46=Math.max(0,actionBusy46-1)}};
 
+function loggedMemberFirst46(list){
+ const a=Array.isArray(list)?list:[],id=String(me?.memberId||'');
+ if(!id)return a.slice();
+ const mine=a.find(m=>String(m?.id||'')===id);if(!mine)return a.slice();
+ return [mine,...a.filter(m=>String(m?.id||'')!==id)];
+}
 function filteredMembers46(){
- const q=memberQuery46.trim().toLowerCase();if(!q)return S.members;
- return S.members.filter(m=>[m.name,m.cls,m.gender,m.inviter,roleLabel(roleOf(m)),m.type==='guest'?'게스트':'일반회원'].some(v=>String(v||'').toLowerCase().includes(q)));
+ const q=memberQuery46.trim().toLowerCase();
+ const base=!q?S.members:S.members.filter(m=>[m.name,m.cls,m.gender,m.inviter,roleLabel(roleOf(m)),m.type==='guest'?'게스트':'일반회원'].some(v=>String(v||'').toLowerCase().includes(q)));
+ return loggedMemberFirst46(base);
 }
 function jsId46(id){return String(id||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'")}
 function stampMemberCards46(page){
@@ -66,7 +72,7 @@ function stampMemberCards46(page){
  window.__kokmatchMemberPage46=memberPage46;
 }
 window.__kokmatchRestampMembers46=function(){
- const all=Array.isArray(S?.members)?S.members:[],filtered=filteredMembers46(),start=(memberPage46-1)*MEMBER_PAGE_SIZE46,page=filtered.slice(start,start+MEMBER_PAGE_SIZE46);stampMemberCards46(page);return page.map(m=>String(m.id||''));
+ const filtered=filteredMembers46(),start=(memberPage46-1)*MEMBER_PAGE_SIZE46,page=filtered.slice(start,start+MEMBER_PAGE_SIZE46);stampMemberCards46(page);return page.map(m=>String(m.id||''));
 };
 const renderMembers45=renderMembers;
 renderMembers=function(){
