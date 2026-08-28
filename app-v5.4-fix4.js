@@ -50,7 +50,8 @@ window.addEventListener('pageshow',()=>{if(me&&group)clearResumeGuard54()});
 (()=>{
 if(window.__kokmatchV54FinalProfileBridge4)return;window.__kokmatchV54FinalProfileBridge4=true;
 const add=(src,onload)=>{const s=document.createElement('script');s.src=src;s.async=false;s.onload=onload||null;s.onerror=()=>console.error('콕매치 최종 회원명부 보정 로드 실패',src);document.body.appendChild(s)};
-const load23=()=>window.__kokmatchV54Fix23?null:add('/app-v5.4-fix23.js?v=23.0&t='+Date.now());
+const load24=()=>window.__kokmatchV54Fix24?null:add('/app-v5.4-fix24.js?v=24.0&t='+Date.now());
+const load23=()=>window.__kokmatchV54Fix23?load24():add('/app-v5.4-fix23.js?v=23.1&t='+Date.now(),load24);
 const load22=()=>window.__kokmatchV54Fix22?load23():add('/app-v5.4-fix22.js?v=22.2&t='+Date.now(),load23);
 let tries=0;const timer=setInterval(()=>{
  if(window.__kokmatchV54Fix21){clearInterval(timer);load22();return}
