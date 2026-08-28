@@ -27,3 +27,23 @@ const rm=renderMembers;renderMembers=function(){const r=rm();alignMembers54();re
 const ra=renderAll;renderAll=function(){const r=ra();alignAll54();return r};
 alignAll54();setTimeout(alignAll54,0);
 })();
+
+(()=>{
+if(window.__kokmatchV54KakaoLoginFix)return;
+window.__kokmatchV54KakaoLoginFix='1.0';
+const baseLoadStateKakao54=typeof loadState==='function'?loadState:null;
+const baseOpenEntryKakao54=typeof openEntry==='function'?openEntry:null;
+const uaKakao54=String(navigator.userAgent||'');
+const shouldResume54=/iPhone|iPad|iPod|KAKAOTALK|Kakao/i.test(uaKakao54);
+const RESUME_KEY54='kokmatch_kakao_login_resume_v54';
+function sleepKakao54(ms){return new Promise(r=>setTimeout(r,ms))}
+function hasSavedToken54(){try{return !!String(T||localStorage.getItem(TOKEN_KEY)||localStorage.getItem('kokmatch_token')||'').trim()}catch{return !!String(T||'').trim()}}
+function clearResumeGuard54(){try{sessionStorage.removeItem(RESUME_KEY54)}catch{}}
+function resumeOnce54(reason){if(!shouldResume54||!hasSavedToken54())return false;try{const prev=Number(sessionStorage.getItem(RESUME_KEY54)||0),now=Date.now();if(prev&&now-prev<12000)return false;sessionStorage.setItem(RESUME_KEY54,String(now));console.warn('콕매치 카카오 로그인 후처리 재진입',reason||'state');location.replace('/?loginresume='+now);return true}catch{return false}}
+if(baseLoadStateKakao54){
+ loadState=async function(...args){let last=null;for(const wait of [0,180,420]){if(wait)await sleepKakao54(wait);try{const r=await baseLoadStateKakao54.apply(this,args);clearResumeGuard54();return r}catch(e){last=e;if(!hasSavedToken54())throw e;if(me&&group){try{if(typeof normalizeClient==='function')normalizeClient()}catch{};try{if(typeof renderAll==='function'){renderAll();clearResumeGuard54();return}}catch{};break}}}if(resumeOnce54(last?.message||'loadState'))return new Promise(()=>{});throw last||new Error('로그인 후 화면을 불러오지 못했습니다.')};
+ try{window.loadState=loadState}catch{}
+}
+if(baseOpenEntryKakao54){openEntry=function(...args){try{return baseOpenEntryKakao54.apply(this,args)}catch(e){console.warn('콕매치 입장창 표시 지연',e);return null}};try{window.openEntry=openEntry}catch{}}
+window.addEventListener('pageshow',()=>{if(me&&group)clearResumeGuard54()});
+})();
