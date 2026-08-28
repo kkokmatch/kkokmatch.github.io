@@ -9,6 +9,7 @@ on:
       - 'app-v5.6-fix2.js'
       - 'app-v5.6-fix3.js'
       - 'app-v5.6-fix4.js'
+      - 'app-v5.6-fix5.js'
 jobs:
   syntax:
     runs-on: ubuntu-latest
@@ -24,6 +25,7 @@ jobs:
           node --check app-v5.6-fix2.js
           node --check app-v5.6-fix3.js
           node --check app-v5.6-fix4.js
+          node --check app-v5.6-fix5.js
           node - <<'NODE'
           const fs=require('fs');
           const s=fs.readFileSync('app-v5.6.js','utf8');
@@ -31,11 +33,13 @@ jobs:
           const f2=fs.readFileSync('app-v5.6-fix2.js','utf8');
           const f3=fs.readFileSync('app-v5.6-fix3.js','utf8');
           const f4=fs.readFileSync('app-v5.6-fix4.js','utf8');
+          const f5=fs.readFileSync('app-v5.6-fix5.js','utf8');
           for(const x of ["window.__kokmatchV56Patch='1.4'",'window.__kokmatchLoadProfiles56=loadProfiles56']) if(!s.includes(x)) throw new Error('missing v5.6 marker: '+x);
           for(const x of ["window.__kokmatchV56Fix1Patch='1.1'",'saveProfileFix1','if(!window.__kokmatchV56Fix3)installSwitch()']) if(!f1.includes(x)) throw new Error('missing fix1 marker: '+x);
           for(const x of ["window.__kokmatchV56Fix2Patch='2.0'",'setInterval(enforce,100)']) if(!f2.includes(x)) throw new Error('missing fix2 marker: '+x);
           for(const x of ["window.__kokmatchV56Fix3Patch='1.1'",'window.__kokmatchFastSwitch56=fastSwitch']) if(!f3.includes(x)) throw new Error('missing fix3 marker: '+x);
           for(const x of ["window.__kokmatchV56Fix4Patch='1.0'",'window.openGroupSwitch56','window.openProfilePhoto80','kokmatch-login-v55','loginCandidate56']) if(!f4.includes(x)) throw new Error('missing fix4 marker: '+x);
+          for(const x of ["window.__kokmatchV56Fix5Patch='1.1'",'activateGroup','activateProfile','blockProfileMenu']) if(!f5.includes(x)) throw new Error('missing fix5 marker: '+x);
           if(f1.includes('kokmatch-updater')) throw new Error('legacy updater endpoint must not be used');
-          console.log('PASS V5.6 FIX1/FIX2/FIX3/FIX4 SYNTAX');
+          console.log('PASS V5.6 FIX1/FIX2/FIX3/FIX4/FIX5 SYNTAX');
           NODE
