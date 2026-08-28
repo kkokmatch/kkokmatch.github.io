@@ -103,7 +103,7 @@ jobs:
           console.log('PASS group switch');
 
           await page.evaluate(()=>goView('settings'));
-          await page.waitForSelector('#profileCard53 #profileFile53');
+          await page.waitForSelector('#profileCard53 #profileFile53',{state:'attached'});
           const chooserPromise=page.waitForEvent('filechooser');
           await page.locator('label[for="profileFile53"]').click();
           const chooser=await chooserPromise;
