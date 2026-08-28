@@ -1,4 +1,4 @@
-name: Bump v21 loader
+name: Bump v5.6 hotfix loader
 
 on:
   push:
@@ -12,25 +12,25 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Bump loader query to v21
+      - name: Bump hotfix loader query
         run: |
           python - <<'PY'
           from pathlib import Path
+          import re
           p=Path('index.html')
           s=p.read_text(encoding='utf-8')
-          old='<script src="/drag-compose-v18.js?v=19"></script>'
-          new='<script src="/drag-compose-v18.js?v=21"></script>'
-          if old in s:
-              p.write_text(s.replace(old,new),encoding='utf-8')
+          n=re.sub(r'/app-v5\.4-hotfix-loader\.js\?v=[^\"]+', '/app-v5.4-hotfix-loader.js?v=22.0', s)
+          if n != s:
+              p.write_text(n,encoding='utf-8')
           PY
       - name: Commit cache bust
         run: |
           if git diff --quiet -- index.html; then
-            echo "already v21"
+            echo "already current"
             exit 0
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add index.html
-          git commit -m "Load v21 app bundle"
+          git commit -m "Load v5.6 hotfix loader v22"
           git push
