@@ -14,7 +14,7 @@ jobs:
           node-version: 22
       - run: npm install --no-save playwright@1.55.0
       - run: npx playwright install --with-deps webkit
-      - name: Verify public site reaches login
+      - name: Verify public site stays on login without reload loop
         run: |
           cat > smoke.mjs <<'EOF'
           import { webkit } from 'playwright';
@@ -25,16 +25,24 @@ jobs:
           });
           await c.addInitScript(()=>{ try{localStorage.clear();sessionStorage.clear();localStorage.setItem('kokmatch_v1_6_reset_once','done')}catch{} });
           const p = await c.newPage();
-          const errors=[]; const logs=[];
+          const errors=[]; const updaterRequests=[]; const mainUrls=[];
           p.on('pageerror',e=>errors.push(String(e)));
-          p.on('console',m=>logs.push(m.type()+': '+m.text()));
-          await p.goto('https://kkokmatch.github.io/?live-smoke='+Date.now(),{waitUntil:'domcontentloaded',timeout:30000});
+          p.on('request',r=>{ if(r.url().includes('kokmatch-updater')) updaterRequests.push(r.url()) });
+          p.on('framenavigated',f=>{ if(f===p.mainFrame()) mainUrls.push(f.url()) });
+          const start='https://kkokmatch.github.io/?loop-smoke='+Date.now();
+          await p.goto(start,{waitUntil:'domcontentloaded',timeout:30000});
           await p.waitForSelector('#loginName',{state:'visible',timeout:25000});
+          await p.waitForTimeout(15000);
           const info = await p.evaluate(()=>({title:document.title,version:document.documentElement.dataset.kokmatchVersion,ready:document.readyState,loginVisible:!!document.querySelector('#loginName')}));
-          console.log('LIVE_STARTUP',JSON.stringify(info));
-          console.log('CONSOLE_TAIL',logs.slice(-20).join('\n'));
-          if(errors.length) throw new Error('page errors: '+errors.join(' | '));
-          if(!info.loginVisible) throw new Error('login UI not visible');
+          console.log('LIVE_STABLE',JSON.stringify(info));
+          console.log('MAIN_URLS',JSON.stringify(mainUrls));
+          console.log('UPDATER_REQUESTS',JSON.stringify(updaterRequests));
+          console.log('FINAL_URL',p.url());
+          if(!info.loginVisible) throw new Error('login UI disappeared');
+          if(!p.url().startsWith('https://kkokmatch.github.io/')) throw new Error('left public app: '+p.url());
+          const externalNav=mainUrls.find(u=>u.includes('supabase.co/functions/v1/kokmatch-updater'));
+          if(externalNav) throw new Error('legacy updater navigation detected: '+externalNav);
+          if(mainUrls.length>3) throw new Error('repeated navigation detected: '+JSON.stringify(mainUrls));
           await b.close();
           EOF
           node smoke.mjs
