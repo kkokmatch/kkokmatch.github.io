@@ -2,8 +2,8 @@
 'use strict';
 if(window.__kokmatchV54Fix27)return;
 window.__kokmatchV54Fix27=true;
-window.__kokmatchIOSMemberSlotFix='27.1';
-document.documentElement.dataset.kokmatchIOSMemberSlotFix='27.1';
+window.__kokmatchIOSMemberSlotFix='27.2';
+document.documentElement.dataset.kokmatchIOSMemberSlotFix='27.2';
 
 const MULTI27='https://wjelumpbjklfrdjxbesj.supabase.co/functions/v1/kokmatch-multi-api';
 let sx27=0,sy27=0,st27=0,moved27=false,lastKey27='',lastAt27=0,startEditId27='',startEditAt27=0;
@@ -14,7 +14,7 @@ function trace27(msg){
   if(!location.pathname.includes('ios-diagnostic'))return;
   let el=document.getElementById('kokmatchV27Status')||document.getElementById('kokmatchV26Status');
   if(!el){el=document.createElement('div');el.id='kokmatchV27Status';el.style.cssText='position:fixed;left:8px;right:8px;bottom:calc(74px + env(safe-area-inset-bottom));z-index:100000;background:#172033ee;color:#fff;border-radius:10px;padding:8px 10px;font:700 11px/1.35 -apple-system,BlinkMacSystemFont,sans-serif;pointer-events:none';document.body.appendChild(el)}
-  el.textContent='v27.1 · '+s;
+  el.textContent='v27.2 · '+s;
  }catch{}
 }
 function err27(e){trace27('오류 · '+(e?.message||String(e)));try{typeof showError==='function'?showError(e):alert(e?.message||String(e))}catch{}}
@@ -26,6 +26,7 @@ function member27(id){id=String(id||'');return members27().find(m=>String(m?.id|
 async function json27(url,opt={}){const r=await fetch(url,{cache:'no-store',...opt}),x=await r.json().catch(()=>({}));if(!r.ok)throw new Error(x.error||x.message||`요청 실패 (${r.status})`);return x}
 function dedupe27(key){const now=Date.now();if(lastKey27===key&&now-lastAt27<700)return true;lastKey27=key;lastAt27=now;return false}
 function within27(r,x,y,pad=6){return !!r&&x>=r.left-pad&&x<=r.right+pad&&y>=r.top-pad&&y<=r.bottom+pad}
+function modalOwns27(target){try{return !!target?.closest?.('#modal.on')}catch{return false}}
 
 function candidates27(ev,x,y){
  const out=[];const add=v=>{if(v&&v.nodeType===1&&!out.includes(v))out.push(v)};
@@ -44,6 +45,7 @@ function actionFromButton27(btn,card){
 }
 function cardCandidates27(all){const cards=[];for(const el of all){const c=el.closest?.('#members .memberCard');if(c&&!cards.includes(c))cards.push(c)}return cards}
 function actionAt27(ev,x,y){
+ if(modalOwns27(ev?.target))return null;
  const all=candidates27(ev,x,y);
  for(const el of all){const btn=el.closest?.('#members .memberBtns button');const a=actionFromButton27(btn);if(a)return a}
  const cards=cardCandidates27(all);
@@ -53,7 +55,7 @@ function actionAt27(ev,x,y){
  }
  return null;
 }
-function memberTouchInfo27(ev,x,y){const all=candidates27(ev,x,y),cards=cardCandidates27(all);if(!cards.length)return null;return{card:cards[0],target:all[0]||null}}
+function memberTouchInfo27(ev,x,y){if(modalOwns27(ev?.target))return null;const all=candidates27(ev,x,y),cards=cardCandidates27(all);if(!cards.length)return null;return{card:cards[0],target:all[0]||null}}
 
 function edit27(id){
  id=String(id||'');const m=member27(id);if(!m){err27(new Error('수정할 회원을 찾지 못했습니다.'));return false}
@@ -77,6 +79,7 @@ function attendance27(id,mode){
 function run27(a){if(!a)return false;if(a.kind==='edit')return edit27(a.id);if(a.kind==='attendance')return attendance27(a.id,a.mode);return false}
 
 window.addEventListener('touchstart',ev=>{
+ if(modalOwns27(ev.target))return;
  const t=ev.touches?.[0];if(!t)return;sx27=t.clientX;sy27=t.clientY;st27=Date.now();moved27=false;
  const a=actionAt27(ev,sx27,sy27);
  if(a){
@@ -90,8 +93,9 @@ window.addEventListener('touchstart',ev=>{
  }
  const info=memberTouchInfo27(ev,sx27,sy27);if(info)trace27('회원영역 터치 감지 · '+cardId27(info.card)+' · '+String(info.target?.className||info.target?.tagName||'target').slice(0,36));
 },{capture:true,passive:false});
-window.addEventListener('touchmove',ev=>{const t=ev.touches?.[0];if(!t)return;if(Math.abs(t.clientX-sx27)>14||Math.abs(t.clientY-sy27)>14)moved27=true},{capture:true,passive:true});
+window.addEventListener('touchmove',ev=>{if(modalOwns27(ev.target))return;const t=ev.touches?.[0];if(!t)return;if(Math.abs(t.clientX-sx27)>14||Math.abs(t.clientY-sy27)>14)moved27=true},{capture:true,passive:true});
 window.addEventListener('touchend',ev=>{
+ if(modalOwns27(ev.target))return;
  const t=ev.changedTouches?.[0];if(!t||moved27||Date.now()-st27>1100)return;const a=actionAt27(ev,t.clientX,t.clientY);if(!a)return;
  if(a.kind==='edit'&&String(a.id||'')===startEditId27&&Date.now()-startEditAt27<1200){
   try{ev.preventDefault();ev.stopPropagation();ev.stopImmediatePropagation()}catch{};return;
