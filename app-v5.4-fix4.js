@@ -47,3 +47,8 @@ if(baseLoadStateKakao54){
 if(baseOpenEntryKakao54){openEntry=function(...args){try{return baseOpenEntryKakao54.apply(this,args)}catch(e){console.warn('콕매치 입장창 표시 지연',e);return null}};try{window.openEntry=openEntry}catch{}}
 window.addEventListener('pageshow',()=>{if(me&&group)clearResumeGuard54()});
 })();
+
+(()=>{
+if(window.__kokmatchV54Fix8LoaderFrom4)return;window.__kokmatchV54Fix8LoaderFrom4=true;
+let tries=0;const timer=setInterval(()=>{if(window.__kokmatchV54Fix8){clearInterval(timer);return}if(window.__kokmatchV54Fix6){clearInterval(timer);const s=document.createElement('script');s.src='/app-v5.4-fix8.js?v=8.0&t='+Date.now();s.async=false;s.onerror=()=>console.error('콕매치 회원명부/프로필 보정 로드 실패');document.body.appendChild(s);return}if(++tries>=160)clearInterval(timer)},25);
+})();
