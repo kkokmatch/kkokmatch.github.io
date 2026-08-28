@@ -2,11 +2,20 @@
 'use strict';
 if(window.__kokmatchV56Fix5)return;
 window.__kokmatchV56Fix5=true;
-window.__kokmatchV56Fix5Patch='1.1';
-window.__kokmatchV56Fix5Build='2026.08.28.9';
+window.__kokmatchV56Fix5Patch='1.2';
+window.__kokmatchV56Fix5Build='2026.08.28.10';
 let busySeenAt=0;
 function me56(){try{return (typeof me!=='undefined'&&me)||window.me||null}catch{return window.me||null}}
 function group56(){try{return (typeof group!=='undefined'&&group)||window.group||null}catch{return window.group||null}}
+function lockButton(b){
+ if(!b||b.__kokmatchDisabledLock56)return b;
+ try{
+  b.removeAttribute('disabled');
+  Object.defineProperty(b,'disabled',{configurable:true,enumerable:true,get(){return false},set(){try{this.removeAttribute('disabled')}catch{}}});
+  b.__kokmatchDisabledLock56=true;
+ }catch{try{b.disabled=false;b.removeAttribute('disabled')}catch{}}
+ return b;
+}
 function ensure(){
  const m=me56();if(!m)return;
  let b=document.getElementById('groupBtn');
@@ -16,16 +25,17 @@ function ensure(){
   if(line){b=document.createElement('button');b.id='groupBtn';b.className='groupBtn';b.type='button';line.appendChild(b)}
  }
  if(!b)return;
+ lockButton(b);
  const markedBusy=window.__kokmatchGroupSwitching12===true;
  const busyText=/모임\s*변경\s*중/.test(String(b.textContent||''));
  if(markedBusy&&busyText){
   if(!busySeenAt)busySeenAt=Date.now();
-  if(Date.now()-busySeenAt<5000)return;
+  if(Date.now()-busySeenAt<5000){b.setAttribute('aria-disabled','true');return}
   window.__kokmatchGroupSwitching12=false;
  }
  busySeenAt=0;
- b.disabled=false;
  b.removeAttribute('disabled');
+ b.removeAttribute('aria-disabled');
  b.classList.remove('groupSwitching12','switching52');
  const name=String(group56()?.name||'모임');
  if(!/▾/.test(String(b.textContent||''))||busyText)b.textContent=name+' ▾';
@@ -47,5 +57,5 @@ if(!window.__kokmatchProfileCapture561){window.__kokmatchProfileCapture561=true;
 ensure();
 const MO=window.MutationObserver;
 try{new MO(()=>queueMicrotask(ensure)).observe(document.body,{subtree:true,childList:true,attributes:true,attributeFilter:['disabled','class']})}catch{}
-setInterval(ensure,200);
+setInterval(ensure,120);
 })();
