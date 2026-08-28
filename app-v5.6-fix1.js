@@ -94,5 +94,5 @@ function updateCapture(e){const b=e.target?.closest?.('#headerRefresh51,[data-ko
 function installUpdate(){window.__kokmatchHardRefresh56=forceUpdate;window.forceUpdateApp=forceUpdate;window.refreshApp51=forceUpdate;window.refreshApp50=forceUpdate;window.refreshApp49=forceUpdate;try{forceUpdateApp=forceUpdate}catch{};try{refreshApp51=forceUpdate}catch{};if(!window.__kokmatchUpdateCapture561){window.__kokmatchUpdateCapture561=true;document.addEventListener('click',updateCapture,true)}const b=document.getElementById('headerRefresh51');if(b&&!updateBusy)b.textContent='↻ 최신본 적용'}
 function install(){window.__kokmatchVersionLock=VERSION;window.__kokmatchBuild=BUILD;installUpdate();installSwitch();installProfile();try{document.documentElement.dataset.kokmatchVersion=VERSION;document.title='콕매치 v'+VERSION}catch{}}
 install();
-setInterval(()=>{installUpdate();installSwitch();if(window.changeProfile53!==saveProfileFix1)installProfile()},500);
+setInterval(()=>{installUpdate();if(!window.__kokmatchV56Fix3)installSwitch();if(window.changeProfile53!==saveProfileFix1)installProfile()},500);
 })();
