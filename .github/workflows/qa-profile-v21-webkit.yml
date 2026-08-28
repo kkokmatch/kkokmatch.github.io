@@ -15,50 +15,35 @@ jobs:
         with: {node-version: 22}
       - run: npm install --no-save playwright@1.55.0
       - run: npx playwright install --with-deps webkit
-      - name: verify real roster page mapping and person icons
+      - name: verify rendered IDs photo isolation and person icons
         run: |
           cat > qa-webkit.mjs <<'EOF'
           import { webkit } from 'playwright';
-          const PROFILE='https://wjelumpbjklfrdjxbesj.supabase.co/functions/v1/kokmatch-profile-v53';
           const PARK='m8f6ef715bdb8';
           const FEMALE_MANAGER='m7fb3d830300b';
           const photo='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAusB9Y9ZKxkAAAAASUVORK5CYII=';
           const roster=[
-            [PARK,'박태영','남',1989,'C','admin'],
-            ['m6c3cac48f37e','김철수','남',2007,'C','organizer'],
-            ['ma935c28f1c1d','김수진','여',2006,'E','member'],
-            ['mf82f2791c13f','송민지','여',2002,'D','organizer'],
-            ['m664f1494eb85','박나라','여',1996,'C','organizer'],
-            ['m87f23c3ac3de','박수철','남',1969,'B','member'],
-            ['mfe57ff99c65c','방시혁','남',1979,'E','member'],
-            ['m24cc7f36d7da','박찬열','남',1988,'C','member'],
-            ['m742aafdafab3','카리나','여',1999,'A','member'],
-            ['m5393aa1242c9','장원영','여',2000,'A','member'],
-            ['mac74576c9478','최설윤','여',2001,'B','member'],
-            [FEMALE_MANAGER,'배솜다리','여',1994,'C','manager'],
-            ['m3b1c46b1df48','최희진','여',2004,'E','member'],
-            ['mfd02a9e95e5a','김연수','여',1990,'D','organizer'],
-            ['m298ec69a2e10','홍길동','남',1989,'C','member'],
-            ['mff05bd9ef505','윤동건','남',1989,'E','manager'],
-            ['m6c163d30a5be','김은영','여',1990,'D','organizer'],
-            ['mdc2fb2b93693','배솜다리','남',1999,'C','member']
+            [PARK,'박태영','남',1989,'C','admin'],['m6c3cac48f37e','김철수','남',2007,'C','organizer'],['ma935c28f1c1d','김수진','여',2006,'E','member'],['mf82f2791c13f','송민지','여',2002,'D','organizer'],['m664f1494eb85','박나라','여',1996,'C','organizer'],['m87f23c3ac3de','박수철','남',1969,'B','member'],['mfe57ff99c65c','방시혁','남',1979,'E','member'],['m24cc7f36d7da','박찬열','남',1988,'C','member'],['m742aafdafab3','카리나','여',1999,'A','member'],['m5393aa1242c9','장원영','여',2000,'A','member'],['mac74576c9478','최설윤','여',2001,'B','member'],[FEMALE_MANAGER,'배솜다리','여',1994,'C','manager'],['m3b1c46b1df48','최희진','여',2004,'E','member'],['mfd02a9e95e5a','김연수','여',1990,'D','organizer'],['m298ec69a2e10','홍길동','남',1989,'C','member'],['mff05bd9ef505','윤동건','남',1989,'E','manager'],['m6c163d30a5be','김은영','여',1990,'D','organizer'],['mdc2fb2b93693','배솜다리','남',1999,'C','member']
           ].map(([id,name,gender,year,cls,role],i)=>({id,name,gender,year,cls,role,type:'member',state:'waiting',age:'30',joinedAt:i+1,totalGames:0}));
+          const byId=new Map(roster.map(m=>[m.id,m]));
           const b=await webkit.launch({headless:true});
           const p=await b.newPage({viewport:{width:390,height:844},userAgent:'Mozilla/5.0 (iPhone; CPU iPhone OS 18_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 KAKAOTALK'});
-          const errors=[];p.on('pageerror',e=>errors.push(String(e)));
-          await p.route(PROFILE+'**',async r=>{const u=new URL(r.request().url());if(u.searchParams.get('full')==='1'){const id=u.searchParams.get('memberId');return r.fulfill({status:200,contentType:'application/json',body:JSON.stringify({image:id===PARK?photo:'',fullImage:id===PARK?photo:''})})}return r.fulfill({status:200,contentType:'application/json',body:JSON.stringify({profiles:{[PARK]:{image:photo}}})})});
-          let ready=false;for(let i=0;i<8&&!ready;i++){await p.goto('https://kkokmatch.github.io/?qa=real-roster-212&t='+Date.now(),{waitUntil:'networkidle'});try{await p.waitForFunction(()=>window.__kokmatchV54Fix21===true&&window.__kokmatchProfileCanonical==='21.2'&&window.__kokmatchLegacyProfileRemappersDisabled===true,{timeout:12000});ready=true}catch{}}if(!ready)throw new Error('fix21.2 not live in WebKit');
+          const errors=[];let profileHits=0;
+          p.on('pageerror',e=>errors.push(String(e)));
+          p.on('console',m=>{const t=m.text();if(t.includes('profile21'))console.log('BROWSER',t)});
+          await p.route('**/functions/v1/kokmatch-profile-v53**',async r=>{profileHits++;const u=new URL(r.request().url());console.log('PROFILE HIT',u.pathname,u.search);if(u.searchParams.get('full')==='1'){const id=u.searchParams.get('memberId');return r.fulfill({status:200,contentType:'application/json',body:JSON.stringify({image:id===PARK?photo:'',fullImage:id===PARK?photo:''})})}return r.fulfill({status:200,contentType:'application/json',body:JSON.stringify({profiles:{[PARK]:{image:photo}}})})});
+          let ready=false;for(let i=0;i<8&&!ready;i++){await p.goto('https://kkokmatch.github.io/?qa=real-roster-213&t='+Date.now(),{waitUntil:'networkidle'});try{await p.waitForFunction(()=>window.__kokmatchV54Fix21===true&&window.__kokmatchProfileCanonical==='21.2'&&window.__kokmatchLegacyProfileRemappersDisabled===true,{timeout:12000});ready=true}catch{}}if(!ready)throw new Error('fix21.2 not live in WebKit');
           await p.evaluate(({roster,PARK})=>{T='qa-token';currentGroupId='grp_4545db22c88d';S=emptyClientState();S.members=roster;S.queue=[];S.pendingGames=[];S.games=[];S.history=[];S.pairCounts={};group={groupId:'grp_4545db22c88d',name:'QA 실제명부'};groups=[];me={memberId:PARK,displayName:'박태영',role:'admin',globalAdmin:true,groupId:'grp_4545db22c88d'};normalizeClient();currentView='members';renderAll();document.getElementById('login')?.classList.add('hide')},{roster,PARK});
-          await p.waitForFunction(()=>window.__kokmatchProfilesLoaded21==='grp_4545db22c88d',{timeout:10000});await p.waitForTimeout(700);
+          await p.waitForFunction(()=>window.__kokmatchProfilesLoaded21==='grp_4545db22c88d',{timeout:10000});await p.waitForTimeout(900);
           const readRows=()=>p.evaluate(()=>[...document.querySelectorAll('#members .memberCard')].map(c=>{const a=c.querySelector('.profileIdentity21'),on=c.querySelector('.pairBtn')?.getAttribute('onclick')||'';return{name:(c.querySelector('.memberName45')?.textContent||'').trim(),actionId:(on.match(/openPairs\(['\"]([^'\"]+)['\"]\)/)||[])[1]||'',id:a?.dataset.memberId||'',gender:a?.dataset.gender||'',photo:a?.dataset.photo||'',img:a?.querySelector('img')?.getAttribute('src')||'',text:(a?.textContent||'').trim(),hasPerson:!!a?.querySelector('svg.genderPersonIcon21'),aria:a?.getAttribute('aria-label')||''}}));
-          const verify=async(label,expected)=>{const rows=await readRows();console.log(label,rows);if(rows.length!==expected.length)throw new Error(label+' count '+rows.length);for(let i=0;i<rows.length;i++){const r=rows[i],m=expected[i];if(r.id!==m.id||r.actionId!==m.id||r.name!==m.name||r.gender!==m.gender)throw new Error(label+' identity mismatch '+JSON.stringify({i,r,m}));if(m.id===PARK){if(r.photo!=='1'||r.img!==photo)throw new Error(label+' Park photo missing '+JSON.stringify(r))}else{if(r.photo!=='0'||r.img||!r.hasPerson||r.text!=='')throw new Error(label+' photo/icon leak '+JSON.stringify({i,r,m}));if(r.aria!==(m.gender==='여'?'여성':'남성'))throw new Error(label+' aria gender mismatch '+JSON.stringify({i,r,m}))}}return rows};
-          await verify('PAGE1',roster.slice(0,10));
-          await p.evaluate(()=>memberPageGo46(2));await p.waitForTimeout(700);
-          const page2=await verify('PAGE2',roster.slice(10,18));
-          if(page2.some(r=>r.img===photo||r.id===PARK))throw new Error('Park photo/id leaked to page2');
-          const sameName=page2.filter(r=>r.name==='배솜다리');if(sameName.length!==2||sameName[0].id===sameName[1].id||sameName[0].gender!=='여'||sameName[1].gender!=='남')throw new Error('same-name members collapsed '+JSON.stringify(sameName));
+          const verifyRows=(label,rows)=>{console.log(label,rows);for(const r of rows){const m=byId.get(r.actionId);if(!m)throw new Error(label+' unknown action '+JSON.stringify(r));if(r.id!==m.id||r.name!==m.name||r.gender!==m.gender)throw new Error(label+' identity mismatch '+JSON.stringify({r,m}));if(m.id===PARK){if(r.photo!=='1'||r.img!==photo)throw new Error(label+' Park photo missing '+JSON.stringify(r))}else{if(r.photo!=='0'||r.img||!r.hasPerson||r.text!=='')throw new Error(label+' photo/icon leak '+JSON.stringify({r,m}));if(r.aria!==(m.gender==='여'?'여성':'남성'))throw new Error(label+' gender icon mismatch '+JSON.stringify({r,m}))}}};
+          const page1=await readRows();if(page1.length!==10)throw new Error('PAGE1 count '+page1.length);verifyRows('PAGE1',page1);
+          await p.evaluate(()=>memberPageGo46(2));await p.waitForTimeout(800);
+          const page2=await readRows();if(page2.length!==8)throw new Error('PAGE2 count '+page2.length);verifyRows('PAGE2',page2);
+          const allIds=[...page1,...page2].map(r=>r.id);if(new Set(allIds).size!==18)throw new Error('pagination duplicate/missing '+JSON.stringify(allIds));if(page2.some(r=>r.id===PARK||r.img===photo))throw new Error('Park leaked to page2 '+JSON.stringify(page2));
+          const same=[...page1,...page2].filter(r=>r.name==='배솜다리');if(same.length!==2||new Set(same.map(x=>x.id)).size!==2||!same.some(x=>x.gender==='여')||!same.some(x=>x.gender==='남'))throw new Error('same-name members collapsed '+JSON.stringify(same));
           await p.evaluate(({FEMALE_MANAGER})=>{me={memberId:FEMALE_MANAGER,displayName:'배솜다리',role:'manager',globalAdmin:false,groupId:'grp_4545db22c88d'};currentView='settings';renderAll()},{FEMALE_MANAGER});await p.waitForTimeout(500);
-          const settings=await p.evaluate(()=>({img:document.querySelector('#profileCard53 .profilePreview53 img')?.getAttribute('src')||'',text:document.querySelector('#profileCard53 .profilePreview53')?.textContent?.trim()||'',person:!!document.querySelector('#profileCard53 .profileFallback21 svg.genderPersonIcon21'),cls:document.querySelector('#profileCard53 .profileFallback21')?.className||'',aria:document.querySelector('#profileCard53 .profileFallback21')?.getAttribute('aria-label')||''}));console.log('SETTINGS',settings);if(settings.img||settings.text||!settings.person||!settings.cls.includes('female')||settings.aria!=='여성')throw new Error('settings inherited Park photo or lost person icon '+JSON.stringify(settings));
-          if(errors.length)throw new Error(errors.join(' | '));console.log('PASS real 18-member roster / duplicate name / person icons / iPhone WebKit');await b.close();
+          const settings=await p.evaluate(()=>({img:document.querySelector('#profileCard53 .profilePreview53 img')?.getAttribute('src')||'',text:document.querySelector('#profileCard53 .profilePreview53')?.textContent?.trim()||'',person:!!document.querySelector('#profileCard53 .profileFallback21 svg.genderPersonIcon21'),cls:document.querySelector('#profileCard53 .profileFallback21')?.className||'',aria:document.querySelector('#profileCard53 .profileFallback21')?.getAttribute('aria-label')||''}));console.log('SETTINGS',settings);if(settings.img||settings.text||!settings.person||!settings.cls.includes('female')||settings.aria!=='여성')throw new Error('settings inherited Park photo '+JSON.stringify(settings));
+          if(profileHits<1)throw new Error('profile endpoint was not intercepted');if(errors.length)throw new Error(errors.join(' | '));console.log('PASS rendered IDs / 18 unique / duplicate name / person icons / photo isolation / iPhone WebKit');await b.close();
           EOF
           node qa-webkit.mjs
