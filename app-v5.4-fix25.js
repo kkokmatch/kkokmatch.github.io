@@ -55,12 +55,15 @@ function prep25(){
 function later25(){requestAnimationFrame(prep25);setTimeout(prep25,40);setTimeout(prep25,180)}
 
 window.addEventListener('touchstart',ev=>{
+ if(window.__kokmatchV54Fix26)return;
  const t=ev.touches?.[0];if(!t)return;sx25=t.clientX;sy25=t.clientY;st25=Date.now();moved25=false;
 },{capture:true,passive:true});
 window.addEventListener('touchmove',ev=>{
+ if(window.__kokmatchV54Fix26)return;
  const t=ev.touches?.[0];if(!t)return;if(Math.abs(t.clientX-sx25)>12||Math.abs(t.clientY-sy25)>12)moved25=true;
 },{capture:true,passive:true});
 window.addEventListener('touchend',ev=>{
+ if(window.__kokmatchV54Fix26)return;
  const t=ev.changedTouches?.[0];if(!t||moved25||Date.now()-st25>900)return;
  const btn=buttonAt25(t.clientX,t.clientY,ev.target);if(!btn)return;
  if(handle25(btn)){
@@ -69,8 +72,8 @@ window.addEventListener('touchend',ev=>{
   later25();
  }
 },{capture:true,passive:false});
-/* suppress the synthetic click generated after a handled iOS touch */
 window.addEventListener('click',ev=>{
+ if(window.__kokmatchV54Fix26)return;
  if(Date.now()-lastHandled25>700)return;
  const btn=ev.target?.closest?.('button');if(actionable25(btn)){try{ev.preventDefault();ev.stopPropagation();ev.stopImmediatePropagation()}catch{}}
 },{capture:true});
