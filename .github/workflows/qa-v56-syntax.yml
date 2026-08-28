@@ -31,7 +31,7 @@ jobs:
           for(const x of ["window.__kokmatchV56Patch='1.4'","window.__kokmatchV56Build='2026.08.28.1'",'window.__kokmatchLoadProfiles56=loadProfiles56']) if(!s.includes(x)) throw new Error('missing v5.6 marker: '+x);
           for(const x of ["window.__kokmatchV56Fix1Patch='1.1'","window.__kokmatchV56Fix1Build='2026.08.28.3'",'saveProfileFix1','forceUpdate','if(!window.__kokmatchV56Fix3)installSwitch()']) if(!f1.includes(x)) throw new Error('missing fix1 marker: '+x);
           for(const x of ["window.__kokmatchV56Fix2Patch='2.0'","window.__kokmatchV56Fix2Build='2026.08.28.4'",'setInterval(enforce,100)']) if(!f2.includes(x)) throw new Error('missing fix2 marker: '+x);
-          for(const x of ["window.__kokmatchV56Fix3Patch='1.0'","window.__kokmatchV56Fix3Build='2026.08.28.5'",'refreshProfilesLater','globalAdmin()','window.__kokmatchFastSwitch56=fastSwitch']) if(!f3.includes(x)) throw new Error('missing fix3 marker: '+x);
+          for(const x of ["window.__kokmatchV56Fix3Patch='1.1'","window.__kokmatchV56Fix3Build='2026.08.28.6'",'refreshProfilesLater','globalAdmin()','releaseBusy','window.__kokmatchFastSwitch56=fastSwitch']) if(!f3.includes(x)) throw new Error('missing fix3 marker: '+x);
           if(f1.includes('kokmatch-updater')) throw new Error('legacy updater endpoint must not be used');
           console.log('PASS V5.6 FIX1/FIX2/FIX3 SYNTAX');
           NODE
