@@ -1,12 +1,15 @@
 (()=>{
 if(window.__kokmatchV54Fix4)return;window.__kokmatchV54Fix4=true;
-// 구형 프로필/성별 보정기는 서로 DOM을 덮어쓰므로 실행하지 않는다.
+// 구형 프로필/성별 보정기는 회원명부 페이지가 바뀐 뒤 전체 S.members 인덱스로
+// 아바타를 다시 덮어써 2페이지에 1페이지 회원 정보가 섞이므로 실행하지 않는다.
+window.__kokmatchV54Fix6=true;
 window.__kokmatchV54Fix8=true;
 window.__kokmatchV54Fix9=true;
 window.__kokmatchV54Fix10=true;
 window.__kokmatchV54Fix18=true;
 window.__kokmatchV54Fix19=true;
 window.__kokmatchV54Fix20=true;
+window.__kokmatchLegacyProfileRemappersDisabled=true;
 function alignQueue54(){
  const box=typeof $==='function'?$('queue'):document.getElementById('queue');if(!box)return;
  const slots=[...box.querySelectorAll('.composer54 .pendingSlot')];
@@ -48,7 +51,7 @@ window.addEventListener('pageshow',()=>{if(me&&group)clearResumeGuard54()});
 if(window.__kokmatchV54FinalProfileBridge4)return;window.__kokmatchV54FinalProfileBridge4=true;
 let tries=0;const timer=setInterval(()=>{
  if(window.__kokmatchV54Fix21){clearInterval(timer);return}
- if(window.__kokmatchV54Fix6){clearInterval(timer);const s=document.createElement('script');s.src='/app-v5.4-fix21.js?v=21.0&t='+Date.now();s.async=false;s.onerror=()=>console.error('콕매치 최종 프로필/성별 보정 로드 실패');document.body.appendChild(s);return}
+ if(window.__kokmatchV54Fix6){clearInterval(timer);const s=document.createElement('script');s.src='/app-v5.4-fix21.js?v=21.2&t='+Date.now();s.async=false;s.onerror=()=>console.error('콕매치 최종 프로필/성별 보정 로드 실패');document.body.appendChild(s);return}
  if(++tries>=160)clearInterval(timer)
 },25);
 })();
