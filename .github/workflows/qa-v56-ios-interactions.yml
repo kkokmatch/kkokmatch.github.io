@@ -24,12 +24,14 @@ jobs:
           const browser=await webkit.launch({headless:true});
           const page=await browser.newPage({...devices['iPhone 13']});
           page.setDefaultTimeout(15000);
-          await page.setContent(`<!doctype html><html><head></head><body>
+          const fixture=`<!doctype html><html><head></head><body>
             <div id="login" class="login hide"><div id="loginBox"></div></div>
             <div class="app"><header class="top"><div class="toprow"><div><div class="groupLine"><button id="groupBtn" class="groupBtn" disabled>모임</button></div></div></div></header>
             <main><section id="members"><div class="profileIdentity80" data-member-id56="self"><img src="data:image/jpeg;base64,THUMB"></div></section><section id="queue"></section><section id="playing"></section></main></div>
             <div id="modal" class="modal"><div id="modalSheet"></div></div>
-          </body></html>`);
+          </body></html>`;
+          await page.route('http://fixture.local/**',route=>route.fulfill({status:200,contentType:'text/html',body:fixture}));
+          await page.goto('http://fixture.local/');
           await page.evaluate(()=>{
             window.T='token-grp_a';window.currentGroupId='grp_a';window.currentView='members';
             window.S={dayKey:'2026-08-28',courtCount:2,courtNames:['1코트','2코트'],members:[{id:'self',name:'김동일',age:'30',cls:'C',state:'waiting',role:'member',type:'member'}],queue:['self'],pendingGames:[],games:[],history:[],pairCounts:{},attendancePolls:[]};
@@ -65,7 +67,6 @@ jobs:
           await page.addScriptTag({path:'app-v5.6-fix5.js'});
           await page.waitForFunction(()=>window.__kokmatchV56Fix3Patch==='1.1'&&window.__kokmatchV56Fix4Patch==='1.0'&&window.__kokmatchV56Fix5Patch==='1.1');
 
-          // Legacy header disabled the button. Latest fix must recover it.
           await page.evaluate(()=>window.renderHeader());
           await page.waitForFunction(()=>document.getElementById('groupBtn')&&!document.getElementById('groupBtn').disabled);
           await page.locator('#groupBtn').click();
@@ -74,7 +75,6 @@ jobs:
           await page.locator('#groupChoice56 button').filter({hasText:'B모임'}).click();
           await page.waitForFunction(()=>window.currentGroupId==='grp_b'&&window.group?.groupId==='grp_b'&&!document.getElementById('groupBtn')?.disabled);
 
-          // Tapping a member photo must open the in-app high-res viewer and suppress context menu.
           await page.locator('#members .profileIdentity80 img').click();
           await page.waitForSelector('#profileViewer56:not(.hide)');
           await page.waitForFunction(()=>document.querySelector('#profileViewer56 img')?.getAttribute('src')==='data:image/jpeg;base64,FULL_IMAGE');
@@ -82,7 +82,6 @@ jobs:
           if(!prevented)throw new Error('profile context menu was not prevented');
           await page.locator('.profileViewerClose56').click();
 
-          // Exact-name -> all same-name candidates -> select one -> PIN -> login.
           await page.evaluate(()=>{window.T='';window.me=null;window.group=null;window.currentGroupId='';localStorage.removeItem('kokmatch_token');localStorage.removeItem('kokmatch_group_id');window.renderLoginName()});
           await page.locator('#loginName').fill('김동일');
           await page.locator('#loginNext56').click();
