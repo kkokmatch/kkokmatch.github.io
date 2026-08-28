@@ -2,7 +2,7 @@
 'use strict';
 if(window.__kokmatchV54Fix23)return;
 window.__kokmatchV54Fix23=true;
-window.__kokmatchInteractionPatch='23.0';
+window.__kokmatchInteractionPatch='23.1';
 
 const AUTH23='https://wjelumpbjklfrdjxbesj.supabase.co/functions/v1/kokmatch-auth-v38';
 const MULTI23='https://wjelumpbjklfrdjxbesj.supabase.co/functions/v1/kokmatch-multi-api';
@@ -11,13 +11,13 @@ const legacyOpenEdit23=typeof window.openEditMember==='function'?window.openEdit
 let switching23=false,membershipsBusy23=false,syncBusy23=false;
 
 function esc23(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
-function tok23(){try{return String(T||localStorage.getItem('kokmatch_token')||'')}catch{return String(localStorage.getItem('kokmatch_token')||'')}}
-function gid23(){try{return String(currentGroupId||localStorage.getItem('kokmatch_group_id')||'')}catch{return String(localStorage.getItem('kokmatch_group_id')||'')}}
-function mine23(){try{return me||null}catch{return null}}
-function grp23(){try{return group||null}catch{return null}}
+function tok23(){try{return String(T||window.T||localStorage.getItem('kokmatch_token')||'')}catch{return String(window.T||localStorage.getItem('kokmatch_token')||'')}}
+function gid23(){try{return String(currentGroupId||window.currentGroupId||localStorage.getItem('kokmatch_group_id')||'')}catch{return String(window.currentGroupId||localStorage.getItem('kokmatch_group_id')||'')}}
+function mine23(){try{return me||window.me||null}catch{return window.me||null}}
+function grp23(){try{return group||window.group||null}catch{return window.group||null}}
 function member23(id){try{return typeof M==='function'?M(String(id||'')):null}catch{return null}}
-function setToken23(v){v=String(v||'');try{T=v}catch{};try{localStorage.setItem('kokmatch_token',v)}catch{}}
-function setGroup23(v){v=String(v||'');try{currentGroupId=v}catch{};try{localStorage.setItem('kokmatch_group_id',v)}catch{}}
+function setToken23(v){v=String(v||'');try{T=v}catch{};try{window.T=v}catch{};try{localStorage.setItem('kokmatch_token',v)}catch{}}
+function setGroup23(v){v=String(v||'');try{currentGroupId=v}catch{};try{window.currentGroupId=v}catch{};try{localStorage.setItem('kokmatch_group_id',v)}catch{}}
 function show23(e){const msg=e?.message||String(e||'처리 중 오류가 발생했습니다.');try{if(typeof showError==='function')showError(new Error(msg));else alert(msg)}catch{}}
 async function json23(url,opt={}){const r=await fetch(url,{cache:'no-store',...opt}),x=await r.json().catch(()=>({}));if(!r.ok){const e=new Error(x.error||x.message||`요청 실패 (${r.status})`);e.status=r.status;throw e}return x}
 
@@ -88,6 +88,11 @@ async function state23(target,token){const u=new URL(MULTI23);u.searchParams.set
 function applyState23(x,target,token){
  setToken23(token);setGroup23(target);
  try{S=x.data;me=x.user;group=x.group;if(Array.isArray(x.groups))groups=x.groups;if(Array.isArray(x.groupSummaries))groupSummaries=x.groupSummaries}catch(e){throw e}
+ try{
+  window.S=S;window.me=me;window.group=group;window.currentGroupId=String(target);window.T=String(token||'');
+  if(typeof groups!=='undefined')window.groups=groups;
+  if(typeof groupSummaries!=='undefined')window.groupSummaries=groupSummaries;
+ }catch{}
  try{if(typeof normalizeClient==='function')normalizeClient()}catch{}
  try{window.__kokmatchProfilesLoaded21=''}catch{}
  try{if(typeof renderAll==='function')renderAll()}catch{}
