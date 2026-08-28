@@ -1,0 +1,40 @@
+name: Live startup smoke
+
+on:
+  push:
+    paths:
+      - '.github/workflows/live-startup-smoke.yml'
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install --no-save playwright@1.55.0
+      - run: npx playwright install --with-deps webkit
+      - name: Verify public site reaches login
+        run: |
+          cat > smoke.mjs <<'EOF'
+          import { webkit } from 'playwright';
+          const b = await webkit.launch({headless:true});
+          const c = await b.newContext({
+            viewport:{width:390,height:844},
+            userAgent:'Mozilla/5.0 (iPhone; CPU iPhone OS 18_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.6 Mobile/15E148 Safari/604.1'
+          });
+          await c.addInitScript(()=>{ try{localStorage.clear();sessionStorage.clear();localStorage.setItem('kokmatch_v1_6_reset_once','done')}catch{} });
+          const p = await c.newPage();
+          const errors=[]; const logs=[];
+          p.on('pageerror',e=>errors.push(String(e)));
+          p.on('console',m=>logs.push(m.type()+': '+m.text()));
+          await p.goto('https://kkokmatch.github.io/?live-smoke='+Date.now(),{waitUntil:'domcontentloaded',timeout:30000});
+          await p.waitForSelector('#loginName',{state:'visible',timeout:25000});
+          const info = await p.evaluate(()=>({title:document.title,version:document.documentElement.dataset.kokmatchVersion,ready:document.readyState,loginVisible:!!document.querySelector('#loginName')}));
+          console.log('LIVE_STARTUP',JSON.stringify(info));
+          console.log('CONSOLE_TAIL',logs.slice(-20).join('\n'));
+          if(errors.length) throw new Error('page errors: '+errors.join(' | '));
+          if(!info.loginVisible) throw new Error('login UI not visible');
+          await b.close();
+          EOF
+          node smoke.mjs
