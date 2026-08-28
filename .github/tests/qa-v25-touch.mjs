@@ -11,14 +11,31 @@ await page.addInitScript(()=>{localStorage.setItem('kokmatch_v1_6_reset_once','d
 await page.route('**/latest-version.json*',r=>r.fulfill({status:200,contentType:'application/json',body:JSON.stringify({version:54,label:'5.4',semanticVersion:'5.4'})}));
 await page.route('https://wjelumpbjklfrdjxbesj.supabase.co/functions/v1/**',async route=>{const req=route.request(),u=new URL(req.url()),path=u.pathname;let body={};try{body=req.postData()?JSON.parse(req.postData()):{}}catch{}let out={};if(path.endsWith('/kokmatch-multi-api')){const api=u.searchParams.get('api');if(api==='state')out=state(u.searchParams.get('groupId')||'grp_a');else if(api==='action'){actionBodies.push(body);out={data:state(body.groupId||'grp_a').data}}}else if(path.endsWith('/kokmatch-state-v46')){const g=u.searchParams.get('groupId')||'grp_a';out={...state(g),memberCount:state(g).data.members.length}}else if(path.endsWith('/kokmatch-auth-v38')){if(body.action==='my_memberships')out={memberships:[{groupId:'grp_a',groupName:'테스트모임',memberId:'mgr',role:'manager',roleLabel:'모임관리자'},{groupId:'grp_b',groupName:'B모임',memberId:'mgrb',role:'manager',roleLabel:'모임관리자'}]};else if(body.action==='switch_group')out={success:true,token:'qa-token-'+body.groupId,groupId:body.groupId,groupName:body.groupId==='grp_b'?'B모임':'테스트모임',memberId:body.groupId==='grp_b'?'mgrb':'mgr',role:'manager',roleLabel:'모임관리자'}}else if(path.endsWith('/kokmatch-profile-v53')){out=u.searchParams.get('full')==='1'?{image:'',fullImage:''}:{profiles:{}}}else if(path.endsWith('/kokmatch-updater'))out={version:0,label:'0.0',autoUpdate:false};else if(path.endsWith('/kokmatch-v66-api'))out={data:state(body.groupId||'grp_a').data};else out={data:state(body.groupId||'grp_a').data};await route.fulfill({status:200,contentType:'application/json',body:JSON.stringify(out)})});
 const errors=[];page.on('pageerror',e=>errors.push(e.message));
-async function tap(loc){await loc.scrollIntoViewIfNeeded();await page.waitForTimeout(80);const b=await loc.boundingBox();if(!b)throw new Error('no box for '+await loc.evaluate(e=>e.outerHTML));await page.touchscreen.tap(b.x+b.width/2,b.y+b.height/2);}
+async function tapFresh(factory,label){
+ let last;
+ for(let i=0;i<10;i++){
+  try{
+   const loc=factory().first();
+   await loc.waitFor({state:'visible',timeout:2500});
+   await page.waitForTimeout(230);
+   const current=factory().first();
+   const b=await current.boundingBox();
+   if(!b)throw new Error('no bounding box');
+   await page.touchscreen.tap(b.x+b.width/2,b.y+b.height/2);
+   return;
+  }catch(e){last=e;await page.waitForTimeout(120)}
+ }
+ throw new Error('tap failed '+label+': '+String(last?.message||last));
+}
 await page.goto('http://127.0.0.1:4173/?qa=v25touch',{waitUntil:'domcontentloaded'});
 await page.waitForFunction(()=>window.__kokmatchTouchBridge==='25.0'&&window.__kokmatchRosterCanonical==='22.2');
 await page.waitForFunction(()=>document.querySelectorAll('#members .memberCard').length===10);
-let card=page.locator('#members .memberCard[data-member-id22="m1"]');
-await tap(card.locator('button').filter({hasText:'수정'}));await page.waitForSelector('#modal.on #fmName');if(await page.locator('#fmName').inputValue()!=='회원1')throw new Error('wrong edit');console.log('PASS TOUCH edit');await page.evaluate(()=>closeModal());
-card=page.locator('#members .memberCard[data-member-id22="m1"]');await tap(card.locator('.btn.enter'));await page.waitForTimeout(300);if(!actionBodies.some(x=>x.action==='set_member_attendance'&&x.memberId==='m1'&&x.mode==='waiting'))throw new Error('touch attendance missing '+JSON.stringify(actionBodies));console.log('PASS TOUCH attendance');
-await tap(page.locator('#members .memberPager46 button').filter({hasText:'다음'}));await page.waitForFunction(()=>window.__kokmatchMemberPage46===2);console.log('PASS TOUCH pager');
-await tap(page.locator('#members .memberPager46 button').filter({hasText:'이전'}));await page.waitForFunction(()=>window.__kokmatchMemberPage46===1);
-await tap(page.locator('#groupBtn'));await page.waitForSelector('#groupChoice23');console.log('PASS TOUCH group open');await tap(page.locator('#groupChoice23 button').filter({hasText:'B모임'}));await page.waitForFunction(()=>window.currentGroupId==='grp_b'&&document.querySelector('#groupBtn')?.textContent.includes('B모임'));console.log('PASS TOUCH group switch');
+await tapFresh(()=>page.locator('#members .memberCard[data-member-id22="m1"] button').filter({hasText:'수정'}),'edit');
+await page.waitForSelector('#modal.on #fmName');if(await page.locator('#fmName').inputValue()!=='회원1')throw new Error('wrong edit');console.log('PASS TOUCH edit');await page.evaluate(()=>closeModal());await page.waitForTimeout(260);
+await tapFresh(()=>page.locator('#members .memberCard[data-member-id22="m1"] .btn.enter'),'attendance');
+await page.waitForTimeout(350);if(!actionBodies.some(x=>x.action==='set_member_attendance'&&x.memberId==='m1'&&x.mode==='waiting'))throw new Error('touch attendance missing '+JSON.stringify(actionBodies));console.log('PASS TOUCH attendance');
+await tapFresh(()=>page.locator('#members .memberPager46 button').filter({hasText:'다음'}),'pager next');await page.waitForFunction(()=>window.__kokmatchMemberPage46===2);console.log('PASS TOUCH pager next');
+await tapFresh(()=>page.locator('#members .memberPager46 button').filter({hasText:'이전'}),'pager prev');await page.waitForFunction(()=>window.__kokmatchMemberPage46===1);console.log('PASS TOUCH pager prev');
+await tapFresh(()=>page.locator('#groupBtn'),'group open');await page.waitForSelector('#groupChoice23');console.log('PASS TOUCH group open');
+await tapFresh(()=>page.locator('#groupChoice23 button').filter({hasText:'B모임'}),'group B');await page.waitForFunction(()=>window.currentGroupId==='grp_b'&&document.querySelector('#groupBtn')?.textContent.includes('B모임'));console.log('PASS TOUCH group switch');
 if(errors.length)throw new Error('page errors '+JSON.stringify(errors));console.log('PASS V25 REAL TOUCH BRIDGE');await browser.close();
