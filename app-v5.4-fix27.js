@@ -6,7 +6,7 @@ window.__kokmatchIOSMemberSlotFix='27.1';
 document.documentElement.dataset.kokmatchIOSMemberSlotFix='27.1';
 
 const MULTI27='https://wjelumpbjklfrdjxbesj.supabase.co/functions/v1/kokmatch-multi-api';
-let sx27=0,sy27=0,st27=0,moved27=false,lastKey27='',lastAt27=0;
+let sx27=0,sy27=0,st27=0,moved27=false,lastKey27='',lastAt27=0,startEditId27='',startEditAt27=0;
 
 function trace27(msg){
  try{
@@ -78,12 +78,24 @@ function run27(a){if(!a)return false;if(a.kind==='edit')return edit27(a.id);if(a
 
 window.addEventListener('touchstart',ev=>{
  const t=ev.touches?.[0];if(!t)return;sx27=t.clientX;sy27=t.clientY;st27=Date.now();moved27=false;
- const a=actionAt27(ev,sx27,sy27);if(a){trace27('회원버튼 터치 감지 · '+a.text+' · '+a.id);return}
+ const a=actionAt27(ev,sx27,sy27);
+ if(a){
+  trace27('회원버튼 터치 감지 · '+a.text+' · '+a.id);
+  if(a.kind==='edit'){
+   startEditId27=String(a.id||'');startEditAt27=Date.now();
+   try{ev.preventDefault();ev.stopPropagation();ev.stopImmediatePropagation()}catch{}
+   edit27(a.id);
+  }
+  return;
+ }
  const info=memberTouchInfo27(ev,sx27,sy27);if(info)trace27('회원영역 터치 감지 · '+cardId27(info.card)+' · '+String(info.target?.className||info.target?.tagName||'target').slice(0,36));
-},{capture:true,passive:true});
+},{capture:true,passive:false});
 window.addEventListener('touchmove',ev=>{const t=ev.touches?.[0];if(!t)return;if(Math.abs(t.clientX-sx27)>14||Math.abs(t.clientY-sy27)>14)moved27=true},{capture:true,passive:true});
 window.addEventListener('touchend',ev=>{
  const t=ev.changedTouches?.[0];if(!t||moved27||Date.now()-st27>1100)return;const a=actionAt27(ev,t.clientX,t.clientY);if(!a)return;
+ if(a.kind==='edit'&&String(a.id||'')===startEditId27&&Date.now()-startEditAt27<1200){
+  try{ev.preventDefault();ev.stopPropagation();ev.stopImmediatePropagation()}catch{};return;
+ }
  try{ev.preventDefault();ev.stopPropagation();ev.stopImmediatePropagation()}catch{};run27(a);
 },{capture:true,passive:false});
 
