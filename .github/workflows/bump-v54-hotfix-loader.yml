@@ -1,17 +1,6 @@
 name: Bump v5.4 hotfix loader
 on:
-  push:
-    branches: [main]
-    paths:
-      - '.github/workflows/bump-v54-hotfix-loader.yml'
-      - 'app-v5.4-hotfix-loader.js'
-      - 'app-v5.4-fix11.js'
-      - 'app-v5.4-fix12.js'
-      - 'app-v5.4-fix16.js'
-      - 'app-v5.6-pre.js'
-      - 'app-v5.6.js'
-      - 'app-v5.6-fix1.js'
-      - 'latest-version.json'
+  workflow_dispatch:
 permissions:
   contents: write
 jobs:
