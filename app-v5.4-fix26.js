@@ -2,8 +2,8 @@
 'use strict';
 if(window.__kokmatchV54Fix26)return;
 window.__kokmatchV54Fix26=true;
-window.__kokmatchDirectTouch='26.1';
-document.documentElement.dataset.kokmatchDirectTouch='26.1';
+window.__kokmatchDirectTouch='26.2';
+document.documentElement.dataset.kokmatchDirectTouch='26.2';
 
 const AUTH26='https://wjelumpbjklfrdjxbesj.supabase.co/functions/v1/kokmatch-auth-v38';
 const MULTI26='https://wjelumpbjklfrdjxbesj.supabase.co/functions/v1/kokmatch-multi-api';
@@ -16,7 +16,7 @@ function trace26(msg){
   if(!location.pathname.includes('ios-diagnostic'))return;
   let el=document.getElementById('kokmatchV26Status');
   if(!el){el=document.createElement('div');el.id='kokmatchV26Status';el.style.cssText='position:fixed;left:8px;right:8px;bottom:calc(74px + env(safe-area-inset-bottom));z-index:9999;background:#172033e8;color:#fff;border-radius:10px;padding:7px 10px;font:700 11px/1.35 -apple-system,BlinkMacSystemFont,sans-serif;pointer-events:none';document.body.appendChild(el)}
-  el.textContent='v26.1 · '+s;
+  el.textContent='v26.2 · '+s;
  }catch{}
 }
 function err26(e){trace26('오류: '+(e?.message||String(e)));try{typeof showError==='function'?showError(e):alert(e?.message||String(e))}catch{}}
@@ -41,12 +41,14 @@ function edit26(id){
 }
 function attendance26(id,mode){
  id=String(id||'');if(!member26(id)){err26(new Error('상태를 변경할 회원을 찾지 못했습니다.'));return false}
- trace26((mode==='waiting'?'입장':mode==='spectator'?'관람':'퇴장')+' 실행 · '+id);
- try{
-  if(typeof act==='function'){Promise.resolve(act('set_member_attendance',{memberId:id,mode})).then(()=>trace26('상태변경 완료 · '+id)).catch(err26);return true}
-  if(typeof window.act==='function'){Promise.resolve(window.act('set_member_attendance',{memberId:id,mode})).then(()=>trace26('상태변경 완료 · '+id)).catch(err26);return true}
- }catch(e){err26(e);return false}
- err26(new Error('상태변경 API 함수를 찾지 못했습니다.'));return false;
+ trace26((mode==='waiting'?'입장':mode==='spectator'?'관람':'퇴장')+' 요청 · '+id);
+ const u=new URL(MULTI26);u.searchParams.set('api','action');u.searchParams.set('_fix26',Date.now());
+ const body={action:'set_member_attendance',groupId:gid26(),memberId:id,mode};
+ Promise.resolve(json26(u,{method:'POST',headers:{'content-type':'application/json',authorization:'Bearer '+token26()},body:JSON.stringify(body)})).then(x=>{
+  if(x?.data){try{S=x.data;window.S=S}catch{};try{if(typeof normalizeClient==='function')normalizeClient()}catch{};try{if(typeof renderAll==='function')renderAll()}catch{}}
+  trace26('상태변경 완료 · '+id);later26();
+ }).catch(err26);
+ return true;
 }
 
 function setToken26(v){v=String(v||'');try{T=v}catch{};try{window.T=v}catch{};try{localStorage.setItem('kokmatch_token',v)}catch{}}
@@ -128,7 +130,7 @@ function directCapture26(btn){
 }
 window.addEventListener('touchstart',ev=>{const t=ev.touches?.[0];if(!t)return;sx26=t.clientX;sy26=t.clientY;st26=Date.now();moved26=false},{capture:true,passive:true});
 window.addEventListener('touchmove',ev=>{const t=ev.touches?.[0];if(!t)return;if(Math.abs(t.clientX-sx26)>12||Math.abs(t.clientY-sy26)>12)moved26=true},{capture:true,passive:true});
-document.addEventListener('touchend',ev=>{
+window.addEventListener('touchend',ev=>{
  const t=ev.changedTouches?.[0];if(!t||moved26||Date.now()-st26>900)return;
  let btn=ev.target?.closest?.('button');
  if(!btn&&typeof document.elementsFromPoint==='function'){for(const el of document.elementsFromPoint(t.clientX,t.clientY)){const b=el?.closest?.('button');if(b){btn=b;break}}}
