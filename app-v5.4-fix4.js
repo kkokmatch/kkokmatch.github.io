@@ -51,7 +51,8 @@ window.addEventListener('pageshow',()=>{if(me&&group)clearResumeGuard54()});
 if(window.__kokmatchV54FinalProfileBridge4)return;window.__kokmatchV54FinalProfileBridge4=true;
 let tries=0;const timer=setInterval(()=>{
  if(window.__kokmatchV54Fix21){clearInterval(timer);return}
- if(window.__kokmatchV54Fix6){clearInterval(timer);const s=document.createElement('script');s.src='/app-v5.4-fix21.js?v=21.2&t='+Date.now();s.async=false;s.onerror=()=>console.error('콕매치 최종 프로필/성별 보정 로드 실패');document.body.appendChild(s);return}
- if(++tries>=160)clearInterval(timer)
+ // 최종 프로필 렌더러는 fix5와 카카오 로그인 보정이 모두 올라온 뒤 가장 마지막에 실행한다.
+ if(window.__kokmatchV54Fix5&&window.__kokmatchV54KakaoLoginFix){clearInterval(timer);const s=document.createElement('script');s.src='/app-v5.4-fix21.js?v=21.2&t='+Date.now();s.async=false;s.onerror=()=>console.error('콕매치 최종 프로필/성별 보정 로드 실패');document.body.appendChild(s);return}
+ if(++tries>=200)clearInterval(timer)
 },25);
 })();
