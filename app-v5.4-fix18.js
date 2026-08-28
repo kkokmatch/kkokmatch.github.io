@@ -2,14 +2,14 @@
 'use strict';
 if(window.__kokmatchV54Fix18)return;
 window.__kokmatchV54Fix18=true;
-window.__kokmatchRosterIdentityPatch='18.0';
+window.__kokmatchRosterIdentityPatch='18.1';
 
 function style18(){if(document.getElementById('v54fix18style'))return;const s=document.createElement('style');s.id='v54fix18style';s.textContent=`
 #members .profileIdentity80,#queue .profileIdentity80{touch-action:manipulation!important;-webkit-tap-highlight-color:transparent!important;-webkit-touch-callout:none!important;-webkit-user-select:none!important;user-select:none!important}
 #members .profileIdentity80 img,#queue .profileIdentity80 img,#profilePhotoModal80 img{-webkit-touch-callout:none!important;-webkit-user-select:none!important;user-select:none!important;-webkit-user-drag:none!important;pointer-events:none!important}
 `;document.head.appendChild(s)}
-function realId18(card){const pair=String(card?.querySelector('.pairBtn')?.getAttribute('onclick')||'');let m=pair.match(/openPairs\(\s*['\"]([^'\"]+)['\"]\s*\)/);if(m)return String(m[1]||'');const edit=String(card?.querySelector('[onclick*="openEditMember"]')?.getAttribute('onclick')||'');m=edit.match(/openEditMember\(\s*['\"]([^'\"]+)['\"]\s*\)/);if(m)return String(m[1]||'');const state=String(card?.querySelector('[onclick*="setOther"]')?.getAttribute('onclick')||'');m=state.match(/setOther\(\s*['\"]([^'\"]+)['\"]/);return m?String(m[1]||''):''}
 function member18(id){try{return id&&typeof M==='function'?M(String(id)):null}catch{return null}}
+function realId18(card){if(!card)return'';for(const el of card.querySelectorAll('[onclick]')){const code=String(el.getAttribute('onclick')||''),re=/['\"]([^'\"]+)['\"]/g;let m;while((m=re.exec(code))){const id=String(m[1]||'');if(id&&member18(id))return id}}for(const attr of ['data-member-id','data-memberid','data-id']){const id=String(card.getAttribute(attr)||'');if(id&&member18(id))return id}return''}
 function avatarSrc18(m){try{const d=document.createElement('div');d.innerHTML=typeof avatar==='function'?String(avatar(m)||''):'';const im=d.querySelector('img');return im?String(im.getAttribute('src')||im.src||''):''}catch{return''}}
 function esc18(v){return String(v??'').replace(/[&\"<>]/g,c=>({'&':'&amp;','\"':'&quot;','<':'&lt;','>':'&gt;'}[c]))}
 function identity18(m){const female=String(m?.gender||'')==='여',gender=female?'여':'남',src=avatarSrc18(m),d=document.createElement('div');d.className=`avatar profileIdentity80 genderVisual10 ${src?'profileTap80 profileAvatar53':'genderFallback80 genderAvatar39'} ${female?'female':'male'}`;d.dataset.memberId=String(m?.id||'');d.dataset.gender=gender;d.dataset.photo=src?'1':'0';d.dataset.visual10=`${gender}|${src?'1':'0'}|${src}`;if(src){d.setAttribute('role','button');d.setAttribute('tabindex','0');d.setAttribute('aria-label',`${String(m?.name||'회원')} 프로필 사진 크게 보기`);d.innerHTML=`<img src="${esc18(src)}" alt="${esc18(m?.name||'프로필')} 프로필" draggable="false">`}else{d.setAttribute('aria-label',female?'여성':'남성');d.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="7" r="4"></circle><path d="M4.5 21c.5-5 3.2-8 7.5-8s7 3 7.5 8z"></path></svg>'}return d}
