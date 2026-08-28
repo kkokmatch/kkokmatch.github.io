@@ -15,12 +15,14 @@ async function tapFresh(factory,label){
  let last;
  for(let i=0;i<10;i++){
   try{
-   const loc=factory().first();
+   let loc=factory().first();
    await loc.waitFor({state:'visible',timeout:2500});
-   await page.waitForTimeout(230);
-   const current=factory().first();
-   const b=await current.boundingBox();
+   await loc.evaluate(el=>el.scrollIntoView({block:'center',inline:'center'}));
+   await page.waitForTimeout(260);
+   loc=factory().first();
+   const b=await loc.boundingBox();
    if(!b)throw new Error('no bounding box');
+   const vp=page.viewportSize();if(vp&&(b.y<0||b.y+b.height>vp.height))throw new Error('target outside viewport '+JSON.stringify(b));
    await page.touchscreen.tap(b.x+b.width/2,b.y+b.height/2);
    return;
   }catch(e){last=e;await page.waitForTimeout(120)}
