@@ -1,0 +1,21 @@
+import {webkit,devices} from 'playwright';
+const browser=await webkit.launch({headless:true});
+const page=await browser.newPage({...devices['iPhone 13'],userAgent:devices['iPhone 13'].userAgent+' KAKAOTALK'});
+page.setDefaultTimeout(12000);
+const calls=[];
+await page.route('https://wjelumpbjklfrdjxbesj.supabase.co/functions/v1/kokmatch-multi-api**',async r=>{const b=JSON.parse(r.request().postData()||'{}');calls.push(b);await r.fulfill({status:200,contentType:'application/json',body:JSON.stringify({data:{members:[{id:'m1',name:'회원1',state:b.mode||'out'}]}})})});
+await page.setContent(`<!doctype html><meta name="viewport" content="width=device-width,initial-scale=1"><section id="members"><div class="memberCard" data-member-id22="m1"><div class="memberBtns"><span class="memberBtnSlot65"><button class="btn enter">입장</button></span><span class="memberBtnSlot65"><button class="btn watch">관람</button></span><span class="memberBtnSlot65"><button class="btn danger">퇴장</button></span></div></div><div class="memberPager46"><button class="btn ghost" onclick="memberPageGo46(2)">다음</button></div></section><div id="modal"></div>`);
+await page.evaluate(()=>{window.S={members:[{id:'m1',name:'회원1',state:'out'}]};window.T='qa';window.currentGroupId='grp';window.normalizeClient=()=>{};window.renderAll=()=>{};window.__pageGo=0;window.memberPageGo46=p=>window.__pageGo=p});
+await page.addScriptTag({url:'http://127.0.0.1:4173/app-v5.4-fix29.js?v=29.0'});
+await page.waitForFunction(()=>window.__kokmatchIOSImmediateActions==='29.0');
+async function overlayTap(sel){const b=page.locator(sel);await b.scrollIntoViewIfNeeded();const r=await b.boundingBox();if(!r)throw new Error('no box '+sel);const x=r.x+r.width/2,y=r.y+r.height/2;await page.evaluate(({x,y,w,h})=>{document.querySelectorAll('.qa29').forEach(n=>n.remove());const o=document.createElement('span');o.className='qa29';o.style.cssText=`position:fixed;left:${x-w/2}px;top:${y-h/2}px;width:${w}px;height:${h}px;z-index:999999;background:transparent;pointer-events:auto`;document.body.appendChild(o)},{x,y,w:r.width,h:r.height});await page.touchscreen.tap(x,y);await page.waitForTimeout(250);await page.evaluate(()=>document.querySelectorAll('.qa29').forEach(n=>n.remove()))}
+await overlayTap('#members .btn.enter');
+if(!calls.some(x=>x.action==='set_member_attendance'&&x.memberId==='m1'&&x.mode==='waiting'))throw new Error('입장 touchstart 실패 '+JSON.stringify(calls));
+await page.waitForTimeout(800);await overlayTap('#members .btn.watch');
+if(!calls.some(x=>x.mode==='spectator'))throw new Error('관람 touchstart 실패 '+JSON.stringify(calls));
+await page.waitForTimeout(800);await overlayTap('#members .btn.danger');
+if(!calls.some(x=>x.mode==='out'))throw new Error('퇴장 touchstart 실패 '+JSON.stringify(calls));
+await page.waitForTimeout(800);await overlayTap('.memberPager46 button');
+if(await page.evaluate(()=>window.__pageGo)!==2)throw new Error('2페이지 touchstart 실패');
+console.log('PASS v29 iPhone WebKit attendance + pagination touchstart');
+await browser.close();
