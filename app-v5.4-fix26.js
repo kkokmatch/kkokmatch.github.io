@@ -27,6 +27,7 @@ function members26(){try{return Array.isArray(S?.members)?S.members:(Array.isArr
 function member26(id){id=String(id||'');return members26().find(m=>String(m?.id||'')===id)||null}
 function cardId26(card){return String(card?.dataset?.memberId22||card?.dataset?.memberId46||card?.dataset?.memberId||'')}
 function esc26(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function modalOwns26(target){try{return !!target?.closest?.('#modal.on')}catch{return false}}
 function openModal26(html){try{if(typeof openModal==='function'){openModal(html);return true}}catch{};const m=document.getElementById('modal'),s=document.getElementById('modalSheet');if(!m||!s)return false;s.innerHTML=html;m.classList.add('on');return true}
 function closeModal26(){try{if(typeof closeModal==='function')return closeModal()}catch{};const m=document.getElementById('modal'),s=document.getElementById('modalSheet');m?.classList.remove('on');if(s)s.innerHTML=''}
 async function json26(url,opt={}){const r=await fetch(url,{cache:'no-store',...opt}),x=await r.json().catch(()=>({}));if(!r.ok)throw new Error(x.error||x.message||`요청 실패 (${r.status})`);return x}
@@ -102,6 +103,7 @@ function bindDirect26(btn,key,handler){
  btn.replaceWith(fresh);return fresh;
 }
 function prep26(){
+ if(document.getElementById('modal')?.classList.contains('on'))return;
  if(prepBusy26)return;prepBusy26=true;
  try{
   const gb=document.getElementById('groupBtn');if(gb&&me26())bindDirect26(gb,'group',()=>openGroups26());
@@ -128,12 +130,13 @@ function directCapture26(btn){
  if((btn.classList.contains('danger')&&t==='퇴장')||t==='퇴장')return attendance26(id,'out');
  return false;
 }
-window.addEventListener('touchstart',ev=>{const t=ev.touches?.[0];if(!t)return;sx26=t.clientX;sy26=t.clientY;st26=Date.now();moved26=false},{capture:true,passive:true});
-window.addEventListener('touchmove',ev=>{const t=ev.touches?.[0];if(!t)return;if(Math.abs(t.clientX-sx26)>12||Math.abs(t.clientY-sy26)>12)moved26=true},{capture:true,passive:true});
+window.addEventListener('touchstart',ev=>{if(modalOwns26(ev.target))return;const t=ev.touches?.[0];if(!t)return;sx26=t.clientX;sy26=t.clientY;st26=Date.now();moved26=false},{capture:true,passive:true});
+window.addEventListener('touchmove',ev=>{if(modalOwns26(ev.target))return;const t=ev.touches?.[0];if(!t)return;if(Math.abs(t.clientX-sx26)>12||Math.abs(t.clientY-sy26)>12)moved26=true},{capture:true,passive:true});
 window.addEventListener('touchend',ev=>{
+ if(modalOwns26(ev.target))return;
  const t=ev.changedTouches?.[0];if(!t||moved26||Date.now()-st26>900)return;
  let btn=ev.target?.closest?.('button');
- if(!btn&&typeof document.elementsFromPoint==='function'){for(const el of document.elementsFromPoint(t.clientX,t.clientY)){const b=el?.closest?.('button');if(b){btn=b;break}}}
+ if(!btn&&typeof document.elementsFromPoint==='function'){for(const el of document.elementsFromPoint(t.clientX,t.clientY)){if(modalOwns26(el))return;const b=el?.closest?.('button');if(b){btn=b;break}}}
  if(!directCapture26(btn))return;
  try{ev.preventDefault();ev.stopPropagation();ev.stopImmediatePropagation()}catch{}
  later26();
