@@ -1,0 +1,23 @@
+name: QA v5.4 iOS immediate actions v29
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'app-v5.4-fix29.js'
+      - '.github/tests/qa-v29-immediate-actions.mjs'
+      - '.github/workflows/qa-v54-ios-immediate-v29.yml'
+  workflow_dispatch:
+jobs:
+  webkit-v29:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install --no-save playwright@1.55.0
+      - run: npx playwright install --with-deps webkit
+      - name: Test attendance and pagination on iPhone WebKit
+        run: |
+          python3 -m http.server 4173 >/tmp/kokmatch-http.log 2>&1 &
+          node .github/tests/qa-v29-immediate-actions.mjs
