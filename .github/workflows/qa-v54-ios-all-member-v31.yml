@@ -1,0 +1,22 @@
+name: QA v5.4 iOS all-member actions v31
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'app-v5.4-fix31.js'
+      - '.github/tests/qa-v31-all-member-actions.mjs'
+      - '.github/workflows/qa-v54-ios-all-member-v31.yml'
+  workflow_dispatch:
+jobs:
+  webkit-v31:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - run: npm install --no-save playwright@1.55.0
+      - run: npx playwright install --with-deps webkit
+      - run: python3 -m http.server 4173 >/tmp/v31-http.log 2>&1 &
+      - name: Test other-member actions on iPhone WebKit
+        run: node .github/tests/qa-v31-all-member-actions.mjs
