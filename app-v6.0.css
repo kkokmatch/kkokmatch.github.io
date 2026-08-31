@@ -2918,3 +2918,39 @@ html:not(.kokmatch-ready86) .app{visibility:visible!important}
 @media(max-width:430px){#members .memberCard{grid-template-columns:42px minmax(0,1fr) 84px!important;column-gap:4px!important;padding:9px 3px 9px 6px!important}#members .memberActions48,#members .v6MemberActions,#members .memberActions60,#members .memberActions65,#members .memberActions48 .status,#members .v6MemberActions .status,#members .memberActions60 .status,#members .memberActions65 .status,#members .memberBtns,#members .memberBtns65{width:84px!important;min-width:84px!important;max-width:84px!important}#members .memberName45{font-size:13.5px!important;min-width:4.2em!important}#members .memberMainLine45{gap:3px!important}#members .memberMainLine45 .tag,#members .memberMainLine45 .roleBadge{font-size:8.8px!important;padding:2px 3px!important}#members .memberMetaV6,#members .memberAttendanceV6,#members .rosterPartnerBtnV6{font-size:9.8px!important}#members .memberRosterFooterV6{gap:6px!important}#members .memberBtns .btn,#members .memberBtns65 .btn{padding:6px 3px!important;font-size:9.2px!important}}
 @media(max-width:359px){#members .memberCard{grid-template-columns:39px minmax(0,1fr) 80px!important;column-gap:3px!important;padding-left:5px!important;padding-right:2px!important}#members .memberActions48,#members .v6MemberActions,#members .memberActions60,#members .memberActions65,#members .memberActions48 .status,#members .v6MemberActions .status,#members .memberActions60 .status,#members .memberActions65 .status,#members .memberBtns,#members .memberBtns65{width:80px!important;min-width:80px!important;max-width:80px!important}#members .memberName45{font-size:12.8px!important;min-width:4.2em!important}#members .memberMainLine45 .tag,#members .memberMainLine45 .roleBadge{font-size:8.2px!important;padding:1px 3px!important}#members .memberMetaV6,#members .memberAttendanceV6,#members .rosterPartnerBtnV6{font-size:9.2px!important}}
 /* V6_CANONICAL_ROSTER_CSS_END */
+
+/* V6_UI_STABILITY_CSS_BEGIN */
+/* Reliable taps in Kakao/iOS: scrolling is handled by the 10px movement threshold in JS. */
+#topActionsV6 button,#modal .sheet button{pointer-events:auto!important;touch-action:manipulation!important;-webkit-tap-highlight-color:transparent!important}
+#modal .sheet{pointer-events:auto!important}
+
+/* Restore the original v50 grade badge palette everywhere. */
+.grade-a50{background:#A60093!important;color:#fff!important;border-color:transparent!important}
+.grade-b50{background:#00CFC6!important;color:#073937!important;border-color:transparent!important}
+.grade-c50{background:#10D400!important;color:#063b00!important;border-color:transparent!important}
+.grade-d50{background:#DE9999!important;color:#4b2020!important;border-color:transparent!important}
+.grade-e50{background:#EBE202!important;color:#3b3800!important;border-color:transparent!important}
+
+/* Keep roster cards pastel, but match each pastel to the restored badge hue. */
+#members .memberCard[data-grade-v6="A"]{background:#fff1fd!important;border-color:#edc2e8!important}
+#members .memberCard[data-grade-v6="B"]{background:#edfffe!important;border-color:#b8efec!important}
+#members .memberCard[data-grade-v6="C"]{background:#f0ffef!important;border-color:#c2efbd!important}
+#members .memberCard[data-grade-v6="D"]{background:#fff4f4!important;border-color:#edcccc!important}
+#members .memberCard[data-grade-v6="E"]{background:#fffdea!important;border-color:#eee7a7!important}
+#members .memberCard[data-grade-v6="A"] .grade-a50{background:#A60093!important;color:#fff!important}
+#members .memberCard[data-grade-v6="B"] .grade-b50{background:#00CFC6!important;color:#073937!important}
+#members .memberCard[data-grade-v6="C"] .grade-c50{background:#10D400!important;color:#063b00!important}
+#members .memberCard[data-grade-v6="D"] .grade-d50{background:#DE9999!important;color:#4b2020!important}
+#members .memberCard[data-grade-v6="E"] .grade-e50{background:#EBE202!important;color:#3b3800!important}
+
+/* Compress only vertical whitespace; keep the existing readable font sizes. */
+#members .memberCard{padding-top:7px!important;padding-bottom:7px!important}
+#members .memberInfo48,#members .memberInfoV6{display:flex!important;flex-direction:column!important;gap:0!important}
+#members .memberMainLine45{margin:0!important;line-height:1.15!important}
+#members .memberName45{line-height:1.15!important}
+#members .memberMetaV6{margin:0!important;padding:0!important;line-height:1.12!important}
+#members .memberRosterFooterV6{margin:0!important;padding:0!important;min-height:0!important;gap:6px!important;line-height:1.1!important}
+#members .memberAttendanceV6{line-height:1.1!important}
+#members .rosterPartnerBtnV6{padding:0!important;min-height:0!important;line-height:1.1!important}
+@media(max-width:430px){#members .memberCard{padding-top:6px!important;padding-bottom:6px!important}#members .memberRosterFooterV6{gap:5px!important}}
+/* V6_UI_STABILITY_CSS_END */
