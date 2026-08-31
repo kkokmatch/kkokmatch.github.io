@@ -1,6 +1,6 @@
 {
   "version": "6.0",
-  "build": "2026.08.31.standalone.5",
+  "build": "2026.08.31.standalone.6",
   "removed": [
     "legacy automatic updater redirect",
     "legacy fix22 roster ownership",
