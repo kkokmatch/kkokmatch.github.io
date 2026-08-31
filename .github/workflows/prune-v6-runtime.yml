@@ -58,15 +58,21 @@ jobs:
           grep -q 'currentVersionV6' app-v6.0.js
           grep -q '최신버전으로 새로고침' app-v6.0.js
           grep -q 'https://kkokmatch.github.io/' app-v6.0.js
-          grep -Fq "function buildLabelV6(){return 'v6.12'}" app-v6.0.js
-          grep -Fq "__kokmatchReliableActionTapV6='v6.12'" app-v6.0.js
+          grep -Fq "function buildLabelV6(){return 'v6.13'}" app-v6.0.js
+          grep -Fq "__kokmatchReliableActionTapV6='v6.13'" app-v6.0.js
+          grep -Fq "__kokmatchFastMemberActionsV6='v6.13'" app-v6.0.js
+          grep -Fq "__kokmatchCanonicalMemberEditorV6='v6.13'" app-v6.0.js
+          grep -q 'memberApiV613' app-v6.0.js
           grep -Fq 'function blockLegacyLogoutV6(){return true}' app-v6.0.js
           grep -q 'V6_UI_STABILITY_CSS_BEGIN' app-v6.0.css
-          grep -q '#A60093' app-v6.0.css
-          grep -q '#00CFC6' app-v6.0.css
-          grep -q '#10D400' app-v6.0.css
-          grep -q '#DE9999' app-v6.0.css
-          grep -q '#EBE202' app-v6.0.css
+          grep -q '#f8d8f2' app-v6.0.css
+          grep -q '#cef7f4' app-v6.0.css
+          grep -q '#d8f5d4' app-v6.0.css
+          grep -q '#f4dada' app-v6.0.css
+          grep -q '#f6efb9' app-v6.0.css
+          grep -q 'margin:-3px 0 0' app-v6.0.css
+          grep -q 'margin:3px 0 0' app-v6.0.css
+          grep -q '.memberEditorOverlayV613' app-v6.0.css
           ! grep -Eq '총관리자|모임관리자|게임편성자|일반회원' app-v6.0.js
           grep -q "data-kokmatch-entry='fresh-v1'\|dataset.kokmatchEntry='fresh-v1'" index.html
           grep -q "app-v6.0.js?_km=" index.html
@@ -75,11 +81,11 @@ jobs:
         run: |
           node - <<'NODE'
           const fs=require('fs');
-          const build='v6.12';
+          const build='v6.13';
           const p='latest-version.json';const x=JSON.parse(fs.readFileSync(p,'utf8'));
-          x.version=60;x.label='v6.12';x.semanticVersion='6.12';x.build=build;x.updatedAt='2026-08-31T14:30:00+09:00';x.note='버튼 탭 안정화 · 기존 급수배지 색상 복원 · 회원정보 간격 축소';
+          x.version=60;x.label='v6.13';x.semanticVersion='6.13';x.build=build;x.updatedAt='2026-08-31T14:55:00+09:00';x.note='회원정보 줄간격 조정 · 카드 배경 강화 · 입장상태 즉시반응 · 회원수정창 입력기능 복구';
           fs.writeFileSync(p,JSON.stringify(x,null,2)+'\n');
-          fs.writeFileSync('v6-cleanup-report.json',JSON.stringify({version:'6.12',build,features:['short visible version label v6.12','reliable Kakao/iOS tap handling for header and modal buttons with scroll movement threshold','legacy automatic version navigation removed','manual latest-version refresh only','original v50 grade badge colors restored: A magenta, B cyan, C green, D rose, E yellow','grade-matched pastel member cards','compact member name/birth/gender/attendance/partner spacing','role badges: 개발자/모임장/운영진/일반','member roster re-entry forces full roster refresh'],validation:['javascript syntax','no automatic /refresh/vXX navigation','short build label source','reliable action tap bridge','logout fallback remains callable','original grade palette present','compact roster CSS present','fresh-entry bootstrap marker'],functionalQaPolicy:'functional/browser/device QA omitted from deployment gate per operator request'},null,2)+'\n');
+          fs.writeFileSync('v6-cleanup-report.json',JSON.stringify({version:'6.13',build,features:['name-to-birth spacing tightened by 3px','birth-to-monthly-attendance spacing increased by 3px','member card pastel backgrounds strengthened two steps','optimistic immediate member attendance UI before server response','isolated v6 member editor for birth year, gender, grade, type, role and PIN/password','short visible version label v6.13','manual latest-version refresh only','role badges: 개발자/모임장/운영진/일반'],validation:['javascript syntax','no automatic /refresh/vXX navigation','short build label source','optimistic member attendance installed','dedicated member editor installed','stronger roster palette present','requested roster spacing present','fresh-entry bootstrap marker'],functionalQaPolicy:'functional/browser/device QA omitted from deployment gate per operator request'},null,2)+'\n');
           let html=fs.readFileSync('index.html','utf8');
           html=html.replace(/data-kokmatch-build="[^"]*"/,`data-kokmatch-build="${build}"`);
           html=html.replace(/const BUILD_FALLBACK='[^']*'/,`const BUILD_FALLBACK='${build}'`);
@@ -90,6 +96,6 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add app-v6.0.js app-v6.0.css index.html latest-version.json v6-cleanup-report.json
-          git commit -m "Fix mobile buttons and restore roster styles [skip ci]" || exit 0
+          git commit -m "Ship v6.13 roster interaction fixes [skip ci]" || exit 0
           git pull --rebase origin main
           git push
