@@ -2664,70 +2664,8 @@ if(location.pathname.startsWith('/launch/v74'))history.replaceState(null,'','/?l
 if(me)renderAll();
 })();
 
-/* migrated into v6.0: app-v75.js */
-(()=>{
-const VERSION75=75;
-let checkBusy75=false,pendingLatest75=0,refreshing75=false,retryTimer75=0;
-
-function currentVersion75(){return Number(document.documentElement?.dataset?.kokmatchVersion||VERSION75)||VERSION75}
-function safeToRefresh75(){
- if(document.hidden)return false;
- if(document.querySelector('#modal.on'))return false;
- const a=document.activeElement;if(a&&/^(INPUT|SELECT|TEXTAREA)$/i.test(a.tagName))return false;
- if(typeof draft!=='undefined'&&Array.isArray(draft)&&draft.filter(Boolean).length)return false;
- return true;
-}
-async function latest75(){
- const r=await fetch(`/latest-version.json?fresh=${Date.now()}`,{cache:'no-store',headers:{'cache-control':'no-cache, no-store','pragma':'no-cache'}});
- if(!r.ok)throw new Error('latest version unavailable');
- const x=await r.json().catch(()=>({}));return Math.max(1,Number(x?.version)||currentVersion75());
-}
-async function targetReady75(v){
- try{const r=await fetch(`/refresh/v${v}.html?probe=${Date.now()}`,{method:'GET',cache:'no-store',headers:{'cache-control':'no-cache, no-store','pragma':'no-cache'}});return r.ok}catch{return false}
-}
-function saveRefresh75(){try{if(typeof saveRefreshState==='function')saveRefreshState()}catch{} }
-async function purge75(){
- try{if('caches'in window){const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)))}}catch{}
- try{if('serviceWorker'in navigator){const rs=await navigator.serviceWorker.getRegistrations();await Promise.all(rs.map(r=>r.unregister().catch(()=>{})))}}catch{}
-}
-async function refreshTo75(v){
- if(refreshing75||v<=currentVersion75())return;
- refreshing75=true;
- try{
-  if(!(await targetReady75(v))){refreshing75=false;pendingLatest75=v;scheduleRetry75();return}
-  saveRefresh75();await purge75();
-  location.replace(`/refresh/v${v}.html?fresh=${Date.now()}&auto=1&from=${currentVersion75()}`);
- }catch(e){console.warn('auto refresh v75',e);refreshing75=false;pendingLatest75=v;scheduleRetry75()}
-}
-function scheduleRetry75(){
- clearTimeout(retryTimer75);
- retryTimer75=setTimeout(()=>{
-  if(pendingLatest75>currentVersion75()&&safeToRefresh75())refreshTo75(pendingLatest75);
-  else if(pendingLatest75>currentVersion75())scheduleRetry75();
- },1200);
-}
-async function check75(){
- if(checkBusy75||refreshing75)return;checkBusy75=true;
- try{
-  const v=await latest75(),cur=currentVersion75();
-  if(v>cur){pendingLatest75=Math.max(pendingLatest75,v);if(safeToRefresh75())await refreshTo75(pendingLatest75);else scheduleRetry75()}
- }catch(e){console.warn('version check v75',e)}finally{checkBusy75=false}
-}
-
-document.addEventListener('visibilitychange',()=>{if(!document.hidden)setTimeout(check75,120)});
-window.addEventListener('focus',()=>setTimeout(check75,120));
-setTimeout(check75,1200);
-setInterval(check75,10000);
-
-const renderSettings74=renderSettings;
-renderSettings=function(){
- renderSettings74();const box=$('settings');if(!box)return;
- [...box.querySelectorAll('.meta')].forEach(el=>{if((el.textContent||'').includes('콕매치 v74'))el.textContent='콕매치 v75 · 자동 최신버전 감지/새로고침 안정화'});
-};
-if(location.pathname.startsWith('/launch/v75'))history.replaceState(null,'','/?loaded=75');
-if(me)renderAll();
-})();
-
+/* V6_DISABLE_LEGACY_AUTO_UPDATE */
+/* Disabled legacy auto-update section: app-v75.js */
 /* migrated into v6.0: app-v76.js */
 (()=>{
 const V76_API='https://wjelumpbjklfrdjxbesj.supabase.co/functions/v1/kokmatch-v73-api';
@@ -6799,6 +6737,10 @@ function businessMonth22(){const d=new Date();return new Intl.DateTimeFormat('en
 function monthLabel22(){return Number(businessMonth22().slice(5,7))+'월'}
 function attendanceCount22(m){const k=businessMonth22(),h=m?.attendanceHistory&&typeof m.attendanceHistory==='object'&&!Array.isArray(m.attendanceHistory)?m.attendanceHistory:null;if(h&&h[k]!=null)return Math.max(0,Number(h[k])||0);return String(m?.attendanceMonth||'')===k?Math.max(0,Number(m?.attendanceCount)||0):0}
 function canPartner22(m){return !!m&&!!me&&(String(me.memberId||'')===String(m.id)||me.globalAdmin||me.role==='manager'||me.role==='organizer')}
+function businessMonth22(){const d=new Date();return new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Seoul',year:'numeric',month:'2-digit'}).format(d)}
+function monthLabel22(){return Number(businessMonth22().slice(5,7))+'월'}
+function attendanceCount22(m){const k=businessMonth22(),h=m?.attendanceHistory&&typeof m.attendanceHistory==='object'&&!Array.isArray(m.attendanceHistory)?m.attendanceHistory:null;if(h&&h[k]!=null)return Math.max(0,Number(h[k])||0);return String(m?.attendanceMonth||'')===k?Math.max(0,Number(m?.attendanceCount)||0):0}
+function canPartner22(m){return !!m&&!!me&&(String(me.memberId||'')===String(m.id)||me.globalAdmin||me.role==='manager'||me.role==='organizer')}
 function patchVisibleInfo22(card,m){
  const info=card.querySelector('.memberInfo48')||card.children?.[1];if(!info)return;info.classList.add('memberInfoV6');
  const line=info.querySelector('.memberMainLine45')||info.querySelector('.name');if(line){line.classList.add('memberMainLine45');line.innerHTML="<span class='memberName45'>"+e22(m.name)+"</span>"+grade22(m)+roleBadge22(m)}
@@ -6862,6 +6804,8 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 
 
 
+
+
 /* V6_ROSTER_REENTRY_BEGIN */
 (()=>{'use strict';let busy=false;async function repair(){if(busy||currentView!=='members')return;busy=true;try{const input=document.getElementById('memberSearchInput46');if(input)input.value='';try{window.__kokmatchMemberPage46=1}catch{}if(typeof window.enterMembers42==='function'){await window.enterMembers42(true)}else if(typeof window.refreshMembers46==='function'){await window.refreshMembers46()}else if(typeof renderMembers==='function'){renderMembers()}try{window.resetMemberList46?.()}catch{}try{window.__kokmatchFinalizeRoster22?.()}catch{}}catch(e){console.warn('v6 roster reentry',e);try{typeof renderMembers==='function'&&renderMembers();window.__kokmatchFinalizeRoster22?.()}catch{}}finally{busy=false}}const old=goView;goView=function(id,...args){const was=currentView,r=old(id,...args);if(id==='members'&&was!=='members'){queueMicrotask(()=>repair());requestAnimationFrame(()=>repair())}return r};window.goView=goView;window.__kokmatchRepairRosterV6=repair;})();
 /* V6_ROSTER_REENTRY_END */
@@ -6899,6 +6843,7 @@ window.openGroupSwitchV6=openGroupsV6;window.switchGroupV6=switchGroupV6;
 function callV6(fn,...args){try{const r=fn?.(...args);if(r&&typeof r.then==='function')r.catch(showV6);return r}catch(e){showV6(e);return null}}
 function routeButtonV6(btn){if(!btn||btn.closest?.('#modal'))return false;if(btn.id==='groupBtn'){callV6(openGroupsV6);return true}const pager=btn.closest?.('#members .memberPager46');if(pager&&pageFnV6){const t=String(btn.textContent||'');const cur=Math.max(1,Number(window.__kokmatchMemberPage46)||1);if(t.includes('다음'))callV6(pageFnV6,cur+1);else if(t.includes('이전'))callV6(pageFnV6,Math.max(1,cur-1));else return false;return true}if(btn.closest?.('#members .title')&&String(btn.textContent||'').includes('회원등록')){const f=window.openAddMember||(typeof openAddMember==='function'?openAddMember:null);if(f){callV6(f);return true}}const card=btn.closest?.('#members .memberCard');if(!card)return false;const id=cardIdV6(card);if(!id)return false;const t=String(btn.textContent||'').trim();if(btn.classList.contains('partnerSetBtn66')&&typeof window.openPartner66==='function'){callV6(window.openPartner66,id);return true}if(btn.classList.contains('recordBtn73')||(btn.classList.contains('pairBtn')&&!btn.classList.contains('partnerSetBtn66'))||t.includes('가입·출석')||t.includes('같이한 경기')){const f=window.openPairs||(typeof openPairs==='function'?openPairs:null);if(f){callV6(f,id);return true}}if(t==='수정'){editV6(id);return true}if(btn.classList.contains('enter')||t==='운동'||t==='입장'){callV6(attendanceV6,id,'waiting');return true}if(btn.classList.contains('watch')||t==='관람'){callV6(attendanceV6,id,'spectator');return true}if((btn.classList.contains('danger')&&t==='퇴장')||t==='퇴장'){callV6(attendanceV6,id,'out');return true}return false}
 function bindProfileV6(){const card=document.getElementById('profileCard53');if(!card)return;let input=card.querySelector('#profileFile53');const label=card.querySelector('label[for="profileFile53"]');if(label){label.style.pointerEvents='auto';label.removeAttribute('aria-disabled')}if(input&&!input.dataset.v6clean){const fresh=input.cloneNode(true);fresh.dataset.v6clean='1';fresh.removeAttribute('onchange');fresh.disabled=false;input.replaceWith(fresh);input=fresh;input.addEventListener('change',()=>{const f=window.changeProfile53;if(typeof f==='function')Promise.resolve(f(input)).catch(showV6)})}const del=card.querySelector('#profileDelete21')||[...card.querySelectorAll('button')].find(b=>String(b.textContent||'').includes('기본 사진으로'));if(del&&!del.dataset.v6clean){del.dataset.v6clean='1';del.removeAttribute('onclick');del.onclick=null;del.addEventListener('click',ev=>{ev.preventDefault();const f=window.deleteProfile53;if(typeof f==='function')Promise.resolve(f()).catch(showV6)})}}
+
 
 
 
