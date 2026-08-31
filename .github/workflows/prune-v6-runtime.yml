@@ -48,6 +48,10 @@ jobs:
           grep -q 'memberRosterFooterV6' app-v6.0.js
           grep -q '__kokmatchRepairRosterV6' app-v6.0.js
           grep -q 'V6_CANONICAL_ROSTER_CSS_BEGIN' app-v6.0.css
+          grep -q 'function forceLatestHeaderRefreshV6' app-v6.0.js
+          grep -q 'currentVersionV6' app-v6.0.js
+          grep -q '최신버전으로 새로고침' app-v6.0.js
+          grep -q 'https://kkokmatch.github.io/' app-v6.0.js
           ! grep -Eq '총관리자|모임관리자|게임편성자|일반회원' app-v6.0.js
           grep -q "data-kokmatch-entry='fresh-v1'\|dataset.kokmatchEntry='fresh-v1'" index.html
           grep -q "app-v6.0.js?_km=" index.html
@@ -56,11 +60,11 @@ jobs:
         run: |
           node - <<'NODE'
           const fs=require('fs');
-          const build='2026.08.31.standalone.9';
+          const build='2026.08.31.standalone.10';
           const p='latest-version.json';const x=JSON.parse(fs.readFileSync(p,'utf8'));
-          x.version=60;x.label='6.0';x.semanticVersion='6.0';x.build=build;x.updatedAt='2026-08-31T13:35:00+09:00';x.note='v6.0 독립 운영본 · 회원카드 memberId 매핑 오류 수정 · 요청 회원명부 UI 실제 적용 · 카카오 웹뷰 최신 리소스 강제 로드';
+          x.version=60;x.label='6.0';x.semanticVersion='6.0';x.build=build;x.updatedAt='2026-08-31T13:35:00+09:00';x.note='v6.0 독립 운영본 · 헤더 현재버전 표시 · 최신버전 강제 새로고침 · 공식 주소 강제 진입 · 회원명부 UI 실제 적용';
           fs.writeFileSync(p,JSON.stringify(x,null,2)+'\n');
-          fs.writeFileSync('v6-cleanup-report.json',JSON.stringify({version:'6.0',build,rootCauseFixed:'legacy member cards had no member id, so canonical roster finalizer skipped every card',features:['role badges: 개발자/모임장/운영진/일반','remove roster together-game action and total-game badge','current-month attendance + partner setting row','four-character member name lane','grade-matched pastel roster cards','member roster re-entry forces full roster refresh','Kakao/iOS fresh-entry bootstrap with unique navigation and asset nonce'],validation:['javascript syntax','member card id stamped at render time','canonical roster index fallback mapping present','standalone-source ownership','fresh-entry bootstrap marker'],functionalQaPolicy:'functional/browser/device QA omitted from deployment gate per operator request'},null,2)+'\n');
+          fs.writeFileSync('v6-cleanup-report.json',JSON.stringify({version:'6.0',build,features:['header shows current standalone build left of refresh/logout','header latest-refresh clears Cache API and unregisters service workers','header latest-refresh always redirects to https://kkokmatch.github.io/ with a fresh nonce','role badges: 개발자/모임장/운영진/일반','remove roster together-game action and total-game badge','current-month attendance + partner setting row','four-character member name lane','grade-matched pastel roster cards','member roster re-entry forces full roster refresh','Kakao/iOS fresh-entry bootstrap with unique navigation and asset nonce'],validation:['javascript syntax','visible build label source present','canonical latest-refresh source present','canonical official URL present','member card id stamped at render time','canonical roster index fallback mapping present','standalone-source ownership','fresh-entry bootstrap marker'],functionalQaPolicy:'functional/browser/device QA omitted from deployment gate per operator request'},null,2)+'\n');
           let html=fs.readFileSync('index.html','utf8');
           html=html.replace(/data-kokmatch-build="[^"]*"/,`data-kokmatch-build="${build}"`);
           html=html.replace(/const BUILD_FALLBACK='[^']*'/,`const BUILD_FALLBACK='${build}'`);
@@ -71,6 +75,6 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add app-v6.0.js app-v6.0.css index.html latest-version.json v6-cleanup-report.json
-          git commit -m "Make requested roster UI actually apply [skip ci]" || exit 0
+          git commit -m "Show current build and force latest refresh [skip ci]" || exit 0
           git pull --rebase origin main
           git push
