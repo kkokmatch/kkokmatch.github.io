@@ -1,1 +1,8 @@
-{"version":54,"label":"5.4","semanticVersion":"5.4","build":"2026.08.28.loopfix.1","updatedAt":"2026-08-28T11:20:00+09:00","note":"자동 업데이트 반복 이동 복구 안정본"}
+{
+  "version": 60,
+  "label": "6.0",
+  "semanticVersion": "6.0",
+  "build": "2026.08.31.standalone.1",
+  "updatedAt": "2026-08-31T09:30:00+09:00",
+  "note": "누적형 구버전 로드를 종료한 v6.0 독립 운영본"
+}

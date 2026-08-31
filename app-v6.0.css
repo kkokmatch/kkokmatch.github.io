@@ -1,0 +1,2898 @@
+/* 콕매치 v6.0 standalone stylesheet. Runtime must load this file only. */
+/* migrated into v6.0: app-v35.css */
+:root{--blue:#2453d4;--blue2:#5138c5;--bg:#f5f7fb;--card:#fff;--line:#dbe3f1;--text:#172033;--mut:#7785a1;--red:#d94646;--green:#15804f;--gold:#8a6700;--pink:#b23a65;--manager:#3e5eb8}*{box-sizing:border-box}html{background:var(--bg)}body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Noto Sans KR",sans-serif;background:var(--bg);color:var(--text)}button,input,select{font:inherit}.hide{display:none!important}.app{max-width:760px;margin:auto;min-height:100vh;padding-bottom:94px}.top{position:sticky;top:0;z-index:30;background:linear-gradient(135deg,var(--blue),var(--blue2));color:#fff;padding:calc(12px + env(safe-area-inset-top)) 15px 13px;border-radius:0 0 22px 22px;box-shadow:0 3px 14px #233d8b24}.toprow{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}.brand{font-size:22px;font-weight:950}.groupLine{display:flex;align-items:center;gap:6px;margin-top:3px;flex-wrap:wrap}.groupBtn{border:1px solid #ffffff4d;background:#ffffff1f;color:#fff;border-radius:999px;padding:5px 9px;font-size:12px;font-weight:850}.who{font-size:12px;opacity:.92;margin-top:5px}.logout{border:1px solid #ffffff55;background:#ffffff18;color:#fff;border-radius:999px;padding:7px 10px;font-weight:850;font-size:12px}.summary{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:11px}.summary>div{background:#ffffff1b;border-radius:13px;padding:7px;text-align:center}.summary b{display:block;font-size:20px}.summary span{font-size:11px;opacity:.9}.view{display:none;padding:14px}.view.on{display:block}.title{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px}.title h2{font-size:18px;margin:0}.btn{border:0;border-radius:12px;padding:10px 12px;font-weight:850}.btn:disabled{opacity:.4}.pri{background:var(--blue);color:#fff}.ghost{background:#fff;color:var(--text);border:1px solid var(--line)}.danger{background:#fff0f0;color:var(--red)}.enter{background:#eaf8f0;color:var(--green)}.watch{background:#fff6e9;color:#a45b08}.card{background:var(--card);border:1px solid var(--line);border-radius:17px;padding:13px;margin-bottom:9px}.note{font-size:12px;color:#60708f;background:#edf2ff;border-radius:12px;padding:10px 12px;margin-bottom:10px;line-height:1.55}.warn{font-size:12px;color:#9e3f3f;background:#fff3f3;border-radius:12px;padding:10px 12px;margin-bottom:10px;line-height:1.55}.meta{font-size:12px;color:var(--mut);line-height:1.45}.name{font-weight:900}.row{display:flex;align-items:center;gap:8px}.between{display:flex;align-items:center;justify-content:space-between;gap:8px}.wrap{flex-wrap:wrap}.tag,.gamecnt,.roleBadge{display:inline-block;border-radius:999px;padding:3px 7px;font-size:11px;font-weight:900;margin-left:4px;vertical-align:middle}.tag{background:#edf2ff;color:var(--blue)}.gamecnt{background:#eef8f2;color:var(--green)}.role-global{background:#fff3bf;color:#765900;border:1px solid #e3c650}.role-manager{background:#eaf0ff;color:var(--manager);border:1px solid #bac9f1}.role-organizer{background:#e8f7ef;color:#1c7048;border:1px solid #abd9c2}.role-temp{background:#fde8f0;color:var(--pink);border:1px solid #f3b8cd}.guest{background:#fff1dc;color:#a45b08}.memberCard{display:grid;grid-template-columns:42px 1fr auto;gap:10px;align-items:center}.avatar{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;font-size:23px}.male{background:#edf4ff;color:#2768e8}.female{background:#fff0f3;color:#e34e67}.memberBtns{display:flex;gap:5px;flex-wrap:wrap;justify-content:flex-end;max-width:190px}.memberBtns .btn{padding:7px 8px;font-size:11px}.status{font-size:11px;text-align:right;font-weight:850;color:#5a6986;margin-bottom:5px}.pairBtn{border:0;background:transparent;padding:4px 0;color:#6076a4;font-size:11px;font-weight:800;text-decoration:underline}.composer{background:#fff;border:1px solid #bac9f1;border-radius:18px;padding:13px;margin-bottom:12px}.composerTitle{font-weight:950;margin-bottom:9px}.slots{display:grid;grid-template-columns:1fr 1fr;gap:7px}.slot{min-height:72px;border:1px dashed #b7c5e8;border-radius:13px;background:#f8faff;padding:9px;position:relative}.slot.filled{border-style:solid;background:#f4f7ff}.slotLabel{font-size:10px;font-weight:900;color:#6d7da0;margin-bottom:4px}.slotName{font-weight:900}.slotX{position:absolute;right:7px;top:7px;border:0;border-radius:50%;width:25px;height:25px;background:#fff0f0;color:var(--red);font-weight:950}.composerActs{display:flex;gap:7px;margin-top:9px}.composerActs .btn{flex:1}.subhead{display:flex;justify-content:space-between;align-items:center;margin:14px 2px 8px}.subhead b{font-size:14px}.queueCard{display:grid;grid-template-columns:30px 1fr auto;gap:8px;align-items:center;cursor:pointer}.ord{width:29px;height:29px;border-radius:50%;background:#edf1f8;display:grid;place-items:center;font-weight:900}.queueCard.selected{opacity:.48}.pendingCard{border-color:#bac9f1;background:#fbfcff}.pendingHead{display:flex;justify-content:space-between;gap:8px;align-items:center;margin-bottom:8px}.pendingTools{display:flex;align-items:center;gap:5px;flex-wrap:wrap;justify-content:flex-end}.miniBtn{border:1px solid var(--line);background:#fff;border-radius:9px;padding:5px 7px;font-size:11px;font-weight:900}.pendingGrid{display:grid;grid-template-columns:1fr 1fr;gap:7px}.pendingSlot{min-height:66px;border-radius:12px;background:#f2f5fd;padding:8px;position:relative;border:1px solid transparent}.pendingSlot.clickable{cursor:pointer}.pendingSlot.emptySlot{border:1px dashed #b8c4e0;background:#fafbff;color:#72809a;display:flex;align-items:center;justify-content:center;text-align:center;font-weight:850}.pendingX{position:absolute;right:5px;top:5px;border:0;background:#fff0f0;color:var(--red);border-radius:50%;width:23px;height:23px;font-weight:950}.pendingActs{display:flex;gap:7px;margin-top:9px}.pendingActs .btn{flex:1;padding:8px;font-size:12px}.pairSummary{font-size:11px;color:#647493;line-height:1.5;margin-top:8px}.courtCard{display:grid;grid-template-columns:82px 1fr;padding:0;overflow:hidden}.courtName{display:grid;place-items:center;background:#edf3ff;color:var(--blue);font-weight:900;border-right:1px solid var(--line);padding:7px;text-align:center}.courtName button{border:0;background:transparent;color:inherit;font-weight:900;word-break:keep-all}.courtBody{padding:12px}.teams{display:grid;grid-template-columns:1fr auto 1fr;gap:7px;align-items:center}.team{background:#f7f9ff;border-radius:11px;padding:8px;text-align:center;font-weight:850}.team .p{padding:4px 0}.foot{display:flex;justify-content:space-between;align-items:center;gap:7px;margin-top:9px}.gameBtns{display:flex;gap:6px}.statsGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.stat{background:#fff;border:1px solid var(--line);border-radius:16px;padding:14px 8px;text-align:center;font-size:12px}.stat b{display:block;font-size:22px;color:var(--blue);margin-bottom:3px}.historyRow{padding:9px 0;border-bottom:1px solid #edf0f7}.field{margin-bottom:9px}.field label{display:block;font-size:12px;color:var(--mut);margin-bottom:4px}.field input,.field select{width:100%;padding:12px;border:1px solid var(--line);border-radius:12px;background:#fff}.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}.groupCard.inactive{opacity:.62}.groupStats{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}.groupStats span{background:#f3f5fa;border-radius:999px;padding:4px 8px;font-size:11px;font-weight:800;color:#5d6b86}.groupActs{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}.groupActs .btn{font-size:11px;padding:8px 9px}.empty{text-align:center;color:var(--mut);padding:24px 8px}.modal{position:fixed;inset:0;background:#10182d88;display:none;align-items:flex-end;justify-content:center;z-index:100}.modal.on{display:flex}.sheet{width:min(760px,100%);background:#fff;border-radius:24px 24px 0 0;padding:18px 18px calc(18px + env(safe-area-inset-bottom));max-height:90vh;overflow:auto}.sheet h3{margin:0 0 12px}.acts{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}.acts>*{flex:1;min-width:90px}.login{position:fixed;inset:0;z-index:200;background:linear-gradient(145deg,#214cc5,#5434c6);display:grid;place-items:center;padding:18px}.loginBox{width:min(430px,100%);background:#fff;border-radius:24px;padding:22px}.loginBox h1,.loginBox h2{margin:0 0 5px}.authName{font-size:18px;font-weight:900;background:#f3f6ff;border-radius:13px;padding:11px;text-align:center;margin:14px 0}.error{font-size:12px;color:#c93636;min-height:18px;margin-top:7px}.choiceList{display:grid;gap:7px}.choiceBtn{width:100%;text-align:left;border:1px solid var(--line);background:#fff;border-radius:14px;padding:12px}.choiceBtn b{display:block;margin-bottom:3px}nav{position:fixed;left:50%;bottom:0;transform:translateX(-50%);width:min(760px,100%);display:grid;background:#f2f5ff;border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom);z-index:50}nav.n5{grid-template-columns:repeat(5,1fr)}nav.n6{grid-template-columns:repeat(6,1fr)}nav button{border:0;background:transparent;padding:8px 1px;color:#8492b4;font-size:10px;font-weight:850;min-width:0}nav button.on{color:var(--blue);background:#e5ebff}nav i{display:block;font-style:normal;font-size:19px;margin-bottom:1px}@media(max-width:430px){.memberCard{grid-template-columns:39px 1fr auto}.avatar{width:39px;height:39px}.memberBtns{max-width:135px}.memberBtns .btn{padding:6px}.courtCard{grid-template-columns:72px 1fr}.statsGrid{grid-template-columns:1fr 1fr}.groupLine{max-width:250px}.groupBtn{max-width:210px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}}
+
+/* migrated into v6.0: app-v36.css */
+.composerActs{display:flex;gap:7px;flex-wrap:nowrap}.composerActs .btn{flex:1 1 0;min-width:0;white-space:nowrap;font-size:12px;padding:9px 7px;line-height:1.2}
+@media(max-width:380px){.composerActs .btn{font-size:11px;padding:9px 5px}}
+
+/* migrated into v6.0: app-v37.css */
+.memberTitleActs37{display:flex;gap:6px;align-items:center;flex-wrap:nowrap}.memberTitleActs37 .btn{white-space:nowrap;font-size:12px;padding:9px 10px}.bulkExample37{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px;line-height:1.55;background:#f7f8fb;border:1px solid #e4e8f1;border-radius:11px;padding:9px 10px;margin-bottom:10px;color:#56637d}.field textarea{width:100%;resize:vertical;min-height:180px;padding:11px;border:1px solid var(--line);border-radius:12px;background:#fff;font:inherit;line-height:1.5}.bulkErr37{color:#c93636;font-weight:800}@media(max-width:430px){.memberTitleActs37{gap:4px}.memberTitleActs37 .btn{font-size:11px;padding:8px 7px}}
+
+/* migrated into v6.0: app-v39.css */
+.login input{font-size:16px!important;touch-action:manipulation;-webkit-user-select:text;user-select:text}.pinInput39{-webkit-text-security:disc}.loginTapHint39{margin-top:9px;text-align:center}.genderAvatar39{position:relative;overflow:visible;font-weight:950}.genderAvatar39 svg{width:24px;height:24px;fill:currentColor}.genderAvatar39 span{position:absolute;right:-4px;bottom:-3px;min-width:18px;height:18px;border-radius:999px;display:grid;place-items:center;font-size:9px;font-weight:950;background:#fff;border:2px solid currentColor}.genderAvatar39.male{background:#eaf2ff;color:#2768e8;border:1px solid #b8cef9}.genderAvatar39.female{background:#fff0f4;color:#e34e67;border:1px solid #f4bdc9}.queueCard{grid-template-columns:30px 31px 1fr auto!important}.genderMini39{width:31px;height:31px;border-radius:50%;display:grid;place-items:center}.genderMini39 svg{width:19px;height:19px;fill:currentColor}.genderMini39.male{background:#eaf2ff;color:#2768e8;border:1px solid #bdd1fa}.genderMini39.female{background:#fff0f4;color:#e34e67;border:1px solid #f5bfcc}.genderInline39{display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 5px;border-radius:999px;font-size:10px;font-weight:950;vertical-align:1px}.genderInline39.male{background:#eaf2ff;color:#2768e8;border:1px solid #bdd1fa}.genderInline39.female{background:#fff0f4;color:#e34e67;border:1px solid #f5bfcc}@media(max-width:430px){.queueCard{grid-template-columns:28px 29px 1fr auto!important}.genderMini39{width:29px;height:29px}.genderMini39 svg{width:18px;height:18px}}
+
+/* migrated into v6.0: app-v44.css */
+/* v44: role colors + faster mobile touch feedback */
+.role-organizer{background:#fff1df!important;color:#b85d00!important;border:1px solid #efc187!important}
+.role-member44{background:#f0f1f3;color:#5f6673;border:1px solid #d1d5db}
+button,.btn,.choiceBtn,.queueCard,.pendingSlot{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+button:active,.btn:active{filter:brightness(.97)}
+
+/* migrated into v6.0: app-v45.css */
+/* v45: keep member summary on one line + neutral guest/inviter styling */
+.memberMainLine45{display:flex;align-items:center;gap:5px;flex-wrap:nowrap;white-space:nowrap;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;min-width:0}
+.memberMainLine45::-webkit-scrollbar{display:none}
+.memberMainLine45 .tag,.memberMainLine45 .gamecnt,.memberMainLine45 .roleBadge{flex:0 0 auto;margin-left:0}
+.memberName45{font-weight:900;flex:0 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis}
+.guest45{background:#f0f1f3!important;color:#5f6673!important;border:1px solid #d1d5db!important}
+.inviteInfo45{color:#7a8498;font-size:11px;font-weight:750;white-space:nowrap}
+.inviteSub45{display:block;color:#7a8498;font-size:10px;font-weight:750;line-height:1.35;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+@media(max-width:430px){.memberMainLine45{gap:4px}.memberMainLine45 .tag,.memberMainLine45 .gamecnt,.memberMainLine45 .roleBadge{font-size:10px;padding:3px 6px}.memberName45{font-size:15px}.inviteInfo45{font-size:10px}}
+
+/* migrated into v6.0: app-v46.css */
+/* v46: 400-member roster and polling UX */
+.memberSearch46{margin:8px 0 10px;padding:10px 12px;background:#fff;border:1px solid #dbe3f1;border-radius:14px}
+.memberSearchRow46{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:center}
+.memberSearchRow46 input{width:100%;min-width:0;box-sizing:border-box;border:1px solid #cfd8e8;border-radius:11px;padding:11px 12px;font-size:16px;background:#fff;color:#172033;outline:none}
+.memberSearchRow46 input:focus{border-color:#7b94d8;box-shadow:0 0 0 3px rgba(36,83,212,.08)}
+.memberPager46{display:flex;align-items:center;justify-content:center;gap:12px;padding:12px 0 4px}
+.memberPager46 span{min-width:70px;text-align:center;font-size:13px;color:#66738d}
+.memberPager46 button:disabled{opacity:.42}
+@media(max-width:430px){.memberSearch46{padding:9px 10px}.memberSearchRow46{gap:6px}.memberSearchRow46 input{padding:10px;font-size:16px}.memberPager46{gap:8px}}
+
+/* migrated into v6.0: app-v47.css */
+/* v47: desktop compatibility and safer modal/queue UX */
+.queueMain47{display:flex;align-items:center;gap:5px;flex-wrap:wrap}
+.modal .sheet input,.modal .sheet select,.modal .sheet textarea{user-select:text;-webkit-user-select:text}
+@media(min-width:900px){
+ body{min-width:760px}
+ .app{max-width:1120px;padding-bottom:116px}
+ .view{padding:20px 24px}
+ .top{border-radius:0 0 24px 24px;padding-left:24px;padding-right:24px}
+ nav{width:min(1120px,calc(100% - 40px));bottom:16px;border:1px solid var(--line);border-radius:18px;overflow:hidden;box-shadow:0 8px 28px rgba(31,47,87,.14);padding-bottom:0}
+ nav button{padding:10px 4px;font-size:11px;cursor:pointer}
+ nav button:hover{background:#edf2ff}
+ .modal{align-items:center;padding:24px}
+ .sheet{width:min(900px,calc(100% - 48px));border-radius:22px;padding:22px 24px;max-height:84vh;box-shadow:0 20px 60px rgba(18,28,52,.28)}
+ .sheet .field input,.sheet .field select,.sheet .field textarea{font-size:15px}
+ .memberCard{grid-template-columns:46px minmax(0,1fr) auto;gap:14px}
+ .memberBtns{max-width:280px}
+ .memberBtns .btn{cursor:pointer}
+ .queueCard,.pendingSlot.clickable,.choiceBtn,.btn,.groupBtn,.logout{cursor:pointer}
+ .queueCard:hover,.choiceBtn:hover{border-color:#b9c8e8;box-shadow:0 2px 10px rgba(36,83,212,.06)}
+ .composer,.pendingCard{padding:16px}
+ .slots,.pendingGrid{grid-template-columns:repeat(4,minmax(0,1fr))}
+ .courtCard{grid-template-columns:110px 1fr}
+ .statsGrid{grid-template-columns:repeat(4,1fr)}
+ .memberSearch46{padding:12px 14px}
+ .memberSearchRow46 input{font-size:15px}
+}
+
+/* migrated into v6.0: app-v48.css */
+/* v48: responsive layout for phone / fold / tablet / desktop */
+html,body{min-width:0!important;width:100%;max-width:100%;overflow-x:hidden}
+.app{width:100%;max-width:760px}
+.view{min-width:0}
+.card,.composer,.pendingCard,.courtCard,.groupCard{min-width:0;max-width:100%}
+
+/* Never let queue information collapse to min-content on wide screens. */
+.queueCard{width:100%;grid-template-columns:34px minmax(0,1fr) 24px!important;align-items:center}
+.queueCard>div:nth-child(2){min-width:0;width:100%}
+.queueCard>b:last-child{justify-self:end;min-width:18px;text-align:center}
+.queueMain47{display:flex!important;align-items:center;gap:5px;flex-wrap:nowrap!important;white-space:nowrap;min-width:0;width:100%;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;-webkit-overflow-scrolling:touch;word-break:keep-all}
+.queueMain47::-webkit-scrollbar{display:none}
+.queueMain47 .tag,.queueMain47 .gamecnt,.queueMain47 .roleBadge{flex:0 0 auto;margin-left:0}
+.queueCard .meta{word-break:keep-all;overflow-wrap:normal}
+
+.memberCard{grid-template-columns:42px minmax(0,1fr) auto!important;width:100%}
+.memberInfo48{min-width:0;width:100%}
+.memberActions48{min-width:0}
+.memberMainLine45{max-width:100%}
+
+.slots,.pendingGrid,.teams,.statsGrid,.grid2{min-width:0}
+.slot,.pendingSlot,.team{min-width:0}
+.slotName,.pendingSlot .slotName,.team .p{word-break:keep-all;overflow-wrap:normal}
+.groupCard .groupActs{align-items:center}
+.modal .sheet{max-width:100%}
+
+/* Fold cover / very narrow phones */
+@media(max-width:359px){
+ .view{padding:10px}
+ .top{padding-left:11px;padding-right:11px}
+ .brand{font-size:19px}
+ .summary{gap:5px}.summary>div{padding:6px 4px}.summary b{font-size:18px}
+ .card{padding:10px;border-radius:14px}
+ .memberCard{grid-template-columns:36px minmax(0,1fr)!important;gap:8px}
+ .avatar{width:36px;height:36px;font-size:20px}
+ .memberActions48{grid-column:2;justify-self:stretch;width:100%}
+ .memberActions48 .memberBtns{max-width:none;justify-content:flex-start}
+ .memberActions48 .status{text-align:left}
+ .queueCard{grid-template-columns:27px minmax(0,1fr) 18px!important;gap:6px}
+ .ord{width:26px;height:26px;font-size:12px}
+ .slots,.pendingGrid{grid-template-columns:1fr!important}
+ .courtCard{grid-template-columns:62px minmax(0,1fr)}
+ .teams{grid-template-columns:1fr;gap:5px}.teams> :nth-child(2){display:none}
+ nav button{font-size:9px;padding:7px 1px}nav i{font-size:17px}
+}
+
+/* Normal phones incl. iPhone/Galaxy and Fold cover */
+@media(min-width:360px) and (max-width:599px){
+ .app{max-width:760px}
+ .queueCard{grid-template-columns:30px minmax(0,1fr) 20px!important}
+ .memberCard{grid-template-columns:39px minmax(0,1fr) auto!important}
+ .slots,.pendingGrid{grid-template-columns:1fr 1fr!important}
+}
+
+/* Fold unfolded / small tablets */
+@media(min-width:600px) and (max-width:899px){
+ .app{max-width:860px;padding-bottom:98px}
+ .view{padding:18px}
+ .top{padding-left:20px;padding-right:20px}
+ .queueCard{grid-template-columns:36px minmax(0,1fr) 28px!important;padding:14px 16px}
+ .memberCard{grid-template-columns:46px minmax(0,1fr) auto!important;gap:13px}
+ .avatar{width:46px;height:46px}
+ .memberBtns{max-width:260px}
+ .slots,.pendingGrid{grid-template-columns:1fr 1fr!important}
+ .courtCard{grid-template-columns:96px minmax(0,1fr)}
+ .statsGrid{grid-template-columns:repeat(3,minmax(0,1fr))}
+ .modal{align-items:center;padding:22px}
+ .sheet{width:min(720px,calc(100% - 32px));border-radius:22px;padding:22px;max-height:88vh}
+ nav{width:min(860px,100%)}
+}
+
+/* Large tablets / laptops */
+@media(min-width:900px) and (max-width:1199px){
+ body{min-width:0!important}
+ .app{max-width:1080px;padding-bottom:112px}
+ .view{padding:20px 22px}
+ .top{padding-left:22px;padding-right:22px}
+ nav{width:min(1040px,calc(100% - 36px));bottom:14px}
+ .queueCard{grid-template-columns:38px minmax(0,1fr) 30px!important;padding:14px 16px}
+ .memberCard{grid-template-columns:48px minmax(0,1fr) auto!important;gap:14px}
+ .memberBtns{max-width:300px}
+ .slots,.pendingGrid{grid-template-columns:repeat(4,minmax(0,1fr))!important}
+ .courtCard{grid-template-columns:105px minmax(0,1fr)}
+ .statsGrid{grid-template-columns:repeat(4,minmax(0,1fr))}
+ .sheet{width:min(820px,calc(100% - 48px))}
+}
+
+/* Desktop */
+@media(min-width:1200px){
+ body{min-width:0!important}
+ .app{max-width:1180px;padding-bottom:116px}
+ .view{padding:22px 26px}
+ .top{padding-left:26px;padding-right:26px}
+ nav{width:min(1140px,calc(100% - 48px));bottom:16px}
+ .queueCard{grid-template-columns:40px minmax(0,1fr) 32px!important;padding:15px 18px;gap:12px}
+ .queueMain47{overflow:visible}
+ .memberCard{grid-template-columns:50px minmax(0,1fr) auto!important;gap:16px;padding:15px 18px}
+ .avatar{width:48px;height:48px}
+ .memberBtns{max-width:340px}
+ .memberMainLine45{overflow:visible}
+ .slots,.pendingGrid{grid-template-columns:repeat(4,minmax(0,1fr))!important}
+ .courtCard{grid-template-columns:112px minmax(0,1fr)}
+ .statsGrid{grid-template-columns:repeat(4,minmax(0,1fr))}
+ .sheet{width:min(900px,calc(100% - 56px))}
+}
+
+@media(hover:hover) and (pointer:fine){
+ .queueCard,.choiceBtn,.pendingSlot.clickable,.btn,.groupBtn,.logout{transition:border-color .12s ease,box-shadow .12s ease,transform .05s ease}
+ .queueCard:hover,.choiceBtn:hover{border-color:#b9c8e8;box-shadow:0 3px 12px rgba(36,83,212,.07)}
+ .btn:active{transform:translateY(1px)}
+}
+
+/* migrated into v6.0: app-v49.css */
+/* v49: refined responsive polish for fold / phone / tablet while preserving the good v48 phone/desktop layout */
+input,select,textarea{max-width:100%}
+.title,.subhead,.pendingHead,.foot{min-width:0}
+.title>*,.subhead>*,.pendingHead>*,.foot>*{min-width:0}
+.memberInfo48,.queueInfo48{min-width:0!important;width:100%}
+.memberMainLine45,.queueMain47{max-width:100%;word-break:keep-all;overflow-wrap:normal}
+.memberCard,.queueCard{overflow:hidden}
+.memberBtns{min-width:0}
+.memberBtns .btn{white-space:nowrap}
+@media(max-width:1199px){button,.btn,.choiceBtn,.groupBtn,.logout{min-height:40px}}
+
+/* Fold cover and other ultra-narrow screens */
+@media(max-width:359px){
+ .app{max-width:100%;padding-bottom:82px}
+ .view{padding:9px 8px}
+ .top{padding-left:10px;padding-right:10px;border-radius:0 0 17px 17px}
+ .toprow{gap:6px}.brand{font-size:18px}.logout{padding:6px 8px;font-size:10px;min-height:36px}
+ .groupBtn{max-width:170px;font-size:10px;padding:5px 7px;min-height:34px}.who{font-size:10px}
+ .summary{gap:4px;margin-top:8px}.summary>div{padding:5px 2px;border-radius:10px}.summary b{font-size:17px}.summary span{font-size:9px}
+ .title{align-items:center;gap:5px}.title h2{font-size:16px}.title .btn{padding:8px 7px;font-size:10px;min-height:36px}
+ .card{padding:10px 9px;margin-bottom:7px;border-radius:13px}
+ .memberCard{grid-template-columns:34px minmax(0,1fr)!important;gap:7px;align-items:start}
+ .avatar{width:34px;height:34px;font-size:18px}
+ .memberInfo48{grid-column:2}
+ .memberActions48{grid-column:2;width:100%;justify-self:stretch;margin-top:2px}
+ .memberActions48 .status{text-align:left;margin:2px 0 4px}
+ .memberActions48 .memberBtns{max-width:none!important;justify-content:flex-start;gap:4px}
+ .memberActions48 .memberBtns .btn{font-size:10px;padding:6px 7px;min-height:34px}
+ .memberMainLine45{gap:3px;font-size:13px;overflow-x:auto}
+ .memberMainLine45 .tag,.memberMainLine45 .gamecnt,.memberMainLine45 .roleBadge{font-size:9px;padding:2px 5px}
+ .queueCard{grid-template-columns:25px minmax(0,1fr) 15px!important;padding:10px 8px;gap:5px}
+ .ord{width:24px;height:24px;font-size:11px}
+ .queueMain47{font-size:13px;gap:3px;overflow-x:auto}
+ .queueMain47 .tag,.queueMain47 .gamecnt,.queueMain47 .roleBadge{font-size:9px;padding:2px 5px}
+ .queueCard .meta{font-size:10px}
+ .composer{padding:10px}.composerTitle{font-size:14px}
+ .slots,.pendingGrid{grid-template-columns:1fr!important;gap:6px}
+ .slot,.pendingSlot{min-height:62px;padding:8px}
+ .composerActs,.pendingActs{gap:5px;flex-wrap:wrap}.composerActs .btn,.pendingActs .btn{min-width:120px;padding:8px 6px;font-size:10px;min-height:36px}
+ .courtCard{grid-template-columns:58px minmax(0,1fr)!important}.courtName{font-size:11px;padding:5px}.courtBody{padding:8px}
+ .teams{grid-template-columns:1fr!important}.teams> :nth-child(2){display:none}.team{padding:6px;font-size:11px}
+ .statsGrid{grid-template-columns:1fr 1fr!important;gap:6px}.stat{padding:10px 5px}.stat b{font-size:18px}
+ .grid2{grid-template-columns:1fr!important}
+ .sheet{padding:14px 12px calc(14px + env(safe-area-inset-bottom));border-radius:18px 18px 0 0}
+ nav{width:100%;left:0;transform:none}
+ nav button{padding:6px 0;font-size:8px;min-height:48px}nav i{font-size:16px}
+}
+
+/* Normal iPhone / Galaxy portrait: preserve the familiar mobile card layout */
+@media(min-width:360px) and (max-width:479px){
+ .app{max-width:100%;padding-bottom:90px}
+ .view{padding:12px 10px}
+ .top{padding-left:13px;padding-right:13px}
+ .memberCard{grid-template-columns:39px minmax(0,1fr) auto!important;gap:9px;align-items:center}
+ .memberActions48{max-width:132px}
+ .memberActions48 .memberBtns{max-width:132px!important;gap:4px}
+ .memberActions48 .memberBtns .btn{font-size:10px;padding:6px 7px;min-height:34px}
+ .memberMainLine45{overflow-x:auto;gap:4px}
+ .queueCard{grid-template-columns:29px minmax(0,1fr) 18px!important;padding:11px 10px;gap:7px}
+ .queueMain47{overflow-x:auto;gap:4px}
+ .slots,.pendingGrid{grid-template-columns:1fr 1fr!important;gap:6px}
+ .slot,.pendingSlot{padding:8px;min-height:68px}
+ .composerActs,.pendingActs{gap:6px}.composerActs .btn,.pendingActs .btn{padding:9px 5px;font-size:11px;min-height:38px}
+ .courtCard{grid-template-columns:68px minmax(0,1fr)!important}.courtBody{padding:9px}.teams{gap:5px}.team{padding:7px 5px;font-size:11px}
+ .statsGrid{grid-template-columns:1fr 1fr!important}
+ .sheet{width:100%;border-radius:22px 22px 0 0}
+ nav{width:100%}
+}
+
+/* Large phones / Fold cover landscape */
+@media(min-width:480px) and (max-width:599px){
+ .app{max-width:100%}
+ .view{padding:14px 13px}
+ .memberCard{grid-template-columns:42px minmax(0,1fr) auto!important;gap:10px}
+ .memberActions48,.memberBtns{max-width:180px!important}
+ .queueCard{grid-template-columns:31px minmax(0,1fr) 20px!important;padding:12px}
+ .slots,.pendingGrid{grid-template-columns:1fr 1fr!important}
+ .statsGrid{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+ .sheet{width:min(560px,100%)}
+}
+
+/* Fold unfolded / compact tablet */
+@media(min-width:600px) and (max-width:767px){
+ .app{max-width:100%;padding-bottom:96px}
+ .view{padding:16px}
+ .top{padding-left:18px;padding-right:18px}
+ .memberCard{grid-template-columns:46px minmax(0,1fr) auto!important;gap:12px}
+ .memberBtns{max-width:240px!important}
+ .queueCard{grid-template-columns:34px minmax(0,1fr) 24px!important;padding:13px 14px}
+ .slots,.pendingGrid{grid-template-columns:1fr 1fr!important;gap:8px}
+ .courtCard{grid-template-columns:88px minmax(0,1fr)!important}
+ .statsGrid{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+ .sheet{width:min(680px,calc(100% - 24px));border-radius:22px}
+ nav{width:100%}
+}
+
+/* iPad mini / iPad / Galaxy Tab portrait */
+@media(min-width:768px) and (max-width:1023px){
+ .app{max-width:960px;padding-bottom:104px}
+ .view{padding:18px 20px}
+ .top{padding-left:20px;padding-right:20px}
+ .memberCard{grid-template-columns:48px minmax(0,1fr) auto!important;gap:13px;padding:14px 15px}
+ .memberBtns{max-width:280px!important}
+ .queueCard{grid-template-columns:36px minmax(0,1fr) 26px!important;padding:14px 15px}
+ .slots,.pendingGrid{grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:7px}
+ .slot,.pendingSlot{padding:9px;min-height:72px}
+ .courtCard{grid-template-columns:100px minmax(0,1fr)!important}
+ .statsGrid{grid-template-columns:repeat(4,minmax(0,1fr))!important}
+ .sheet{width:min(760px,calc(100% - 32px));border-radius:22px}
+ nav{width:min(920px,calc(100% - 24px));bottom:10px;border-radius:16px}
+}
+
+/* Large tablets / compact laptops before the v48 desktop breakpoint */
+@media(min-width:1024px) and (max-width:1199px){
+ .app{max-width:1080px}
+ .view{padding:20px 22px}
+ .memberCard{grid-template-columns:50px minmax(0,1fr) auto!important}
+ .queueCard{grid-template-columns:38px minmax(0,1fr) 28px!important}
+ .slots,.pendingGrid{grid-template-columns:repeat(4,minmax(0,1fr))!important}
+ .statsGrid{grid-template-columns:repeat(4,minmax(0,1fr))!important}
+}
+
+/* Landscape phones: save vertical room without changing the content structure */
+@media(max-height:520px) and (orientation:landscape) and (max-width:899px){
+ .top{position:relative;padding-top:8px;padding-bottom:8px;border-radius:0 0 16px 16px}
+ .summary{margin-top:7px}.summary>div{padding:5px}.summary b{font-size:17px}
+ .view{padding-top:10px;padding-bottom:76px}
+ .modal{align-items:center;padding:10px}
+ .sheet{max-height:94dvh;border-radius:18px;padding-top:14px;padding-bottom:14px}
+ nav{position:fixed;bottom:0;border-radius:0;padding-bottom:env(safe-area-inset-bottom)}
+}
+
+/* migrated into v6.0: app-v50.css */
+/* v50: exact grade colors + compact shuttlecock role icons */
+.gradeBadge50{font-weight:900!important;border:0!important;letter-spacing:.01em;box-shadow:inset 0 0 0 1px rgba(0,0,0,.08);white-space:nowrap}
+.grade-a50{background:#A60093!important;color:#fff!important}
+.grade-b50{background:#00CFC6!important;color:#073937!important}
+.grade-c50{background:#10D400!important;color:#063b00!important}
+.grade-d50{background:#DE9999!important;color:#4b2020!important}
+.grade-e50{background:#EBE202!important;color:#3b3800!important}
+
+.roleShuttle50{display:inline-flex;align-items:center;justify-content:center;width:17px;height:20px;vertical-align:middle;flex:0 0 auto;margin-left:2px;line-height:1;position:relative;top:1px}
+.roleShuttle50 svg{display:block;width:15px;height:19px;overflow:visible}
+.roleShuttle50.glossy50{filter:drop-shadow(0 1px 1px rgba(0,0,0,.18)) drop-shadow(0 0 2px rgba(255,210,40,.18))}
+.role-global50.glossy50{filter:drop-shadow(0 1px 1px rgba(0,0,0,.18)) drop-shadow(0 0 2.5px rgba(154,84,255,.30))}
+.roleShuttle50.matte50{filter:none;opacity:.97}
+.memberMainLine45 .roleShuttle50,.queueMain47 .roleShuttle50,.slotName .roleShuttle50,.pendingSlot .roleShuttle50,.team .roleShuttle50{flex:0 0 auto}
+
+@media(max-width:359px){.roleShuttle50{width:15px;height:18px}.roleShuttle50 svg{width:13px;height:17px}}
+@media(min-width:1200px){.roleShuttle50{width:18px;height:21px}.roleShuttle50 svg{width:16px;height:20px}}
+
+/* migrated into v6.0: app-v51.css */
+/* v51: refined diagonal shuttlecock role icons */
+.roleShuttle51{display:inline-flex;align-items:center;justify-content:center;width:16px;height:20px;vertical-align:middle;flex:0 0 auto;margin-left:2px;line-height:1;position:relative;top:1px}
+.roleShuttle51 svg{display:block;width:15px;height:19px;overflow:visible;shape-rendering:geometricPrecision}
+.roleShuttle51.glossy51{filter:drop-shadow(0 1px 1px rgba(0,0,0,.16))}
+.role-global51.glossy51{filter:drop-shadow(0 1px 1px rgba(0,0,0,.15)) drop-shadow(0 0 1.8px rgba(167,90,255,.24))}
+.role-manager51.glossy51{filter:drop-shadow(0 1px 1px rgba(0,0,0,.15)) drop-shadow(0 0 1.6px rgba(255,190,30,.22))}
+.roleShuttle51.matte51{filter:none;opacity:.98}
+.memberMainLine45 .roleShuttle51,.queueMain47 .roleShuttle51,.slotName .roleShuttle51,.pendingSlot .roleShuttle51,.team .roleShuttle51{flex:0 0 auto}
+/* remove legacy ordinary-member role pill, keep guest pill intact */
+.roleBadge.role-member44{display:none!important}
+@media(max-width:359px){.roleShuttle51{width:14px;height:18px}.roleShuttle51 svg{width:13px;height:17px}}
+@media(min-width:1200px){.roleShuttle51{width:17px;height:21px}.roleShuttle51 svg{width:16px;height:20px}}
+
+/* migrated into v6.0: app-v52.css */
+/* v52: plumper, more recognizable shuttlecock role icons */
+.roleShuttle52{display:inline-flex;align-items:center;justify-content:center;width:16px;height:20px;vertical-align:middle;flex:0 0 auto;margin-left:2px;line-height:1;position:relative;top:1px}
+.roleShuttle52 svg{display:block;width:15px;height:19px;overflow:visible;shape-rendering:geometricPrecision}
+.roleShuttle52.glossy52{filter:drop-shadow(0 1px 1px rgba(0,0,0,.16))}
+.role-global52.glossy52{filter:drop-shadow(0 1px 1px rgba(0,0,0,.15)) drop-shadow(0 0 1.9px rgba(166,70,255,.25))}
+.role-manager52.glossy52{filter:drop-shadow(0 1px 1px rgba(0,0,0,.15)) drop-shadow(0 0 1.7px rgba(255,189,28,.24))}
+.roleShuttle52.matte52{filter:none;opacity:.99}
+.memberMainLine45 .roleShuttle52,.queueMain47 .roleShuttle52,.slotName .roleShuttle52,.pendingSlot .roleShuttle52,.team .roleShuttle52{flex:0 0 auto}
+.roleBadge.role-member44{display:none!important}
+@media(max-width:359px){.roleShuttle52{width:14px;height:18px}.roleShuttle52 svg{width:13px;height:17px}}
+@media(min-width:1200px){.roleShuttle52{width:17px;height:21px}.roleShuttle52 svg{width:16px;height:20px}}
+
+/* migrated into v6.0: app-v53.css */
+/* v53: restore text role badges + compact gender markers + denser balanced layouts */
+.roleShuttle50,.roleShuttle51,.roleShuttle52{display:none!important}
+.roleBadge.role-member44{display:inline-block!important}
+
+/* Keep the original role color system. */
+.role-global{background:#fff3bf!important;color:#765900!important;border:1px solid #e3c650!important}
+.role-manager{background:#eaf0ff!important;color:#3e5eb8!important;border:1px solid #bac9f1!important}
+.role-organizer{background:#fff1df!important;color:#b85d00!important;border:1px solid #efc187!important}
+.role-temp{background:#fde8f0!important;color:#b23a65!important;border:1px solid #f3b8cd!important}
+.role-member44,.guest45{background:#f0f1f3!important;color:#5f6673!important;border:1px solid #d1d5db!important}
+
+.genderMark53{width:22px;height:22px;border-radius:50%;display:inline-grid;place-items:center;flex:0 0 auto;font-size:12px;font-weight:900;line-height:1;border:1px solid transparent}
+.genderMark53.male{background:#edf4ff;color:#2768e8;border-color:#d5e4ff}
+.genderMark53.female{background:#fff0f3;color:#e34e67;border-color:#ffd7df}
+
+.compactLine53{display:flex!important;align-items:center;gap:4px;flex-wrap:nowrap!important;white-space:nowrap;min-width:0;width:100%;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.compactLine53::-webkit-scrollbar{display:none}
+.compactName53{font-weight:900;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:0 1 auto}
+.compactLine53 .tag,.compactLine53 .gamecnt,.compactLine53 .roleBadge{flex:0 0 auto;margin-left:0;font-size:10px;padding:2px 6px}
+.compactMeta53{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.3}
+
+/* Personal waiting: ranking -> gender icon -> member info -> selection check */
+.queueCard.queueCard53{grid-template-columns:29px 22px minmax(0,1fr) 18px!important;gap:7px;align-items:center;padding-top:10px;padding-bottom:10px}
+.queueCard53 .queueInfo53{min-width:0;width:100%}
+.queueCard53 .queueCheck53{justify-self:end;min-width:16px;text-align:center}
+.queueCard53 .ord{margin:0}
+.queueCard53 .genderMark53{justify-self:center}
+.queueCard53 .compactMeta53{margin-top:2px;font-size:10px}
+
+/* Pending composition: team label, gender and role stay on one compact header row. */
+.pendingCard53{padding-top:11px;padding-bottom:11px}
+.pendingSlot53{min-width:0;overflow:hidden;padding:7px 8px!important;min-height:63px!important}
+.slotTop53{display:flex;align-items:center;justify-content:space-between;gap:4px;min-width:0;margin-bottom:4px;white-space:nowrap}
+.slotTop53 .slotLabel{margin:0;flex:0 0 auto}
+.slotBadges53{display:flex;align-items:center;justify-content:flex-end;gap:3px;min-width:0;white-space:nowrap}
+.slotBadges53 .genderMark53{width:16px;height:16px;font-size:8px}
+.slotBadges53 .roleBadge{font-size:8px;padding:1px 4px;margin:0;line-height:1.35}
+.pendingSlot53.hasX53 .slotTop53{padding-right:22px}
+.slotName53{display:flex;align-items:center;gap:4px;min-width:0;white-space:nowrap;overflow:hidden}
+.slotName53 .compactName53{font-size:12px}
+.slotName53 .tag,.slotName53 .roleBadge{font-size:9px;padding:2px 5px;margin-left:0;flex:0 0 auto}
+.pendingSlot53 .compactMeta53{font-size:9.5px;margin-top:2px}
+.pendingSlot53 .inviteSub45{font-size:9px;margin-top:1px}
+
+/* Playing screen: symmetric team columns with each player kept to a compact two-line row. */
+#playing .courtBody{min-width:0}
+#playing .teams{grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);gap:6px;align-items:stretch}
+#playing .team{min-width:0;padding:7px 6px;display:flex;flex-direction:column;justify-content:center;gap:3px}
+.playingPlayer53{padding:3px 0!important;min-width:0;border-bottom:1px solid #edf0f6}
+.playingPlayer53:last-child{border-bottom:0}
+.playingMain53{display:flex;align-items:center;justify-content:center;gap:3px;min-width:0;white-space:nowrap;overflow:hidden}
+.playingName53{font-weight:900;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.playingMain53 .tag,.playingMain53 .roleBadge{font-size:8.5px;padding:2px 4px;margin-left:0;flex:0 0 auto}
+.playingMeta53{text-align:center;font-size:9.5px!important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.25!important;margin-top:1px}
+#playing .foot{margin-top:7px;flex-wrap:nowrap}
+#playing .gameBtns{flex-wrap:nowrap}
+#playing .gameBtns .btn{white-space:nowrap;padding:7px 8px;font-size:10px}
+
+/* Member list also gets slightly tighter badges to reduce wrapping without changing its structure. */
+.memberMainLine45 .roleBadge{font-size:9px;padding:2px 5px}
+.memberMainLine45 .tag,.memberMainLine45 .gamecnt{font-size:10px;padding:2px 6px}
+
+@media(max-width:359px){
+ .genderMark53{width:18px;height:18px;font-size:9px}
+ .queueCard.queueCard53{grid-template-columns:24px 18px minmax(0,1fr) 14px!important;gap:4px;padding-left:7px;padding-right:7px}
+ .queueCard53 .ord{width:23px;height:23px;font-size:10px}
+ .compactLine53{gap:3px}
+ .compactLine53 .tag,.compactLine53 .gamecnt,.compactLine53 .roleBadge{font-size:8px;padding:2px 4px}
+ .pendingGrid{grid-template-columns:1fr!important}
+ .slotBadges53 .roleBadge{font-size:8px;padding:1px 4px}
+ #playing .teams{grid-template-columns:1fr!important;gap:5px}
+ #playing .teams> :nth-child(2){display:none}
+ .playingMain53 .tag,.playingMain53 .roleBadge{font-size:8px;padding:1px 4px}
+}
+
+@media(min-width:360px) and (max-width:479px){
+ .queueCard.queueCard53{grid-template-columns:27px 20px minmax(0,1fr) 16px!important;gap:5px;padding-left:8px;padding-right:8px}
+ .genderMark53{width:20px;height:20px;font-size:10px}
+ .compactLine53 .tag,.compactLine53 .gamecnt,.compactLine53 .roleBadge{font-size:9px;padding:2px 5px}
+ .pendingSlot53{padding:6px 7px!important}
+ .slotBadges53{gap:2px}
+ .slotBadges53 .genderMark53{width:14px;height:14px;font-size:7px}
+ .slotBadges53 .roleBadge{font-size:7.5px;padding:1px 3px}
+ .slotName53 .compactName53{font-size:11px}
+ .slotName53 .tag{font-size:8px;padding:1px 4px}
+ #playing .team{padding:6px 4px}
+ .playingName53{font-size:10.5px}
+ .playingMain53{gap:2px}
+ .playingMain53 .tag,.playingMain53 .roleBadge{font-size:7.5px;padding:1px 3px}
+ .playingMeta53{font-size:8.5px!important}
+}
+
+@media(min-width:480px) and (max-width:767px){
+ .queueCard.queueCard53{grid-template-columns:31px 22px minmax(0,1fr) 18px!important}
+ .pendingSlot53 .slotBadges53 .roleBadge{font-size:8.5px}
+}
+
+@media(min-width:768px){
+ .queueCard.queueCard53{grid-template-columns:34px 23px minmax(0,1fr) 22px!important;gap:8px}
+ .genderMark53{width:23px;height:23px}
+ .pendingSlot53{min-height:66px!important}
+ .slotBadges53 .genderMark53{width:17px;height:17px}
+ .slotBadges53 .roleBadge{font-size:8.5px;padding:1px 4px}
+ #playing .team{padding:8px}
+ .playingMain53 .tag,.playingMain53 .roleBadge{font-size:9px;padding:2px 5px}
+}
+
+/* migrated into v6.0: app-v54.css */
+/* v54: person-shaped gender icons + balanced match cards + left-aligned playing info */
+.genderMark53{display:none!important}
+.genderPerson54{width:22px;height:22px;display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto;line-height:1;background:transparent!important;border:0!important;border-radius:0!important}
+.genderPerson54 svg{display:block;width:20px;height:20px;fill:currentColor}
+.genderPerson54.male{color:#2768e8!important;background:transparent!important}
+.genderPerson54.female{color:#e34e67!important;background:transparent!important}
+.genderPerson54.compact54{width:17px;height:17px}
+.genderPerson54.compact54 svg{width:15px;height:15px}
+
+.queueCard.queueCard54{grid-template-columns:29px 22px minmax(0,1fr) 18px!important}
+.queueCard54 .genderPerson54{justify-self:center}
+
+/* Reserve the inviter line in every composition slot so rows stay level whether a player is a guest or not. */
+.composer54 .slots,.pendingCard54 .pendingGrid{align-items:stretch}
+.composer54 .slot54{min-height:92px;display:flex;flex-direction:column;min-width:0}
+.composer54 .slot54 .slotName53{padding-right:24px;min-height:21px}
+.composer54 .slot54 .compactMeta53{margin-top:2px}
+.slotEmptyText54{margin-top:5px;min-height:31px}
+.inviteReserve54{display:block;min-height:13px;height:13px;line-height:13px;margin-top:2px;color:#7a8498;font-size:9px;font-weight:750;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.composer54 .inviteReserve54{margin-top:auto}
+
+.pendingSlot54{min-height:82px!important;display:flex;flex-direction:column}
+.pendingSlot54 .slotTop53{flex:0 0 auto}
+.pendingSlot54 .slotName53{flex:0 0 auto}
+.pendingSlot54 .compactMeta53{flex:0 0 auto}
+.pendingSlot54 .inviteReserve54{margin-top:auto}
+.pendingEmpty54{min-height:82px!important;display:flex!important;flex-direction:column;align-items:center!important;justify-content:center!important;gap:3px}
+.pendingEmpty54 .inviteReserve54{margin-top:0;width:100%}
+.slotBadges54 .genderPerson54{margin:0}
+
+/* Playing: keep every participant block aligned from the left edge regardless of badge width. */
+#playing .team{text-align:left!important;align-items:stretch}
+.playingPlayer53{text-align:left!important;width:100%}
+.playingMain53{justify-content:flex-start!important;text-align:left!important;width:100%}
+.playingMeta53{text-align:left!important;width:100%;padding-left:0}
+
+@media(max-width:359px){
+ .genderPerson54{width:18px;height:18px}
+ .genderPerson54 svg{width:17px;height:17px}
+ .genderPerson54.compact54{width:15px;height:15px}
+ .genderPerson54.compact54 svg{width:13px;height:13px}
+ .queueCard.queueCard54{grid-template-columns:24px 18px minmax(0,1fr) 14px!important}
+ .composer54 .slot54{min-height:88px}
+ .pendingSlot54,.pendingEmpty54{min-height:78px!important}
+}
+
+@media(min-width:360px) and (max-width:479px){
+ .genderPerson54{width:20px;height:20px}
+ .genderPerson54 svg{width:18px;height:18px}
+ .genderPerson54.compact54{width:15px;height:15px}
+ .genderPerson54.compact54 svg{width:13px;height:13px}
+ .queueCard.queueCard54{grid-template-columns:27px 20px minmax(0,1fr) 16px!important}
+ .composer54 .slot54{min-height:90px}
+ .pendingSlot54,.pendingEmpty54{min-height:80px!important}
+}
+
+@media(min-width:480px) and (max-width:767px){
+ .queueCard.queueCard54{grid-template-columns:31px 22px minmax(0,1fr) 18px!important}
+}
+
+@media(min-width:768px){
+ .genderPerson54{width:23px;height:23px}
+ .genderPerson54 svg{width:21px;height:21px}
+ .genderPerson54.compact54{width:18px;height:18px}
+ .genderPerson54.compact54 svg{width:16px;height:16px}
+ .queueCard.queueCard54{grid-template-columns:34px 23px minmax(0,1fr) 22px!important}
+ .composer54 .slot54{min-height:96px}
+ .pendingSlot54,.pendingEmpty54{min-height:84px!important}
+}
+
+/* migrated into v6.0: app-v55.css */
+/* v55: normalize queue cards, center remove buttons, and rebalance playing cards */
+
+/* Personal waiting cards always reserve the inviter row so guests do not look taller. */
+.queueCard54{min-height:72px}
+.queueCard54 .queueInfo53{display:flex;flex-direction:column;justify-content:center;min-height:48px}
+.queueInviteReserve55{display:block;min-height:13px;height:13px;line-height:13px;margin-top:1px;font-size:9px;font-weight:750;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.queueInviteEmpty55{visibility:hidden}
+
+/* Move remove buttons from the top corner to the vertical center of each composition cell. */
+.composer54 .slot54.filled{padding-right:34px}
+.composer54 .slot54 .slotX{right:7px;top:50%;transform:translateY(-50%)}
+.pendingSlot54.hasX53{padding-right:34px!important}
+.pendingSlot54.hasX53 .slotTop53{padding-right:0}
+.pendingSlot54 .pendingX{right:6px;top:50%;transform:translateY(-50%)}
+
+/* Keep VS visually centered between the full participant columns. */
+#playing .teams{align-items:stretch;min-height:86px}
+#playing .teams>b{align-self:stretch;display:flex;align-items:center;justify-content:center;text-align:center;line-height:1;font-size:11px;padding:0 2px}
+#playing .team{justify-content:center;padding-top:8px;padding-bottom:8px}
+#playing .playingPlayer53{padding:4px 0!important}
+
+/* Participant area gets more visual weight; footer becomes a compact control strip. */
+#playing .courtBody{padding:10px 11px}
+#playing .foot{margin-top:4px;padding-top:5px;border-top:1px solid #edf0f6;gap:5px;min-height:0}
+#playing .foot>.meta{font-size:9px!important;line-height:1.2;white-space:nowrap}
+#playing .gameBtns{gap:4px}
+#playing .gameBtns .btn{padding:6px 7px;font-size:9px;border-radius:9px;line-height:1.15}
+
+@media(max-width:359px){
+ .queueCard54{min-height:68px}
+ .queueCard54 .queueInfo53{min-height:45px}
+ .queueInviteReserve55{height:12px;min-height:12px;line-height:12px;font-size:8px}
+ .composer54 .slot54.filled,.pendingSlot54.hasX53{padding-right:31px!important}
+ #playing .teams{min-height:0}
+ #playing .teams>b{display:none}
+ #playing .team{padding-top:6px;padding-bottom:6px}
+ #playing .foot{padding-top:4px}
+ #playing .gameBtns .btn{padding:5px 6px;font-size:8.5px}
+}
+
+@media(min-width:360px) and (max-width:479px){
+ .queueCard54{min-height:70px}
+ .queueInviteReserve55{font-size:8.5px}
+ #playing .teams{min-height:82px}
+ #playing .team{padding-top:7px;padding-bottom:7px}
+ #playing .gameBtns .btn{padding:5px 6px;font-size:8.5px}
+}
+
+@media(min-width:480px) and (max-width:767px){
+ #playing .teams{min-height:88px}
+}
+
+@media(min-width:768px){
+ .queueCard54{min-height:76px}
+ .queueCard54 .queueInfo53{min-height:51px}
+ .queueInviteReserve55{font-size:9.5px}
+ #playing .teams{min-height:94px}
+ #playing .team{padding-top:9px;padding-bottom:9px}
+ #playing .gameBtns .btn{padding:6px 8px;font-size:9.5px}
+}
+
+/* migrated into v6.0: app-v56.css */
+/* v56: Kakao in-app browser resilient update flow */
+.updateBanner56{position:fixed;left:50%;bottom:calc(76px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:95;width:min(720px,calc(100% - 24px));display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 11px;border-radius:14px;background:#172033;color:#fff;box-shadow:0 8px 24px rgba(23,32,51,.24);font-size:12px}
+.updateBanner56 b{font-size:12px}.updateBanner56 span{opacity:.84;font-size:10px}.updateBanner56 button{flex:0 0 auto;border:0;border-radius:10px;background:#fff;color:#2453d4;font-weight:900;padding:7px 9px;font-size:10px}
+.updateBanner56.hide56{display:none!important}
+@media(max-width:359px){.updateBanner56{bottom:calc(70px + env(safe-area-inset-bottom));width:calc(100% - 16px);padding:8px 9px}.updateBanner56 span{display:none}}
+
+/* migrated into v6.0: app-v57.css */
+/* v57: widen member information, reduce vertical whitespace, and pin gender markers independently from role badges */
+
+/* Member list: give the information column more room and never ellipsize the member name. */
+.memberCard57{padding-top:9px!important;padding-bottom:9px!important;gap:8px!important}
+.memberCard57 .memberMainLine45{gap:6px!important;overflow-x:auto;overflow-y:hidden;padding-bottom:1px}
+.memberCard57 .memberName45{flex:0 0 auto!important;min-width:max-content!important;overflow:visible!important;text-overflow:clip!important;white-space:nowrap!important}
+.memberCard57 .memberMainLine45 .tag,.memberCard57 .memberMainLine45 .gamecnt,.memberCard57 .memberMainLine45 .roleBadge{flex:0 0 auto!important;margin-left:0!important;white-space:nowrap}
+.memberCard57 .meta{line-height:1.25;margin-top:1px}
+.memberCard57 .pairBtn{padding-top:2px;padding-bottom:1px}
+.memberCard57 .memberActions48{min-width:0}
+.memberCard57 .memberBtns{gap:3px!important;max-width:104px!important}
+.memberCard57 .memberBtns .btn{padding:5px 6px!important;font-size:9.5px!important;border-radius:9px!important;line-height:1.15}
+.memberCard57 .status{font-size:10px;margin-bottom:3px}
+
+/* New-game composition: fixed role zone + fixed gender zone in the upper-right header. */
+.slotHeader57{display:flex;align-items:center;justify-content:space-between;gap:5px;min-width:0;margin-bottom:4px;white-space:nowrap;padding-right:0}
+.slotHeader57>.slotLabel{margin:0;flex:0 0 auto}
+.slotRight57{display:grid;grid-template-columns:68px 16px;align-items:center;justify-content:end;gap:3px;min-width:87px;flex:0 0 87px}
+.roleZone57{grid-column:1;display:flex;align-items:center;justify-content:flex-end;min-width:0;overflow:hidden}
+.genderZone57{grid-column:2;display:flex;align-items:center;justify-content:center;width:16px}
+.roleZone57 .roleBadge{font-size:8px!important;padding:1px 4px!important;margin:0!important;max-width:68px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.composer54 .slot54 .slotName53{padding-right:24px;min-width:0}
+
+/* Pending composition: badge width can vary, gender position cannot. */
+.slotBadges54.fixedZones57{display:grid!important;grid-template-columns:68px 16px!important;align-items:center!important;justify-content:end!important;gap:3px!important;min-width:87px!important;width:87px!important;flex:0 0 87px!important}
+.slotBadges54.fixedZones57 .roleBadge{grid-column:1;grid-row:1;justify-self:end;max-width:68px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin:0!important}
+.slotBadges54.fixedZones57 .genderPerson54{grid-column:2;grid-row:1;justify-self:center;margin:0!important}
+
+/* Shared person icon for composer/playing. */
+.genderPerson57{display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;flex:0 0 16px;line-height:1;background:transparent!important;border:0!important}
+.genderPerson57 svg{display:block;width:14px;height:14px;fill:currentColor}
+.genderPerson57.male{color:#2768e8}
+.genderPerson57.female{color:#e34e67}
+.genderPerson57.compact57{width:15px;height:15px;flex-basis:15px}
+.genderPerson57.compact57 svg{width:13px;height:13px}
+
+/* Playing: small gender icon sits directly after the role badge. */
+.playingMain53 .playingRole57{display:inline-flex;align-items:center;min-width:0;flex:0 0 auto}
+.playingMain53 .playingGender57{display:inline-flex;align-items:center;justify-content:center;flex:0 0 15px;width:15px;margin-left:1px}
+.playingMain53 .playingRole57 .roleBadge{margin-left:0!important}
+
+@media(max-width:599px){
+ .memberCard57{grid-template-columns:36px minmax(0,1fr)!important;padding:8px 9px!important;align-items:center!important}
+ .memberCard57 .avatar{width:36px!important;height:36px!important;font-size:20px!important}
+ .memberCard57 .memberInfo48{grid-column:2;min-width:0;width:100%}
+ .memberCard57 .memberActions48{grid-column:2;display:flex!important;align-items:center;justify-content:space-between;gap:5px;width:100%;margin-top:1px}
+ .memberCard57 .memberBtns{max-width:none!important;display:flex;flex-wrap:nowrap!important;justify-content:flex-end;gap:3px!important}
+ .memberCard57 .memberBtns .btn{padding:4px 5px!important;font-size:8.5px!important;min-width:0}
+ .memberCard57 .status{margin:0!important;white-space:nowrap;flex:0 0 auto}
+ .memberCard57 .memberMainLine45{gap:5px!important}
+ .memberCard57 .memberName45{font-size:14px!important}
+ .memberCard57 .memberMainLine45 .tag,.memberCard57 .memberMainLine45 .gamecnt,.memberCard57 .memberMainLine45 .roleBadge{font-size:8.5px!important;padding:2px 4px!important}
+ .slotRight57,.slotBadges54.fixedZones57{grid-template-columns:60px 15px!important;min-width:78px!important;width:78px!important;flex-basis:78px!important;gap:3px!important}
+ .roleZone57 .roleBadge,.slotBadges54.fixedZones57 .roleBadge{max-width:60px;font-size:7.5px!important;padding:1px 3px!important}
+ .genderZone57{width:15px}
+}
+
+@media(max-width:359px){
+ .memberCard57{grid-template-columns:34px minmax(0,1fr)!important;padding:7px 8px!important;gap:7px!important}
+ .memberCard57 .avatar{width:34px!important;height:34px!important}
+ .memberCard57 .memberMainLine45{gap:4px!important}
+ .memberCard57 .memberName45{font-size:13px!important}
+ .memberCard57 .memberMainLine45 .tag,.memberCard57 .memberMainLine45 .gamecnt,.memberCard57 .memberMainLine45 .roleBadge{font-size:8px!important;padding:1px 3px!important}
+ .memberCard57 .memberBtns .btn{padding:4px!important;font-size:8px!important}
+ .slotRight57,.slotBadges54.fixedZones57{grid-template-columns:56px 14px!important;min-width:73px!important;width:73px!important;flex-basis:73px!important}
+ .roleZone57 .roleBadge,.slotBadges54.fixedZones57 .roleBadge{max-width:56px;font-size:7px!important}
+ .genderPerson57.compact57{width:14px;height:14px;flex-basis:14px}.genderPerson57.compact57 svg{width:12px;height:12px}
+}
+
+@media(min-width:600px){
+ .memberCard57 .memberInfo48{min-width:0}
+ .memberCard57 .memberActions48{max-width:112px}
+ .memberCard57 .memberMainLine45 .tag,.memberCard57 .memberMainLine45 .gamecnt,.memberCard57 .memberMainLine45 .roleBadge{font-size:9.5px!important;padding:2px 5px!important}
+}
+
+/* migrated into v6.0: app-v58.css */
+/* v58: restore clean iPhone member cards and move gender icons directly before names */
+
+/* iPhone / phone member cards: keep the identity block roomy, then use the full card width for controls. */
+@media(max-width:599px){
+ .memberCard57{grid-template-columns:38px minmax(0,1fr)!important;grid-template-rows:auto auto!important;column-gap:9px!important;row-gap:5px!important;padding:8px 10px!important;align-items:center!important}
+ .memberCard57 .avatar{grid-column:1;grid-row:1;width:38px!important;height:38px!important;font-size:21px!important;align-self:start}
+ .memberCard57 .memberInfo48{grid-column:2;grid-row:1;min-width:0;width:100%;align-self:center}
+ .memberCard57 .memberActions48{grid-column:1/-1!important;grid-row:2!important;display:flex!important;align-items:center!important;justify-content:space-between!important;gap:8px!important;width:100%!important;margin:0!important;padding-top:4px!important;border-top:1px solid #edf0f6}
+ .memberCard57 .memberMainLine45{display:flex!important;align-items:center!important;gap:5px!important;flex-wrap:wrap!important;overflow:visible!important;white-space:normal!important;padding:0!important;line-height:1.25}
+ .memberCard57 .memberName45{font-size:14px!important;line-height:1.2!important;min-width:0!important;white-space:nowrap!important}
+ .memberCard57 .memberMainLine45 .tag,.memberCard57 .memberMainLine45 .gamecnt,.memberCard57 .memberMainLine45 .roleBadge{font-size:8.5px!important;padding:2px 5px!important;line-height:1.25!important;margin:0!important;white-space:nowrap!important}
+ .memberCard57 .meta{font-size:10px!important;margin-top:2px!important;line-height:1.25!important}
+ .memberCard57 .pairBtn{font-size:10px!important;padding:2px 0!important}
+ .memberCard57 .status{font-size:9.5px!important;margin:0!important;white-space:nowrap!important;flex:0 0 auto}
+ .memberCard57 .memberBtns{display:flex!important;flex-wrap:nowrap!important;justify-content:flex-end!important;gap:3px!important;max-width:none!important;min-width:0!important;margin-left:auto}
+ .memberCard57 .memberBtns .btn{padding:5px 6px!important;font-size:8.5px!important;line-height:1!important;border-radius:8px!important;white-space:nowrap!important}
+}
+
+@media(max-width:374px){
+ .memberCard57{grid-template-columns:35px minmax(0,1fr)!important;padding:7px 8px!important;column-gap:8px!important}
+ .memberCard57 .avatar{width:35px!important;height:35px!important;font-size:19px!important}
+ .memberCard57 .memberMainLine45{gap:4px!important}
+ .memberCard57 .memberName45{font-size:13px!important}
+ .memberCard57 .memberMainLine45 .tag,.memberCard57 .memberMainLine45 .gamecnt,.memberCard57 .memberMainLine45 .roleBadge{font-size:8px!important;padding:2px 4px!important}
+ .memberCard57 .memberBtns .btn{padding:4px 5px!important;font-size:8px!important}
+}
+
+/* Composer and pending headers: reserve only a role-badge zone on the upper-right. */
+.slotHeader58{display:flex;align-items:center;justify-content:space-between;gap:5px;min-width:0;margin-bottom:4px;white-space:nowrap}
+.slotHeader58>.slotLabel{margin:0;flex:0 0 auto}
+.slotRoleRight58{display:flex;align-items:center;justify-content:flex-end;min-width:68px;max-width:68px;flex:0 0 68px;overflow:hidden}
+.slotRoleRight58 .roleBadge{margin:0!important;max-width:68px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:8px!important;padding:1px 4px!important}
+
+/* Gender icon now sits immediately before the name. */
+.nameGender58{display:inline-flex;align-items:center;justify-content:center;width:15px;height:15px;flex:0 0 15px;margin-right:1px}
+.nameGender58 svg{display:block;width:13px;height:13px;fill:currentColor}
+.nameGender58.male{color:#2768e8}
+.nameGender58.female{color:#e34e67}
+.composer54 .slotName53,.pendingSlot54 .slotName53{display:flex!important;align-items:center!important;gap:3px!important;min-width:0}
+
+/* Pending: upper-right is badge-only, independent from the name/gender line. */
+.slotBadges58{display:flex!important;align-items:center!important;justify-content:flex-end!important;min-width:68px!important;max-width:68px!important;width:68px!important;flex:0 0 68px!important;overflow:hidden!important}
+.slotBadges58 .roleBadge{margin:0!important;max-width:68px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* Playing: gender precedes the name; role badge remains after the grade. */
+.playingMain58{display:flex!important;align-items:center!important;justify-content:flex-start!important;gap:3px!important;min-width:0;width:100%;white-space:nowrap;overflow:hidden}
+.playingGender58{display:inline-flex;align-items:center;justify-content:center;flex:0 0 14px;width:14px}
+.playingGender58 .nameGender58{width:14px;height:14px;flex-basis:14px;margin:0}
+.playingGender58 .nameGender58 svg{width:12px;height:12px}
+.playingRole58{display:inline-flex;align-items:center;min-width:0;flex:0 0 auto}
+.playingRole58 .roleBadge{margin-left:0!important}
+
+@media(max-width:599px){
+ .slotRoleRight58,.slotBadges58{min-width:60px!important;max-width:60px!important;width:60px!important;flex-basis:60px!important}
+ .slotRoleRight58 .roleBadge,.slotBadges58 .roleBadge{max-width:60px;font-size:7.5px!important;padding:1px 3px!important}
+ .nameGender58{width:14px;height:14px;flex-basis:14px}.nameGender58 svg{width:12px;height:12px}
+}
+
+/* migrated into v6.0: app-v59.css */
+/* v59: iPhone member cards use the empty right side for attendance/status controls. */
+
+@media(max-width:599px){
+ .memberCard57{
+  grid-template-columns:38px minmax(0,1fr) clamp(116px,32vw,132px)!important;
+  grid-template-rows:auto!important;
+  column-gap:8px!important;
+  row-gap:0!important;
+  padding:8px 10px!important;
+  align-items:center!important;
+ }
+ .memberCard57 .avatar{
+  grid-column:1!important;
+  grid-row:1!important;
+  align-self:start!important;
+  width:38px!important;
+  height:38px!important;
+ }
+ .memberCard57 .memberInfo48{
+  grid-column:2!important;
+  grid-row:1!important;
+  min-width:0!important;
+  width:100%!important;
+  align-self:center!important;
+ }
+ .memberCard57 .memberActions48{
+  grid-column:3!important;
+  grid-row:1!important;
+  align-self:stretch!important;
+  display:flex!important;
+  flex-direction:column!important;
+  justify-content:center!important;
+  align-items:stretch!important;
+  gap:6px!important;
+  width:100%!important;
+  min-width:0!important;
+  margin:0!important;
+  padding:2px 0 2px 8px!important;
+  border-top:0!important;
+  border-left:1px solid #edf0f6!important;
+ }
+ .memberCard57 .status{
+  width:100%!important;
+  margin:0!important;
+  text-align:center!important;
+  font-size:9.5px!important;
+  line-height:1.2!important;
+  white-space:nowrap!important;
+ }
+ .memberCard57 .memberBtns{
+  display:grid!important;
+  grid-auto-flow:column!important;
+  grid-auto-columns:minmax(0,1fr)!important;
+  align-items:center!important;
+  justify-content:stretch!important;
+  gap:3px!important;
+  width:100%!important;
+  max-width:none!important;
+  min-width:0!important;
+  margin:0!important;
+ }
+ .memberCard57 .memberBtns .btn{
+  width:100%!important;
+  min-width:0!important;
+  height:30px!important;
+  padding:4px 3px!important;
+  font-size:8.5px!important;
+  line-height:1!important;
+  border-radius:8px!important;
+  white-space:nowrap!important;
+ }
+ .memberCard57 .memberBtns .btn:only-child{
+  width:54px!important;
+  justify-self:end!important;
+ }
+ .memberCard57 .memberMainLine45{
+  gap:4px!important;
+  flex-wrap:wrap!important;
+  overflow:visible!important;
+ }
+ .memberCard57 .memberName45{font-size:14px!important}
+ .memberCard57 .memberMainLine45 .tag,
+ .memberCard57 .memberMainLine45 .gamecnt,
+ .memberCard57 .memberMainLine45 .roleBadge{
+  font-size:8px!important;
+  padding:2px 4px!important;
+ }
+ .memberCard57 .meta{font-size:9.5px!important;line-height:1.2!important;margin-top:2px!important}
+ .memberCard57 .pairBtn{font-size:9.5px!important;padding:2px 0!important}
+}
+
+@media(max-width:374px){
+ .memberCard57{
+  grid-template-columns:35px minmax(0,1fr) 108px!important;
+  column-gap:7px!important;
+  padding:7px 8px!important;
+ }
+ .memberCard57 .avatar{width:35px!important;height:35px!important}
+ .memberCard57 .memberActions48{padding-left:6px!important;gap:5px!important}
+ .memberCard57 .memberBtns{gap:2px!important}
+ .memberCard57 .memberBtns .btn{height:28px!important;padding:3px 2px!important;font-size:8px!important}
+ .memberCard57 .memberName45{font-size:13px!important}
+ .memberCard57 .memberMainLine45 .tag,
+ .memberCard57 .memberMainLine45 .gamecnt,
+ .memberCard57 .memberMainLine45 .roleBadge{font-size:7.5px!important;padding:2px 3px!important}
+}
+
+/* Tablets and wider screens keep the v58 arrangement unchanged. */
+
+/* migrated into v6.0: app-v60.css */
+/* v60: permission-layout polish. Keep a lone edit button the same size as each attendance button. */
+@media(max-width:599px){
+ .memberCard57 .memberActions48{min-width:0!important}
+ .memberCard57 .memberBtns{
+  display:grid!important;
+  grid-auto-flow:column!important;
+  grid-auto-columns:38px!important;
+  justify-content:end!important;
+  align-items:center!important;
+  gap:3px!important;
+  width:100%!important;
+ }
+ .memberCard57 .memberBtns .btn,
+ .memberCard57 .memberBtns .btn:only-child{
+  width:38px!important;
+  min-width:38px!important;
+  max-width:38px!important;
+  height:30px!important;
+  padding:4px 2px!important;
+  font-size:8.5px!important;
+  line-height:1!important;
+  border-radius:8px!important;
+  justify-self:auto!important;
+  white-space:nowrap!important;
+ }
+}
+@media(max-width:374px){
+ .memberCard57 .memberBtns{grid-auto-columns:32px!important;gap:2px!important}
+ .memberCard57 .memberBtns .btn,
+ .memberCard57 .memberBtns .btn:only-child{
+  width:32px!important;min-width:32px!important;max-width:32px!important;height:28px!important;font-size:8px!important;padding:3px 1px!important
+ }
+}
+@media(min-width:600px){
+ .memberCard57 .memberBtns .btn:only-child{width:auto!important;min-width:0!important}
+}
+
+/* migrated into v6.0: app-v61.css */
+/* v61: fixed member-action slots, slightly larger player text, and equal empty/active court heights. */
+
+/* Member action buttons keep semantic positions even when one action is unavailable. */
+.memberBtns61{display:grid!important;grid-template-columns:repeat(4,auto)!important;align-items:center!important;justify-content:end!important;gap:3px!important;max-width:none!important}
+.memberBtnSlot61{display:flex;align-items:center;justify-content:center;min-width:0}
+.memberBtnSlot61 .btn{margin:0!important}
+.memberBtnPlaceholder61{display:block;visibility:hidden;pointer-events:none}
+
+/* Modest readability bump for older players without changing the card structure. */
+#queue .composer54 .slotName53 .compactName53,
+#queue .pendingSlot54 .slotName53 .compactName53{font-size:13.5px!important;line-height:1.22}
+#queue .composer54 .compactMeta53,
+#queue .pendingSlot54 .compactMeta53{font-size:10.5px!important;line-height:1.3}
+#queue .composer54 .slotName53 .tag,
+#queue .pendingSlot54 .slotName53 .tag{font-size:9px!important}
+#playing .playingName53{font-size:13px!important;line-height:1.2}
+#playing .playingMeta53{font-size:10px!important;line-height:1.3!important}
+#playing .playingMain53 .tag,#playing .playingMain53 .roleBadge{font-size:8.5px!important}
+
+/* Empty courts reserve the same body height as active courts. */
+#playing .courtBody{min-height:148px;display:flex;flex-direction:column;justify-content:center}
+#playing .courtBody>.teams{width:100%}
+#playing .courtBody>.foot{width:100%}
+#playing .courtBody>.empty{display:flex;align-items:center;justify-content:center;flex:1;width:100%;min-height:126px;padding:0!important}
+
+@media(max-width:599px){
+ .memberCard57{
+  grid-template-columns:38px minmax(0,1fr) 142px!important;
+ }
+ .memberCard57 .memberBtns61{
+  grid-template-columns:repeat(4,32px)!important;
+  gap:3px!important;
+  width:100%!important;
+  justify-content:end!important;
+ }
+ .memberCard57 .memberBtns61 .memberBtnSlot61,
+ .memberCard57 .memberBtns61 .memberBtnSlot61 .btn,
+ .memberCard57 .memberBtns61 .memberBtnPlaceholder61{
+  width:32px!important;min-width:32px!important;max-width:32px!important;height:30px!important
+ }
+ .memberCard57 .memberBtns61 .memberBtnSlot61 .btn{padding:4px 1px!important;font-size:8px!important;line-height:1!important;border-radius:8px!important;white-space:nowrap!important}
+ #queue .composer54 .slotName53 .compactName53,
+ #queue .pendingSlot54 .slotName53 .compactName53{font-size:13px!important}
+ #queue .composer54 .compactMeta53,
+ #queue .pendingSlot54 .compactMeta53{font-size:10px!important}
+ #playing .playingName53{font-size:12.5px!important}
+ #playing .playingMeta53{font-size:9.5px!important}
+ #playing .courtBody{min-height:145px}
+ #playing .courtBody>.empty{min-height:123px}
+}
+
+@media(max-width:374px){
+ .memberCard57{grid-template-columns:35px minmax(0,1fr) 124px!important}
+ .memberCard57 .memberBtns61{grid-template-columns:repeat(4,28px)!important;gap:2px!important}
+ .memberCard57 .memberBtns61 .memberBtnSlot61,
+ .memberCard57 .memberBtns61 .memberBtnSlot61 .btn,
+ .memberCard57 .memberBtns61 .memberBtnPlaceholder61{width:28px!important;min-width:28px!important;max-width:28px!important;height:28px!important}
+ .memberCard57 .memberBtns61 .memberBtnSlot61 .btn{font-size:7.5px!important;padding:3px 0!important}
+ #queue .composer54 .slotName53 .compactName53,
+ #queue .pendingSlot54 .slotName53 .compactName53{font-size:12px!important}
+ #playing .playingName53{font-size:11.5px!important}
+ #playing .courtBody{min-height:142px}
+ #playing .courtBody>.empty{min-height:120px}
+}
+
+@media(min-width:600px){
+ .memberBtns61{grid-template-columns:repeat(4,42px)!important;gap:4px!important}
+ .memberBtns61 .memberBtnSlot61,.memberBtns61 .memberBtnSlot61 .btn,.memberBtns61 .memberBtnPlaceholder61{width:42px!important;min-width:42px!important;height:32px!important}
+ .memberBtns61 .memberBtnSlot61 .btn{padding:6px 3px!important;font-size:10px!important}
+ #playing .courtBody{min-height:158px}
+ #playing .courtBody>.empty{min-height:136px}
+}
+
+/* migrated into v6.0: app-v62.css */
+/* v62: reclaim horizontal space for member badges and playing participant names. */
+
+/* Phone member cards: narrow the right control rail while keeping the four fixed action slots. */
+@media(max-width:599px){
+ .memberCard57{grid-template-columns:38px minmax(0,1fr) 120px!important;column-gap:7px!important}
+ .memberCard57 .memberActions48{padding-left:6px!important}
+ .memberCard57 .memberBtns61{grid-template-columns:repeat(4,27px)!important;gap:3px!important;width:100%!important}
+ .memberCard57 .memberBtns61 .memberBtnSlot61,
+ .memberCard57 .memberBtns61 .memberBtnSlot61 .btn,
+ .memberCard57 .memberBtns61 .memberBtnPlaceholder61{width:27px!important;min-width:27px!important;max-width:27px!important;height:29px!important}
+ .memberCard57 .memberBtns61 .memberBtnSlot61 .btn{font-size:7.5px!important;padding:3px 0!important}
+ .memberCard57 .memberMainLine45{gap:3px!important}
+ .memberCard57 .memberMainLine45 .roleBadge{white-space:nowrap!important}
+}
+@media(max-width:374px){
+ .memberCard57{grid-template-columns:35px minmax(0,1fr) 112px!important;column-gap:6px!important}
+ .memberCard57 .memberActions48{padding-left:5px!important}
+ .memberCard57 .memberBtns61{grid-template-columns:repeat(4,26px)!important;gap:2px!important}
+ .memberCard57 .memberBtns61 .memberBtnSlot61,
+ .memberCard57 .memberBtns61 .memberBtnSlot61 .btn,
+ .memberCard57 .memberBtns61 .memberBtnPlaceholder61{width:26px!important;min-width:26px!important;max-width:26px!important;height:28px!important}
+ .memberCard57 .memberBtns61 .memberBtnSlot61 .btn{font-size:7px!important}
+}
+
+/* Playing: make the blue court-name rail slimmer and give participant columns the saved width. */
+@media(max-width:599px){
+ #playing .courtCard{grid-template-columns:56px minmax(0,1fr)!important}
+ #playing .courtName{padding:5px 3px!important;font-size:12px!important}
+ #playing .courtName button{font-size:12px!important;line-height:1.2!important;padding:2px!important}
+ #playing .courtBody{padding-left:8px!important;padding-right:8px!important}
+ #playing .teams{grid-template-columns:minmax(0,1fr) 16px minmax(0,1fr)!important;gap:3px!important}
+ #playing .teams>b{padding:0!important;font-size:10px!important}
+ #playing .team{padding-left:4px!important;padding-right:4px!important}
+ #playing .playingMain53{gap:2px!important}
+ #playing .playingName53{flex:0 1 auto!important;min-width:0!important}
+ #playing .playingMain53 .roleBadge{font-size:7.5px!important;padding:1px 3px!important}
+ #playing .playingMain53 .tag{font-size:8px!important;padding:1px 3px!important}
+}
+@media(max-width:374px){
+ #playing .courtCard{grid-template-columns:52px minmax(0,1fr)!important}
+ #playing .courtName,#playing .courtName button{font-size:11px!important}
+ #playing .courtBody{padding-left:6px!important;padding-right:6px!important}
+ #playing .teams{grid-template-columns:minmax(0,1fr) 14px minmax(0,1fr)!important;gap:2px!important}
+ #playing .playingMain53 .roleBadge{font-size:7px!important;padding:1px 2px!important}
+ #playing .playingMain53 .tag{font-size:7.5px!important;padding:1px 2px!important}
+}
+@media(min-width:600px) and (max-width:899px){
+ #playing .courtCard{grid-template-columns:66px minmax(0,1fr)!important}
+ #playing .courtName{padding-left:5px!important;padding-right:5px!important}
+}
+
+/* migrated into v6.0: app-v63.css */
+/* v63: rebalance member action rail and keep the settings version badge on one line. */
+
+/* Phone member cards: move the gray divider slightly right and let the fixed action rail fill its width cleanly. */
+@media(max-width:599px){
+ .memberCard57{grid-template-columns:38px minmax(0,1fr) 110px!important;column-gap:7px!important}
+ .memberCard57 .memberActions48,
+ .memberCard57 .memberActions60{padding-left:4px!important}
+ .memberCard57 .memberBtns61{
+  grid-template-columns:repeat(4,26.75px)!important;
+  gap:1px!important;
+  width:110px!important;
+  max-width:110px!important;
+  justify-content:start!important
+ }
+ .memberCard57 .memberBtns61 .memberBtnSlot61,
+ .memberCard57 .memberBtns61 .memberBtnSlot61 .btn,
+ .memberCard57 .memberBtns61 .memberBtnPlaceholder61{
+  width:26.75px!important;min-width:26.75px!important;max-width:26.75px!important;height:31px!important
+ }
+ .memberCard57 .memberBtns61 .memberBtnSlot61 .btn{
+  padding:4px 0!important;font-size:7.6px!important;line-height:1!important;border-radius:8px!important;white-space:nowrap!important
+ }
+}
+@media(max-width:374px){
+ .memberCard57{grid-template-columns:35px minmax(0,1fr) 104px!important;column-gap:6px!important}
+ .memberCard57 .memberActions48,
+ .memberCard57 .memberActions60{padding-left:3px!important}
+ .memberCard57 .memberBtns61{
+  grid-template-columns:repeat(4,25.25px)!important;
+  gap:1px!important;
+  width:104px!important;max-width:104px!important
+ }
+ .memberCard57 .memberBtns61 .memberBtnSlot61,
+ .memberCard57 .memberBtns61 .memberBtnSlot61 .btn,
+ .memberCard57 .memberBtns61 .memberBtnPlaceholder61{
+  width:25.25px!important;min-width:25.25px!important;max-width:25.25px!important;height:29px!important
+ }
+ .memberCard57 .memberBtns61 .memberBtnSlot61 .btn{font-size:7px!important;padding:3px 0!important}
+}
+
+/* Program version card: never wrap the '운영본' badge. */
+#settings .versionCard63 .between{display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;align-items:center!important;gap:10px!important}
+#settings .versionCard63 .between>div:first-child{min-width:0!important}
+#settings .versionCard63 .between>.tag{
+ display:inline-flex!important;align-items:center!important;justify-content:center!important;
+ white-space:nowrap!important;word-break:keep-all!important;overflow:visible!important;
+ min-width:54px!important;width:max-content!important;max-width:none!important;
+ flex:0 0 auto!important;padding:4px 10px!important;margin-left:0!important;font-size:11px!important
+}
+
+/* migrated into v6.0: app-v64.css */
+/* v64: move the member-card divider directly beside the first visible action button. */
+
+.memberActions64{position:relative!important;border-left:0!important;padding-left:0!important}
+.memberActions64::before{content:"";position:absolute;top:0;bottom:0;width:1px;background:#edf0f6;z-index:0}
+.memberActions64 .status,.memberActions64 .memberBtns64{position:relative;z-index:1}
+
+/* v63 phone rail: 26.75px slots + 1px gaps. */
+@media(max-width:599px){
+ .memberActions64.lead064::before{left:0}
+ .memberActions64.lead164::before{left:27.75px}
+ .memberActions64.lead264::before{left:55.5px}
+ .memberActions64.lead364::before{left:83.25px}
+ .memberActions64 .memberBtns64{margin-left:0!important}
+}
+
+/* Small phones: 25.25px slots + 1px gaps. */
+@media(max-width:374px){
+ .memberActions64.lead064::before{left:0}
+ .memberActions64.lead164::before{left:26.25px}
+ .memberActions64.lead264::before{left:52.5px}
+ .memberActions64.lead364::before{left:78.75px}
+}
+
+/* Tablet/wider v61 rail: 42px slots + 4px gaps. */
+@media(min-width:600px){
+ .memberActions64.lead064::before{left:0}
+ .memberActions64.lead164::before{left:46px}
+ .memberActions64.lead264::before{left:92px}
+ .memberActions64.lead364::before{left:138px}
+}
+
+/* migrated into v6.0: app-v65.css */
+/* v65: three-button rotating member controls; remove member-card divider entirely. */
+
+.memberCard57 .memberActions48,
+.memberCard57 .memberActions60,
+.memberCard57 .memberActions64,
+.memberCard57 .memberActions65{
+ border-left:0!important;
+ padding-left:0!important;
+}
+.memberActions64::before,
+.memberActions65::before{
+ content:none!important;
+ display:none!important;
+}
+.memberBtns65{
+ display:grid!important;
+ grid-template-columns:repeat(3,34px)!important;
+ gap:3px!important;
+ justify-content:end!important;
+ align-items:center!important;
+ width:108px!important;
+ max-width:108px!important;
+ margin-left:auto!important;
+}
+.memberBtnSlot65,
+.memberBtnSlot65 .btn,
+.memberBtnPlaceholder65{
+ width:34px!important;
+ min-width:34px!important;
+ max-width:34px!important;
+ height:31px!important;
+}
+.memberBtnSlot65{display:flex!important;align-items:center!important;justify-content:center!important}
+.memberBtnSlot65 .btn{
+ padding:4px 1px!important;
+ font-size:8.3px!important;
+ line-height:1!important;
+ border-radius:8px!important;
+ white-space:nowrap!important;
+ margin:0!important;
+}
+.memberBtnPlaceholder65{display:block!important;visibility:hidden!important;pointer-events:none!important}
+
+@media(max-width:599px){
+ .memberCard57{grid-template-columns:38px minmax(0,1fr) 108px!important;column-gap:7px!important}
+ .memberCard57 .memberActions65{width:108px!important;min-width:108px!important;align-items:flex-end!important}
+ .memberCard57 .memberActions65 .status{width:108px!important;text-align:center!important;margin-bottom:5px!important}
+}
+
+@media(max-width:374px){
+ .memberCard57{grid-template-columns:35px minmax(0,1fr) 98px!important;column-gap:6px!important}
+ .memberCard57 .memberActions65{width:98px!important;min-width:98px!important}
+ .memberCard57 .memberActions65 .status{width:98px!important}
+ .memberBtns65{grid-template-columns:repeat(3,31px)!important;gap:2px!important;width:97px!important;max-width:97px!important}
+ .memberBtnSlot65,
+ .memberBtnSlot65 .btn,
+ .memberBtnPlaceholder65{width:31px!important;min-width:31px!important;max-width:31px!important;height:29px!important}
+ .memberBtnSlot65 .btn{font-size:7.6px!important;padding:3px 0!important}
+}
+
+@media(min-width:600px){
+ .memberBtns65{grid-template-columns:repeat(3,44px)!important;gap:4px!important;width:140px!important;max-width:140px!important}
+ .memberBtnSlot65,
+ .memberBtnSlot65 .btn,
+ .memberBtnPlaceholder65{width:44px!important;min-width:44px!important;max-width:44px!important;height:32px!important}
+ .memberBtnSlot65 .btn{font-size:10px!important;padding:6px 3px!important}
+}
+
+/* migrated into v6.0: app-v66.css */
+/* v66: daily partner display + repeat-pair warning */
+.relationInfo66{font-weight:850;color:#7256b8;white-space:nowrap}
+.partnerSetBtn66{margin-left:10px!important;color:#7256b8!important}
+.relationEmpty66{visibility:hidden!important}
+.repeatPair66{margin:7px 0!important;padding:10px 11px!important}
+.partnerCard66 .btn{min-width:58px;white-space:nowrap}
+#queue .inviteSub45,#queue .inviteReserve54{color:#7256b8;font-weight:800}
+#playing .playingMeta53{overflow:visible!important;text-overflow:clip!important}
+@media(max-width:599px){
+ .partnerSetBtn66{margin-left:8px!important;font-size:9.5px!important}
+ .relationInfo66{font-size:9px!important}
+ .repeatPair66 .tag{font-size:10px!important;white-space:nowrap}
+ .partnerCard66 .between{gap:8px}
+}
+@media(max-width:374px){
+ .partnerSetBtn66{margin-left:6px!important;font-size:9px!important}
+ .relationInfo66{font-size:8.5px!important}
+}
+
+/* migrated into v6.0: app-v67.css */
+/* v67: partner-aware draft composition dialogs. */
+.partnerNotice67{margin:8px 0 12px;padding:12px;border-radius:12px;background:#f6f8ff;line-height:1.65;font-size:13px}
+.partnerSwapList67{display:grid;gap:7px;margin:10px 0}
+.partnerSwapBtn67{width:100%;text-align:left}
+.partnerSwapBtn67 b{font-size:14px}
+.partnerIgnore67{width:100%;margin-top:3px}
+.repeatPair67{margin:7px 0}
+@media(max-width:599px){
+ .partnerNotice67{font-size:12.5px;padding:11px}
+ .partnerSwapBtn67{padding-top:10px!important;padding-bottom:10px!important}
+ .partnerIgnore67{min-height:40px}
+}
+
+/* migrated into v6.0: app-v68.css */
+/* v68: richer partner swap details + stable 3~5 character name lane in personal queue. */
+.partnerFullWarn68{line-height:1.7}
+.partnerSwapBtn68{display:flex!important;flex-direction:column!important;align-items:flex-start!important;gap:3px!important}
+.partnerSwapBtn68 b{font-size:13px!important;line-height:1.45!important;white-space:normal!important;word-break:keep-all!important}
+.partnerSwapBtn68 .meta{font-size:10.5px!important;line-height:1.35!important}
+
+/* Personal game waiting: reserve a consistent name lane for 3~5 Korean characters. */
+.queueCard54 .queueMain47 .compactName53{
+ display:inline-block!important;
+ flex:0 0 5.2em!important;
+ width:5.2em!important;
+ min-width:5.2em!important;
+ max-width:5.2em!important;
+ overflow:hidden!important;
+ text-overflow:ellipsis!important;
+ white-space:nowrap!important;
+}
+.queueCard54 .queueMain47 .tag,
+.queueCard54 .queueMain47 .gamecnt{
+ flex:0 0 auto!important;
+}
+
+@media(max-width:479px){
+ .queueCard54 .queueMain47 .compactName53{flex-basis:5em!important;width:5em!important;min-width:5em!important;max-width:5em!important}
+ .partnerSwapBtn68 b{font-size:12px!important}
+}
+
+@media(max-width:359px){
+ .queueCard54 .queueMain47 .compactName53{flex-basis:4.8em!important;width:4.8em!important;min-width:4.8em!important;max-width:4.8em!important}
+ .partnerSwapBtn68 b{font-size:11.5px!important}
+ .partnerSwapBtn68 .meta{font-size:10px!important}
+}
+
+/* migrated into v6.0: app-v69.css */
+/* v69: member-list visibility and self-first ordering. */
+.memberCard57.memberSelf69{scroll-margin-top:84px}
+
+/* migrated into v6.0: app-v70.css */
+/* v70: all-member roster visibility + current/today waiting time. */
+.memberReadonly70{display:flex!important;align-items:center!important;justify-content:center!important}
+.memberReadonly70 .status{margin:0!important}
+.waitCurrent70,.waitTotal70{white-space:nowrap}
+.waitTotal70{font-weight:700;color:#4d5f86}
+.waitSep70{opacity:.55}
+@media(max-width:479px){
+ .queueCard54 .queueInfo53 .compactMeta53{font-size:9px!important;white-space:nowrap!important;overflow:visible!important;text-overflow:clip!important}
+ .waitSep70{margin:0 1px}
+}
+@media(max-width:359px){
+ .queueCard54 .queueInfo53 .compactMeta53{font-size:8.5px!important;letter-spacing:-.2px}
+}
+
+/* migrated into v6.0: app-v71.css */
+/* v71: cleaner member roster meta + monthly attendance, with compact fast-update layout. */
+.memberCard71 .memberMeta71{
+ font-size:11px!important;
+ line-height:1.4!important;
+ letter-spacing:-.05px!important;
+ color:#606a7d!important;
+}
+.memberCard71 .memberAttendance71{
+ font-size:10.5px!important;
+ font-weight:800!important;
+ color:#365b9d!important;
+ white-space:nowrap!important;
+}
+.memberCard71 .memberMainLine45{gap:4px!important}
+
+@media(max-width:599px){
+ .memberCard71 .memberMeta71{font-size:10.5px!important;line-height:1.35!important}
+ .memberCard71 .memberAttendance71{font-size:10px!important}
+}
+@media(max-width:374px){
+ .memberCard71 .memberMeta71{font-size:10px!important;letter-spacing:-.15px!important}
+ .memberCard71 .memberAttendance71{font-size:9.5px!important}
+}
+
+/* migrated into v6.0: app-v72.css */
+/* v72: balanced member cards, attendance-poll UI, stats/settings cleanup. */
+
+/* Member roster: center identity block vertically and tighten the lower action area. */
+.memberCard71{align-items:center!important}
+.memberCard71 .avatar{align-self:center!important}
+.memberCard71 .memberInfo48{align-self:stretch!important;display:flex!important;flex-direction:column!important;justify-content:center!important;min-width:0!important}
+.memberCard71 .memberMainLine45{align-items:center!important;gap:5px!important;line-height:1.32!important}
+.memberCard71 .memberName45{font-size:15px!important;line-height:1.25!important}
+.memberCard71 .memberMainLine45 .tag,.memberCard71 .memberMainLine45 .roleBadge{font-size:9px!important;padding:2px 5px!important}
+.memberCard71 .memberMeta71{font-size:11.5px!important;line-height:1.45!important;margin-top:2px!important}
+.memberCard71 .memberAttendance71{font-size:11px!important}
+.memberCard71 .pairBtn{font-size:10.5px!important;line-height:1.25!important;padding:3px 0!important;margin-top:2px!important;margin-right:8px!important}
+.memberCard71 .partnerSetBtn66{margin-left:0!important}
+
+@media(max-width:599px){
+ .memberCard71{padding-top:9px!important;padding-bottom:9px!important}
+ .memberCard71 .avatar{align-self:center!important}
+ .memberCard71 .memberName45{font-size:14.5px!important}
+ .memberCard71 .memberMainLine45{gap:4px!important}
+ .memberCard71 .memberMainLine45 .tag,.memberCard71 .memberMainLine45 .roleBadge{font-size:8.5px!important;padding:2px 4px!important}
+ .memberCard71 .memberMeta71{font-size:11px!important;margin-top:2px!important}
+ .memberCard71 .memberAttendance71{font-size:10.5px!important}
+ .memberCard71 .pairBtn{font-size:10px!important;padding:2px 0!important;margin-top:2px!important;margin-right:7px!important}
+}
+@media(max-width:374px){
+ .memberCard71 .memberName45{font-size:13.5px!important}
+ .memberCard71 .memberMeta71{font-size:10.5px!important}
+ .memberCard71 .memberAttendance71{font-size:10px!important}
+ .memberCard71 .pairBtn{font-size:9.5px!important;margin-right:5px!important}
+}
+
+/* Statistics */
+.statsGrid72{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+@media(min-width:600px){.statsGrid72{grid-template-columns:repeat(4,minmax(0,1fr))!important}}
+.pollCard72{margin-top:10px}
+.pollHead72{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
+.pollWhen72{font-size:13px;font-weight:900;color:#243d76}
+.pollCounts72{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:10px 0}
+.pollCountBtn72{border:1px solid #d9e2f1;background:#f8faff;border-radius:11px;padding:9px 6px;text-align:center;font:inherit;color:inherit;cursor:pointer}
+.pollCountBtn72 b{display:block;font-size:18px;color:#2453d4;margin-bottom:2px}
+.pollVote72{display:flex;gap:6px;margin-top:8px}
+.pollVote72 .btn{flex:1}
+.pollMine72{font-size:10.5px;color:#5e6c85;margin-top:5px}
+.pollAdmin72{display:flex;gap:5px;flex-wrap:wrap;margin-top:8px}
+.pollMember72{display:flex;align-items:center;gap:7px;padding:8px 0;border-bottom:1px solid #edf0f6;min-width:0}
+.pollMember72:last-child{border-bottom:0}
+.pollGender72{width:22px;height:22px;border-radius:50%;display:inline-grid;place-items:center;flex:0 0 22px;font-size:10px;font-weight:900}
+.pollGender72.male{background:#edf4ff;color:#2768e8}
+.pollGender72.female{background:#fff0f3;color:#e34e67}
+.pollMember72 .pollName72{font-weight:900;white-space:nowrap}
+.pollMember72 .tag,.pollMember72 .roleBadge{font-size:9px!important;padding:2px 5px!important;margin:0!important}
+.pollGuestRow72{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 0;border-bottom:1px solid #edf0f6}
+
+/* Numeric court-name edit */
+.courtNumber72{font-size:18px!important;text-align:center!important;font-weight:900!important}
+
+/* Settings ordering / reset accordion */
+.resetWrap72{overflow:hidden}
+.resetHead72{width:100%;border:0;background:transparent;padding:0;display:flex;align-items:center;justify-content:space-between;font:inherit;color:inherit;cursor:pointer}
+.resetHead72 b{font-size:14px}
+.resetArrow72{font-size:16px;transition:transform .15s ease}
+.resetWrap72.open .resetArrow72{transform:rotate(180deg)}
+.resetPanel72{display:none;margin-top:9px}
+.resetWrap72.open .resetPanel72{display:block}
+.resetPanel72 .resetTier40,.resetPanel72 .rosterReset60{margin:7px 0!important;box-shadow:none!important;border:1px solid #e1e7f0!important;background:#fbfcff!important}
+.resetPanel72 .resetTier40:first-child,.resetPanel72 .rosterReset60:first-child{margin-top:0!important}
+
+/* migrated into v6.0: app-v73.css */
+/* v73: horizontally centered member identity block + one-line record/partner actions. */
+.memberCard73 .memberInfo48{
+ display:block!important;
+ align-self:auto!important;
+ text-align:center!important;
+ min-width:0!important;
+}
+.memberCard73 .memberMainLine45{
+ justify-content:center!important;
+ align-items:center!important;
+ width:100%!important;
+ margin:0 auto!important;
+}
+.memberCard73 .memberMeta71{
+ width:100%!important;
+ text-align:center!important;
+ margin-top:3px!important;
+}
+.memberRecordActions73{
+ display:flex!important;
+ align-items:center!important;
+ justify-content:center!important;
+ gap:10px!important;
+ width:100%!important;
+ min-width:0!important;
+ margin-top:4px!important;
+ white-space:nowrap!important;
+}
+.memberRecordActions73 .pairBtn{
+ margin:0!important;
+ padding:3px 2px!important;
+ font-size:10.5px!important;
+ line-height:1.2!important;
+ flex:0 0 auto!important;
+}
+.memberCard73 .memberName45{font-size:15px!important}
+.memberCard73 .memberMainLine45 .tag,.memberCard73 .memberMainLine45 .roleBadge{font-size:9px!important}
+
+@media(max-width:599px){
+ .memberCard73 .memberName45{font-size:14.5px!important}
+ .memberRecordActions73{gap:8px!important;margin-top:3px!important}
+ .memberRecordActions73 .pairBtn{font-size:10px!important;padding:2px 1px!important}
+}
+@media(max-width:374px){
+ .memberCard73 .memberName45{font-size:13.5px!important}
+ .memberRecordActions73{gap:6px!important}
+ .memberRecordActions73 .pairBtn{font-size:9.4px!important}
+}
+
+/* Join / attendance history modal */
+.recordSummary73{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin:8px 0 10px}
+.recordSummary73>div{border:1px solid #dce4f2;background:#f8faff;border-radius:12px;padding:10px;text-align:center}
+.recordSummary73 span{display:block;font-size:10px;color:#6a758b;margin-bottom:4px}
+.recordSummary73 b{font-size:14px;color:#26457f}
+.attendanceRow73{display:flex;align-items:center;justify-content:space-between;padding:9px 2px;border-bottom:1px solid #edf0f6}
+.attendanceRow73.current{font-weight:800;color:#2453d4}
+.attendanceRow73:last-child{border-bottom:0}
+
+/* Poll place */
+.pollLocation73{font-size:11px;font-weight:800;color:#53617c;margin-top:2px}
+#pollLocation73,#pollTitle72,#pollTime72{width:100%}
+
+/* migrated into v6.0: app-v74.css */
+/* v74: member info left-aligned beside gender/avatar, yearly attendance history, compact poll form. */
+.memberCard73{column-gap:6px!important}
+.memberCard73 .avatar{align-self:start!important}
+.memberCard73 .memberInfo48{
+ display:block!important;
+ align-self:start!important;
+ text-align:left!important;
+ padding-top:0!important;
+}
+.memberCard73 .memberMainLine45{
+ justify-content:flex-start!important;
+ align-items:center!important;
+ margin:0!important;
+ text-align:left!important;
+}
+.memberCard73 .memberMeta71{
+ text-align:left!important;
+ margin-top:2px!important;
+}
+.memberCard73 .memberRecordActions73{
+ justify-content:flex-start!important;
+ margin-top:3px!important;
+ gap:8px!important;
+}
+
+.recordSummary74>div:first-child b{font-size:13px}
+.attendanceYear74{border:1px solid #dfe6f1;border-radius:12px;margin:8px 0;overflow:hidden;background:#fff}
+.attendanceYear74.current{border-color:#b9cbed}
+.attendanceYearHead74{display:flex;align-items:center;justify-content:space-between;padding:9px 11px;background:#f6f9ff;color:#28477e}
+.attendanceYearHead74 b{font-size:13px}
+.attendanceYearHead74 span{font-size:11px;font-weight:800}
+.attendanceMonths74{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0}
+.attendanceMonth74{padding:9px 6px;text-align:center;border-top:1px solid #edf1f7;border-right:1px solid #edf1f7}
+.attendanceMonth74:nth-child(3n){border-right:0}
+.attendanceMonth74 span{display:block;font-size:10px;color:#68758c;margin-bottom:2px}
+.attendanceMonth74 b{font-size:12px;color:#2d4e88}
+
+.pollCreateForm74{width:100%;max-width:100%;min-width:0;overflow:hidden;box-sizing:border-box}
+.pollCreateForm74 .field{width:100%;max-width:100%;min-width:0;box-sizing:border-box}
+.pollCreateForm74 input,
+.pollCreateForm74 select{
+ display:block!important;
+ width:100%!important;
+ max-width:100%!important;
+ min-width:0!important;
+ box-sizing:border-box!important;
+}
+.pollCreateForm74 input[type="date"]{-webkit-appearance:none;appearance:none}
+
+@media(max-width:599px){
+ .memberCard73{column-gap:5px!important}
+ .memberCard73 .memberRecordActions73{gap:6px!important}
+ .attendanceMonths74{grid-template-columns:repeat(3,minmax(0,1fr))}
+ .pollCreateForm74{padding-right:1px}
+}
+@media(max-width:374px){
+ .memberCard73{column-gap:4px!important}
+ .memberCard73 .memberRecordActions73{gap:5px!important}
+ .attendanceMonth74{padding:8px 3px}
+}
+
+/* migrated into v6.0: app-v76.css */
+/* v76: separated gender zone + compact centered member-info rows; compact poll date row. */
+
+/* Member roster: gender mark is its own far-left zone, info stays in the next zone. */
+.memberCard73.memberCard71{
+  column-gap:4px!important;
+}
+.memberCard73.memberCard71 .avatar{
+  justify-self:center!important;
+  align-self:start!important;
+  margin:0!important;
+}
+.memberCard73.memberCard71 .memberInfo48{
+  display:flex!important;
+  flex-direction:column!important;
+  align-items:center!important;
+  justify-content:flex-start!important;
+  text-align:center!important;
+  min-width:0!important;
+  padding-top:0!important;
+  gap:0!important;
+}
+.memberCard73.memberCard71 .memberMainLine45{
+  width:100%!important;
+  justify-content:center!important;
+  align-items:center!important;
+  text-align:center!important;
+  margin:0!important;
+  padding-bottom:0!important;
+}
+.memberCard73.memberCard71 .memberMeta71{
+  width:100%!important;
+  text-align:center!important;
+  margin-top:0!important;
+  line-height:1.22!important;
+}
+.memberCard73.memberCard71 .memberRecordActions73{
+  width:100%!important;
+  justify-content:center!important;
+  align-items:center!important;
+  margin-top:1px!important;
+  gap:7px!important;
+}
+.memberCard73.memberCard71 .memberRecordActions73 .pairBtn{
+  margin:0!important;
+  padding-top:2px!important;
+  padding-bottom:2px!important;
+}
+
+/* Date + weekday must stay inside the same form width. */
+.pollDateRow76{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  align-items:center;
+  gap:6px;
+  width:100%;
+  max-width:100%;
+  min-width:0;
+}
+.pollDateRow76 input[type="date"]{
+  width:100%!important;
+  max-width:100%!important;
+  min-width:0!important;
+  box-sizing:border-box!important;
+}
+.pollWeekday76{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-width:46px;
+  height:38px;
+  padding:0 7px;
+  box-sizing:border-box;
+  border:1px solid #dce4f2;
+  border-radius:10px;
+  background:#f7f9fd;
+  color:#365b9d;
+  font-size:11px;
+  font-weight:900;
+  white-space:nowrap;
+}
+
+/* Poll member list uses the same age+class tag style as member roster. */
+.pollMember76 .tag{margin:0!important;flex:0 0 auto!important}
+
+@media(max-width:599px){
+  .memberCard73.memberCard71{grid-template-columns:36px minmax(0,1fr)!important;column-gap:4px!important}
+  .memberCard73.memberCard71 .memberRecordActions73{margin-top:1px!important;gap:6px!important}
+  .pollWeekday76{min-width:42px;height:36px;padding:0 6px;font-size:10.5px}
+}
+@media(max-width:359px){
+  .memberCard73.memberCard71{grid-template-columns:34px minmax(0,1fr)!important;column-gap:3px!important}
+  .memberCard73.memberCard71 .memberRecordActions73{gap:5px!important}
+  .pollDateRow76{gap:4px}
+  .pollWeekday76{min-width:39px;padding:0 5px;font-size:10px}
+}
+
+/* migrated into v6.0: app-v77.css */
+/* v77: member roster avatar vertically centered and info block moved next to avatar with ~0.5cm gap. */
+.memberCard73.memberCard71{
+  column-gap:0!important;
+}
+.memberCard73.memberCard71 .avatar{
+  align-self:center!important;
+  justify-self:center!important;
+  margin:0!important;
+}
+.memberCard73.memberCard71 .memberInfo48{
+  align-items:flex-start!important;
+  justify-content:center!important;
+  text-align:left!important;
+  margin-left:.5cm!important;
+  width:calc(100% - .5cm)!important;
+  max-width:calc(100% - .5cm)!important;
+  box-sizing:border-box!important;
+  gap:0!important;
+}
+.memberCard73.memberCard71 .memberMainLine45{
+  justify-content:flex-start!important;
+  text-align:left!important;
+  margin:0!important;
+  padding:0!important;
+}
+.memberCard73.memberCard71 .memberMeta71{
+  text-align:left!important;
+  margin-top:1px!important;
+}
+.memberCard73.memberCard71 .memberRecordActions73{
+  justify-content:flex-start!important;
+  margin-top:2px!important;
+  gap:7px!important;
+}
+@media(max-width:599px){
+  .memberCard73.memberCard71 .avatar{align-self:center!important}
+  .memberCard73.memberCard71 .memberInfo48{
+    margin-left:.5cm!important;
+    width:calc(100% - .5cm)!important;
+    max-width:calc(100% - .5cm)!important;
+  }
+}
+@media(max-width:359px){
+  .memberCard73.memberCard71 .memberInfo48{
+    margin-left:16px!important;
+    width:calc(100% - 16px)!important;
+    max-width:calc(100% - 16px)!important;
+  }
+}
+
+/* migrated into v6.0: app-v78.css */
+/* v78: compact member roster spacing to match reference image while keeping v77 avatar/info alignment. */
+.memberCard73.memberCard71{
+  padding-top:6px!important;
+  padding-bottom:6px!important;
+  row-gap:0!important;
+  min-height:0!important;
+}
+.memberCard73.memberCard71 .avatar{
+  align-self:center!important;
+  justify-self:center!important;
+}
+.memberCard73.memberCard71 .memberInfo48{
+  justify-content:center!important;
+  gap:0!important;
+}
+.memberCard73.memberCard71 .memberMainLine45{
+  line-height:1.12!important;
+  margin:0!important;
+  padding:0!important;
+}
+.memberCard73.memberCard71 .memberMeta71{
+  line-height:1.16!important;
+  margin-top:0!important;
+  margin-bottom:0!important;
+}
+.memberCard73.memberCard71 .memberRecordActions73{
+  margin-top:3px!important;
+  margin-bottom:0!important;
+  line-height:1.1!important;
+}
+.memberCard73.memberCard71 .memberRecordActions73 .pairBtn{
+  padding-top:1px!important;
+  padding-bottom:1px!important;
+  line-height:1.15!important;
+}
+@media(max-width:599px){
+  .memberCard73.memberCard71{
+    padding-top:5px!important;
+    padding-bottom:5px!important;
+  }
+  .memberCard73.memberCard71 .memberRecordActions73{margin-top:2px!important}
+}
+@media(max-width:359px){
+  .memberCard73.memberCard71{
+    padding-top:4px!important;
+    padding-bottom:4px!important;
+  }
+}
+
+/* migrated into v6.0: app-v79.css */
+/* v79: move member information block slightly downward while keeping avatar position unchanged. */
+.memberCard73.memberCard71 .memberInfo48{
+  position:relative!important;
+  top:4px!important;
+}
+@media(max-width:359px){
+  .memberCard73.memberCard71 .memberInfo48{top:3px!important}
+}
+
+/* migrated into v6.0: app-v80.css */
+/* v80: personal game waiting card matches member-roster profile style and spacing. */
+#queue .queueCard.queueCard54{
+  grid-template-columns:34px 52px minmax(0,1fr) 18px!important;
+  column-gap:10px!important;
+  align-items:center!important;
+  padding:13px 12px!important;
+  min-height:84px!important;
+}
+#queue .queueCard54 .ord{
+  width:32px!important;
+  height:32px!important;
+  font-size:14px!important;
+}
+#queue .queueCard54 .genderPerson54{
+  position:relative!important;
+  width:48px!important;
+  height:48px!important;
+  border-radius:50%!important;
+  display:grid!important;
+  place-items:center!important;
+  justify-self:center!important;
+  align-self:center!important;
+  overflow:visible!important;
+  box-sizing:border-box!important;
+}
+#queue .queueCard54 .genderPerson54.male{
+  background:#edf4ff!important;
+  color:#2768e8!important;
+  border:2px solid #bfd2fb!important;
+}
+#queue .queueCard54 .genderPerson54.female{
+  background:#fff0f3!important;
+  color:#e34e67!important;
+  border:2px solid #f6c4cf!important;
+}
+#queue .queueCard54 .genderPerson54 svg{
+  width:28px!important;
+  height:28px!important;
+}
+#queue .queueCard54 .genderPerson54::after{
+  position:absolute;
+  right:-6px;
+  bottom:-6px;
+  width:24px;
+  height:24px;
+  border-radius:50%;
+  background:#fff;
+  display:grid;
+  place-items:center;
+  box-sizing:border-box;
+  font-size:11px;
+  line-height:1;
+  font-weight:950;
+  border:3px solid currentColor;
+}
+#queue .queueCard54 .genderPerson54.male::after{content:'남'}
+#queue .queueCard54 .genderPerson54.female::after{content:'여'}
+#queue .queueCard54 .queueInfo53{
+  position:relative!important;
+  top:4px!important;
+  min-width:0!important;
+  width:100%!important;
+}
+#queue .queueCard54 .queueMain47{
+  align-items:center!important;
+  gap:5px!important;
+  line-height:1.15!important;
+}
+#queue .queueCard54 .queueMain47 .compactName53{
+  font-size:14px!important;
+  line-height:1.15!important;
+}
+#queue .queueCard54 .queueInfo53 .compactMeta53{
+  margin-top:6px!important;
+  line-height:1.2!important;
+}
+#queue .queueCard54 .queueCheck53{align-self:center!important}
+
+@media(max-width:479px){
+  #queue .queueCard.queueCard54{
+    grid-template-columns:31px 48px minmax(0,1fr) 16px!important;
+    column-gap:8px!important;
+    padding:11px 9px!important;
+    min-height:80px!important;
+  }
+  #queue .queueCard54 .ord{width:29px!important;height:29px!important;font-size:12px!important}
+  #queue .queueCard54 .genderPerson54{width:45px!important;height:45px!important}
+  #queue .queueCard54 .genderPerson54 svg{width:26px!important;height:26px!important}
+  #queue .queueCard54 .genderPerson54::after{width:22px;height:22px;right:-5px;bottom:-5px;font-size:10px;border-width:3px}
+  #queue .queueCard54 .queueInfo53{top:4px!important}
+  #queue .queueCard54 .queueMain47 .compactName53{font-size:13.5px!important}
+  #queue .queueCard54 .queueInfo53 .compactMeta53{margin-top:5px!important}
+}
+@media(max-width:359px){
+  #queue .queueCard.queueCard54{
+    grid-template-columns:27px 44px minmax(0,1fr) 14px!important;
+    column-gap:6px!important;
+    padding:10px 7px!important;
+  }
+  #queue .queueCard54 .ord{width:26px!important;height:26px!important;font-size:11px!important}
+  #queue .queueCard54 .genderPerson54{width:41px!important;height:41px!important}
+  #queue .queueCard54 .genderPerson54 svg{width:24px!important;height:24px!important}
+  #queue .queueCard54 .genderPerson54::after{width:20px;height:20px;right:-4px;bottom:-4px;font-size:9px;border-width:2px}
+  #queue .queueCard54 .queueInfo53{top:3px!important}
+  #queue .queueCard54 .queueInfo53 .compactMeta53{margin-top:4px!important}
+}
+
+/* migrated into v6.0: app-v81.css */
+/* v81: personal queue spacing/name lane and larger pending-player information. */
+
+/* Personal game waiting: move wait-time line down and increase readability. */
+#queue .queueCard54 .queueInfo53 .compactMeta53{
+  margin-top:9px!important;
+  font-size:11.8px!important;
+  line-height:1.25!important;
+  font-weight:700!important;
+}
+#queue .queueCard54 .queueInfo53 .waitCurrent70,
+#queue .queueCard54 .queueInfo53 .waitTotal70{
+  font-size:inherit!important;
+}
+
+/* Fixed four-character name lane; pull grade/game badges closer to the name lane. */
+#queue .queueCard54 .queueMain47{
+  gap:3px!important;
+}
+#queue .queueCard54 .queueMain47 .compactName53{
+  flex:0 0 4.15em!important;
+  width:4.15em!important;
+  min-width:4.15em!important;
+  max-width:4.15em!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+  white-space:nowrap!important;
+}
+#queue .queueCard54 .queueMain47 .tag,
+#queue .queueCard54 .queueMain47 .gamecnt,
+#queue .queueCard54 .queueMain47 .roleBadge{
+  margin-left:0!important;
+}
+
+/* Pending groups: enlarge player/gender/grade/wait information without changing the 2-column layout. */
+#queue .pendingCard54 .pendingSlot54{
+  min-height:88px!important;
+  padding:8px 9px!important;
+}
+#queue .pendingCard54 .pendingSlot54 .genderPerson54.compact54{
+  width:19px!important;
+  height:19px!important;
+}
+#queue .pendingCard54 .pendingSlot54 .genderPerson54.compact54 svg{
+  width:17px!important;
+  height:17px!important;
+}
+#queue .pendingCard54 .pendingSlot54 .slotName53{
+  gap:5px!important;
+  line-height:1.2!important;
+}
+#queue .pendingCard54 .pendingSlot54 .slotName53 .compactName53{
+  font-size:13px!important;
+  line-height:1.2!important;
+}
+#queue .pendingCard54 .pendingSlot54 .slotName53 .tag{
+  font-size:10px!important;
+  padding:2px 5px!important;
+}
+#queue .pendingCard54 .pendingSlot54 .compactMeta53{
+  font-size:10.8px!important;
+  line-height:1.3!important;
+  margin-top:3px!important;
+}
+
+@media(max-width:479px){
+  #queue .queueCard54 .queueInfo53 .compactMeta53{
+    margin-top:8px!important;
+    font-size:11.3px!important;
+  }
+  #queue .queueCard54 .queueMain47{gap:2px!important}
+  #queue .queueCard54 .queueMain47 .compactName53{
+    flex-basis:4.1em!important;
+    width:4.1em!important;
+    min-width:4.1em!important;
+    max-width:4.1em!important;
+  }
+  #queue .pendingCard54 .pendingSlot54{
+    min-height:86px!important;
+    padding:7px 8px!important;
+  }
+  #queue .pendingCard54 .pendingSlot54 .genderPerson54.compact54{width:18px!important;height:18px!important}
+  #queue .pendingCard54 .pendingSlot54 .genderPerson54.compact54 svg{width:16px!important;height:16px!important}
+  #queue .pendingCard54 .pendingSlot54 .slotName53 .compactName53{font-size:12.5px!important}
+  #queue .pendingCard54 .pendingSlot54 .slotName53 .tag{font-size:9.5px!important;padding:2px 4px!important}
+  #queue .pendingCard54 .pendingSlot54 .compactMeta53{font-size:10.3px!important;margin-top:3px!important}
+}
+
+@media(max-width:359px){
+  #queue .queueCard54 .queueInfo53 .compactMeta53{
+    margin-top:7px!important;
+    font-size:10.8px!important;
+  }
+  #queue .queueCard54 .queueMain47 .compactName53{
+    flex-basis:4.05em!important;
+    width:4.05em!important;
+    min-width:4.05em!important;
+    max-width:4.05em!important;
+  }
+  #queue .pendingCard54 .pendingSlot54{min-height:83px!important;padding:6px 7px!important}
+  #queue .pendingCard54 .pendingSlot54 .genderPerson54.compact54{width:17px!important;height:17px!important}
+  #queue .pendingCard54 .pendingSlot54 .genderPerson54.compact54 svg{width:15px!important;height:15px!important}
+  #queue .pendingCard54 .pendingSlot54 .slotName53 .compactName53{font-size:12px!important}
+  #queue .pendingCard54 .pendingSlot54 .slotName53 .tag{font-size:9px!important}
+  #queue .pendingCard54 .pendingSlot54 .compactMeta53{font-size:9.8px!important}
+}
+
+/* migrated into v6.0: app-v82.css */
+/* v82: partner search UI, member relation text sizing, larger pending/playing readability. */
+
+/* Partner search */
+.partnerResults82{display:grid;gap:6px;margin-top:-2px;margin-bottom:9px;max-height:260px;overflow:auto}
+.partnerSearchRow82{display:flex!important;align-items:center!important;justify-content:space-between!important;gap:10px!important}
+.partnerSearchRow82 b{font-size:13px!important;white-space:nowrap}
+.partnerSearchRow82 .meta{text-align:right;font-size:10.5px!important}
+.partnerSearchHint82{padding:10px 11px;border:1px dashed #d8e0ef;border-radius:11px;color:#7a879f;background:#fafbfe;font-size:11px;line-height:1.45}
+.partnerPicked82{margin:4px 0 10px}
+.partnerPickedCard82{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 11px;border:1px solid #cbd8f3;border-radius:12px;background:#f6f9ff}
+.partnerPickedCard82 b{font-size:12px}
+.partnerPickedCard82 .meta{font-size:10.5px!important;margin-top:2px}
+.partnerPickedCard82 .btn{padding:7px 9px;font-size:10px}
+.partnerPickedNone82{padding:9px 11px;border-radius:11px;background:#f5f6f8;color:#7a8496;font-size:11px}
+.partnerResetInfo82{line-height:1.6!important;margin-top:2px}
+
+/* Member roster: partner/inviter text matches the monthly attendance text size. */
+.memberCard73.memberCard71 .memberMeta71 .relationInfo66,
+.memberCard73.memberCard71 .memberMeta71 .inviteInfo45{
+  font-size:1em!important;
+  line-height:inherit!important;
+  font-weight:inherit!important;
+}
+
+/* Pending groups: one more readability step while preserving the card structure. */
+#queue .pendingCard54 .pendingSlot54{
+  min-height:91px!important;
+  padding:8px 9px!important;
+}
+#queue .pendingCard54 .pendingSlot54 .genderPerson54.compact54{
+  width:20px!important;
+  height:20px!important;
+}
+#queue .pendingCard54 .pendingSlot54 .genderPerson54.compact54 svg{
+  width:18px!important;
+  height:18px!important;
+}
+#queue .pendingCard54 .pendingSlot54 .slotName53 .compactName53{
+  font-size:13.8px!important;
+  line-height:1.2!important;
+}
+#queue .pendingCard54 .pendingSlot54 .slotName53 .tag{
+  font-size:10.5px!important;
+  padding:2px 5px!important;
+}
+#queue .pendingCard54 .pendingSlot54 .compactMeta53{
+  font-size:11.4px!important;
+  line-height:1.3!important;
+  margin-top:3px!important;
+}
+
+/* Playing screen: keep the same structure, but enlarge all information a little. */
+#playing .playingName53{
+  font-size:14px!important;
+  line-height:1.22!important;
+}
+#playing .playingMeta53{
+  font-size:11.2px!important;
+  line-height:1.32!important;
+}
+#playing .playingMain53 .tag{
+  font-size:9.3px!important;
+  padding:2px 4px!important;
+}
+#playing .playingMain53 .roleBadge{
+  font-size:9px!important;
+  padding:2px 4px!important;
+}
+#playing .playingGender58{
+  width:15px!important;
+  flex-basis:15px!important;
+}
+#playing .playingGender58 .nameGender58{
+  width:15px!important;
+  height:15px!important;
+  flex-basis:15px!important;
+}
+#playing .playingGender58 .nameGender58 svg{
+  width:13px!important;
+  height:13px!important;
+}
+#playing .courtName,
+#playing .courtName button{
+  font-size:13px!important;
+  line-height:1.2!important;
+}
+#playing .foot .meta{font-size:11px!important}
+#playing .gameBtns .btn{font-size:10.5px!important}
+#playing .courtBody{min-height:168px!important}
+#playing .courtBody>.empty{min-height:146px!important;font-size:12.5px!important}
+
+@media(max-width:599px){
+  .partnerSearchRow82 b{font-size:12.5px!important}
+  .partnerSearchRow82 .meta{font-size:10px!important}
+  #queue .pendingCard54 .pendingSlot54{min-height:89px!important;padding:7px 8px!important}
+  #queue .pendingCard54 .pendingSlot54 .genderPerson54.compact54{width:19px!important;height:19px!important}
+  #queue .pendingCard54 .pendingSlot54 .genderPerson54.compact54 svg{width:17px!important;height:17px!important}
+  #queue .pendingCard54 .pendingSlot54 .slotName53 .compactName53{font-size:13.2px!important}
+  #queue .pendingCard54 .pendingSlot54 .slotName53 .tag{font-size:10px!important;padding:2px 4px!important}
+  #queue .pendingCard54 .pendingSlot54 .compactMeta53{font-size:10.8px!important}
+  #playing .playingName53{font-size:13.3px!important}
+  #playing .playingMeta53{font-size:10.5px!important}
+  #playing .playingMain53 .tag{font-size:8.8px!important;padding:1px 3px!important}
+  #playing .playingMain53 .roleBadge{font-size:8.2px!important;padding:1px 3px!important}
+  #playing .playingGender58{width:14px!important;flex-basis:14px!important}
+  #playing .playingGender58 .nameGender58{width:14px!important;height:14px!important;flex-basis:14px!important}
+  #playing .playingGender58 .nameGender58 svg{width:12.5px!important;height:12.5px!important}
+  #playing .courtName,#playing .courtName button{font-size:12.5px!important}
+  #playing .foot .meta{font-size:10.5px!important}
+  #playing .gameBtns .btn{font-size:10px!important}
+  #playing .courtBody{min-height:156px!important}
+  #playing .courtBody>.empty{min-height:134px!important;font-size:12px!important}
+}
+
+@media(max-width:374px){
+  #queue .pendingCard54 .pendingSlot54{min-height:86px!important;padding:6px 7px!important}
+  #queue .pendingCard54 .pendingSlot54 .genderPerson54.compact54{width:18px!important;height:18px!important}
+  #queue .pendingCard54 .pendingSlot54 .genderPerson54.compact54 svg{width:16px!important;height:16px!important}
+  #queue .pendingCard54 .pendingSlot54 .slotName53 .compactName53{font-size:12.6px!important}
+  #queue .pendingCard54 .pendingSlot54 .slotName53 .tag{font-size:9.5px!important}
+  #queue .pendingCard54 .pendingSlot54 .compactMeta53{font-size:10.2px!important}
+  #playing .playingName53{font-size:12.6px!important}
+  #playing .playingMeta53{font-size:10px!important}
+  #playing .playingMain53 .tag{font-size:8.2px!important;padding:1px 2px!important}
+  #playing .playingMain53 .roleBadge{font-size:7.8px!important;padding:1px 2px!important}
+  #playing .courtName,#playing .courtName button{font-size:11.8px!important}
+  #playing .courtBody{min-height:154px!important}
+  #playing .courtBody>.empty{min-height:132px!important;font-size:11.5px!important}
+}
+
+/* migrated into v6.0: app-v83.css */
+/* v83: wider playing participant area, renamed role labels, and member relation row layout. */
+
+/* Member roster: name/badges -> partner or inviter -> birth/gender/monthly attendance -> record actions. */
+.memberCard73.memberCard71 .memberInfo48{
+  gap:0!important;
+}
+.memberCard73.memberCard71 .memberMainLine45{
+  margin-bottom:0!important;
+}
+.memberCard73.memberCard71 .memberRelation83{
+  width:100%!important;
+  margin-top:1px!important;
+  margin-bottom:0!important;
+  color:#606a7d!important;
+  font-size:10.5px!important;
+  line-height:1.3!important;
+  font-weight:800!important;
+  white-space:nowrap!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+  text-align:left!important;
+}
+.memberCard73.memberCard71 .memberMeta71{
+  margin-top:1px!important;
+  margin-bottom:0!important;
+  text-align:left!important;
+}
+.memberCard73.memberCard71 .memberRecordActions73{
+  margin-top:2px!important;
+}
+
+/* Playing: reserve enough room for four-character Korean names and reclaim width from the court rail. */
+#playing .courtCard{
+  grid-template-columns:54px minmax(0,1fr)!important;
+}
+#playing .courtName{
+  padding-left:4px!important;
+  padding-right:4px!important;
+}
+#playing .courtBody{
+  padding-left:7px!important;
+  padding-right:7px!important;
+}
+#playing .teams{
+  grid-template-columns:minmax(0,1fr) 14px minmax(0,1fr)!important;
+  gap:3px!important;
+}
+#playing .playingMain53{
+  gap:2px!important;
+  overflow:hidden!important;
+}
+#playing .playingName53{
+  flex:0 0 4.15em!important;
+  width:4.15em!important;
+  min-width:4.15em!important;
+  max-width:4.15em!important;
+  overflow:visible!important;
+  text-overflow:clip!important;
+  white-space:nowrap!important;
+}
+#playing .playingRole58{
+  min-width:0!important;
+  overflow:hidden!important;
+}
+#playing .playingRole58 .roleBadge{
+  max-width:100%!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+  white-space:nowrap!important;
+}
+
+@media(max-width:599px){
+  .memberCard73.memberCard71 .memberRelation83{font-size:10px!important;line-height:1.28!important}
+  #playing .courtCard{grid-template-columns:46px minmax(0,1fr)!important}
+  #playing .courtName{padding-left:2px!important;padding-right:2px!important}
+  #playing .courtBody{padding-left:5px!important;padding-right:5px!important}
+  #playing .teams{grid-template-columns:minmax(0,1fr) 12px minmax(0,1fr)!important;gap:2px!important}
+  #playing .teams>b{font-size:9.5px!important;padding:0!important}
+  #playing .team{padding-left:3px!important;padding-right:3px!important}
+  #playing .playingName53{
+    flex-basis:4.12em!important;
+    width:4.12em!important;
+    min-width:4.12em!important;
+    max-width:4.12em!important;
+  }
+}
+
+@media(max-width:374px){
+  .memberCard73.memberCard71 .memberRelation83{font-size:9.5px!important}
+  #playing .courtCard{grid-template-columns:43px minmax(0,1fr)!important}
+  #playing .courtBody{padding-left:4px!important;padding-right:4px!important}
+  #playing .teams{grid-template-columns:minmax(0,1fr) 10px minmax(0,1fr)!important;gap:1px!important}
+  #playing .team{padding-left:2px!important;padding-right:2px!important}
+  #playing .playingName53{
+    flex-basis:4.08em!important;
+    width:4.08em!important;
+    min-width:4.08em!important;
+    max-width:4.08em!important;
+  }
+}
+
+@media(min-width:600px){
+  #playing .courtCard{grid-template-columns:58px minmax(0,1fr)!important}
+  #playing .playingName53{
+    flex-basis:4.2em!important;
+    width:4.2em!important;
+    min-width:4.2em!important;
+    max-width:4.2em!important;
+  }
+}
+
+/* migrated into v6.0: app-v84.css */
+/* v84: member roster spacing and role-priority ordering polish. */
+
+/* Add about 3px more breathing room between the name/badge row and partner/inviter row. */
+.memberCard73.memberCard71 .memberRelation83{
+  margin-top:4px!important;
+}
+
+/* Pull the record-action row about 3px closer to the birth/gender/monthly-attendance row. */
+.memberCard73.memberCard71 .memberRecordActions73{
+  margin-top:-1px!important;
+}
+
+@media(max-width:599px){
+  .memberCard73.memberCard71 .memberRelation83{margin-top:4px!important}
+  .memberCard73.memberCard71 .memberRecordActions73{margin-top:-1px!important}
+}
+
+@media(max-width:359px){
+  .memberCard73.memberCard71 .memberRelation83{margin-top:3px!important}
+  .memberCard73.memberCard71 .memberRecordActions73{margin-top:-1px!important}
+}
+
+/* migrated into v6.0: app-v85.css */
+/* v85: place current-user info beside the group name and keep guest ordering below regular members. */
+.groupLine{
+  display:flex!important;
+  align-items:center!important;
+  gap:8px!important;
+  flex-wrap:wrap!important;
+  min-width:0!important;
+}
+.groupLine .groupBtn{
+  flex:0 1 auto!important;
+  min-width:0!important;
+}
+.groupLine .whoInline85{
+  display:inline-flex!important;
+  align-items:center!important;
+  margin:0!important;
+  padding:0!important;
+  font-size:11px!important;
+  line-height:1.2!important;
+  white-space:nowrap!important;
+  color:rgba(255,255,255,.9)!important;
+}
+
+@media(max-width:599px){
+  .groupLine{gap:6px!important;flex-wrap:nowrap!important}
+  .groupLine .groupBtn{max-width:48vw!important;overflow:hidden!important;text-overflow:ellipsis!important;white-space:nowrap!important}
+  .groupLine .whoInline85{font-size:10.5px!important;min-width:0!important;overflow:hidden!important;text-overflow:ellipsis!important}
+}
+
+@media(max-width:359px){
+  .groupLine{gap:5px!important}
+  .groupLine .groupBtn{max-width:44vw!important}
+  .groupLine .whoInline85{font-size:10px!important}
+}
+
+/* migrated into v6.0: app-v86.css */
+/* v86: prevent partial-version paint and stabilize member-roster rendering on mobile refresh. */
+
+/* Older layered scripts can briefly render before the latest overlay is loaded.
+   Keep the app itself hidden until v86 has installed the final render pipeline. */
+html:not(.kokmatch-ready86) .app{
+  visibility:hidden!important;
+}
+
+/* Member roster is rebuilt synchronously; keep intermediate DOM work off-screen. */
+#members.memberRenderLock86{
+  visibility:hidden!important;
+}
+
+/* Give mobile browsers a stable compositing layer after the final member layout is ready. */
+#members.memberRenderStable86{
+  transform:translateZ(0);
+  backface-visibility:hidden;
+}
+
+/* migrated into v6.0: app-v87.css */
+/* v87: robust first-paint stabilization for member roster on mobile browsers. */
+
+/* Neutralize the v86 compositing/visibility experiment. */
+html:not(.kokmatch-ready86) .app{visibility:visible!important}
+#members.memberRenderLock86{visibility:visible!important}
+#members.memberRenderStable86{
+  transform:none!important;
+  backface-visibility:visible!important;
+  will-change:auto!important;
+}
+
+/* Keep only the first roster paint off-screen while the viewport/layout settles. */
+#members.rosterPreparing87{
+  opacity:0!important;
+  pointer-events:none!important;
+}
+
+/* Avoid animated layout during the one-time stabilization pass. */
+#members.rosterPreparing87 .memberCard{
+  transition:none!important;
+}
+
+/* migrated into v6.0: app-v88.css */
+/* v88: stable member roster layout across view changes, equal card heights, tablet/fold control alignment, and pagination. */
+
+/* Neutralize the one-shot hidden paint from v87; v88 performs repeatable reflow instead. */
+#members.rosterPreparing87{opacity:1!important;pointer-events:auto!important}
+#members.view.on{display:block!important}
+
+/* Keep member cards on one deterministic grid at every breakpoint. */
+.memberCard57.memberCard73.memberCard71{
+  align-items:center!important;
+  grid-template-columns:38px minmax(0,1fr) 108px!important;
+  column-gap:7px!important;
+}
+.memberCard57.memberCard73.memberCard71 .memberInfo48{min-width:0!important;width:100%!important}
+.memberCard57.memberCard73.memberCard71 .memberActions65{
+  width:108px!important;
+  min-width:108px!important;
+  display:flex!important;
+  flex-direction:column!important;
+  align-items:center!important;
+  justify-content:center!important;
+}
+.memberCard57.memberCard73.memberCard71 .memberActions65 .status{
+  width:108px!important;
+  text-align:center!important;
+  margin:0 0 5px!important;
+  align-self:center!important;
+}
+
+/* Reserve the partner/inviter line for every member so all white cards have the same height. */
+.memberCard73.memberCard71 .memberRelation83{
+  min-height:14px!important;
+  height:14px!important;
+  line-height:14px!important;
+  box-sizing:border-box!important;
+}
+.memberRelationPlaceholder88{
+  visibility:hidden!important;
+  user-select:none!important;
+}
+
+/* Page navigation lives under the blue member-list description area. */
+.memberPager88{
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  flex-wrap:wrap!important;
+  gap:5px!important;
+  padding:6px 0 8px!important;
+}
+.memberPageBtn88{
+  min-width:30px!important;
+  height:28px!important;
+  padding:0 7px!important;
+  border:1px solid #c9d5ee!important;
+  border-radius:8px!important;
+  background:#fff!important;
+  color:#31558f!important;
+  font-size:11px!important;
+  font-weight:800!important;
+}
+.memberPageBtn88.on{
+  background:#2453d4!important;
+  border-color:#2453d4!important;
+  color:#fff!important;
+}
+.memberPageHidden88{display:none!important}
+
+/* Tiny reversible style pulse used only to make WebKit recalculate the visible roster. */
+#members.rosterReflow88{outline:1px solid transparent!important}
+
+@media(max-width:374px){
+  .memberCard57.memberCard73.memberCard71{
+    grid-template-columns:35px minmax(0,1fr) 98px!important;
+    column-gap:6px!important;
+  }
+  .memberCard57.memberCard73.memberCard71 .memberActions65{width:98px!important;min-width:98px!important}
+  .memberCard57.memberCard73.memberCard71 .memberActions65 .status{width:98px!important}
+  .memberPager88{gap:4px!important}
+  .memberPageBtn88{min-width:27px!important;height:27px!important;font-size:10px!important;padding:0 6px!important}
+}
+
+@media(min-width:600px) and (max-width:899px){
+  .memberCard57.memberCard73.memberCard71{
+    grid-template-columns:46px minmax(0,1fr) 140px!important;
+    column-gap:10px!important;
+  }
+  .memberCard57.memberCard73.memberCard71 .memberActions65{width:140px!important;min-width:140px!important}
+  .memberCard57.memberCard73.memberCard71 .memberActions65 .status{
+    width:140px!important;
+    text-align:center!important;
+    margin-bottom:5px!important;
+  }
+}
+
+@media(min-width:900px){
+  .memberCard57.memberCard73.memberCard71{
+    grid-template-columns:48px minmax(0,1fr) 140px!important;
+    column-gap:12px!important;
+  }
+  .memberCard57.memberCard73.memberCard71 .memberActions65{width:140px!important;min-width:140px!important}
+  .memberCard57.memberCard73.memberCard71 .memberActions65 .status{
+    width:140px!important;
+    text-align:center!important;
+    margin-bottom:5px!important;
+  }
+}
+
+/* migrated into v6.0: app-v89.css */
+/* v89: personal queue relation line directly under member name; slightly larger relation text; trim top whitespace. */
+#queue .queueCard54 .queueInfo53{
+  top:1px!important;
+}
+#queue .queueCard54 .queueRelation89{
+  display:block!important;
+  margin-top:3px!important;
+  font-size:12px!important;
+  line-height:1.2!important;
+  font-weight:800!important;
+  color:#53657f!important;
+  white-space:nowrap!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+}
+#queue .queueCard54 .queueRelation89.relationEmpty66,
+#queue .queueCard54 .queueRelation89.queueInviteEmpty55{
+  visibility:hidden!important;
+  min-height:14px!important;
+}
+#queue .queueCard54 .queueWaitMeta89{
+  margin-top:4px!important;
+}
+
+@media(max-width:479px){
+  #queue .queueCard54 .queueInfo53{top:1px!important}
+  #queue .queueCard54 .queueRelation89{font-size:11.5px!important;margin-top:3px!important}
+  #queue .queueCard54 .queueWaitMeta89{margin-top:4px!important}
+}
+@media(max-width:359px){
+  #queue .queueCard54 .queueInfo53{top:0!important}
+  #queue .queueCard54 .queueRelation89{font-size:11px!important;margin-top:2px!important}
+  #queue .queueCard54 .queueWaitMeta89{margin-top:3px!important}
+}
+
+/* migrated into v6.0: app-v90.css */
+/* v90: attendance poll edit/start-end time/expiry presentation */
+.pollWrap90{display:block}
+.pollHead90{margin-top:12px}
+.pollCard90 .pollHead72{align-items:flex-start!important}
+.pollBlank90{height:14px;line-height:14px}
+.pollHeadBtns90{display:flex;gap:5px;align-items:center;justify-content:flex-end;flex:0 0 auto}
+.pollForm90 .pollTimeGrid90{grid-template-columns:1fr 1fr!important;gap:8px!important}
+.pollForm90 .pollTimeGrid90 .field{min-width:0!important}
+.pollForm90 .pollTimeGrid90 select{width:100%!important;max-width:100%!important;box-sizing:border-box!important}
+.pollTimeNote90{margin:-2px 0 8px!important}
+
+@media(max-width:479px){
+ .pollHeadBtns90{gap:4px}
+ .pollHeadBtns90 .miniBtn{padding:5px 7px!important;font-size:10px!important}
+ .pollForm90 .pollTimeGrid90{gap:6px!important}
+ .pollForm90 .pollTimeGrid90 label{font-size:11px!important}
+}
+@media(max-width:359px){
+ .pollForm90 .pollTimeGrid90{grid-template-columns:1fr!important}
+ .pollHeadBtns90 .miniBtn{padding:4px 6px!important;font-size:9.5px!important}
+}
+
+/* migrated into v6.0: app-v91.css */
+/* v91: maximize name/grade/role readability without changing screen structure. */
+
+/* Member roster */
+#members .memberMainLine45 .memberName45,
+#members .memberMainLine45 .name{font-size:15.5px!important;line-height:1.15!important}
+#members .memberMainLine45 .tag{font-size:11.5px!important;padding:2px 6px!important}
+#members .memberMainLine45 .roleBadge{font-size:10.8px!important;padding:3px 6px!important}
+
+/* Personal waiting */
+#queue .queueCard54 .queueMain47 .compactName53{font-size:15px!important;line-height:1.15!important}
+#queue .queueCard54 .queueMain47 .tag{font-size:11px!important;padding:2px 5px!important}
+#queue .queueCard54 .queueMain47 .roleBadge{font-size:10.5px!important;padding:3px 5px!important}
+
+/* New-game composer */
+#queue .composer54 .slot54 .compactName53,
+#queue .composer54 .slot54 .slotName53{font-size:14px!important;line-height:1.15!important}
+#queue .composer54 .slot54 .tag{font-size:10.8px!important;padding:2px 5px!important}
+#queue .composer54 .slot54 .roleBadge{font-size:10.2px!important;padding:3px 5px!important}
+
+/* Pending groups */
+#queue .pendingCard54 .pendingSlot54 .slotName53 .compactName53{font-size:14px!important;line-height:1.18!important}
+#queue .pendingCard54 .pendingSlot54 .slotName53 .tag{font-size:10.8px!important;padding:2px 5px!important}
+#queue .pendingCard54 .pendingSlot54 .roleBadge{font-size:10.2px!important;padding:3px 5px!important}
+
+/* Playing */
+#playing .playingName53{font-size:14.5px!important;line-height:1.15!important}
+#playing .playingMain53 .tag{font-size:10.8px!important;padding:2px 5px!important}
+#playing .playingRole58 .roleBadge{font-size:10.2px!important;padding:3px 5px!important}
+
+/* Give enlarged text a little breathing room without changing the layout model. */
+#queue .composer54 .slot54{min-height:76px!important}
+#queue .pendingCard54 .pendingSlot54{min-height:90px!important}
+#playing .courtBody{padding-top:10px!important;padding-bottom:10px!important}
+
+@media(max-width:479px){
+ #members .memberMainLine45 .memberName45,#members .memberMainLine45 .name{font-size:14.5px!important}
+ #members .memberMainLine45 .tag{font-size:10.8px!important;padding:2px 5px!important}
+ #members .memberMainLine45 .roleBadge{font-size:10px!important;padding:3px 5px!important}
+ #queue .queueCard54 .queueMain47 .compactName53{font-size:14.3px!important}
+ #queue .queueCard54 .queueMain47 .tag{font-size:10.5px!important}
+ #queue .queueCard54 .queueMain47 .roleBadge{font-size:9.8px!important}
+ #queue .composer54 .slot54 .compactName53,#queue .composer54 .slot54 .slotName53{font-size:13.2px!important}
+ #queue .pendingCard54 .pendingSlot54 .slotName53 .compactName53{font-size:13.2px!important}
+ #playing .playingName53{font-size:13.6px!important}
+ #playing .playingMain53 .tag{font-size:10px!important}
+ #playing .playingRole58 .roleBadge{font-size:9.6px!important}
+}
+@media(max-width:359px){
+ #members .memberMainLine45 .memberName45,#members .memberMainLine45 .name{font-size:13.8px!important}
+ #queue .queueCard54 .queueMain47 .compactName53{font-size:13.6px!important}
+ #queue .composer54 .slot54 .compactName53,#queue .composer54 .slot54 .slotName53{font-size:12.5px!important}
+ #queue .pendingCard54 .pendingSlot54 .slotName53 .compactName53{font-size:12.5px!important}
+ #playing .playingName53{font-size:12.9px!important}
+}
+
+/* migrated into v6.0: app-v92.css */
+/* v92: circular remove buttons and composer role badge placement */
+.composer54 .slot54 .slotX,
+.pendingSlot54 .pendingX{
+  width:28px!important;height:28px!important;min-width:28px!important;max-width:28px!important;
+  padding:0!important;border-radius:50%!important;display:flex!important;align-items:center!important;justify-content:center!important;
+  line-height:1!important;aspect-ratio:1/1!important;
+}
+/* New-game composer: role badge lives in the right rail above the X button. */
+.composer54 .slot54.filled{position:relative!important;padding-right:38px!important}
+.composer54 .slot54.filled .roleBadge{position:absolute!important;right:4px!important;top:5px!important;max-width:34px!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;margin:0!important}
+.composer54 .slot54.filled .slotX{right:7px!important;top:auto!important;bottom:8px!important;transform:none!important}
+@media(max-width:479px){
+ .composer54 .slot54 .slotX,.pendingSlot54 .pendingX{width:26px!important;height:26px!important;min-width:26px!important;max-width:26px!important}
+ .composer54 .slot54.filled{padding-right:36px!important}
+ .composer54 .slot54.filled .roleBadge{right:3px!important;top:4px!important;max-width:32px!important}
+ .composer54 .slot54.filled .slotX{right:6px!important;bottom:7px!important}
+}
+
+/* migrated into v6.0: app-v93.css */
+/* v93: prevent role badge clipping on iPhone and separate pending X from badges */
+/* Composer: reserve a wider right rail so 3~4 Korean-character role labels remain fully visible. */
+.composer54 .slot54.filled{padding-right:48px!important;overflow:visible!important}
+.composer54 .slot54.filled .roleBadge{right:4px!important;top:5px!important;max-width:none!important;width:auto!important;min-width:38px!important;padding-left:5px!important;padding-right:5px!important;overflow:visible!important;text-overflow:clip!important;white-space:nowrap!important;z-index:3!important}
+.composer54 .slot54.filled .slotX{right:10px!important;bottom:7px!important;z-index:2!important}
+/* Pending group: keep role badge above, move circular X lower so they never overlap. */
+.pendingSlot54.hasX53{position:relative!important;padding-right:38px!important;overflow:visible!important}
+.pendingSlot54 .pendingX{right:6px!important;top:auto!important;bottom:7px!important;transform:none!important;z-index:2!important}
+.pendingSlot54 .roleBadge{position:relative!important;z-index:3!important}
+@media(max-width:479px){
+ .composer54 .slot54.filled{padding-right:46px!important}
+ .composer54 .slot54.filled .roleBadge{right:3px!important;top:4px!important;min-width:36px!important;font-size:9.4px!important;padding-left:4px!important;padding-right:4px!important}
+ .composer54 .slot54.filled .slotX{right:9px!important;bottom:6px!important}
+ .pendingSlot54.hasX53{padding-right:36px!important}
+ .pendingSlot54 .pendingX{right:5px!important;bottom:6px!important}
+}
+@media(max-width:359px){
+ .composer54 .slot54.filled{padding-right:43px!important}
+ .composer54 .slot54.filled .roleBadge{min-width:34px!important;font-size:8.9px!important;padding-left:3px!important;padding-right:3px!important}
+}
+
+/* migrated into v6.0: app-v94.css */
+/* v94: queue info order and pending-fill choice list */
+#queue .queueCard54 .queueMain47{display:flex!important;align-items:center!important;gap:3px!important}
+#queue .queueCard54 .queueMain47 .tag{order:2}
+#queue .queueCard54 .queueMain47 .roleBadge{order:3}
+#queue .queueCard54 .queueMain47 .gamecnt{order:4}
+.fillChoice94{display:grid!important;grid-template-columns:26px 22px minmax(0,1fr)!important;gap:8px!important;align-items:center!important;text-align:left!important}
+.fillOrd94{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;font-weight:900;font-size:11px;background:#eef2f8;color:#4f5e76}
+.fillInfo94{display:flex;flex-direction:column;min-width:0;gap:3px}
+.fillMain94{display:flex;align-items:center;gap:4px;min-width:0;white-space:nowrap;overflow:hidden}
+.fillMain94>b{font-size:14px;overflow:hidden;text-overflow:ellipsis}
+.fillMain94 .tag{font-size:10px!important;padding:2px 4px!important}
+.fillMain94 .roleBadge{font-size:9.5px!important;padding:2px 4px!important}
+.fillMain94 .gamecnt{font-size:10px!important;white-space:nowrap}
+.fillInfo94>.meta{font-size:10.5px!important;font-weight:700}
+@media(max-width:479px){
+ .fillChoice94{grid-template-columns:24px 20px minmax(0,1fr)!important;gap:6px!important}
+ .fillOrd94{width:22px;height:22px;font-size:10px}
+ .fillMain94>b{font-size:13.2px}
+ .fillMain94 .tag{font-size:9.5px!important}
+ .fillMain94 .roleBadge{font-size:9px!important}
+ .fillMain94 .gamecnt{font-size:9.5px!important}
+}
+
+/* migrated into v6.0: app-v97.css */
+/* v97: game screen enlarged after VS removal */
+#playing .vs,#playing .vs54,#playing .versus,#playing [class*="vs"]{display:none!important}
+#playing .team,#playing .team54,#playing .players,#playing .players54{gap:5px!important;flex:1 1 auto!important}
+#playing .player54,#playing .playerCard,#playing .courtPlayer{flex:1 1 0!important;min-width:0!important;padding-left:6px!important;padding-right:6px!important}
+#playing .player54 .name,#playing .playerCard .name,#playing .courtPlayer .name{font-size:clamp(15px,3.8vw,19px)!important;font-weight:900!important}
+#playing .player54 .tag,#playing .playerCard .tag,#playing .courtPlayer .tag{font-size:clamp(10px,2.6vw,13px)!important;padding:3px 5px!important}
+#playing .player54 .meta,#playing .playerCard .meta,#playing .courtPlayer .meta{font-size:clamp(11px,2.8vw,14px)!important}
+@media(min-width:600px){#playing .player54 .name,#playing .playerCard .name,#playing .courtPlayer .name{font-size:19px!important}#playing .player54 .tag,#playing .playerCard .tag,#playing .courtPlayer .tag{font-size:13px!important}}
+
+/* migrated into v6.0: app-v98.css */
+/* v98: restore stable two-column playing layout after removing VS */
+#playing .teams{
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;
+  gap:8px!important;
+  align-items:stretch!important;
+  width:100%!important;
+}
+#playing .teams>b{display:none!important}
+#playing .team{
+  min-width:0!important;
+  width:100%!important;
+  box-sizing:border-box!important;
+  padding:8px 6px!important;
+  overflow:visible!important;
+}
+#playing .playingPlayer53{
+  width:100%!important;
+  min-width:0!important;
+  box-sizing:border-box!important;
+  padding:4px 0!important;
+  overflow:visible!important;
+}
+#playing .playingMain53{
+  display:flex!important;
+  align-items:center!important;
+  justify-content:flex-start!important;
+  gap:3px!important;
+  width:100%!important;
+  min-width:0!important;
+  overflow:visible!important;
+}
+#playing .playingName53{
+  flex:0 0 4.2em!important;
+  width:4.2em!important;
+  min-width:4.2em!important;
+  max-width:4.2em!important;
+  font-size:14.2px!important;
+  line-height:1.18!important;
+  white-space:nowrap!important;
+  overflow:visible!important;
+  text-overflow:clip!important;
+}
+#playing .playingMain53 .tag{font-size:10px!important;padding:2px 4px!important;flex:0 0 auto!important}
+#playing .playingRole58{min-width:0!important;flex:1 1 auto!important;overflow:hidden!important}
+#playing .playingRole58 .roleBadge{font-size:9.3px!important;padding:2px 4px!important;max-width:100%!important;white-space:nowrap!important}
+#playing .playingMeta53{font-size:11px!important;line-height:1.28!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
+@media(max-width:599px){
+ #playing .teams{gap:4px!important}
+ #playing .team{padding:7px 3px!important}
+ #playing .playingMain53{gap:2px!important}
+ #playing .playingName53{flex-basis:4.1em!important;width:4.1em!important;min-width:4.1em!important;max-width:4.1em!important;font-size:13.2px!important}
+ #playing .playingMain53 .tag{font-size:8.8px!important;padding:1px 3px!important}
+ #playing .playingRole58 .roleBadge{font-size:8.1px!important;padding:1px 3px!important}
+ #playing .playingMeta53{font-size:10.3px!important}
+}
+@media(max-width:374px){
+ #playing .teams{gap:2px!important}
+ #playing .team{padding-left:2px!important;padding-right:2px!important}
+ #playing .playingName53{flex-basis:4em!important;width:4em!important;min-width:4em!important;max-width:4em!important;font-size:12.5px!important}
+ #playing .playingMain53 .tag{font-size:8.2px!important;padding:1px 2px!important}
+ #playing .playingRole58 .roleBadge{font-size:7.7px!important;padding:1px 2px!important}
+ #playing .playingMeta53{font-size:9.8px!important}
+}
+@media(min-width:600px){
+ #playing .teams{gap:10px!important}
+ #playing .team{padding:10px 8px!important}
+ #playing .playingName53{font-size:15.2px!important;flex-basis:4.25em!important;width:4.25em!important;min-width:4.25em!important;max-width:4.25em!important}
+ #playing .playingMain53 .tag{font-size:10.5px!important}
+ #playing .playingRole58 .roleBadge{font-size:9.8px!important}
+ #playing .playingMeta53{font-size:11.5px!important}
+}
+
+/* migrated into v6.0: app-v99.css */
+/* v99: rounded grade-tinted player areas in active games */
+#playing .playingPlayer53,
+#playing .player54,
+#playing .playerCard,
+#playing .courtPlayer{
+  border-radius:14px!important;
+  overflow:hidden!important;
+}
+#playing .playingPlayer53>* ,
+#playing .player54>* ,
+#playing .playerCard>* ,
+#playing .courtPlayer>*{
+  position:relative;
+  z-index:1;
+}
+@media(max-width:599px){
+  #playing .playingPlayer53,
+  #playing .player54,
+  #playing .playerCard,
+  #playing .courtPlayer{border-radius:12px!important}
+}
+
+/* migrated into v6.0: app-v1.7.css */
+/* v1.7: keep realtime backgrounds visually stable and reserve iPhone name width */
+#playing .playingPlayer53,
+#queue .queueCard54,#queue .queueCard53,#queue .queueCard,
+#queue .composer54 .slot54,#queue .composer .slot,
+#queue .pendingSlot54,#queue .pendingSlot{
+  transition:none!important;
+}
+#playing .playingPlayer53{
+  border-radius:10px!important;
+  padding-left:5px!important;
+  padding-right:5px!important;
+}
+
+/* New-game composer: name first, grade badge after it. v54+v93 were reserving right space twice. */
+.composer54 .slot54.filled .slotName53{
+  padding-right:0!important;
+  min-width:0!important;
+  overflow:visible!important;
+  gap:3px!important;
+}
+.composer54 .slot54.filled .slotName53 .compactName53{
+  flex:1 1 auto!important;
+  min-width:4.35em!important;
+  max-width:none!important;
+  overflow:visible!important;
+  text-overflow:clip!important;
+  white-space:nowrap!important;
+}
+.composer54 .slot54.filled .slotName53>.tag{
+  flex:0 0 auto!important;
+  margin-left:1px!important;
+}
+
+/* Tablet/mobile IME: keep search text at a stable native input size. */
+#memberSearchInput46{
+  font-size:16px!important;
+  line-height:1.35!important;
+  -webkit-user-select:text!important;
+  user-select:text!important;
+}
+
+@media(max-width:479px){
+  .composer54 .slot54.filled .slotName53 .compactName53{
+    min-width:4.25em!important;
+    font-size:11.3px!important;
+  }
+  .composer54 .slot54.filled .slotName53>.tag{
+    font-size:8.4px!important;
+    padding:1px 3px!important;
+  }
+}
+@media(max-width:359px){
+  .composer54 .slot54.filled .slotName53 .compactName53{
+    min-width:4.15em!important;
+    font-size:10.8px!important;
+  }
+}
+
+/* migrated into v6.0: app-v1.8.css */
+/* v1.8: stable poll guest form, combined attendee list, iPhone/tablet member search */
+.pollCountBtn18{width:100%!important;display:flex!important;align-items:center!important;justify-content:space-between!important;gap:8px!important}
+.pollCountBtn18 .pollBreak18{font-size:10px;font-weight:750;color:#75809a}
+.pollAttendeeSection18{margin-top:10px}
+.pollAttendeeTitle18{display:flex;justify-content:space-between;align-items:center;margin:10px 0 6px}
+.pollGuestMeta18{font-size:10px;color:#768096;line-height:1.4;margin-top:2px}
+.pollGuestYearRow18{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px}
+#pollGuestYear18,#pollGuestInviter18,#pollGuestAge18{font-size:16px!important}
+#memberSearchInput46{font-size:16px!important;line-height:1.4!important;touch-action:manipulation!important;caret-color:auto!important}
+.memberCard.searchHidden18{display:none!important}
+@media(max-width:479px){.pollGuestYearRow18{grid-template-columns:1fr}.pollCountBtn18{padding-left:10px!important;padding-right:10px!important}}
+
+/* migrated into v6.0: app-v1.9.css */
+/* v1.9 attendance poll capacity + roster-like attendee list */
+.pollCapacity19{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin:8px 0 10px;padding:7px 9px;border-radius:10px;background:#f7f9fd;font-size:11px;color:#59657d}
+.pollCapacity19 span{white-space:nowrap}
+.pollActionGrid19{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px;margin-top:8px}
+.pollActionGrid19 .btn{width:100%;min-height:38px}
+.pollGuestAdmin19{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:7px;align-items:center;margin-top:8px}
+.pollGuestAdmin19 .btn{width:100%}
+.pollGuestClosed19{opacity:.62!important}
+.pollHeadBtns19{display:flex;gap:5px;align-items:center}
+.pollWhen19{margin-top:4px}
+.pollLimitGrid19 input{font-size:16px!important}
+.pollAttendeeSection19{margin-top:12px}
+.pollAttendeeTitle19{display:flex;align-items:center;justify-content:space-between;margin:8px 2px 6px}
+.pollAttendeeCard19{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:9px 10px;margin:5px 0;border:1px solid rgba(120,130,155,.16);border-radius:12px!important;overflow:hidden;box-sizing:border-box}
+.pollAttendeeMain19{display:flex;align-items:center;gap:5px;min-width:0;white-space:nowrap}
+.pollAttendeeName19{font-weight:900;min-width:3.8em;overflow:hidden;text-overflow:ellipsis}
+.pollAttendeeCard19 .tag,.pollAttendeeCard19 .roleBadge{flex:0 0 auto;margin:0}
+.pollGenderPerson19{width:20px;height:20px;display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto;background:transparent!important}
+.pollGenderPerson19 svg{width:18px;height:18px;display:block;fill:currentColor}
+.pollGenderPerson19.male{color:#2768e8}.pollGenderPerson19.female{color:#e34e67}
+.pollGuestMeta19{font-size:10px;color:#758097;margin:3px 0 0 25px;line-height:1.35}
+.pollRemove19{width:27px;height:27px;min-width:27px;border-radius:50%;border:1px solid #e3aab1;background:#fff;color:#b74855;font-size:18px;line-height:1;display:grid;place-items:center;padding:0}
+@media(max-width:479px){
+ .pollActionGrid19{gap:6px}.pollActionGrid19 .btn{font-size:12px;padding-left:7px;padding-right:7px}
+ .pollGuestAdmin19{grid-template-columns:minmax(0,1fr) auto;gap:5px}
+ .pollAttendeeCard19{padding:8px 8px}.pollAttendeeMain19{gap:4px}.pollAttendeeName19{min-width:3.5em;font-size:13px}
+ .pollAttendeeCard19 .tag,.pollAttendeeCard19 .roleBadge{font-size:9px;padding:2px 4px}
+}
+
+/* migrated into v6.0: app-v2.0.css */
+/* v2.0: attendance poll calendar + roster-identical attendee colors */
+.pollCalendar20{background:#fff;border:1px solid var(--line);border-radius:17px;padding:12px;margin:0 0 14px;box-shadow:0 2px 10px rgba(35,61,139,.04)}
+.pollCalHead20{display:grid;grid-template-columns:36px 1fr 36px;align-items:center;gap:6px;margin-bottom:8px;text-align:center}
+.pollCalHead20 b{font-size:15px}
+.pollCalNav20{border:1px solid var(--line);background:#fff;border-radius:10px;width:34px;height:34px;font-size:22px;line-height:1;font-weight:900;color:#52627e}
+.pollCalNav20:disabled{opacity:.28}
+.pollCalWeek20,.pollCalGrid20{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.pollCalWeek20{margin-bottom:4px;color:#7b879f;font-size:10px;font-weight:850;text-align:center}
+.pollCalWeek20 span:first-child{color:#d65a63}.pollCalWeek20 span:last-child{color:#4672d8}
+.pollCalBlank20{aspect-ratio:1/1}
+.pollCalDay20{position:relative;aspect-ratio:1/1;border:0;background:transparent;border-radius:50%;display:grid;place-items:center;font-size:12px;font-weight:850;color:#273248;padding:0;min-width:0}
+.pollCalDay20:disabled{color:#c6ccd8;background:transparent}
+.pollCalDay20.today:not(.selected){box-shadow:inset 0 0 0 1px #aebbe0}
+.pollCalDay20.hasPoll:not(:disabled){background:#edf2ff;color:var(--blue);font-weight:950}
+.pollCalDay20.hasPoll i{position:absolute;bottom:5px;left:50%;transform:translateX(-50%);width:5px;height:5px;border-radius:50%;background:#ff5a57;box-shadow:0 0 0 2px #fff}
+.pollCalDay20.selected{background:var(--blue)!important;color:#fff!important;box-shadow:0 4px 12px rgba(36,83,212,.28)}
+.pollCalDay20.selected i{background:#fff;box-shadow:none}
+.pollCalLegend20{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:8px;padding-top:7px;border-top:1px solid #eef1f7;font-size:10px;color:#77839a}
+.pollCalLegend20 span:first-child{display:flex;align-items:center;gap:5px}
+.pollCalLegend20 i{display:inline-block;width:7px;height:7px;border-radius:50%;background:#ff5a57}
+
+.pollAttendeeCard20{border-radius:12px!important;overflow:hidden!important;transition:none!important}
+.pollAttendeeCard20 .tag{border-radius:999px!important}
+.pollAttendeeCard20 .pollRemove19:disabled{opacity:.45}
+
+@media(max-width:479px){
+ .pollCalendar20{padding:10px;margin-bottom:12px}
+ .pollCalWeek20,.pollCalGrid20{gap:3px}
+ .pollCalDay20{font-size:11.5px}
+ .pollCalDay20.hasPoll i{bottom:4px}
+ .pollCalLegend20{font-size:9.5px}
+}
+
+/* migrated into v6.0: app-v2.1.css */
+/* v2.1: working poll calendar, readable counts, roster-style attendee list */
+.pollCalendar21{background:#fff;border:1px solid var(--line);border-radius:17px;padding:12px;margin-bottom:12px;box-shadow:0 2px 8px rgba(30,48,90,.04)}
+.pollCalHead21{display:grid;grid-template-columns:38px 1fr 38px;align-items:center;gap:6px;margin-bottom:8px;text-align:center}
+.pollCalHead21 b{font-size:17px;font-weight:950}
+.pollCalNav21{width:36px;height:34px;border:1px solid var(--line);border-radius:10px;background:#fff;color:var(--blue);font-size:22px;font-weight:900;padding:0}
+.pollCalNav21:disabled{opacity:.25}
+.pollCalWeek21,.pollCalGrid21{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px}
+.pollCalWeek21{margin-bottom:3px;color:#7b879e;font-size:10px;font-weight:850;text-align:center}
+.pollCalWeek21 span:first-child{color:#d45b67}.pollCalWeek21 span:last-child{color:#4774ce}
+.pollCalBlank21{aspect-ratio:1/1}
+.pollCalDay21{position:relative;aspect-ratio:1/1;border:0;border-radius:50%;background:transparent;color:#27344d;font-size:13px;font-weight:850;display:grid;place-items:center;padding:0;min-width:0}
+.pollCalDay21:disabled{color:#c5cad4;background:transparent!important;opacity:.65}
+.pollCalDay21.today:not(.selected){box-shadow:inset 0 0 0 2px #9fb4ef;color:#244fb8}
+.pollCalDay21.hasPoll:not(.selected){background:#e9efff;color:#1747bf;font-weight:950}
+.pollCalDay21.hasPoll:not(.selected)::after{content:"";position:absolute;width:6px;height:6px;border-radius:50%;background:#e34f5f;bottom:3px;right:4px;box-shadow:0 0 0 2px #fff}
+.pollCalDay21.selected{background:var(--blue);color:#fff;box-shadow:0 3px 9px rgba(36,83,212,.26)}
+.pollCalDay21.selected.hasPoll::after{content:"";position:absolute;width:6px;height:6px;border-radius:50%;background:#ffd75d;bottom:3px;right:4px}
+.pollCalLegend21{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:8px;font-size:10px;font-weight:750;color:#74809a}
+.pollCalLegend21 span:first-child{display:flex;align-items:center;gap:5px}.pollCalLegend21 i{width:7px;height:7px;border-radius:50%;background:#e34f5f;display:inline-block}
+.pollCard21{padding:13px!important}
+.pollTitleRow21{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:9px}
+.pollTitle21{font-size:16px;font-weight:950;line-height:1.35;min-width:0;word-break:keep-all}
+.pollCounts21{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;margin:9px 0 10px}
+.pollCountBox21{border-radius:13px;padding:9px 5px;text-align:center;border:1px solid transparent;min-width:0}
+.pollCountBox21 b{display:block;font-size:20px;line-height:1.05;font-weight:950;margin-bottom:4px}.pollCountBox21 span{display:block;font-size:11px;font-weight:900}.pollCountBox21 small{display:block;font-size:9px;font-weight:750;opacity:.72;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pollCountBox21.total{background:#eaf0ff;color:#244fb8;border-color:#c9d7ff}.pollCountBox21.member{background:#eaf8f1;color:#176b48;border-color:#c5e7d5}.pollCountBox21.guest{background:#fff3e4;color:#9b5b0d;border-color:#f1d6b2}
+.pollActions21{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:7px}
+.pollActions21 .btn{width:100%;min-height:42px;font-size:13px;padding:9px 7px}
+.pollAttendOn21{background:#e8f7ef!important;color:#176b48!important;border:1px solid #abd9c2!important}
+.pollGuestAdmin21{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:7px;align-items:center;margin-top:8px}
+.pollGuestAdmin21 .btn{width:100%;font-size:12px}
+.pollAttendeeCard21{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:9px 10px;margin:5px 0;border:1px solid rgba(120,130,155,.16);border-radius:12px!important;overflow:hidden;box-sizing:border-box;transition:none!important}
+.pollAttendeeMain21{display:flex;align-items:center;gap:5px;min-width:0;white-space:nowrap}
+.pollAttendeeName21{font-weight:900;min-width:3.7em;max-width:7.5em;overflow:hidden;text-overflow:ellipsis}
+.pollAttendeeMain21 .tag,.pollAttendeeMain21 .roleBadge{flex:0 0 auto;margin:0}
+.pollGuestMeta21{font-size:10px;color:#758097;margin:3px 0 0 25px;line-height:1.35}
+.pollRemove21{width:28px;height:28px;min-width:28px;border-radius:50%;border:1px solid #e2aab1;background:#fff;color:#b84957;font-size:18px;line-height:1;display:grid;place-items:center;padding:0}
+.pollRemove21:disabled{opacity:.35}
+.pollAttendeeSection21{margin-top:11px}.pollAttendeeHead21{display:flex;align-items:center;justify-content:space-between;margin:8px 2px 6px}.pollAttendeeHead21 b{font-size:14px}.pollAttendeeHead21 .tag{margin:0}
+@media(max-width:479px){
+ .pollCalendar21{padding:10px}.pollCalGrid21,.pollCalWeek21{gap:2px}.pollCalDay21{font-size:12px}.pollCounts21{gap:5px}.pollCountBox21{padding:8px 3px}.pollCountBox21 b{font-size:18px}.pollCountBox21 span{font-size:10px}.pollActions21{gap:6px}.pollActions21 .btn{font-size:12px}.pollAttendeeCard21{padding:8px}.pollAttendeeMain21{gap:4px}.pollAttendeeName21{font-size:13px;min-width:3.5em}.pollAttendeeMain21 .tag,.pollAttendeeMain21 .roleBadge{font-size:9px;padding:2px 4px}
+}
+
+/* migrated into v6.0: app-v2.2.css */
+/* v2.2: retained attendance-poll history, archived read-only state, grade summaries */
+.statsGrid72{margin-bottom:5px!important}
+.pollCalendar22{margin-top:0!important}
+.pollCalWeek21{font-size:12px!important;font-weight:900!important}
+.pollCalDay21{font-size:15px!important;font-weight:900!important}
+.pollCalDay21.past22{color:#5f6b82}
+.pollCalDay21.selected.hasPoll::after{content:""!important;position:absolute!important;width:6px!important;height:6px!important;border-radius:50%!important;background:#e34f5f!important;bottom:3px!important;right:4px!important;box-shadow:0 0 0 2px #fff!important}
+.pollEnded22{background:#fbfcff}
+.pollEndedBadge22{display:inline-block;vertical-align:2px;margin-left:4px;padding:2px 6px;border-radius:999px;background:#eef1f6;color:#6d7688;font-size:9px;font-weight:900}
+.pollWhen22{font-size:10.5px;color:#758097;font-weight:750;line-height:1.45;margin-top:4px}
+.pollClosed22{color:#69758b!important;background:#f5f6f9!important;border-color:#dfe3ea!important;opacity:1!important}
+.pollArchiveNote22{margin:0 0 8px!important;background:#f3f5f8!important;color:#667085!important}
+.pollAttendeeHead22{justify-content:flex-start!important;gap:6px!important;flex-wrap:wrap}
+.pollAttendeeHead22 small{font-size:10.5px;font-weight:850;color:#5f6d84;line-height:1.35}
+@media(max-width:479px){
+ .pollCalWeek21{font-size:11.5px!important}
+ .pollCalDay21{font-size:14px!important}
+ .pollAttendeeHead22 small{font-size:10px}
+}
+
+/* migrated into v6.0: app-v2.3.css */
+/* v2.3: immediate composer gender icon, weekend/holiday calendar colors, mobile poll form width */
+.composer54 .slotName53,.composer .slotName{display:flex!important;align-items:center!important;gap:4px!important;min-width:0!important}
+.composer54 .slotName53 .composerGender23,.composer .slotName .composerGender23{margin:0!important;flex:0 0 auto!important}
+
+.pollCalDay21.sun23,.pollCalDay21.holiday23{color:#d94646!important}
+.pollCalDay21.sat23:not(.holiday23){color:#2f67d8!important}
+.pollCalDay21.selected.sun23,.pollCalDay21.selected.holiday23,.pollCalDay21.selected.sat23{
+ background:#fff!important;
+ box-shadow:inset 0 0 0 2px var(--blue),0 3px 9px rgba(36,83,212,.14)!important;
+}
+.pollCalDay21.selected.sun23,.pollCalDay21.selected.holiday23{color:#d94646!important}
+.pollCalDay21.selected.sat23:not(.holiday23){color:#2f67d8!important}
+.pollCalDay21.selected.hasPoll::after{background:#e34f5f!important;box-shadow:0 0 0 2px #fff!important}
+
+#modalSheet .pollForm19,#modalSheet .pollForm90,#modalSheet .pollCreateForm74{width:100%!important;max-width:100%!important;min-width:0!important;overflow-x:hidden!important}
+#modalSheet .pollForm19 .field,#modalSheet .pollForm90 .field,#modalSheet .pollCreateForm74 .field,#modalSheet .pollDateRow76{min-width:0!important;max-width:100%!important}
+#modalSheet input[type="date"],#modalSheet .pollDateRow76 input[type="date"]{display:block!important;width:100%!important;max-width:100%!important;min-width:0!important;box-sizing:border-box!important}
+#modalSheet .pollDateRow76{grid-template-columns:minmax(0,1fr) auto!important;width:100%!important}
+@media(max-width:479px){
+ #modalSheet{overflow-x:hidden!important}
+ #modalSheet input[type="date"]{font-size:16px!important;padding-left:10px!important;padding-right:8px!important}
+ .pollWeekday76{flex:0 0 auto!important}
+}
+
+/* migrated into v6.0: app-v2.4.css */
+/* v2.4: responsive, immediate bottom navigation */
+#nav button[data-v]{touch-action:manipulation;-webkit-tap-highlight-color:transparent;user-select:none;cursor:pointer;will-change:transform}
+#nav button[data-v]:active,#nav button[data-v].navPress24{transform:scale(.97)}
+@media(max-width:767px){#nav button[data-v]{transition:transform .06s ease,background-color .08s ease,color .08s ease}}
+
+/* migrated into v6.0: app-v2.7.css */
+#kokToast27.kokToast27{position:fixed;left:50%;bottom:calc(82px + env(safe-area-inset-bottom));z-index:9999;max-width:min(88vw,420px);transform:translate(-50%,12px);opacity:0;pointer-events:none;padding:10px 14px;border-radius:12px;background:rgba(25,31,44,.94);color:#fff;font-size:14px;font-weight:700;line-height:1.35;text-align:center;box-shadow:0 8px 28px rgba(0,0,0,.22);transition:opacity .14s ease,transform .14s ease}#kokToast27.kokToast27.show{opacity:1;transform:translate(-50%,0)}#kokToast27.kokToast27.err{background:rgba(167,38,38,.96)}
+#stats .pollTopTitle27{margin:12px 0 8px;padding:0 2px}#stats .pollTopTitle27 h3{margin:0;font-size:20px;line-height:1.3;font-weight:800;letter-spacing:-.02em}#stats .pollWrap90>.pollCalendar21,#stats .pollWrap90>.pollCalendar22{margin-top:0!important}#stats .pollWrap90>.pollHead90{margin-top:12px!important;margin-bottom:8px!important}#stats .pollWrap90>.pollHead90 b{font-size:16px}#stats>.title{margin-bottom:8px}
+.queueCard54,.queueCard53,.queueCard,.pendingSlot.emptySlot,.choiceBtn{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+
+/* migrated into v6.0: app-v3.3.css */
+/* v3.3 login group picker + poll archive/title presentation */
+.loginChoices33{display:flex;flex-direction:column;gap:8px;margin-top:10px}
+.loginChoice33{width:100%;display:grid!important;grid-template-columns:1fr auto;grid-template-areas:'name role' 'group role';gap:3px 10px;text-align:left!important;align-items:center!important;padding:13px 14px!important}
+.loginChoice33 b{grid-area:name;font-size:15px}
+.loginChoice33 span{grid-area:group;font-size:13px;color:#5f6b7a}
+.loginChoice33 small{grid-area:role;font-size:12px;font-weight:700;color:#2453d4}
+.loginMember33{display:flex;flex-direction:column;gap:3px;padding:13px 14px;margin:10px 0 14px;border:1px solid #dfe5ee;border-radius:12px;background:#f8fafc}
+.loginMember33 b{font-size:16px}.loginMember33 span{font-size:14px}.loginMember33 small{font-size:12px;color:#2453d4;font-weight:700}.loginGuide33{margin-bottom:6px}
+
+/* Past dates with a poll use light green. Current/future poll dots keep the existing red color. */
+.pollCalDay21.past22.hasPoll::after,.pollCalDay21.selected.past22.hasPoll::after{background:#84cc66!important;box-shadow:0 0 0 2px #fff!important}
+
+.pollMainTitle33{font-size:16px;font-weight:800;line-height:1.35;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.pollSchedule33{font-size:14px;font-weight:700;line-height:1.45;margin-top:4px;color:#283544}
+.pollCreator33{font-size:12px;font-weight:500;line-height:1.4;margin-top:5px;color:#778290}
+.pollTitle21 .pollWhen22{display:none!important}
+
+@media(max-width:480px){
+ .loginChoice33{padding:12px!important}.loginChoice33 b{font-size:14px}.pollMainTitle33{font-size:15px}.pollSchedule33{font-size:13px}
+}
