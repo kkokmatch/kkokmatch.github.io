@@ -24,7 +24,8 @@ jobs:
           test "$(grep -o 'app-v6.0.js' index.html | wc -l)" -eq 1
           test "$(grep -o 'app-v6.0.css' index.html | wc -l)" -eq 1
           ! grep -Eq 'app-v(35|36|37|38|39|4[0-9]|5[0-9]|6[1-9]|7[0-9]|8[0-9]|9[0-9]|1\.|2\.|3\.|4\.|5\.)' index.html
-          ! grep -Eq '\.src\s*=\s*["'"']\/app-v' app-v6.0.js
+          ! grep -F ".src='/app-v" app-v6.0.js
+          ! grep -F '.src="/app-v' app-v6.0.js
           grep -q 'standalone runtime' app-v6.0.js
           grep -q 'standalone stylesheet' app-v6.0.css
       - name: Commit v6 standalone baseline
