@@ -6717,12 +6717,8 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 if(window.__kokmatchV54Fix22)return;
 window.__kokmatchV54Fix22=true;
 window.__kokmatchRosterCanonical='22.3';
-window.__kokmatchRosterCanonicalV6='6.0.2';
-document.documentElement.dataset.kokmatchRoster='6.0.2';
-window.__kokmatchRosterCanonicalV6='6.0.2';
-document.documentElement.dataset.kokmatchRoster='6.0.2';
-window.__kokmatchRosterCanonicalV6='6.0.1';
-document.documentElement.dataset.kokmatchRoster='6.0.1';
+window.__kokmatchRosterCanonicalV6='6.0.3';
+document.documentElement.dataset.kokmatchRoster='6.0.3';
 
 function e22(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function jsId22(id){return String(id||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'")}
@@ -6779,13 +6775,18 @@ function businessMonth22(){const d=new Date(Date.now()-5*60*60*1000);return new 
 function monthLabel22(){return Number(businessMonth22().slice(5,7))+'월'}
 function attendanceCount22(m){const k=businessMonth22(),h=m?.attendanceHistory&&typeof m.attendanceHistory==='object'&&!Array.isArray(m.attendanceHistory)?m.attendanceHistory:null;if(h&&h[k]!=null)return Math.max(0,Number(h[k])||0);return String(m?.attendanceMonth||'')===k?Math.max(0,Number(m?.attendanceCount)||0):0}
 function canPartner22(m){return !!m&&!!me&&(String(me.memberId||'')===String(m.id)||me.globalAdmin||me.role==='manager'||me.role==='organizer')}
+function businessMonth22(){const d=new Date();return new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Seoul',year:'numeric',month:'2-digit'}).format(d)}
+function monthLabel22(){return Number(businessMonth22().slice(5,7))+'월'}
+function attendanceCount22(m){const k=businessMonth22(),h=m?.attendanceHistory&&typeof m.attendanceHistory==='object'&&!Array.isArray(m.attendanceHistory)?m.attendanceHistory:null;if(h&&h[k]!=null)return Math.max(0,Number(h[k])||0);return String(m?.attendanceMonth||'')===k?Math.max(0,Number(m?.attendanceCount)||0):0}
+function canPartner22(m){return !!m&&!!me&&(String(me.memberId||'')===String(m.id)||me.globalAdmin||me.role==='manager'||me.role==='organizer')}
 function patchVisibleInfo22(card,m){
  const info=card.querySelector('.memberInfo48')||card.children?.[1];if(!info)return;info.classList.add('memberInfoV6');
  const line=info.querySelector('.memberMainLine45')||info.querySelector('.name');if(line){line.classList.add('memberMainLine45');line.innerHTML="<span class='memberName45'>"+e22(m.name)+"</span>"+grade22(m)+roleBadge22(m)}
- info.querySelectorAll('.gamecnt,.recordBtn73,.pairBtn,.memberAttendance71').forEach(x=>x.remove());
+ info.querySelectorAll('.gamecnt,.recordBtn73,.pairBtn,.memberAttendance71,.memberRecordActions73').forEach(x=>x.remove());
  const meta=info.querySelector(':scope > .meta')||info.querySelector('.meta');if(meta){meta.classList.add('memberMetaV6');meta.innerHTML=e22(m.year||'')+'년생 · '+e22(m.gender||'')}
- info.querySelectorAll('.memberRecordActions73,.memberRosterFooterV6').forEach(x=>x.remove());
+ info.querySelectorAll('.memberRosterFooterV6').forEach(x=>x.remove());
  const footer=document.createElement('div');footer.className='memberRosterFooterV6';footer.innerHTML="<span class='memberAttendanceV6'>"+monthLabel22()+' 출석 '+attendanceCount22(m)+"회</span>"+(canPartner22(m)?"<button type='button' class='partnerSetBtn66 rosterPartnerBtnV6'>파트너 설정</button>":'');info.appendChild(footer);
+ const pb=footer.querySelector('.rosterPartnerBtnV6');if(pb){pb.dataset.memberId=String(m.id||'');pb.setAttribute('aria-label',String(m.name||'')+' 파트너 설정')}
  card.dataset.gradeV6=String(m?.cls||'C').trim().toUpperCase();card.dataset.memberId22=String(m?.id||'');card.dataset.memberId=String(m?.id||'');card.querySelectorAll('.v54genderText,.genderMark53').forEach(x=>x.remove());
 }
 function finalizeRoster22(){
@@ -6827,8 +6828,10 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 
 
 
+
+
 /* V6_ROSTER_REENTRY_BEGIN */
-(()=>{'use strict';let busy=false;function repair(){if(busy||currentView!=='members')return;busy=true;try{const q=String(document.getElementById('memberSearchInput46')?.value||'').trim();if(!q&&typeof window.resetMemberList46==='function')window.resetMemberList46();else if(typeof renderMembers==='function')renderMembers();try{window.__kokmatchFinalizeRoster22?.()}catch{}}catch(e){console.warn('v6 roster reentry',e)}finally{setTimeout(()=>{busy=false},100)}}const old=goView;goView=function(id,...args){const was=currentView,r=old(id,...args);if(id==='members'&&was!=='members'){queueMicrotask(repair);requestAnimationFrame(repair);setTimeout(repair,80)}return r};window.goView=goView;})();
+(()=>{'use strict';let busy=false;async function repair(){if(busy||currentView!=='members')return;busy=true;try{const input=document.getElementById('memberSearchInput46');if(input)input.value='';try{window.__kokmatchMemberPage46=1}catch{}if(typeof window.enterMembers42==='function'){await window.enterMembers42(true)}else if(typeof window.refreshMembers46==='function'){await window.refreshMembers46()}else if(typeof renderMembers==='function'){renderMembers()}try{window.resetMemberList46?.()}catch{}try{window.__kokmatchFinalizeRoster22?.()}catch{}}catch(e){console.warn('v6 roster reentry',e);try{typeof renderMembers==='function'&&renderMembers();window.__kokmatchFinalizeRoster22?.()}catch{}}finally{busy=false}}const old=goView;goView=function(id,...args){const was=currentView,r=old(id,...args);if(id==='members'&&was!=='members'){queueMicrotask(()=>repair());requestAnimationFrame(()=>repair())}return r};window.goView=goView;window.__kokmatchRepairRosterV6=repair;})();
 /* V6_ROSTER_REENTRY_END */
 
 /* v6.0 canonical interaction core: replaces legacy fix23/fix24/fix26 overlap */

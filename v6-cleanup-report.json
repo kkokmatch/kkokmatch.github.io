@@ -1,29 +1,30 @@
 {
   "version": "6.0",
-  "build": "2026.08.31.standalone.6",
+  "build": "2026.08.31.standalone.7",
   "removed": [
     "legacy automatic updater redirect",
     "legacy fix22 roster ownership",
     "app-v5.4-fix23.js interaction overlap",
     "app-v5.4-fix24.js interaction overlap",
     "app-v5.4-fix26.js interaction overlap",
-    "legacy duplicated runtime header/logout nodes"
+    "legacy duplicated runtime header/logout nodes",
+    "duplicated roster version markers"
   ],
   "replacement": "single v6.0 canonical interaction/member-controls/header/roster ownership",
   "features": [
-    "joined-group selector for multi-membership users",
     "role badges: 개발자/모임장/운영진/일반",
-    "remove roster pair-history action",
+    "remove roster together-game action and total-game badge",
     "current-month attendance + partner setting row",
-    "four-character member name lane",
+    "four-character member name lane with right-aligned action area",
     "grade-matched pastel roster cards",
-    "member roster re-entry repair"
+    "member roster re-entry forces full roster refresh"
   ],
   "validation": [
     "javascript syntax",
     "standalone-source ownership",
     "no legacy automatic updater redirect",
-    "no legacy app dynamic loads"
+    "no legacy role terminology",
+    "roster canonical 6.0.3 marker"
   ],
   "functionalQaPolicy": "functional/browser/device QA is non-blocking and omitted from deployment gate per operator request"
 }
