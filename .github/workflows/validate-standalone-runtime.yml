@@ -1,0 +1,26 @@
+name: Validate standalone runtime
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'index.html'
+      - 'app-v*.js'
+      - 'app-v*.css'
+      - 'latest-version.json'
+      - 'scripts/validate-standalone-runtime.mjs'
+      - '.github/workflows/validate-standalone-runtime.yml'
+  workflow_dispatch:
+jobs:
+  standalone:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Enforce one-version runtime
+        run: node scripts/validate-standalone-runtime.mjs
+      - name: Syntax check current runtime
+        run: |
+          VERSION=$(node -p "require('./latest-version.json').semanticVersion || require('./latest-version.json').label")
+          node --check "app-v${VERSION}.js"
