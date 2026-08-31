@@ -1,22 +1,21 @@
 {
-  "version": "6.19",
-  "build": "v6.19",
+  "version": "6.20",
+  "build": "v6.20",
   "features": [
-    "all existing and future roster cards are normalized to the same three-row information layout used by Park Tae-young",
-    "member action area has a fixed independent width with static two-column buttons so spectator, exit and edit never overlap",
-    "member editing uses native HTML form submit instead of the old custom overlay pointer route",
-    "editor state is cleared before a new edit session is created, so member id and edited values survive until save",
-    "member_save continues to use the verified kokmatch-v60-api contract",
-    "background state polling remains change-only and legacy repaint loops remain disabled"
+    "active member editor save uses a self-contained kokmatch-v60-api client instead of the out-of-scope v6.15 helper",
+    "member delete uses the same self-contained API",
+    "member action grid spacing is 2px wider on desktop and mobile",
+    "v6.18 member template is generated exactly once on repeat builds",
+    "legacy auto-refresh and full-roster repaint loops remain disabled"
   ],
   "validation": [
     "javascript syntax",
-    "v6.19 canonical member-template marker",
-    "v6.19 native member-save marker",
-    "fixed action-column CSS",
-    "member editor form marker",
-    "no legacy 3s/1.2s repaint loops",
-    "fresh-entry bootstrap marker"
+    "active member save route",
+    "self-contained v6.20 API marker",
+    "single canonical v6.18 render wrapper",
+    "6px desktop action gap",
+    "5px mobile action gap",
+    "fresh-entry bootstrap"
   ],
   "functionalQaPolicy": "functional/browser/device QA omitted from deployment gate per operator request"
 }

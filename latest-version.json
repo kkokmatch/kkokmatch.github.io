@@ -1,8 +1,8 @@
 {
   "version": 60,
-  "label": "v6.19",
-  "semanticVersion": "6.19",
-  "build": "v6.19",
-  "updatedAt": "2026-08-31T16:50:00+09:00",
-  "note": "박태영 기준 회원카드 레이아웃 통일 · 신규회원 동일 템플릿 · 액션버튼 겹침 제거 · 회원수정 저장 native form 전환 및 상태 초기화 오류 수정"
+  "label": "v6.20",
+  "semanticVersion": "6.20",
+  "build": "v6.20",
+  "updatedAt": "2026-08-31T17:08:00+09:00",
+  "note": "회원수정 저장 Can't find variable 오류 제거 · v6.20 독립 저장 API · 액션버튼 간격 2px 추가"
 }
