@@ -29,6 +29,8 @@ openMemberModal=function(m){
   const suggestions=S.members.filter(x=>x.type!=='guest'&&(!m||x.id!==m.id)).map(x=>`<option value="${esc(x.name)}"></option>`).join('');
   field.insertAdjacentHTML('afterend',`<div id="fmInviterWrap45" class="field hide"><label>초대인</label><input id="fmInviter45" list="fmInviterList45" value="${esc(m?.inviter||'')}" maxlength="40" placeholder="초대한 회원 이름 입력"><datalist id="fmInviterList45">${suggestions}</datalist><div class="meta">게스트일 때 필수 입력 · 회원명부/게임대기/게임중 화면에 표시됩니다.</div></div>`);
   type.addEventListener('change',syncInviter45);syncInviter45();
+  const selfStaff=!!m&&String(m.id||'')===String(me?.memberId||'')&&['manager','organizer'].includes(roleOf(m));
+  if(selfStaff){$('fmRole')?.closest('.field')?.remove();$('fmPinWrap')?.remove()}
  },0);
 };
 window.syncInviter45=function(){const guest=$('fmType')?.value==='guest',wrap=$('fmInviterWrap45'),inp=$('fmInviter45');if(wrap)wrap.classList.toggle('hide',!guest);if(inp)inp.required=guest};
@@ -37,11 +39,11 @@ const saveMemberNow44=saveMemberNow;
 saveMemberNow=async function(){
  const cur=editMemberId?M(editMemberId):null;
  if(cur&&roleOf(cur)==='admin')return saveMemberNow44();
- if(cur&&roleOf(cur)==='manager'&&!me?.globalAdmin&&cur.id===me?.memberId)return saveMemberNow44();
+ const selfStaff=!!cur&&String(cur.id||'')===String(me?.memberId||'')&&['manager','organizer'].includes(roleOf(cur));
  const type=$('fmType')?.value||'member',inviter=type==='guest'?($('fmInviter45')?.value.trim()||''):'';
  if(type==='guest'&&!inviter)return alert('게스트의 초대인을 입력해주세요.');
- let role=$('fmRole')?.value||(cur?roleOf(cur):'member');if(type==='guest')role='member';
- const body={action:'save_member',groupId:currentGroupId,memberId:editMemberId||'',name:$('fmName')?.value.trim()||'',year:Number($('fmYear')?.value),gender:$('fmGender')?.value||'남',cls:$('fmCls')?.value||'C',type,role,pin:$('fmPin')?.value.trim()||'',inviter};
+ let role=selfStaff?roleOf(cur):($('fmRole')?.value||(cur?roleOf(cur):'member'));if(type==='guest')role='member';
+ const body={action:'save_member',groupId:currentGroupId,memberId:editMemberId||'',name:$('fmName')?.value.trim()||'',year:Number($('fmYear')?.value),gender:$('fmGender')?.value||'남',cls:$('fmCls')?.value||'C',type,role,pin:selfStaff?'':($('fmPin')?.value.trim()||''),inviter};
  if(!body.name)return alert('이름을 입력해주세요.');
  try{const r=await fetch(MEMBER_V45,{method:'POST',headers:{'content-type':'application/json','authorization':'Bearer '+T},body:JSON.stringify(body),cache:'no-store'});const x=await r.json().catch(()=>({}));if(!r.ok)throw new Error(x.error||'회원 저장에 실패했습니다.');S=x.data;normalizeClient();closeModal();renderAll()}catch(e){showError(e)}
 };
