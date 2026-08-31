@@ -12,6 +12,7 @@ on:
       - 'scripts/v6-ui-stability.mjs'
       - 'scripts/v6-ui-v614.mjs'
       - 'scripts/v6-ui-v616.mjs'
+      - 'scripts/v6-ui-v617.mjs'
       - '.github/workflows/prune-v6-runtime.yml'
   workflow_dispatch:
 concurrency:
@@ -38,6 +39,7 @@ jobs:
           node scripts/v6-ui-stability.mjs
           node scripts/v6-ui-v614.mjs
           node scripts/v6-ui-v616.mjs
+          node scripts/v6-ui-v617.mjs
       - name: Validate generated source only
         run: |
           node --check app-v6.0.js
@@ -50,6 +52,8 @@ jobs:
           ! grep -q 'targetReady75' app-v6.0.js
           ! grep -Fq 'location.replace(`/refresh/v' app-v6.0.js
           ! grep -Fq 'location.assign(`/refresh/v' app-v6.0.js
+          ! grep -Fq "setInterval(()=>{if(T&&!reloginBusy)loadState().catch(()=>{})},3000)" app-v6.0.js
+          ! grep -Fq "setInterval(()=>{if(me){restoreDeveloper99();if(currentView==='members')ensureFullDeveloperRoster99()}},1200)" app-v6.0.js
           grep -q "__kokmatchInteractionCore='6.0'" app-v6.0.js
           grep -q "__kokmatchRosterCanonicalV6='6.0.4'" app-v6.0.js
           grep -q 'data-member-id22="${esc(m.id)}"' app-v6.0.js
@@ -59,23 +63,24 @@ jobs:
           grep -q 'function forceLatestHeaderRefreshV6' app-v6.0.js
           grep -q 'currentVersionV6' app-v6.0.js
           grep -q '최신버전으로 새로고침' app-v6.0.js
-          grep -Fq "function buildLabelV6(){return 'v6.16'}" app-v6.0.js
-          grep -Fq "__kokmatchReliableActionTapV6='v6.16'" app-v6.0.js
-          grep -Fq "__kokmatchFastMemberActionsV6='v6.16'" app-v6.0.js
-          grep -Fq "__kokmatchCanonicalMemberEditorV6='v6.16'" app-v6.0.js
-          grep -Fq "__kokmatchFastPartnerV6='v6.16'" app-v6.0.js
-          grep -Fq "__kokmatchMemberPointerRouterV615='v6.16'" app-v6.0.js
-          grep -Fq "__kokmatchPartnerDisplayFilterV616='v6.16'" app-v6.0.js
+          grep -Fq "function buildLabelV6(){return 'v6.17'}" app-v6.0.js
+          grep -Fq "__kokmatchBackgroundPollV617='v6.17'" app-v6.0.js
+          grep -Fq "__kokmatchLegacyRosterObserverDisabledV617=true" app-v6.0.js
+          grep -Fq "function ensureFullDeveloperRoster99(){return false}" app-v6.0.js
+          grep -Fq "__kokmatchReliableActionTapV6='v6.17'" app-v6.0.js
+          grep -Fq "__kokmatchFastMemberActionsV6='v6.17'" app-v6.0.js
+          grep -Fq "__kokmatchCanonicalMemberEditorV6='v6.17'" app-v6.0.js
+          grep -Fq "__kokmatchFastPartnerV6='v6.17'" app-v6.0.js
+          grep -Fq "__kokmatchMemberPointerRouterV615='v6.17'" app-v6.0.js
+          grep -Fq "__kokmatchPartnerDisplayFilterV616='v6.17'" app-v6.0.js
           grep -q 'openMemberEditorV615' app-v6.0.js
           grep -q 'openPartnerOverlayV615' app-v6.0.js
           grep -q 'v615StripPartnerNames' app-v6.0.js
-          grep -Fq '#modal,#memberEditorV615,#partnerOverlayV615,#members .memberCard' app-v6.0.js
           grep -q 'memberEditorOverlayV615' app-v6.0.css
           grep -q 'partnerOverlayV615' app-v6.0.css
-          grep -q 'v615Pressed' app-v6.0.css
           grep -q 'margin:4px 0 0' app-v6.0.css
           grep -q 'v616PartnerNameHidden' app-v6.0.css
-          grep -Fq 'grid-template-columns:repeat(2,minmax(0,1fr))' app-v6.0.css
+          grep -Fq '#members .memberCard{contain:layout style!important' app-v6.0.css
           ! grep -Eq '총관리자|모임관리자|게임편성자|일반회원' app-v6.0.js
           grep -q "data-kokmatch-entry='fresh-v1'\|dataset.kokmatchEntry='fresh-v1'" index.html
           grep -q "app-v6.0.js?_km=" index.html
@@ -84,11 +89,11 @@ jobs:
         run: |
           node - <<'NODE'
           const fs=require('fs');
-          const build='v6.16';
+          const build='v6.17';
           const p='latest-version.json';const x=JSON.parse(fs.readFileSync(p,'utf8'));
-          x.version=60;x.label='v6.16';x.semanticVersion='6.16';x.build=build;x.updatedAt='2026-08-31T16:22:00+09:00';x.note='회원카드 액션영역 레이아웃 복구 · 파트너명 DOM 보존형 숨김 · 이름과 년생성별 4px 간격';
+          x.version=60;x.label='v6.17';x.semanticVersion='6.17';x.build=build;x.updatedAt='2026-08-31T16:35:00+09:00';x.note='회원명부 반복 렌더 루프 제거 · 3초 전체 재렌더 제거 · v99 옵저버/1.2초 감시 제거 · 변경시에만 상태 갱신';
           fs.writeFileSync(p,JSON.stringify(x,null,2)+'\n');
-          fs.writeFileSync('v6-cleanup-report.json',JSON.stringify({version:'6.16',build,features:['partner name is suppressed without deleting member-card DOM nodes','partner relation renderers no longer create visible partner-name rows','member action column is locked independently from member information height','entry, spectator, exit and edit buttons use a stable two-column action grid','name-to-birth/gender gap restored to 4px','single v6.15 pointer router remains the only roster action router','short visible version label v6.16'],validation:['javascript syntax','no automatic /refresh/vXX navigation','v6.16 partner display filter marker','4px member meta spacing','stable action-grid CSS marker','fresh-entry bootstrap marker'],functionalQaPolicy:'functional/browser/device QA omitted from deployment gate per operator request'},null,2)+'\n');
+          fs.writeFileSync('v6-cleanup-report.json',JSON.stringify({version:'6.17',build,features:['removed original three-second loadState full repaint loop','removed unconditional sixty-second renderAll repaint','disabled legacy v99 document-wide roster mutation observer','disabled legacy v99 1.2-second developer roster watchdog','disabled legacy developer full-roster self-render repair','background state polling now repaints only when server state actually changes','member editor and partner overlays pause background polling while open','member card geometry is contained and the requested 4px name-to-meta spacing is preserved'],validation:['javascript syntax','no legacy 3s full repaint loop','no legacy 1.2s roster watchdog','v6.17 change-only background poll marker','legacy roster observer disabled marker','4px member meta spacing','fresh-entry bootstrap marker'],functionalQaPolicy:'functional/browser/device QA omitted from deployment gate per operator request'},null,2)+'\n');
           let html=fs.readFileSync('index.html','utf8');
           html=html.replace(/data-kokmatch-build="[^"]*"/,`data-kokmatch-build="${build}"`);
           html=html.replace(/const BUILD_FALLBACK='[^']*'/,`const BUILD_FALLBACK='${build}'`);
@@ -99,6 +104,6 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add app-v6.0.js app-v6.0.css index.html latest-version.json v6-cleanup-report.json
-          git commit -m "Ship v6.16 member card layout repair [skip ci]" || exit 0
+          git commit -m "Ship v6.17 render-loop stabilization [skip ci]" || exit 0
           git pull --rebase origin main
           git push
