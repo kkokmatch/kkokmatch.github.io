@@ -5,6 +5,9 @@ let js=fs.readFileSync(JS,'utf8'),css=fs.readFileSync(CSS,'utf8');
 if(!js.includes("window.__kokmatchStandalone='6.0'"))throw new Error('Not a v6 standalone runtime');
 if(!js.includes("__kokmatchBackgroundPollV617='v6.17'"))throw new Error('v6.17 must be generated first');
 
+const oldPatchBegin='/* V6_18_CANONICAL_MEMBER_TEMPLATE_BEGIN */',oldPatchEnd='/* V6_18_CANONICAL_MEMBER_TEMPLATE_END */';
+for(;;){const s=js.indexOf(oldPatchBegin),e=s>=0?js.indexOf(oldPatchEnd,s):-1;if(s<0||e<=s)break;js=js.slice(0,s)+js.slice(e+oldPatchEnd.length)}
+
 js=js.replaceAll('v6.17','v6.18');
 js=js.replace(/function buildLabelV6\(\)\{return 'v6\.\d+'\}/,"function buildLabelV6(){return 'v6.18'}");
 
@@ -58,8 +61,14 @@ standardizeRosterV618();
 `;
 js+='\n'+patch+'\n';
 
-const marker='/* V6_UI_STABILITY_CSS_END */',pos=css.indexOf(marker);if(pos<0)throw new Error('CSS marker missing');
-const style=`
+const marker='/* V6_UI_STABILITY_CSS_END */';
+const styleBegin='/* V6_18_PARK_TEMPLATE_BEGIN */',styleEnd='/* V6_18_PARK_TEMPLATE_END */';
+for(;;){const s=css.indexOf(styleBegin),e=s>=0?css.indexOf(styleEnd,s):-1;if(s<0||e<=s)break;css=css.slice(0,s)+css.slice(e+styleEnd.length)}
+const legacyStyle='/* v6.18 Park Tae-young canonical member-card template */';
+const legacyStart=css.indexOf(legacyStyle);
+if(legacyStart>=0){const nf=css.indexOf('/* V6_17_NO_FLICKER_BEGIN */',legacyStart),mk=css.indexOf(marker,legacyStart),legacyEnd=nf>=0?nf:mk;if(legacyEnd>legacyStart)css=css.slice(0,legacyStart)+css.slice(legacyEnd)}
+const pos=css.indexOf(marker);if(pos<0)throw new Error('CSS marker missing');
+const style=`${styleBegin}
 /* v6.18 Park Tae-young canonical member-card template */
 #members .memberCard{grid-template-columns:46px minmax(0,1fr) 104px!important;column-gap:6px!important;align-items:center!important;overflow:hidden!important}
 #members .memberInfoV618{display:flex!important;flex-direction:column!important;justify-content:center!important;gap:0!important;min-height:62px!important;overflow:hidden!important}
@@ -76,10 +85,12 @@ const style=`
 #memberEditorV615 .memberEditorErrorV618{min-height:18px!important;margin-top:6px!important;font-size:12px!important;color:#c93636!important}
 @media(max-width:430px){#members .memberCard{grid-template-columns:42px minmax(0,1fr) 96px!important;column-gap:4px!important}#members .v6MemberActions,#members .memberActions48,#members .memberActions60,#members .memberActions65,#members .memberBtns,#members .memberBtns65{width:96px!important;min-width:96px!important;max-width:96px!important}#members .memberBtns,#members .memberBtns65{gap:3px!important}#members .memberBtns .btn,#members .memberBtns65 .btn{height:28px!important;min-height:28px!important;font-size:9px!important}}
 @media(max-width:359px){#members .memberCard{grid-template-columns:39px minmax(0,1fr) 92px!important}#members .v6MemberActions,#members .memberActions48,#members .memberActions60,#members .memberActions65,#members .memberBtns,#members .memberBtns65{width:92px!important;min-width:92px!important;max-width:92px!important}#members .memberBtns .btn,#members .memberBtns65 .btn{font-size:8.7px!important}}
+${styleEnd}
 `;
 css=css.slice(0,pos)+style+css.slice(pos);
 
 for(const c of ["function buildLabelV6(){return 'v6.18'}","__kokmatchMemberTemplateV618='v6.18'","memberEditorFormV618","saveMemberEditorV618","standardizeRosterV618"]){if(!js.includes(c))throw new Error('v6.18 JS marker missing: '+c)}
-for(const c of ['grid-template-columns:46px minmax(0,1fr) 104px','memberInfoV618','memberEditorErrorV618'])if(!css.includes(c))throw new Error('v6.18 CSS marker missing: '+c);
+if((js.match(/const renderMembersV618=renderMembers;/g)||[]).length!==1)throw new Error('v6.18 render wrapper must exist exactly once');
+for(const c of ['grid-template-columns:46px minmax(0,1fr) 104px','memberInfoV618','memberEditorErrorV618',styleBegin,styleEnd])if(!css.includes(c))throw new Error('v6.18 CSS marker missing: '+c);
 fs.writeFileSync(JS,js);fs.writeFileSync(CSS,css);
-console.log('v6.18 standardized every roster card to the Park Tae-young layout, stabilized action buttons, and replaced member save with native form submit.');
+console.log('v6.18 canonical member template is idempotent and generated exactly once.');
