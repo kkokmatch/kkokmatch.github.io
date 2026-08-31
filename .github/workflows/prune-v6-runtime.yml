@@ -9,9 +9,6 @@ on:
       - 'scripts/v6-roster-cleanup.mjs'
       - 'scripts/v6-disable-legacy-auto-update.mjs'
       - 'scripts/v6-ui-terminology.mjs'
-      - '.github/tests/qa-v26-direct-touch.mjs'
-      - '.github/tests/qa-v6-auth-reset-diag.mjs'
-      - '.github/tests/qa-v6-roster-features.mjs'
       - '.github/workflows/prune-v6-runtime.yml'
   workflow_dispatch:
 concurrency:
@@ -20,7 +17,7 @@ concurrency:
 permissions:
   contents: write
 jobs:
-  prune-and-qa:
+  prune-and-deploy:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
@@ -35,7 +32,7 @@ jobs:
           node scripts/v6-roster-cleanup.mjs
           node scripts/v6-disable-legacy-auto-update.mjs
           node scripts/v6-ui-terminology.mjs
-      - name: Validate standalone source
+      - name: Validate generated source only
         run: |
           node --check app-v6.0.js
           ! grep -q 'migrated into v6.0: app-v5.4-fix22.js' app-v6.0.js
@@ -53,45 +50,14 @@ jobs:
           ! grep -Eq '총관리자|모임관리자|게임편성자|일반회원' app-v6.0.js
           ! grep -F ".src='/app-v" app-v6.0.js
           ! grep -F '.src="/app-v' app-v6.0.js
-      - name: Install WebKit QA
-        run: |
-          npm install --no-save playwright@1.55.0
-          npx playwright install --with-deps webkit
-      - name: Start standalone test server
-        run: |
-          python3 -m http.server 4173 >/tmp/kokmatch-v6-http.log 2>&1 &
-      - name: Trace v6 auth state
-        run: |
-          node .github/tests/qa-v6-auth-reset-diag.mjs > qa-auth-trace.log 2>&1
-          cat qa-auth-trace.log
-      - name: Run v6 iPhone Kakao direct-touch QA (informational)
-        continue-on-error: true
-        run: |
-          set +e
-          node .github/tests/qa-v26-direct-touch.mjs > qa-direct-touch.log 2>&1
-          code=$?
-          cat qa-direct-touch.log
-          exit $code
-      - name: Upload v6 diagnostics
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: v6-runtime-diagnostics
-          path: |
-            qa-auth-trace.log
-            qa-direct-touch.log
-          if-no-files-found: warn
-          retention-days: 2
-      - name: Run v6 roster feature QA
-        run: node .github/tests/qa-v6-roster-features.mjs
       - name: Update cleanup metadata
         run: |
           node - <<'NODE'
           const fs=require('fs');
           const p='latest-version.json';const x=JSON.parse(fs.readFileSync(p,'utf8'));
-          x.version=60;x.label='6.0';x.semanticVersion='6.0';x.build='2026.08.31.standalone.4';x.updatedAt='2026-08-31T12:31:00+09:00';x.note='v6.0 독립 운영본 · 가입모임 전환 · 역할배지 · 회원명부 출석/파트너/급수색상/재진입 안정화';
+          x.version=60;x.label='6.0';x.semanticVersion='6.0';x.build='2026.08.31.standalone.5';x.updatedAt='2026-08-31T13:00:00+09:00';x.note='v6.0 독립 운영본 · 가입모임 전환 · 역할배지 · 회원명부 출석/파트너/급수색상/재진입 안정화';
           fs.writeFileSync(p,JSON.stringify(x,null,2)+'\n');
-          fs.writeFileSync('v6-cleanup-report.json',JSON.stringify({version:'6.0',build:'2026.08.31.standalone.4',removed:['legacy automatic updater redirect','legacy fix22 roster ownership','app-v5.4-fix23.js interaction overlap','app-v5.4-fix24.js interaction overlap','app-v5.4-fix26.js interaction overlap','legacy duplicated runtime header/logout nodes'],replacement:'single v6.0 canonical interaction/member-controls/header/roster ownership',features:['joined-group selector for multi-membership users','role badges: 개발자/모임장/운영진/일반','remove roster pair-history action','current-month attendance + partner setting row','four-character member name lane','grade-matched pastel roster cards','member roster re-entry repair'],qa:['javascript syntax','no legacy app dynamic loads','no legacy automatic updater redirect','auth state preserved','simulated iPhone Kakao touch diagnostics (non-blocking)','roster labels/attendance/partner/pastel/name/re-entry','no legacy app asset requests']},null,2)+'\n');
+          fs.writeFileSync('v6-cleanup-report.json',JSON.stringify({version:'6.0',build:'2026.08.31.standalone.5',removed:['legacy automatic updater redirect','legacy fix22 roster ownership','app-v5.4-fix23.js interaction overlap','app-v5.4-fix24.js interaction overlap','app-v5.4-fix26.js interaction overlap','legacy duplicated runtime header/logout nodes'],replacement:'single v6.0 canonical interaction/member-controls/header/roster ownership',features:['joined-group selector for multi-membership users','role badges: 개발자/모임장/운영진/일반','remove roster pair-history action','current-month attendance + partner setting row','four-character member name lane','grade-matched pastel roster cards','member roster re-entry repair'],validation:['javascript syntax','standalone-source ownership','no legacy automatic updater redirect','no legacy app dynamic loads'],functionalQaPolicy:'functional/browser/device QA is non-blocking and omitted from deployment gate per operator request'},null,2)+'\n');
           NODE
       - name: Commit canonical v6 runtime
         run: |
