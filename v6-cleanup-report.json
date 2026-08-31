@@ -1,24 +1,24 @@
 {
-  "version": "6.13",
-  "build": "v6.13",
+  "version": "6.14",
+  "build": "v6.14",
   "features": [
-    "name-to-birth spacing tightened by 3px",
-    "birth-to-monthly-attendance spacing increased by 3px",
-    "member card pastel backgrounds strengthened two steps",
-    "optimistic immediate member attendance UI before server response",
-    "isolated v6 member editor for birth year, gender, grade, type, role and PIN/password",
-    "short visible version label v6.13",
-    "manual latest-version refresh only",
-    "role badges: 개발자/모임장/운영진/일반"
+    "partner settings opens from local roster data in a dedicated instant overlay",
+    "member attendance buttons paint locally before network response",
+    "heavy roster synchronization deferred during taps",
+    "member editor uses dedicated v6.14 state and unique controls for gender, grade, type, role and PIN",
+    "member_save persists year, gender, grade, type, role and PIN through kokmatch-v60-api",
+    "name-to-birth spacing tightened by another 5px",
+    "birth-to-monthly-attendance spacing increased by another 5px",
+    "short visible version label v6.14",
+    "manual latest-version refresh only"
   ],
   "validation": [
     "javascript syntax",
     "no automatic /refresh/vXX navigation",
-    "short build label source",
-    "optimistic member attendance installed",
-    "dedicated member editor installed",
-    "stronger roster palette present",
-    "requested roster spacing present",
+    "v6.14 fast partner overlay installed",
+    "v6.14 optimistic member attendance installed",
+    "v6.14 dedicated member editor state installed",
+    "requested -8px/+8px roster spacing present",
     "fresh-entry bootstrap marker"
   ],
   "functionalQaPolicy": "functional/browser/device QA omitted from deployment gate per operator request"
