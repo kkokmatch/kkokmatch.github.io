@@ -15,6 +15,7 @@ on:
       - 'scripts/v6-ui-v617.mjs'
       - 'scripts/v6-ui-v618.mjs'
       - 'scripts/v6-ui-v619.mjs'
+      - 'scripts/v6-ui-v620.mjs'
       - '.github/workflows/prune-v6-runtime.yml'
   workflow_dispatch:
 concurrency:
@@ -44,6 +45,7 @@ jobs:
           node scripts/v6-ui-v617.mjs
           node scripts/v6-ui-v618.mjs
           node scripts/v6-ui-v619.mjs
+          node scripts/v6-ui-v620.mjs
       - name: Validate generated source only
         run: |
           node --check app-v6.0.js
@@ -58,6 +60,7 @@ jobs:
           ! grep -Fq 'location.assign(`/refresh/v' app-v6.0.js
           ! grep -Fq "setInterval(()=>{if(T&&!reloginBusy)loadState().catch(()=>{})},3000)" app-v6.0.js
           ! grep -Fq "setInterval(()=>{if(me){restoreDeveloper99();if(currentView==='members')ensureFullDeveloperRoster99()}},1200)" app-v6.0.js
+          ! grep -Fq "v615MemberApi('member_save'" app-v6.0.js
           grep -q "__kokmatchInteractionCore='6.0'" app-v6.0.js
           grep -q "__kokmatchRosterCanonicalV6='6.0.4'" app-v6.0.js
           grep -q 'data-member-id22="${esc(m.id)}"' app-v6.0.js
@@ -67,24 +70,28 @@ jobs:
           grep -q 'function forceLatestHeaderRefreshV6' app-v6.0.js
           grep -q 'currentVersionV6' app-v6.0.js
           grep -q '최신버전으로 새로고침' app-v6.0.js
-          grep -Fq "function buildLabelV6(){return 'v6.19'}" app-v6.0.js
-          grep -Fq "__kokmatchBackgroundPollV617='v6.19'" app-v6.0.js
+          grep -Fq "function buildLabelV6(){return 'v6.20'}" app-v6.0.js
+          grep -Fq "__kokmatchBackgroundPollV617='v6.20'" app-v6.0.js
           grep -Fq "__kokmatchLegacyRosterObserverDisabledV617=true" app-v6.0.js
           grep -Fq "function ensureFullDeveloperRoster99(){return false}" app-v6.0.js
-          grep -Fq "__kokmatchReliableActionTapV6='v6.19'" app-v6.0.js
-          grep -Fq "__kokmatchFastMemberActionsV6='v6.19'" app-v6.0.js
-          grep -Fq "__kokmatchCanonicalMemberEditorV6='v6.19'" app-v6.0.js
-          grep -Fq "__kokmatchFastPartnerV6='v6.19'" app-v6.0.js
-          grep -Fq "__kokmatchMemberPointerRouterV615='v6.19'" app-v6.0.js
-          grep -Fq "__kokmatchPartnerDisplayFilterV616='v6.19'" app-v6.0.js
-          grep -Fq "__kokmatchMemberTemplateV618='v6.19'" app-v6.0.js
-          grep -Fq "__kokmatchNativeMemberSaveV619='v6.19'" app-v6.0.js
+          grep -Fq "__kokmatchReliableActionTapV6='v6.20'" app-v6.0.js
+          grep -Fq "__kokmatchFastMemberActionsV6='v6.20'" app-v6.0.js
+          grep -Fq "__kokmatchCanonicalMemberEditorV6='v6.20'" app-v6.0.js
+          grep -Fq "__kokmatchFastPartnerV6='v6.20'" app-v6.0.js
+          grep -Fq "__kokmatchMemberPointerRouterV615='v6.20'" app-v6.0.js
+          grep -Fq "__kokmatchPartnerDisplayFilterV616='v6.20'" app-v6.0.js
+          grep -Fq "__kokmatchMemberTemplateV618='v6.20'" app-v6.0.js
+          grep -Fq "__kokmatchNativeMemberSaveV619='v6.20'" app-v6.0.js
+          grep -Fq "__kokmatchMemberSaveApiV620='v6.20'" app-v6.0.js
+          grep -q 'v620MemberApi' app-v6.0.js
           grep -q 'standardizeRosterV618' app-v6.0.js
           grep -q 'memberEditorFormV618' app-v6.0.js
           grep -q 'saveMemberEditorV618' app-v6.0.js
           grep -q 'memberInfoV618' app-v6.0.css
           grep -Fq 'grid-template-columns:46px minmax(0,1fr) 104px' app-v6.0.css
           grep -Fq 'position:static!important;inset:auto!important;transform:none!important;width:104px' app-v6.0.css
+          grep -Fq 'gap:6px!important' app-v6.0.css
+          grep -Fq 'gap:5px!important' app-v6.0.css
           grep -q 'memberEditorErrorV618' app-v6.0.css
           grep -q 'margin:4px 0 0' app-v6.0.css
           ! grep -Eq '총관리자|모임관리자|게임편성자|일반회원' app-v6.0.js
@@ -95,11 +102,11 @@ jobs:
         run: |
           node - <<'NODE'
           const fs=require('fs');
-          const build='v6.19';
+          const build='v6.20';
           const p='latest-version.json';const x=JSON.parse(fs.readFileSync(p,'utf8'));
-          x.version=60;x.label='v6.19';x.semanticVersion='6.19';x.build=build;x.updatedAt='2026-08-31T16:50:00+09:00';x.note='박태영 기준 회원카드 레이아웃 통일 · 신규회원 동일 템플릿 · 액션버튼 겹침 제거 · 회원수정 저장 native form 전환 및 상태 초기화 오류 수정';
+          x.version=60;x.label='v6.20';x.semanticVersion='6.20';x.build=build;x.updatedAt='2026-08-31T17:08:00+09:00';x.note='회원수정 저장 Can't find variable 오류 제거 · v6.20 독립 저장 API · 액션버튼 간격 2px 추가';
           fs.writeFileSync(p,JSON.stringify(x,null,2)+'\n');
-          fs.writeFileSync('v6-cleanup-report.json',JSON.stringify({version:'6.19',build,features:['all existing and future roster cards are normalized to the same three-row information layout used by Park Tae-young','member action area has a fixed independent width with static two-column buttons so spectator, exit and edit never overlap','member editing uses native HTML form submit instead of the old custom overlay pointer route','editor state is cleared before a new edit session is created, so member id and edited values survive until save','member_save continues to use the verified kokmatch-v60-api contract','background state polling remains change-only and legacy repaint loops remain disabled'],validation:['javascript syntax','v6.19 canonical member-template marker','v6.19 native member-save marker','fixed action-column CSS','member editor form marker','no legacy 3s/1.2s repaint loops','fresh-entry bootstrap marker'],functionalQaPolicy:'functional/browser/device QA omitted from deployment gate per operator request'},null,2)+'\n');
+          fs.writeFileSync('v6-cleanup-report.json',JSON.stringify({version:'6.20',build,features:['member editor save no longer references the old scoped v615MemberApi helper','v6.20 owns a self-contained kokmatch-v60-api member save/delete client','member editor actor detection no longer depends on the old scoped v615Actor helper','member action grid spacing increased by exactly 2px on desktop and mobile','Park Tae-young canonical roster layout and change-only polling remain intact'],validation:['javascript syntax','no v615MemberApi member_save dependency','v6.20 self-contained member API marker','6px desktop action gap','5px mobile action gap','no legacy 3s/1.2s repaint loops','fresh-entry bootstrap marker'],functionalQaPolicy:'functional/browser/device QA omitted from deployment gate per operator request'},null,2)+'\n');
           let html=fs.readFileSync('index.html','utf8');
           html=html.replace(/data-kokmatch-build="[^"]*"/,`data-kokmatch-build="${build}"`);
           html=html.replace(/const BUILD_FALLBACK='[^']*'/,`const BUILD_FALLBACK='${build}'`);
@@ -110,6 +117,6 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add app-v6.0.js app-v6.0.css index.html latest-version.json v6-cleanup-report.json
-          git commit -m "Ship v6.19 roster layout and member save repair [skip ci]" || exit 0
+          git commit -m "Ship v6.20 member save scope fix [skip ci]" || exit 0
           git pull --rebase origin main
           git push
