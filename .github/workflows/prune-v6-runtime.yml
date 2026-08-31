@@ -51,35 +51,27 @@ jobs:
           grep -q "__kokmatchInteractionCore='6.0'" app-v6.0.js
           grep -q "__kokmatchRosterCanonicalV6='6.0.4'" app-v6.0.js
           grep -q 'data-member-id22="${esc(m.id)}"' app-v6.0.js
-          grep -q 'cards.forEach((card,index)=>' app-v6.0.js
-          grep -Fq 'm=S.members[index]||null' app-v6.0.js
           grep -q 'memberRosterFooterV6' app-v6.0.js
           grep -q '__kokmatchRepairRosterV6' app-v6.0.js
           grep -q 'V6_CANONICAL_ROSTER_CSS_BEGIN' app-v6.0.css
           grep -q 'function forceLatestHeaderRefreshV6' app-v6.0.js
           grep -q 'currentVersionV6' app-v6.0.js
           grep -q '최신버전으로 새로고침' app-v6.0.js
-          grep -q 'https://kkokmatch.github.io/' app-v6.0.js
-          grep -Fq "function buildLabelV6(){return 'v6.14'}" app-v6.0.js
-          grep -Fq "__kokmatchReliableActionTapV6='v6.14'" app-v6.0.js
-          grep -Fq "__kokmatchFastMemberActionsV6='v6.14'" app-v6.0.js
-          grep -Fq "__kokmatchCanonicalMemberEditorV6='v6.14'" app-v6.0.js
-          grep -Fq "__kokmatchFastPartnerV6='v6.14'" app-v6.0.js
-          grep -q 'memberEditorStateV614' app-v6.0.js
-          grep -q 'openPartnerOverlayV614' app-v6.0.js
-          grep -q 'v614MemberApi' app-v6.0.js
-          grep -q 'v614PartnerApi' app-v6.0.js
-          grep -Fq 'function blockLegacyLogoutV6(){return true}' app-v6.0.js
-          grep -q 'V6_UI_STABILITY_CSS_BEGIN' app-v6.0.css
-          grep -q '#f8d8f2' app-v6.0.css
-          grep -q '#cef7f4' app-v6.0.css
-          grep -q '#d8f5d4' app-v6.0.css
-          grep -q '#f4dada' app-v6.0.css
-          grep -q '#f6efb9' app-v6.0.css
+          grep -Fq "function buildLabelV6(){return 'v6.15'}" app-v6.0.js
+          grep -Fq "__kokmatchReliableActionTapV6='v6.15'" app-v6.0.js
+          grep -Fq "__kokmatchFastMemberActionsV6='v6.15'" app-v6.0.js
+          grep -Fq "__kokmatchCanonicalMemberEditorV6='v6.15'" app-v6.0.js
+          grep -Fq "__kokmatchFastPartnerV6='v6.15'" app-v6.0.js
+          grep -Fq "__kokmatchMemberPointerRouterV615='v6.15'" app-v6.0.js
+          grep -q 'openMemberEditorV615' app-v6.0.js
+          grep -q 'openPartnerOverlayV615' app-v6.0.js
+          grep -q 'v615StripPartnerNames' app-v6.0.js
+          grep -Fq '#modal,#memberEditorV615,#partnerOverlayV615,#members .memberCard' app-v6.0.js
+          grep -q 'memberEditorOverlayV615' app-v6.0.css
+          grep -q 'partnerOverlayV615' app-v6.0.css
+          grep -q 'v615Pressed' app-v6.0.css
           grep -q 'margin:-8px 0 0' app-v6.0.css
           grep -q 'margin:8px 0 0' app-v6.0.css
-          grep -q '.memberEditorOverlayV614' app-v6.0.css
-          grep -q '.partnerOverlayV614' app-v6.0.css
           ! grep -Eq '총관리자|모임관리자|게임편성자|일반회원' app-v6.0.js
           grep -q "data-kokmatch-entry='fresh-v1'\|dataset.kokmatchEntry='fresh-v1'" index.html
           grep -q "app-v6.0.js?_km=" index.html
@@ -88,11 +80,11 @@ jobs:
         run: |
           node - <<'NODE'
           const fs=require('fs');
-          const build='v6.14';
+          const build='v6.15';
           const p='latest-version.json';const x=JSON.parse(fs.readFileSync(p,'utf8'));
-          x.version=60;x.label='v6.14';x.semanticVersion='6.14';x.build=build;x.updatedAt='2026-08-31T15:20:00+09:00';x.note='파트너 팝업 즉시화 · 회원버튼 반응 추가 개선 · 수정정보 전체 저장 · 회원정보 줄간격 재조정';
+          x.version=60;x.label='v6.15';x.semanticVersion='6.15';x.build=build;x.updatedAt='2026-08-31T15:45:00+09:00';x.note='회원명부 파트너명 제거 · 수정창 독립 이벤트 · 회원버튼 단일 고속 라우터 · 전체 UI 동기화 경량화';
           fs.writeFileSync(p,JSON.stringify(x,null,2)+'\n');
-          fs.writeFileSync('v6-cleanup-report.json',JSON.stringify({version:'6.14',build,features:['partner settings opens from local roster data in a dedicated instant overlay','member attendance buttons paint locally before network response','heavy roster synchronization deferred during taps','member editor uses dedicated v6.14 state and unique controls for gender, grade, type, role and PIN','member_save persists year, gender, grade, type, role and PIN through kokmatch-v60-api','name-to-birth spacing tightened by another 5px','birth-to-monthly-attendance spacing increased by another 5px','short visible version label v6.14','manual latest-version refresh only'],validation:['javascript syntax','no automatic /refresh/vXX navigation','v6.14 fast partner overlay installed','v6.14 optimistic member attendance installed','v6.14 dedicated member editor state installed','requested -8px/+8px roster spacing present','fresh-entry bootstrap marker'],functionalQaPolicy:'functional/browser/device QA omitted from deployment gate per operator request'},null,2)+'\n');
+          fs.writeFileSync('v6-cleanup-report.json',JSON.stringify({version:'6.15',build,features:['partner name text removed from roster cards while partner setting button remains','legacy global touch router excluded from roster cards and dedicated overlays','single pointer router handles roster attendance, edit and partner actions','member editor uses unique native select/input controls for gender, grade, type, role and PIN','member save sends all edited fields to kokmatch-v60-api','optimistic attendance paints the target card immediately','UI sync reduced from repeated microtask/rAF/timer passes to one rAF pass','short visible version label v6.15'],validation:['javascript syntax','no automatic /refresh/vXX navigation','single v6.15 member pointer router marker','legacy router exclusion marker','v6.15 native editor marker','partner-name stripping marker','fresh-entry bootstrap marker'],functionalQaPolicy:'functional/browser/device QA omitted from deployment gate per operator request'},null,2)+'\n');
           let html=fs.readFileSync('index.html','utf8');
           html=html.replace(/data-kokmatch-build="[^"]*"/,`data-kokmatch-build="${build}"`);
           html=html.replace(/const BUILD_FALLBACK='[^']*'/,`const BUILD_FALLBACK='${build}'`);
@@ -103,6 +95,6 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add app-v6.0.js app-v6.0.css index.html latest-version.json v6-cleanup-report.json
-          git commit -m "Ship v6.14 roster interaction fixes [skip ci]" || exit 0
+          git commit -m "Ship v6.15 interaction stabilization [skip ci]" || exit 0
           git pull --rebase origin main
           git push
