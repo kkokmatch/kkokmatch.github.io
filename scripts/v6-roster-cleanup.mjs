@@ -9,7 +9,7 @@ let start=src.indexOf(canonical);
 if(start<0){start=src.indexOf(legacy);if(start<0)throw new Error('Roster section not found');src=src.slice(0,start)+canonical+src.slice(start+legacy.length)}
 start=src.indexOf(canonical);let end=src.indexOf('/* v6.0 canonical interaction core',start);if(end<0)end=src.lastIndexOf("\nwindow.__kokmatchStandalone='6.0';");if(end<=start)throw new Error('Roster section end not found');
 let section=src.slice(start,end);
-section=section.replace("window.__kokmatchRosterCanonical='22.3';","window.__kokmatchRosterCanonical='22.3';\nwindow.__kokmatchRosterCanonicalV6='6.0.1';\ndocument.documentElement.dataset.kokmatchRoster='6.0.1';");
+section=section.replace("window.__kokmatchRosterCanonical='22.3';","window.__kokmatchRosterCanonical='22.3';\nwindow.__kokmatchRosterCanonicalV6='6.0.2';\ndocument.documentElement.dataset.kokmatchRoster='6.0.2';");
 section=section.replace('>모임관리자</span>','>모임장</span>').replace('>게임편성자</span>','>운영진</span>').replace('>임시편성자</span>','>편성자</span>').replace('>일반회원</span>','>일반</span>');
 
 const pv=section.indexOf('function patchVisibleInfo22(card,m){'),fn=section.indexOf('\nfunction finalizeRoster22()',pv);if(pv<0||fn<0)throw new Error('Roster info function not found');
