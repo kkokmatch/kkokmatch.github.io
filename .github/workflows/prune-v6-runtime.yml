@@ -6,8 +6,10 @@ on:
       - 'scripts/prune-v6-runtime.mjs'
       - 'scripts/v6-canonical-member-controls.mjs'
       - 'scripts/v6-canonical-header.mjs'
+      - 'scripts/v6-canonical-roster.mjs'
       - '.github/tests/qa-v26-direct-touch.mjs'
       - '.github/tests/qa-v6-auth-reset-diag.mjs'
+      - '.github/tests/qa-v6-roster-features.mjs'
       - '.github/workflows/prune-v6-runtime.yml'
   workflow_dispatch:
 concurrency:
@@ -23,53 +25,55 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Replace overlapping interaction patches
+      - name: Build canonical v6 runtime
         run: |
           node scripts/prune-v6-runtime.mjs
           node scripts/v6-canonical-member-controls.mjs
           node scripts/v6-canonical-header.mjs
+          node scripts/v6-canonical-roster.mjs
       - name: Validate standalone source
         run: |
           node --check app-v6.0.js
+          ! grep -q 'migrated into v6.0: app-v5.4-fix22.js' app-v6.0.js
           ! grep -q 'migrated into v6.0: app-v5.4-fix23.js' app-v6.0.js
           ! grep -q 'migrated into v6.0: app-v5.4-fix24.js' app-v6.0.js
           ! grep -q 'migrated into v6.0: app-v5.4-fix26.js' app-v6.0.js
           grep -q "__kokmatchInteractionCore='6.0'" app-v6.0.js
+          grep -q "__kokmatchRosterCanonicalV6='6.0.1'" app-v6.0.js
           grep -q 'function repairMemberControlsV6' app-v6.0.js
           grep -q 'function normalizeHeaderV6' app-v6.0.js
+          grep -q 'memberRosterFooterV6' app-v6.0.js
+          grep -q 'V6_CANONICAL_ROSTER_CSS_BEGIN' app-v6.0.css
           grep -q '구형 로그아웃 호출 차단' app-v6.0.js
           ! grep -F ".src='/app-v" app-v6.0.js
           ! grep -F '.src="/app-v' app-v6.0.js
-      - name: Trace logout source locations
-        run: |
-          echo '--- LINE COUNT ---'
-          wc -l app-v6.0.js
-          echo '--- logout() declarations/calls ---'
-          grep -n -E 'logout\(\)|=>logout\(\)|logout[0-9]+' app-v6.0.js | head -80 || true
       - name: Install WebKit QA
         run: |
           npm install --no-save playwright@1.55.0
           npx playwright install --with-deps webkit
-      - name: Trace v6 auth state
+      - name: Start standalone test server
         run: |
           python3 -m http.server 4173 >/tmp/kokmatch-v6-http.log 2>&1 &
-          node .github/tests/qa-v6-auth-reset-diag.mjs
-      - name: Run v6 iPhone Kakao standalone QA
+      - name: Trace v6 auth state
+        run: node .github/tests/qa-v6-auth-reset-diag.mjs
+      - name: Run v6 iPhone Kakao direct-touch QA
         run: node .github/tests/qa-v26-direct-touch.mjs
+      - name: Run v6 roster feature QA
+        run: node .github/tests/qa-v6-roster-features.mjs
       - name: Update cleanup metadata
         run: |
           node - <<'NODE'
           const fs=require('fs');
           const p='latest-version.json';const x=JSON.parse(fs.readFileSync(p,'utf8'));
-          x.version=60;x.label='6.0';x.semanticVersion='6.0';x.build='2026.08.31.standalone.2';x.updatedAt='2026-08-31T09:55:00+09:00';x.note='v6.0 독립 운영본 · interaction/회원조작/헤더/로그아웃 중복 통합';
+          x.version=60;x.label='6.0';x.semanticVersion='6.0';x.build='2026.08.31.standalone.3';x.updatedAt='2026-08-31T10:12:00+09:00';x.note='v6.0 독립 운영본 · 가입모임 전환 · 역할배지 · 회원명부 출석/파트너/급수색상/재진입 안정화';
           fs.writeFileSync(p,JSON.stringify(x,null,2)+'\n');
-          fs.writeFileSync('v6-cleanup-report.json',JSON.stringify({version:'6.0',removed:['app-v5.4-fix23.js interaction overlap','app-v5.4-fix24.js interaction overlap','app-v5.4-fix26.js interaction overlap','legacy duplicated runtime header/logout nodes','empty loader-only migrated sections'],replacement:'single v6.0 canonical interaction core with member controls and canonical header/logout ownership',qa:['javascript syntax','no legacy app dynamic loads','auth state preserved without legacy logout','iPhone 13 Kakao WebKit attendance/edit/pagination/group switch','no legacy app asset requests']},null,2)+'\n');
+          fs.writeFileSync('v6-cleanup-report.json',JSON.stringify({version:'6.0',build:'2026.08.31.standalone.3',removed:['legacy fix22 roster finalizer','app-v5.4-fix23.js interaction overlap','app-v5.4-fix24.js interaction overlap','app-v5.4-fix26.js interaction overlap','legacy duplicated runtime header/logout nodes'],replacement:'single v6.0 canonical interaction/member-controls/header/roster ownership',features:['joined-group selector for multi-membership users','role badges: 개발자/모임장/운영진/일반','remove roster pair-history action','current-month attendance + partner setting row','four-character member name lane','grade-matched pastel roster cards','member roster re-entry repair'],qa:['javascript syntax','no legacy app dynamic loads','auth state preserved','iPhone 13 Kakao attendance/edit/pagination/group switch','roster labels/attendance/partner/pastel/name/re-entry','no legacy app asset requests']},null,2)+'\n');
           NODE
-      - name: Commit pruned v6 runtime
+      - name: Commit canonical v6 runtime
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add app-v6.0.js latest-version.json v6-cleanup-report.json
-          git commit -m "Prune duplicate v6 interaction patches [skip ci]" || exit 0
+          git add app-v6.0.js app-v6.0.css latest-version.json v6-cleanup-report.json
+          git commit -m "Canonicalize v6 roster and group switching [skip ci]" || exit 0
           git pull --rebase origin main
           git push
