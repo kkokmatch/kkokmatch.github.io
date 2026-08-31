@@ -33,6 +33,14 @@ jobs:
           grep -q 'function repairMemberControlsV6' app-v6.0.js
           ! grep -F ".src='/app-v" app-v6.0.js
           ! grep -F '.src="/app-v' app-v6.0.js
+      - name: Trace logout source locations
+        run: |
+          echo '--- LINE COUNT ---'
+          wc -l app-v6.0.js
+          echo '--- logout() declarations/calls ---'
+          grep -n -E 'logout\(\)|=>logout\(\)|logout[0-9]+' app-v6.0.js | head -80 || true
+          echo '--- around browser stack logout line ---'
+          nl -ba app-v6.0.js | sed -n '6438,6468p;10348,10375p' || true
       - name: Install WebKit QA
         run: |
           npm install --no-save playwright@1.55.0
