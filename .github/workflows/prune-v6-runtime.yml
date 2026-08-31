@@ -60,7 +60,20 @@ jobs:
       - name: Trace v6 auth state
         run: node .github/tests/qa-v6-auth-reset-diag.mjs
       - name: Run v6 iPhone Kakao direct-touch QA
-        run: node .github/tests/qa-v26-direct-touch.mjs
+        run: |
+          set +e
+          node .github/tests/qa-v26-direct-touch.mjs > qa-direct-touch.log 2>&1
+          code=$?
+          cat qa-direct-touch.log
+          exit $code
+      - name: Upload direct-touch diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: v6-direct-touch-diagnostics
+          path: qa-direct-touch.log
+          if-no-files-found: warn
+          retention-days: 2
       - name: Run v6 roster feature QA
         run: node .github/tests/qa-v6-roster-features.mjs
       - name: Update cleanup metadata
