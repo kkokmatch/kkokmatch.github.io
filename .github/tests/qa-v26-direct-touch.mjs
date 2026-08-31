@@ -16,8 +16,10 @@ async function tapFresh(factory,label){let last;for(let i=0;i<12;i++){try{const 
 await page.goto('http://127.0.0.1:4173/?qa=v6standalone',{waitUntil:'domcontentloaded'});
 await page.waitForFunction(()=>window.__kokmatchStandalone==='6.0'&&window.__kokmatchInteractionCore==='6.0'&&window.__kokmatchRosterCanonical==='22.3');
 await page.waitForFunction(()=>document.querySelectorAll('#members .memberCard').length===10);
+await page.waitForTimeout(500);
+console.log('V6 MEMBER DIAG',JSON.stringify(await page.evaluate(()=>({me:window.me||null,currentGroupId:window.currentGroupId||'',canManage:typeof canManageMembers==='function'?canManageMembers():null,cards:[...document.querySelectorAll('#members .memberCard')].map(c=>({id22:c.dataset.memberId22,id46:c.dataset.memberId46,text:(c.textContent||'').trim().slice(0,180),buttons:[...c.querySelectorAll('button')].map(b=>({text:(b.textContent||'').trim(),cls:b.className,display:getComputedStyle(b).display,visibility:getComputedStyle(b).visibility}))}))}))));
 await page.evaluate(()=>{window.openEditMember=()=>{throw new Error('legacy edit must not run')};window.setOther=()=>{throw new Error('legacy setOther must not run')};window.openGroupSwitch23=()=>{throw new Error('legacy group23 must not run')};window.openGroupSwitch=()=>{throw new Error('legacy group must not run')}});
-await page.waitForTimeout(600);
+await page.waitForTimeout(300);
 await tapFresh(()=>page.locator('#members .memberCard[data-member-id22="m1"] .btn.enter'),'attendance-first');
 await page.waitForTimeout(600);if(!actionBodies.some(x=>x.action==='set_member_attendance'&&x.memberId==='m1'&&x.mode==='waiting'))throw new Error('direct attendance missing '+JSON.stringify(actionBodies));console.log('PASS V6 attendance');
 await tapFresh(()=>page.locator('#members .memberCard[data-member-id22="m1"] button').filter({hasText:'수정'}),'edit');
