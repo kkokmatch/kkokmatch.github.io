@@ -24,7 +24,7 @@ const infoFn=[
 " info.querySelectorAll('.gamecnt,.recordBtn73,.pairBtn,.memberAttendance71').forEach(x=>x.remove());",
 " const meta=info.querySelector(':scope > .meta')||info.querySelector('.meta');if(meta){meta.classList.add('memberMetaV6');meta.innerHTML=e22(m.year||'')+'년생 · '+e22(m.gender||'')}",
 " info.querySelectorAll('.memberRecordActions73,.memberRosterFooterV6').forEach(x=>x.remove());",
-" const footer=document.createElement('div');footer.className='memberRosterFooterV6';footer.innerHTML=\"<span class='memberAttendanceV6'>\"+monthLabel22()+' 출석 '+attendanceCount22(m)+\"회</span>\"+(canPartner22(m)?\"<button type='button' class='pairBtn partnerSetBtn66 rosterPartnerBtnV6'>파트너 설정</button>\":'');info.appendChild(footer);",
+" const footer=document.createElement('div');footer.className='memberRosterFooterV6';footer.innerHTML=\"<span class='memberAttendanceV6'>\"+monthLabel22()+' 출석 '+attendanceCount22(m)+\"회</span>\"+(canPartner22(m)?\"<button type='button' class='partnerSetBtn66 rosterPartnerBtnV6'>파트너 설정</button>\":'');info.appendChild(footer);",
 " card.dataset.gradeV6=String(m?.cls||'C').trim().toUpperCase();card.dataset.memberId22=String(m?.id||'');card.dataset.memberId=String(m?.id||'');card.querySelectorAll('.v54genderText,.genderMark53').forEach(x=>x.remove());",
 "}"
 ].join('\n');
