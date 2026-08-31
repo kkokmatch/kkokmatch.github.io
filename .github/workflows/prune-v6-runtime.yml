@@ -5,6 +5,7 @@ on:
     paths:
       - 'scripts/prune-v6-runtime.mjs'
       - 'scripts/v6-canonical-member-controls.mjs'
+      - 'scripts/v6-canonical-header.mjs'
       - '.github/tests/qa-v26-direct-touch.mjs'
       - '.github/tests/qa-v6-auth-reset-diag.mjs'
       - '.github/workflows/prune-v6-runtime.yml'
@@ -23,6 +24,7 @@ jobs:
         run: |
           node scripts/prune-v6-runtime.mjs
           node scripts/v6-canonical-member-controls.mjs
+          node scripts/v6-canonical-header.mjs
       - name: Validate standalone source
         run: |
           node --check app-v6.0.js
@@ -31,6 +33,8 @@ jobs:
           ! grep -q 'migrated into v6.0: app-v5.4-fix26.js' app-v6.0.js
           grep -q "__kokmatchInteractionCore='6.0'" app-v6.0.js
           grep -q 'function repairMemberControlsV6' app-v6.0.js
+          grep -q 'function normalizeHeaderV6' app-v6.0.js
+          grep -q '구형 로그아웃 호출 차단' app-v6.0.js
           ! grep -F ".src='/app-v" app-v6.0.js
           ! grep -F '.src="/app-v' app-v6.0.js
       - name: Trace logout source locations
@@ -39,8 +43,6 @@ jobs:
           wc -l app-v6.0.js
           echo '--- logout() declarations/calls ---'
           grep -n -E 'logout\(\)|=>logout\(\)|logout[0-9]+' app-v6.0.js | head -80 || true
-          echo '--- around browser stack logout line ---'
-          nl -ba app-v6.0.js | sed -n '6438,6468p;10348,10375p' || true
       - name: Install WebKit QA
         run: |
           npm install --no-save playwright@1.55.0
@@ -56,9 +58,9 @@ jobs:
           node - <<'NODE'
           const fs=require('fs');
           const p='latest-version.json';const x=JSON.parse(fs.readFileSync(p,'utf8'));
-          x.version=60;x.label='6.0';x.semanticVersion='6.0';x.build='2026.08.31.standalone.2';x.updatedAt='2026-08-31T09:45:00+09:00';x.note='v6.0 독립 운영본 · 중복 interaction/회원조작 보정 통합';
+          x.version=60;x.label='6.0';x.semanticVersion='6.0';x.build='2026.08.31.standalone.2';x.updatedAt='2026-08-31T09:55:00+09:00';x.note='v6.0 독립 운영본 · interaction/회원조작/헤더/로그아웃 중복 통합';
           fs.writeFileSync(p,JSON.stringify(x,null,2)+'\n');
-          fs.writeFileSync('v6-cleanup-report.json',JSON.stringify({version:'6.0',removed:['app-v5.4-fix23.js interaction overlap','app-v5.4-fix24.js interaction overlap','app-v5.4-fix26.js interaction overlap','empty loader-only migrated sections'],replacement:'single v6.0 canonical interaction core including member action controls',qa:['javascript syntax','no legacy app dynamic loads','iPhone 13 Kakao WebKit attendance/edit/pagination/group switch','no legacy app asset requests']},null,2)+'\n');
+          fs.writeFileSync('v6-cleanup-report.json',JSON.stringify({version:'6.0',removed:['app-v5.4-fix23.js interaction overlap','app-v5.4-fix24.js interaction overlap','app-v5.4-fix26.js interaction overlap','legacy duplicated runtime header/logout nodes','empty loader-only migrated sections'],replacement:'single v6.0 canonical interaction core with member controls and canonical header/logout ownership',qa:['javascript syntax','no legacy app dynamic loads','auth state preserved without legacy logout','iPhone 13 Kakao WebKit attendance/edit/pagination/group switch','no legacy app asset requests']},null,2)+'\n');
           NODE
       - name: Commit pruned v6 runtime
         run: |
