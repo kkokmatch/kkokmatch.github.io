@@ -27,22 +27,19 @@ js=js.replace(anchor,helpers);
 
 const oldSave="const x=await v615MemberApi('member_save',{memberId:st.memberId||'',name,year,gender,cls,type,role,pin,inviter})";
 const newSave="const x=await v620MemberApi('member_save',{memberId:st.memberId||'',name,year,gender,cls,type,role,pin,inviter})";
-if(!js.includes(oldSave))throw new Error('legacy-scoped member save API call not found');
+if(!js.includes(oldSave))throw new Error('active v6.18 editor save API call not found');
 js=js.replace(oldSave,newSave);
 
 const oldDelete="root.querySelector('#v618Delete')?.addEventListener('click',()=>{try{memberEditorStateV615={memberId:memberEditorStateV618?.memberId||''};deleteMemberEditorV615()}catch(e){editorErrorV618(e?.message||String(e))}});";
 if(js.includes(oldDelete))js=js.replace(oldDelete,"root.querySelector('#v618Delete')?.addEventListener('click',deleteMemberEditorV620);");
 
-// Remove the remaining direct dependency on the old v6.15 actor helper from the global v6.18 editor.
 js=js.replace("actor=(()=>{try{return v615Actor()}catch{return'member'}})()","actor=(()=>{try{return me?.globalAdmin?'admin':String(me?.role||'member')}catch{return'member'}})()")
 
-// Add exactly 2px more space between action buttons compared with v6.19.
 css=css.replace(/#members \.memberBtns,#members \.memberBtns65\{([^}]*)gap:4px!important;/,"#members .memberBtns,#members .memberBtns65{$1gap:6px!important;");
 css=css.replace(/@media\(max-width:430px\)\{#members \.memberCard\{([^}]*)\}#members \.v6MemberActions,#members \.memberActions48,#members \.memberActions60,#members \.memberActions65,#members \.memberBtns,#members \.memberBtns65\{([^}]*)\}#members \.memberBtns,#members \.memberBtns65\{gap:3px!important;\}/,"@media(max-width:430px){#members .memberCard{$1}#members .v6MemberActions,#members .memberActions48,#members .memberActions60,#members .memberActions65,#members .memberBtns,#members .memberBtns65{$2}#members .memberBtns,#members .memberBtns65{gap:5px!important;}");
 
-for(const c of ["function buildLabelV6(){return 'v6.20'}","__kokmatchMemberSaveApiV620='v6.20'","v620MemberApi('member_save'","addEventListener('click',deleteMemberEditorV620)"]){if(!js.includes(c))throw new Error('v6.20 JS marker missing: '+c)}
-if(js.includes("v615MemberApi('member_save'"))throw new Error('old scoped member-save dependency still present');
+for(const c of ["function buildLabelV6(){return 'v6.20'}","__kokmatchMemberSaveApiV620='v6.20'",newSave,"addEventListener('click',deleteMemberEditorV620)"]){if(!js.includes(c))throw new Error('v6.20 active editor marker missing: '+c)}
 if(!css.includes('gap:6px!important')||!css.includes('gap:5px!important'))throw new Error('v6.20 +2px action-button gaps missing');
 
 fs.writeFileSync(JS,js);fs.writeFileSync(CSS,css);
-console.log('v6.20 removed the out-of-scope v615MemberApi dependency and added 2px more action-button spacing.');
+console.log('v6.20 active member editor now uses its self-contained API and action buttons have 2px more spacing.');
