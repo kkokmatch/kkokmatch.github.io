@@ -1,23 +1,21 @@
 {
-  "version": "6.15",
-  "build": "v6.15",
+  "version": "6.16",
+  "build": "v6.16",
   "features": [
-    "partner name text removed from roster cards while partner setting button remains",
-    "legacy global touch router excluded from roster cards and dedicated overlays",
-    "single pointer router handles roster attendance, edit and partner actions",
-    "member editor uses unique native select/input controls for gender, grade, type, role and PIN",
-    "member save sends all edited fields to kokmatch-v60-api",
-    "optimistic attendance paints the target card immediately",
-    "UI sync reduced from repeated microtask/rAF/timer passes to one rAF pass",
-    "short visible version label v6.15"
+    "partner name is suppressed without deleting member-card DOM nodes",
+    "partner relation renderers no longer create visible partner-name rows",
+    "member action column is locked independently from member information height",
+    "entry, spectator, exit and edit buttons use a stable two-column action grid",
+    "name-to-birth/gender gap restored to 4px",
+    "single v6.15 pointer router remains the only roster action router",
+    "short visible version label v6.16"
   ],
   "validation": [
     "javascript syntax",
     "no automatic /refresh/vXX navigation",
-    "single v6.15 member pointer router marker",
-    "legacy router exclusion marker",
-    "v6.15 native editor marker",
-    "partner-name stripping marker",
+    "v6.16 partner display filter marker",
+    "4px member meta spacing",
+    "stable action-grid CSS marker",
     "fresh-entry bootstrap marker"
   ],
   "functionalQaPolicy": "functional/browser/device QA omitted from deployment gate per operator request"
