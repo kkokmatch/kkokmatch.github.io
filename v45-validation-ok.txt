@@ -1,1 +1,1 @@
-v45 syntax, member nowrap and guest inviter validation passed
+v45 module syntax, current-shell wiring, member nowrap and guest inviter validation passed
