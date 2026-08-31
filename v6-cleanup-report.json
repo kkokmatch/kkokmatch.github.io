@@ -1,8 +1,10 @@
 {
   "version": "6.0",
-  "build": "2026.08.31.standalone.9",
-  "rootCauseFixed": "legacy member cards had no member id, so canonical roster finalizer skipped every card",
+  "build": "2026.08.31.standalone.10",
   "features": [
+    "header shows current standalone build left of refresh/logout",
+    "header latest-refresh clears Cache API and unregisters service workers",
+    "header latest-refresh always redirects to https://kkokmatch.github.io/ with a fresh nonce",
     "role badges: 개발자/모임장/운영진/일반",
     "remove roster together-game action and total-game badge",
     "current-month attendance + partner setting row",
@@ -13,6 +15,9 @@
   ],
   "validation": [
     "javascript syntax",
+    "visible build label source present",
+    "canonical latest-refresh source present",
+    "canonical official URL present",
     "member card id stamped at render time",
     "canonical roster index fallback mapping present",
     "standalone-source ownership",
