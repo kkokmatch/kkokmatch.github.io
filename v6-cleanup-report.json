@@ -1,6 +1,7 @@
 {
   "version": "6.0",
-  "build": "2026.08.31.standalone.8",
+  "build": "2026.08.31.standalone.9",
+  "rootCauseFixed": "legacy member cards had no member id, so canonical roster finalizer skipped every card",
   "features": [
     "role badges: 개발자/모임장/운영진/일반",
     "remove roster together-game action and total-game badge",
@@ -8,13 +9,13 @@
     "four-character member name lane",
     "grade-matched pastel roster cards",
     "member roster re-entry forces full roster refresh",
-    "Kakao/iOS fresh-entry bootstrap with unique navigation and asset nonce",
-    "BFCache/background restore forces a fresh entry"
+    "Kakao/iOS fresh-entry bootstrap with unique navigation and asset nonce"
   ],
   "validation": [
     "javascript syntax",
+    "member card id stamped at render time",
+    "canonical roster index fallback mapping present",
     "standalone-source ownership",
-    "no legacy role terminology",
     "fresh-entry bootstrap marker"
   ],
   "functionalQaPolicy": "functional/browser/device QA omitted from deployment gate per operator request"

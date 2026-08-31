@@ -51,7 +51,7 @@ async function act(action,body={},opts={}){try{const x=await request('action','P
 function renderAll(){if(!me)return;renderHeader();renderNav();renderMembers();renderQueue();renderPlaying();renderStats();renderSettings();if(canManageGroups()&&currentView==='groups')renderGroups();document.querySelectorAll('.view').forEach(v=>v.classList.toggle('on',v.id===currentView));document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',b.dataset.v===currentView))}
 function renderHeader(){const mine=me.memberId?M(me.memberId):null;$('groupBtn').textContent=(group?.name||'모임')+(me.globalAdmin?' ▾':'');$('groupBtn').disabled=!me.globalAdmin;$('who').textContent=`${me.displayName} · ${roleLabel(me.role)}${me.tempOrganizer?' · 임시편성자':''}${mine?' · '+stateLabel(mine.state):''}`;$('sm').textContent=S.members.filter(m=>m.state!=='out').length;$('sw').textContent=S.queue.length+S.pendingGames.reduce((n,g)=>n+g.players.length,0);$('sg').textContent=S.games.length}
 function memberControls(m){if(!canManageMembers())return `<div class="status">${stateLabel(m.state)}</div>`;const r=roleOf(m);let editable=me.globalAdmin||(me.role==='manager'?(r!=='manager'||m.id===me.memberId):r==='member');let bs='';if(m.state!=='playing'&&m.state!=='matched'){if(m.state!=='waiting')bs+=`<button class="btn enter" onclick="setOther('${m.id}','waiting')">운동</button>`;if(m.state!=='spectator')bs+=`<button class="btn watch" onclick="setOther('${m.id}','spectator')">관람</button>`;if(m.state!=='out')bs+=`<button class="btn danger" onclick="setOther('${m.id}','out')">퇴장</button>`}if(editable)bs+=`<button class="btn ghost" onclick="openEditMember('${m.id}')">수정</button>`;return `<div><div class="status">${stateLabel(m.state)}</div><div class="memberBtns">${bs}</div></div>`}
-function renderMembers(){const note=me.globalAdmin?'개발자는 현재 모임의 모든 인원과 역할을 관리할 수 있습니다.':me.role==='manager'?'모임장는 일반 관리와 운영진 지정·해제가 가능합니다.':me.role==='organizer'?'운영진는 소속 모임의 일반/게스트를 등록·수정·삭제할 수 있습니다.':'회원정보와 현재 참가상태를 확인할 수 있습니다.';$('members').innerHTML=`<div class="title"><h2>회원명부</h2>${canManageMembers()?'<button class="btn pri" onclick="openAddMember()">+ 회원등록</button>':''}</div><div class="note">${note}</div><div>${S.members.map(m=>`<div class="card memberCard">${avatar(m)}<div><div class="name">${esc(m.name)} ${ageTag(m)} ${typeBadge(m)} <span class="gamecnt">총 게임 ${Number(m.totalGames)||0}회</span> ${roleBadge(m)}</div><div class="meta">${esc(m.year||'')}년생 · ${esc(m.gender||'')}</div><button class="pairBtn" onclick="openPairs('${m.id}')">같이한 경기 보기</button></div>${memberControls(m)}</div>`).join('')||'<div class="empty">등록된 회원이 없습니다.</div>'}</div>`}
+function renderMembers(){const note=me.globalAdmin?'개발자는 현재 모임의 모든 인원과 역할을 관리할 수 있습니다.':me.role==='manager'?'모임장는 일반 관리와 운영진 지정·해제가 가능합니다.':me.role==='organizer'?'운영진는 소속 모임의 일반/게스트를 등록·수정·삭제할 수 있습니다.':'회원정보와 현재 참가상태를 확인할 수 있습니다.';$('members').innerHTML=`<div class="title"><h2>회원명부</h2>${canManageMembers()?'<button class="btn pri" onclick="openAddMember()">+ 회원등록</button>':''}</div><div class="note">${note}</div><div>${S.members.map(m=>`<div class="card memberCard" data-member-id22="${esc(m.id)}">${avatar(m)}<div><div class="name">${esc(m.name)} ${ageTag(m)} ${typeBadge(m)} <span class="gamecnt">총 게임 ${Number(m.totalGames)||0}회</span> ${roleBadge(m)}</div><div class="meta">${esc(m.year||'')}년생 · ${esc(m.gender||'')}</div><button class="pairBtn" onclick="openPairs('${m.id}')">같이한 경기 보기</button></div>${memberControls(m)}</div>`).join('')||'<div class="empty">등록된 회원이 없습니다.</div>'}</div>`}
 function openAddMember(){editMemberId=null;openMemberModal(null)}
 function openEditMember(id){const m=M(id);if(!m)return;editMemberId=id;openMemberModal(m)}
 function openMemberModal(m){const add=!m;const role=roleOf(m);const roleOptions=me.globalAdmin?['member','organizer','manager']:me.role==='manager'?['member','organizer']:[];openModal(`<h3>${add?'회원등록':'회원 정보 수정'}</h3><div class="note">${add?'출생연도를 입력하면 연령대가 자동 설정됩니다.':'회원정보와 권한을 수정합니다.'}</div><div class="field"><label>이름</label><input id="fmName" value="${esc(m?.name||'')}"></div><div class="grid2"><div class="field"><label>출생연도</label><input id="fmYear" type="number" inputmode="numeric" value="${esc(m?.year||'')}"></div><div class="field"><label>성별</label><select id="fmGender"><option ${m?.gender!=='여'?'selected':''}>남</option><option ${m?.gender==='여'?'selected':''}>여</option></select></div><div class="field"><label>연령대</label><select id="fmAge">${[20,30,40,50,60,70].map(a=>`<option value="${a}" ${String(m?.age||'30')===String(a)?'selected':''}>${a}대</option>`).join('')}</select></div><div class="field"><label>급수</label><select id="fmCls">${['A','B','C','D','E'].map(c=>`<option ${String(m?.cls||'C')===c?'selected':''}>${c}</option>`).join('')}</select></div></div><div class="field"><label>구분</label><select id="fmType"><option value="member" ${m?.type!=='guest'?'selected':''}>일반</option><option value="guest" ${m?.type==='guest'?'selected':''}>게스트</option></select></div>${!add&&roleOptions.length?`<div class="field"><label>역할</label><select id="fmRole" onchange="syncRolePinField()">${roleOptions.map(r=>`<option value="${r}" ${role===r?'selected':''}>${roleLabel(r)}</option>`).join('')}</select></div><div id="fmPinWrap" class="field ${role==='member'?'hide':''}"><label>새 역할 PIN (변경 시 숫자 4~8자리)</label><input id="fmPin" type="password" inputmode="numeric" placeholder="기존 PIN 유지 시 비움"></div>`:''}<div class="acts">${!add?'<button class="btn danger" onclick="deleteMemberNow()">삭제</button>':''}<button class="btn ghost" onclick="closeModal()">취소</button><button class="btn pri" onclick="saveMemberNow()">${add?'등록':'저장'}</button></div>`);setTimeout(()=>{const y=$('fmYear');if(y)y.addEventListener('input',()=>{const year=Number(y.value);if(year>1900){const age=Math.max(10,Math.floor((new Date().getFullYear()-year)/10)*10);$('fmAge').value=String(Math.min(70,age))}})},0)}
@@ -6717,8 +6717,8 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 if(window.__kokmatchV54Fix22)return;
 window.__kokmatchV54Fix22=true;
 window.__kokmatchRosterCanonical='22.3';
-window.__kokmatchRosterCanonicalV6='6.0.3';
-document.documentElement.dataset.kokmatchRoster='6.0.3';
+window.__kokmatchRosterCanonicalV6='6.0.4';
+document.documentElement.dataset.kokmatchRoster='6.0.4';
 
 function e22(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function jsId22(id){return String(id||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'")}
@@ -6787,6 +6787,10 @@ function businessMonth22(){const d=new Date();return new Intl.DateTimeFormat('en
 function monthLabel22(){return Number(businessMonth22().slice(5,7))+'월'}
 function attendanceCount22(m){const k=businessMonth22(),h=m?.attendanceHistory&&typeof m.attendanceHistory==='object'&&!Array.isArray(m.attendanceHistory)?m.attendanceHistory:null;if(h&&h[k]!=null)return Math.max(0,Number(h[k])||0);return String(m?.attendanceMonth||'')===k?Math.max(0,Number(m?.attendanceCount)||0):0}
 function canPartner22(m){return !!m&&!!me&&(String(me.memberId||'')===String(m.id)||me.globalAdmin||me.role==='manager'||me.role==='organizer')}
+function businessMonth22(){const d=new Date();return new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Seoul',year:'numeric',month:'2-digit'}).format(d)}
+function monthLabel22(){return Number(businessMonth22().slice(5,7))+'월'}
+function attendanceCount22(m){const k=businessMonth22(),h=m?.attendanceHistory&&typeof m.attendanceHistory==='object'&&!Array.isArray(m.attendanceHistory)?m.attendanceHistory:null;if(h&&h[k]!=null)return Math.max(0,Number(h[k])||0);return String(m?.attendanceMonth||'')===k?Math.max(0,Number(m?.attendanceCount)||0):0}
+function canPartner22(m){return !!m&&!!me&&(String(me.memberId||'')===String(m.id)||me.globalAdmin||me.role==='manager'||me.role==='organizer')}
 function patchVisibleInfo22(card,m){
  const info=card.querySelector('.memberInfo48')||card.children?.[1];if(!info)return;info.classList.add('memberInfoV6');
  const line=info.querySelector('.memberMainLine45')||info.querySelector('.name');if(line){line.classList.add('memberMainLine45');line.innerHTML="<span class='memberName45'>"+e22(m.name)+"</span>"+grade22(m)+roleBadge22(m)}
@@ -6800,8 +6804,10 @@ function patchVisibleInfo22(card,m){
 function finalizeRoster22(){
  const box=document.getElementById('members');if(!box)return;
  const cards=[...box.querySelectorAll('.memberCard')],seen=[];
- cards.forEach(card=>{
-  const id=String(card.dataset.memberId46||card.dataset.memberId22||'');const m=getMember22(id);if(!m)return;
+ cards.forEach((card,index)=>{
+  let id=String(card.dataset.memberId46||card.dataset.memberId22||card.dataset.memberId||'');let m=id?getMember22(id):null;
+  if(!m&&Array.isArray(S?.members)){m=S.members[index]||null;id=String(m?.id||'')}
+  if(!m||!id)return;
   seen.push(id);
   card.dataset.memberId22=id;card.dataset.gender22=String(m.gender||'');card.dataset.grade22=String(m.cls||'');card.dataset.role22=String(m.role||'member');
   patchVisibleInfo22(card,m);replaceAvatar22(card,m);replaceControls22(card,m);patchActions22(card,m);
@@ -6830,6 +6836,8 @@ if(typeof originalSearch22==='function')window.searchMembers46=function(v){const
 
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(finalizeRoster22,0),{once:true});else setTimeout(finalizeRoster22,0);
 })();
+
+
 
 
 
