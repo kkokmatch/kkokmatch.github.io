@@ -17,7 +17,7 @@ function emptyClientState(){return{courtCount:8,courtNames:[],members:[],queue:[
 function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function todayKst(){return new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Seoul',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date())}
 function roleOf(m){const r=String(m?.role||'member');return r==='manager'||r==='organizer'?r:r==='admin'?'admin':'member'}
-function roleLabel(r){return r==='admin'?'총관리자':r==='manager'?'모임관리자':r==='organizer'?'게임편성자':'일반회원'}
+function roleLabel(r){return r==='admin'?'개발자':r==='manager'?'모임장':r==='organizer'?'운영진':'일반'}
 function stateLabel(s){return s==='waiting'?'게임대기':s==='matched'?'편성대기':s==='playing'?'게임중':s==='spectator'?'관람':'미입장'}
 function isTemp(m){return !!m&&roleOf(m)==='member'&&m.type!=='guest'&&m.state!=='out'&&String(m.tempOrganizerDay||'')===todayKst()}
 function canGame(){return !!me&&(me.globalAdmin||me.role==='manager'||me.role==='organizer'||me.tempOrganizer)}
@@ -25,7 +25,7 @@ function canManageMembers(){return !!me&&(me.globalAdmin||me.role==='manager'||m
 function canSetRoles(){return !!me&&(me.globalAdmin||me.role==='manager')}
 function canReset(){return !!me&&(me.globalAdmin||me.role==='manager')}
 function canManageGroups(){return !!me?.globalAdmin}
-function roleBadge(m){let r=roleOf(m);if(r==='admin'||(me?.globalAdmin&&m?.name===me.displayName))return '<span class="roleBadge role-global">총관리자</span>';if(r==='manager')return '<span class="roleBadge role-manager">모임관리자</span>';if(r==='organizer')return '<span class="roleBadge role-organizer">게임편성자</span>';if(isTemp(m))return '<span class="roleBadge role-temp">임시편성자</span>';return ''}
+function roleBadge(m){let r=roleOf(m);if(r==='admin'||(me?.globalAdmin&&m?.name===me.displayName))return '<span class="roleBadge role-global">개발자</span>';if(r==='manager')return '<span class="roleBadge role-manager">모임장</span>';if(r==='organizer')return '<span class="roleBadge role-organizer">운영진</span>';if(isTemp(m))return '<span class="roleBadge role-temp">임시편성자</span>';return ''}
 function typeBadge(m){return m?.type==='guest'?'<span class="roleBadge guest">GUEST</span>':''}
 function ageTag(m){return '<span class="tag">'+esc(m?.age||'30')+esc(m?.cls||'C')+'</span>'}
 function dailyCount(id){return S.history.filter(h=>Array.isArray(h.players)&&h.players.includes(id)).length}
@@ -42,7 +42,7 @@ function closeModal(){$('modal').classList.remove('on');$('modalSheet').innerHTM
 function showError(e){alert(e?.message||String(e||'오류가 발생했습니다.'))}
 async function reloginLatest(){if(reloginBusy)return;reloginBusy=true;localStorage.removeItem(TOKEN_KEY);T='';try{if('caches'in window){const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)))}if('serviceWorker'in navigator){const rs=await navigator.serviceWorker.getRegistrations();await Promise.all(rs.map(r=>r.unregister().catch(()=>{})))}}catch{}location.replace('/?relogin='+Date.now())}
 async function request(apiName,method='GET',body=null,params={}){const u=new URL(API);u.searchParams.set('api',apiName);Object.entries(params).forEach(([k,v])=>{if(v)u.searchParams.set(k,v)});const r=await fetch(u,{method,headers:{'content-type':'application/json',...(T?{authorization:'Bearer '+T}:{})},body:body?JSON.stringify(body):undefined,cache:'no-store'});const x=await r.json().catch(()=>({error:'통신 오류'}));if(!r.ok){if(r.status===401&&apiName!=='login'&&apiName!=='login_probe'){reloginLatest();throw new Error('로그인이 만료되었습니다.')}const e=new Error(x.error||'오류가 발생했습니다.');e.payload=x;throw e}return x}
-function renderLoginName(){$('loginBox').innerHTML=`<h1>🏸 콕매치</h1><div class="meta" style="font-size:14px;margin-bottom:18px">모임 회원 로그인</div><div class="field"><label>등록된 이름</label><input id="loginName" autocomplete="username" placeholder="이름"></div><button class="btn pri" style="width:100%" onclick="startLogin()">다음</button><div id="loginErr" class="error"></div><div class="note" style="margin-top:12px">일반회원은 <b>소속 모임 PIN</b>, 모임관리자·게임편성자는 <b>본인 역할 PIN</b>으로 로그인합니다.</div>`;setTimeout(()=>$('loginName')?.focus(),50)}
+function renderLoginName(){$('loginBox').innerHTML=`<h1>🏸 콕매치</h1><div class="meta" style="font-size:14px;margin-bottom:18px">모임 회원 로그인</div><div class="field"><label>등록된 이름</label><input id="loginName" autocomplete="username" placeholder="이름"></div><button class="btn pri" style="width:100%" onclick="startLogin()">다음</button><div id="loginErr" class="error"></div><div class="note" style="margin-top:12px">일반은 <b>소속 모임 PIN</b>, 모임장·운영진는 <b>본인 역할 PIN</b>으로 로그인합니다.</div>`;setTimeout(()=>$('loginName')?.focus(),50)}
 async function startLogin(){const name=$('loginName').value.trim();$('loginErr').textContent='';if(!name)return $('loginErr').textContent='이름을 입력해주세요.';try{const x=await request('login_probe','POST',{name});pendingLoginName=name;$('loginBox').innerHTML=`<h2>${esc(x.roleLabel||'PIN')} 인증</h2><div class="authName">${esc(name)}</div><div class="field"><label>PIN</label><input id="loginPin" type="password" inputmode="numeric" placeholder="PIN 입력"></div><button class="btn pri" style="width:100%" onclick="submitLogin()">로그인</button><div id="loginErr" class="error"></div><button class="btn ghost" style="width:100%;margin-top:8px" onclick="renderLoginName()">← 이름 다시 입력</button>`;setTimeout(()=>$('loginPin')?.focus(),50)}catch(e){$('loginErr').textContent=e.message}}
 async function submitLogin(groupId=''){const pin=$('loginPin')?.value.trim()||pendingLoginPin;if(!pin)return $('loginErr').textContent='PIN을 입력해주세요.';pendingLoginPin=pin;try{const x=await request('login','POST',{name:pendingLoginName,pin,groupId});if(x.groupChoiceRequired){$('loginBox').innerHTML=`<h2>모임 선택</h2><div class="authName">${esc(pendingLoginName)}</div><div class="note">같은 PIN으로 확인되는 모임이 여러 개입니다. 접속할 모임을 선택해주세요.</div><div class="choiceList">${x.choices.map(c=>`<button class="choiceBtn" onclick="submitLogin('${c.groupId}')"><b>${esc(c.groupName)}</b><span class="meta">${esc(c.roleLabel)}</span></button>`).join('')}</div><button class="btn ghost" style="width:100%;margin-top:9px" onclick="renderLoginName()">처음으로</button>`;return}T=x.token;localStorage.setItem(TOKEN_KEY,T);if(x.groupId){currentGroupId=x.groupId;localStorage.setItem(GROUP_KEY,currentGroupId)}$('login').classList.add('hide');pendingLoginPin='';await loadState();const mine=me.memberId?M(me.memberId):null;if(mine?.state==='out')openEntry()}catch(e){const el=$('loginErr');if(el)el.textContent=e.message;else alert(e.message)}}
 async function logout(){try{await request('logout','POST')}catch{}localStorage.removeItem(TOKEN_KEY);T='';location.replace('/')}
@@ -51,10 +51,10 @@ async function act(action,body={},opts={}){try{const x=await request('action','P
 function renderAll(){if(!me)return;renderHeader();renderNav();renderMembers();renderQueue();renderPlaying();renderStats();renderSettings();if(canManageGroups()&&currentView==='groups')renderGroups();document.querySelectorAll('.view').forEach(v=>v.classList.toggle('on',v.id===currentView));document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',b.dataset.v===currentView))}
 function renderHeader(){const mine=me.memberId?M(me.memberId):null;$('groupBtn').textContent=(group?.name||'모임')+(me.globalAdmin?' ▾':'');$('groupBtn').disabled=!me.globalAdmin;$('who').textContent=`${me.displayName} · ${roleLabel(me.role)}${me.tempOrganizer?' · 임시편성자':''}${mine?' · '+stateLabel(mine.state):''}`;$('sm').textContent=S.members.filter(m=>m.state!=='out').length;$('sw').textContent=S.queue.length+S.pendingGames.reduce((n,g)=>n+g.players.length,0);$('sg').textContent=S.games.length}
 function memberControls(m){if(!canManageMembers())return `<div class="status">${stateLabel(m.state)}</div>`;const r=roleOf(m);let editable=me.globalAdmin||(me.role==='manager'?(r!=='manager'||m.id===me.memberId):r==='member');let bs='';if(m.state!=='playing'&&m.state!=='matched'){if(m.state!=='waiting')bs+=`<button class="btn enter" onclick="setOther('${m.id}','waiting')">운동</button>`;if(m.state!=='spectator')bs+=`<button class="btn watch" onclick="setOther('${m.id}','spectator')">관람</button>`;if(m.state!=='out')bs+=`<button class="btn danger" onclick="setOther('${m.id}','out')">퇴장</button>`}if(editable)bs+=`<button class="btn ghost" onclick="openEditMember('${m.id}')">수정</button>`;return `<div><div class="status">${stateLabel(m.state)}</div><div class="memberBtns">${bs}</div></div>`}
-function renderMembers(){const note=me.globalAdmin?'총관리자는 현재 모임의 모든 인원과 역할을 관리할 수 있습니다.':me.role==='manager'?'모임관리자는 일반회원 관리와 게임편성자 지정·해제가 가능합니다.':me.role==='organizer'?'게임편성자는 소속 모임의 일반회원/게스트를 등록·수정·삭제할 수 있습니다.':'회원정보와 현재 참가상태를 확인할 수 있습니다.';$('members').innerHTML=`<div class="title"><h2>회원명부</h2>${canManageMembers()?'<button class="btn pri" onclick="openAddMember()">+ 회원등록</button>':''}</div><div class="note">${note}</div><div>${S.members.map(m=>`<div class="card memberCard">${avatar(m)}<div><div class="name">${esc(m.name)} ${ageTag(m)} ${typeBadge(m)} <span class="gamecnt">총 게임 ${Number(m.totalGames)||0}회</span> ${roleBadge(m)}</div><div class="meta">${esc(m.year||'')}년생 · ${esc(m.gender||'')}</div><button class="pairBtn" onclick="openPairs('${m.id}')">같이한 경기 보기</button></div>${memberControls(m)}</div>`).join('')||'<div class="empty">등록된 회원이 없습니다.</div>'}</div>`}
+function renderMembers(){const note=me.globalAdmin?'개발자는 현재 모임의 모든 인원과 역할을 관리할 수 있습니다.':me.role==='manager'?'모임장는 일반 관리와 운영진 지정·해제가 가능합니다.':me.role==='organizer'?'운영진는 소속 모임의 일반/게스트를 등록·수정·삭제할 수 있습니다.':'회원정보와 현재 참가상태를 확인할 수 있습니다.';$('members').innerHTML=`<div class="title"><h2>회원명부</h2>${canManageMembers()?'<button class="btn pri" onclick="openAddMember()">+ 회원등록</button>':''}</div><div class="note">${note}</div><div>${S.members.map(m=>`<div class="card memberCard">${avatar(m)}<div><div class="name">${esc(m.name)} ${ageTag(m)} ${typeBadge(m)} <span class="gamecnt">총 게임 ${Number(m.totalGames)||0}회</span> ${roleBadge(m)}</div><div class="meta">${esc(m.year||'')}년생 · ${esc(m.gender||'')}</div><button class="pairBtn" onclick="openPairs('${m.id}')">같이한 경기 보기</button></div>${memberControls(m)}</div>`).join('')||'<div class="empty">등록된 회원이 없습니다.</div>'}</div>`}
 function openAddMember(){editMemberId=null;openMemberModal(null)}
 function openEditMember(id){const m=M(id);if(!m)return;editMemberId=id;openMemberModal(m)}
-function openMemberModal(m){const add=!m;const role=roleOf(m);const roleOptions=me.globalAdmin?['member','organizer','manager']:me.role==='manager'?['member','organizer']:[];openModal(`<h3>${add?'회원등록':'회원 정보 수정'}</h3><div class="note">${add?'출생연도를 입력하면 연령대가 자동 설정됩니다.':'회원정보와 권한을 수정합니다.'}</div><div class="field"><label>이름</label><input id="fmName" value="${esc(m?.name||'')}"></div><div class="grid2"><div class="field"><label>출생연도</label><input id="fmYear" type="number" inputmode="numeric" value="${esc(m?.year||'')}"></div><div class="field"><label>성별</label><select id="fmGender"><option ${m?.gender!=='여'?'selected':''}>남</option><option ${m?.gender==='여'?'selected':''}>여</option></select></div><div class="field"><label>연령대</label><select id="fmAge">${[20,30,40,50,60,70].map(a=>`<option value="${a}" ${String(m?.age||'30')===String(a)?'selected':''}>${a}대</option>`).join('')}</select></div><div class="field"><label>급수</label><select id="fmCls">${['A','B','C','D','E'].map(c=>`<option ${String(m?.cls||'C')===c?'selected':''}>${c}</option>`).join('')}</select></div></div><div class="field"><label>구분</label><select id="fmType"><option value="member" ${m?.type!=='guest'?'selected':''}>일반회원</option><option value="guest" ${m?.type==='guest'?'selected':''}>게스트</option></select></div>${!add&&roleOptions.length?`<div class="field"><label>역할</label><select id="fmRole" onchange="syncRolePinField()">${roleOptions.map(r=>`<option value="${r}" ${role===r?'selected':''}>${roleLabel(r)}</option>`).join('')}</select></div><div id="fmPinWrap" class="field ${role==='member'?'hide':''}"><label>새 역할 PIN (변경 시 숫자 4~8자리)</label><input id="fmPin" type="password" inputmode="numeric" placeholder="기존 PIN 유지 시 비움"></div>`:''}<div class="acts">${!add?'<button class="btn danger" onclick="deleteMemberNow()">삭제</button>':''}<button class="btn ghost" onclick="closeModal()">취소</button><button class="btn pri" onclick="saveMemberNow()">${add?'등록':'저장'}</button></div>`);setTimeout(()=>{const y=$('fmYear');if(y)y.addEventListener('input',()=>{const year=Number(y.value);if(year>1900){const age=Math.max(10,Math.floor((new Date().getFullYear()-year)/10)*10);$('fmAge').value=String(Math.min(70,age))}})},0)}
+function openMemberModal(m){const add=!m;const role=roleOf(m);const roleOptions=me.globalAdmin?['member','organizer','manager']:me.role==='manager'?['member','organizer']:[];openModal(`<h3>${add?'회원등록':'회원 정보 수정'}</h3><div class="note">${add?'출생연도를 입력하면 연령대가 자동 설정됩니다.':'회원정보와 권한을 수정합니다.'}</div><div class="field"><label>이름</label><input id="fmName" value="${esc(m?.name||'')}"></div><div class="grid2"><div class="field"><label>출생연도</label><input id="fmYear" type="number" inputmode="numeric" value="${esc(m?.year||'')}"></div><div class="field"><label>성별</label><select id="fmGender"><option ${m?.gender!=='여'?'selected':''}>남</option><option ${m?.gender==='여'?'selected':''}>여</option></select></div><div class="field"><label>연령대</label><select id="fmAge">${[20,30,40,50,60,70].map(a=>`<option value="${a}" ${String(m?.age||'30')===String(a)?'selected':''}>${a}대</option>`).join('')}</select></div><div class="field"><label>급수</label><select id="fmCls">${['A','B','C','D','E'].map(c=>`<option ${String(m?.cls||'C')===c?'selected':''}>${c}</option>`).join('')}</select></div></div><div class="field"><label>구분</label><select id="fmType"><option value="member" ${m?.type!=='guest'?'selected':''}>일반</option><option value="guest" ${m?.type==='guest'?'selected':''}>게스트</option></select></div>${!add&&roleOptions.length?`<div class="field"><label>역할</label><select id="fmRole" onchange="syncRolePinField()">${roleOptions.map(r=>`<option value="${r}" ${role===r?'selected':''}>${roleLabel(r)}</option>`).join('')}</select></div><div id="fmPinWrap" class="field ${role==='member'?'hide':''}"><label>새 역할 PIN (변경 시 숫자 4~8자리)</label><input id="fmPin" type="password" inputmode="numeric" placeholder="기존 PIN 유지 시 비움"></div>`:''}<div class="acts">${!add?'<button class="btn danger" onclick="deleteMemberNow()">삭제</button>':''}<button class="btn ghost" onclick="closeModal()">취소</button><button class="btn pri" onclick="saveMemberNow()">${add?'등록':'저장'}</button></div>`);setTimeout(()=>{const y=$('fmYear');if(y)y.addEventListener('input',()=>{const year=Number(y.value);if(year>1900){const age=Math.max(10,Math.floor((new Date().getFullYear()-year)/10)*10);$('fmAge').value=String(Math.min(70,age))}})},0)}
 function syncRolePinField(){const r=$('fmRole')?.value;$('fmPinWrap')?.classList.toggle('hide',!r||r==='member')}
 async function saveMemberNow(){const body={name:$('fmName').value.trim(),year:Number($('fmYear').value),gender:$('fmGender').value,age:$('fmAge').value,cls:$('fmCls').value,type:$('fmType').value};if(!body.name)return alert('이름을 입력해주세요.');try{if(!editMemberId){await act('add_member',body);closeModal();return}const m=M(editMemberId),oldRole=roleOf(m);await act('edit_member',{memberId:editMemberId,...body});const nr=$('fmRole')?.value;if(nr&&nr!==oldRole){await act('set_role',{memberId:editMemberId,role:nr,pin:$('fmPin')?.value.trim()||''})}else if(nr&&nr!=='member'&&$('fmPin')?.value.trim()){await act('set_role',{memberId:editMemberId,role:nr,pin:$('fmPin').value.trim()})}closeModal()}catch(e){showError(e)}}
 async function deleteMemberNow(){const m=M(editMemberId);if(!m||!confirm(`${m.name} 회원을 삭제하시겠습니까?`))return;try{await act('delete_member',{memberId:editMemberId});closeModal()}catch(e){showError(e)}}
@@ -97,17 +97,17 @@ function renderPlaying(){let html='<div class="title"><h2>게임중</h2><span cl
 async function finishGameNow(id){if(!confirm('정말 이 경기를 종료하시겠습니까?'))return;try{await act('finish_game',{gameId:id});goView('queue')}catch(e){showError(e)}}
 function renderStats(){const mins=S.history.reduce((a,h)=>a+(Number(h.durationMin)||0),0),people=new Set(S.history.flatMap(h=>h.players||[])).size;$('stats').innerHTML=`<div class="title"><h2>오늘 통계</h2></div><div class="statsGrid"><div class="stat"><b>${S.history.length}</b>완료 게임</div><div class="stat"><b>${mins}분</b>플레이시간</div><div class="stat"><b>${people}</b>참여 인원</div></div><div class="card" style="margin-top:10px"><b>오늘 최근 경기</b>${S.history.length?S.history.slice().reverse().slice(0,20).map(h=>`<div class="historyRow"><b>${esc(h.courtName||courtLabel(h.court))}</b> ${(h.players||[]).map((id,i)=>esc(M(id)?.name||h.playerNames?.[i]||'삭제회원')).join(' · ')}<div class="meta">${h.durationMin||0}분${h.autoEnded?' · 자동종료':''}</div></div>`).join(''):'<div class="empty">완료된 게임이 없습니다.</div>'}</div>`}
 function openPairs(id){const m=M(id);if(!m)return;const rows=S.members.filter(x=>x.id!==id).map(x=>({m:x,n:pairCount(id,x.id)})).sort((a,b)=>b.n-a.n||a.m.name.localeCompare(b.m.name,'ko'));openModal(`<h3>${esc(m.name)} · 같이한 경기</h3><div class="note">같은 4인 경기에 함께 들어간 횟수이며 같은 편/상대편은 구분하지 않습니다.</div>${rows.map(x=>`<div class="card between"><div><b>${esc(x.m.name)}</b><div class="meta">${esc(x.m.age)}${esc(x.m.cls)} · ${esc(x.m.gender)}</div></div><b>${x.n}회</b></div>`).join('')||'<div class="empty">비교할 회원이 없습니다.</div>'}<button class="btn ghost" style="width:100%" onclick="closeModal()">닫기</button>`)}
-function renderSettings(){const mine=me.memberId?M(me.memberId):null;const tempEligible=S.members.filter(m=>m.type!=='guest'&&roleOf(m)==='member'&&m.state!=='out');$('settings').innerHTML=`<div class="title"><h2>설정</h2></div><div class="card"><div class="between"><div><b>현재 모임</b><div class="meta">${esc(group?.name||'-')}</div></div><span class="tag">${roleLabel(me.role)}</span></div></div>${mine?`<div class="card"><div class="between"><div><b>오늘 내 상태</b><div class="meta">${stateLabel(mine.state)}</div></div><div class="memberBtns"><button class="btn enter" onclick="setMySetting('waiting')">운동</button><button class="btn watch" onclick="setMySetting('spectator')">관람</button><button class="btn danger" onclick="setMySetting('out')">퇴장</button></div></div></div>`:'<div class="note">현재 모임 회원명부에 본인 이름이 없어 참가상태 변경은 표시되지 않습니다.</div>'}${(me.globalAdmin||me.role==='manager'||me.role==='organizer')?`<div class="card"><b>당일 임시편성자</b><div class="meta" style="margin:5px 0 10px">오늘 참석한 일반회원에게 당일 게임편성 권한만 부여합니다.</div>${tempEligible.map(m=>`<div class="between" style="padding:7px 0;border-bottom:1px solid #edf0f7"><span>${esc(m.name)} ${ageTag(m)}</span><button class="btn ${isTemp(m)?'danger':'ghost'}" onclick="toggleTemp('${m.id}',${!isTemp(m)})">${isTemp(m)?'해제':'임시 지정'}</button></div>`).join('')||'<div class="empty">지정 가능한 참석 회원이 없습니다.</div>'}</div>`:''}${canGame()?`<div class="card"><b>코트 설정</b><div class="field" style="margin-top:9px"><label>사용 코트 수 (1~16)</label><input id="courtCountInput" type="number" min="1" max="16" inputmode="numeric" value="${S.courtCount}"></div><button class="btn pri" onclick="saveCourtCount()">코트 수 저장</button></div>`:''}${canReset()?`<div class="card"><b>모임 당일 운영 리셋</b><div class="warn">이 모임의 오늘 경기·대기·입장상태를 초기화하고 이 모임에 로그인한 이용자를 로그아웃합니다. 누적 게임횟수와 같이한 경기 기록은 유지합니다.</div><button class="btn danger" style="width:100%" onclick="resetDaily()">당일 운영 리셋</button></div>`:''}<div class="card"><div class="between"><div><b>프로그램 버전</b><div class="meta">콕매치 v35 · 다중 모임 운영</div></div><span class="tag">운영본</span></div><button id="forceUpdateBtn" class="btn pri" style="width:100%;margin-top:10px" onclick="forceUpdateApp()">↻ 최신 버전으로 새로고침</button>${me.globalAdmin?'<a class="btn ghost" style="display:block;text-align:center;text-decoration:none;margin-top:7px" href="/versions/">구버전 보기</a>':''}<div class="meta" style="margin-top:8px">${me.globalAdmin?'총관리자 최신화 시 본인을 제외한 모든 로그인 세션을 종료합니다.':''} 현재 화면과 스크롤 위치는 유지합니다.</div></div><div class="card"><b>홈 화면에 추가</b><div class="meta" style="margin-top:6px;line-height:1.7">아이폰 Safari: 공유 → 홈 화면에 추가<br>갤럭시 Chrome: 메뉴 → 홈 화면에 추가</div></div>`}
+function renderSettings(){const mine=me.memberId?M(me.memberId):null;const tempEligible=S.members.filter(m=>m.type!=='guest'&&roleOf(m)==='member'&&m.state!=='out');$('settings').innerHTML=`<div class="title"><h2>설정</h2></div><div class="card"><div class="between"><div><b>현재 모임</b><div class="meta">${esc(group?.name||'-')}</div></div><span class="tag">${roleLabel(me.role)}</span></div></div>${mine?`<div class="card"><div class="between"><div><b>오늘 내 상태</b><div class="meta">${stateLabel(mine.state)}</div></div><div class="memberBtns"><button class="btn enter" onclick="setMySetting('waiting')">운동</button><button class="btn watch" onclick="setMySetting('spectator')">관람</button><button class="btn danger" onclick="setMySetting('out')">퇴장</button></div></div></div>`:'<div class="note">현재 모임 회원명부에 본인 이름이 없어 참가상태 변경은 표시되지 않습니다.</div>'}${(me.globalAdmin||me.role==='manager'||me.role==='organizer')?`<div class="card"><b>당일 임시편성자</b><div class="meta" style="margin:5px 0 10px">오늘 참석한 일반에게 당일 게임편성 권한만 부여합니다.</div>${tempEligible.map(m=>`<div class="between" style="padding:7px 0;border-bottom:1px solid #edf0f7"><span>${esc(m.name)} ${ageTag(m)}</span><button class="btn ${isTemp(m)?'danger':'ghost'}" onclick="toggleTemp('${m.id}',${!isTemp(m)})">${isTemp(m)?'해제':'임시 지정'}</button></div>`).join('')||'<div class="empty">지정 가능한 참석 회원이 없습니다.</div>'}</div>`:''}${canGame()?`<div class="card"><b>코트 설정</b><div class="field" style="margin-top:9px"><label>사용 코트 수 (1~16)</label><input id="courtCountInput" type="number" min="1" max="16" inputmode="numeric" value="${S.courtCount}"></div><button class="btn pri" onclick="saveCourtCount()">코트 수 저장</button></div>`:''}${canReset()?`<div class="card"><b>모임 당일 운영 리셋</b><div class="warn">이 모임의 오늘 경기·대기·입장상태를 초기화하고 이 모임에 로그인한 이용자를 로그아웃합니다. 누적 게임횟수와 같이한 경기 기록은 유지합니다.</div><button class="btn danger" style="width:100%" onclick="resetDaily()">당일 운영 리셋</button></div>`:''}<div class="card"><div class="between"><div><b>프로그램 버전</b><div class="meta">콕매치 v35 · 다중 모임 운영</div></div><span class="tag">운영본</span></div><button id="forceUpdateBtn" class="btn pri" style="width:100%;margin-top:10px" onclick="forceUpdateApp()">↻ 최신 버전으로 새로고침</button>${me.globalAdmin?'<a class="btn ghost" style="display:block;text-align:center;text-decoration:none;margin-top:7px" href="/versions/">구버전 보기</a>':''}<div class="meta" style="margin-top:8px">${me.globalAdmin?'개발자 최신화 시 본인을 제외한 모든 로그인 세션을 종료합니다.':''} 현재 화면과 스크롤 위치는 유지합니다.</div></div><div class="card"><b>홈 화면에 추가</b><div class="meta" style="margin-top:6px;line-height:1.7">아이폰 Safari: 공유 → 홈 화면에 추가<br>갤럭시 Chrome: 메뉴 → 홈 화면에 추가</div></div>`}
 async function setMySetting(mode){try{await act('set_my_attendance',{mode})}catch(e){showError(e)}}
 async function toggleTemp(id,enabled){try{await act('set_temp',{memberId:id,enabled})}catch(e){showError(e)}}
 async function saveCourtCount(){const n=Number($('courtCountInput').value);try{await act('set_courts',{count:n});alert(`코트 수를 ${n}개로 설정했습니다.`)}catch(e){showError(e)}}
-async function resetDaily(){const pin=prompt(`${me.globalAdmin?'총관리자':'모임관리자'} PIN을 입력해주세요.`);if(pin===null)return;if(!confirm(`${group.name}의 당일 운영기록을 초기화하시겠습니까?`))return;try{await act('reset_daily',{pin});if(!me.globalAdmin){await reloginLatest()}else{await loadState();goView('settings')}}catch(e){showError(e)}}
+async function resetDaily(){const pin=prompt(`${me.globalAdmin?'개발자':'모임장'} PIN을 입력해주세요.`);if(pin===null)return;if(!confirm(`${group.name}의 당일 운영기록을 초기화하시겠습니까?`))return;try{await act('reset_daily',{pin});if(!me.globalAdmin){await reloginLatest()}else{await loadState();goView('settings')}}catch(e){showError(e)}}
 async function openGroupSwitch(){if(!me?.globalAdmin)return;openModal(`<h3>운영 모임 선택</h3><div class="choiceList">${groups.map(g=>`<button class="choiceBtn" onclick="switchGroup('${g.groupId}')"><b>${esc(g.name)}</b></button>`).join('')}</div><button class="btn ghost" style="width:100%;margin-top:9px" onclick="closeModal()">취소</button>`)}
 async function switchGroup(id,view='members'){currentGroupId=id;localStorage.setItem(GROUP_KEY,id);closeModal();try{await loadState();goView(view)}catch(e){showError(e)}}
 async function loadGroups(){if(!canManageGroups())return;const x=await request('groups','POST',{action:'list_groups'});groupSummaries=x.groups||[];renderGroups()}
-function renderGroups(){if(!$('groups')||!canManageGroups())return;$('groups').innerHTML=`<div class="title"><h2>모임관리</h2><button class="btn pri" onclick="openGroupEditor()">+ 모임 생성</button></div><div class="note">총관리자는 모든 모임을 생성·수정·삭제하고 각 모임 회원명부에서 모임관리자와 게임편성자를 지정할 수 있습니다. 일반회원 로그인에는 각 모임의 PIN이 사용됩니다.</div>${groupSummaries.map(g=>`<div class="card groupCard ${g.isActive?'':'inactive'}"><div class="between"><div><b>${esc(g.name)}</b><div class="meta">${g.isActive?'운영중':'삭제됨(복구 가능)'}</div></div><span class="tag">${g.memberCount}명</span></div><div class="groupStats"><span>모임관리자 ${g.managers.length?esc(g.managers.join(', ')):'미지정'}</span><span>게임편성자 ${g.organizers.length?esc(g.organizers.join(', ')):'없음'}</span><span>대기 ${g.waiting}</span><span>게임중 ${g.playing}</span></div><div class="groupActs">${g.isActive?`<button class="btn pri" onclick="switchGroup('${g.groupId}','members')">인원/권한 관리</button><button class="btn ghost" onclick="openGroupEditor('${g.groupId}')">모임 수정</button><button class="btn danger" onclick="deleteGroup('${g.groupId}')">모임 삭제</button>`:`<button class="btn pri" onclick="restoreGroup('${g.groupId}')">모임 복구</button>`}</div></div>`).join('')||'<div class="empty">등록된 모임이 없습니다.</div>'}`}
-function openGroupEditor(id=''){const g=id?groupSummaries.find(x=>x.groupId===id):null;openModal(`<h3>${g?'모임 수정':'새 모임 생성'}</h3><div class="field"><label>모임 이름</label><input id="fgName" value="${esc(g?.name||'')}"></div><div class="field"><label>${g?'새 모임 PIN (변경할 때만 입력)':'모임 PIN (숫자 4~8자리)'}</label><input id="fgPin" type="password" inputmode="numeric" placeholder="${g?'비우면 기존 PIN 유지':'일반회원 로그인용 PIN'}"></div><div class="acts"><button class="btn ghost" onclick="closeModal()">취소</button><button class="btn pri" onclick="saveGroup('${id}')">저장</button></div>`)}
-async function saveGroup(id){const name=$('fgName').value.trim(),pin=$('fgPin').value.trim();if(!name)return alert('모임 이름을 입력해주세요.');try{await request('groups','POST',{action:id?'update_group':'create_group',groupId:id,name,pin});closeModal();await loadGroups();if(!id)alert('모임을 생성했습니다. 일반회원에게 해당 모임 PIN을 안내해주세요.')}catch(e){showError(e)}}
+function renderGroups(){if(!$('groups')||!canManageGroups())return;$('groups').innerHTML=`<div class="title"><h2>모임관리</h2><button class="btn pri" onclick="openGroupEditor()">+ 모임 생성</button></div><div class="note">개발자는 모든 모임을 생성·수정·삭제하고 각 모임 회원명부에서 모임장와 운영진를 지정할 수 있습니다. 일반 로그인에는 각 모임의 PIN이 사용됩니다.</div>${groupSummaries.map(g=>`<div class="card groupCard ${g.isActive?'':'inactive'}"><div class="between"><div><b>${esc(g.name)}</b><div class="meta">${g.isActive?'운영중':'삭제됨(복구 가능)'}</div></div><span class="tag">${g.memberCount}명</span></div><div class="groupStats"><span>모임장 ${g.managers.length?esc(g.managers.join(', ')):'미지정'}</span><span>운영진 ${g.organizers.length?esc(g.organizers.join(', ')):'없음'}</span><span>대기 ${g.waiting}</span><span>게임중 ${g.playing}</span></div><div class="groupActs">${g.isActive?`<button class="btn pri" onclick="switchGroup('${g.groupId}','members')">인원/권한 관리</button><button class="btn ghost" onclick="openGroupEditor('${g.groupId}')">모임 수정</button><button class="btn danger" onclick="deleteGroup('${g.groupId}')">모임 삭제</button>`:`<button class="btn pri" onclick="restoreGroup('${g.groupId}')">모임 복구</button>`}</div></div>`).join('')||'<div class="empty">등록된 모임이 없습니다.</div>'}`}
+function openGroupEditor(id=''){const g=id?groupSummaries.find(x=>x.groupId===id):null;openModal(`<h3>${g?'모임 수정':'새 모임 생성'}</h3><div class="field"><label>모임 이름</label><input id="fgName" value="${esc(g?.name||'')}"></div><div class="field"><label>${g?'새 모임 PIN (변경할 때만 입력)':'모임 PIN (숫자 4~8자리)'}</label><input id="fgPin" type="password" inputmode="numeric" placeholder="${g?'비우면 기존 PIN 유지':'일반 로그인용 PIN'}"></div><div class="acts"><button class="btn ghost" onclick="closeModal()">취소</button><button class="btn pri" onclick="saveGroup('${id}')">저장</button></div>`)}
+async function saveGroup(id){const name=$('fgName').value.trim(),pin=$('fgPin').value.trim();if(!name)return alert('모임 이름을 입력해주세요.');try{await request('groups','POST',{action:id?'update_group':'create_group',groupId:id,name,pin});closeModal();await loadGroups();if(!id)alert('모임을 생성했습니다. 일반에게 해당 모임 PIN을 안내해주세요.')}catch(e){showError(e)}}
 async function deleteGroup(id){const g=groupSummaries.find(x=>x.groupId===id);if(!g||!confirm(`${g.name} 모임을 삭제하시겠습니까?\n데이터는 복구를 위해 보존되며 운영목록에서 숨겨집니다.`))return;try{await request('groups','POST',{action:'delete_group',groupId:id});await loadGroups()}catch(e){showError(e)}}
 async function restoreGroup(id){try{await request('groups','POST',{action:'restore_group',groupId:id});await loadGroups()}catch(e){showError(e)}}
 function saveRefreshState(){try{sessionStorage.setItem(REFRESH_KEY,JSON.stringify({view:currentView,y:Math.max(0,scrollY||0),groupId:currentGroupId,at:Date.now()}));if('scrollRestoration'in history)history.scrollRestoration='manual'}catch{}}
@@ -137,18 +137,18 @@ renderSettings=function(){
   if(me?.globalAdmin){
     const cards=[...box.querySelectorAll(':scope > .card')];
     const home=cards.find(c=>(c.textContent||'').includes('홈 화면에 추가'));
-    const html=`<div id="rosterReset36" class="card"><b>선택 모임 회원명부 전체 초기화</b><div class="warn" style="margin-top:8px"><b>${esc(group?.name||'현재 모임')}</b>에서 총관리자에 해당하는 회원과 모임관리자만 남기고 <b>일반회원·게임편성자·게스트를 모두 삭제</b>합니다. 개인 게임대기·편성대기·진행중 경기·오늘 경기기록·같이한 경기 기록도 초기화되며, 남겨진 관리자들의 누적 게임횟수도 0회로 초기화됩니다.<br><br>다른 모임에는 영향을 주지 않습니다.</div><button class="btn danger" style="width:100%" onclick="resetRosterGroup36()">선택 모임 회원명부 전체 초기화</button><div class="meta" style="margin-top:8px">총관리자 전용 · 총관리자 PIN 재확인 필요</div></div>`;
+    const html=`<div id="rosterReset36" class="card"><b>선택 모임 회원명부 전체 초기화</b><div class="warn" style="margin-top:8px"><b>${esc(group?.name||'현재 모임')}</b>에서 개발자에 해당하는 회원과 모임장만 남기고 <b>일반·운영진·게스트를 모두 삭제</b>합니다. 개인 게임대기·편성대기·진행중 경기·오늘 경기기록·같이한 경기 기록도 초기화되며, 남겨진 관리자들의 누적 게임횟수도 0회로 초기화됩니다.<br><br>다른 모임에는 영향을 주지 않습니다.</div><button class="btn danger" style="width:100%" onclick="resetRosterGroup36()">선택 모임 회원명부 전체 초기화</button><div class="meta" style="margin-top:8px">개발자 전용 · 개발자 PIN 재확인 필요</div></div>`;
     if(home)home.insertAdjacentHTML('beforebegin',html);else box.insertAdjacentHTML('beforeend',html);
   }
 };
 
 window.resetRosterGroup36=async function(){
-  if(!me?.globalAdmin)return alert('총관리자만 사용할 수 있습니다.');
-  const pin=prompt('총관리자 PIN을 입력해주세요.');
+  if(!me?.globalAdmin)return alert('개발자만 사용할 수 있습니다.');
+  const pin=prompt('개발자 PIN을 입력해주세요.');
   if(pin===null)return;
-  if(!pin.trim())return alert('총관리자 PIN을 입력해주세요.');
+  if(!pin.trim())return alert('개발자 PIN을 입력해주세요.');
   const gname=group?.name||'현재 모임';
-  if(!confirm(`${gname}의 회원명부를 전체 초기화하시겠습니까?\n\n총관리자와 모임관리자만 남고 일반회원·게임편성자·게스트는 삭제됩니다. 이 작업은 되돌릴 수 없습니다.`))return;
+  if(!confirm(`${gname}의 회원명부를 전체 초기화하시겠습니까?\n\n개발자와 모임장만 남고 일반·운영진·게스트는 삭제됩니다. 이 작업은 되돌릴 수 없습니다.`))return;
   try{
     const r=await fetch(ADMIN_V36,{method:'POST',headers:{'content-type':'application/json','authorization':'Bearer '+T},body:JSON.stringify({action:'reset_roster_group',groupId:currentGroupId,pin:pin.trim()}),cache:'no-store'});
     const x=await r.json().catch(()=>({}));
@@ -199,7 +199,7 @@ renderSettings=function(){
   if(currentView==='settings'&&document.activeElement?.id==='courtCountInput')return;
   renderSettings36();
   const box=$('settings');if(!box)return;
-  [...box.querySelectorAll('.meta')].forEach(el=>{if((el.textContent||'').includes('콕매치 v36'))el.textContent='콕매치 v37 · 모임 총관리자 자동등록 · 코트 입력 개선 · 회원 일괄등록'});
+  [...box.querySelectorAll('.meta')].forEach(el=>{if((el.textContent||'').includes('콕매치 v36'))el.textContent='콕매치 v37 · 모임 개발자 자동등록 · 코트 입력 개선 · 회원 일괄등록'});
 };
 
 const renderMembers36=renderMembers;
@@ -222,7 +222,7 @@ memberControls=function(m){
 const openEditMember36=openEditMember;
 openEditMember=function(id){
   const m=M(id);if(!m)return;
-  if(roleOf(m)==='admin'&&!me?.globalAdmin)return alert('총관리자 정보는 총관리자만 수정할 수 있습니다.');
+  if(roleOf(m)==='admin'&&!me?.globalAdmin)return alert('개발자 정보는 개발자만 수정할 수 있습니다.');
   openEditMember36(id);
 };
 
@@ -236,12 +236,12 @@ openMemberModal=function(m){
     role?.closest('.field')?.remove();pinWrap?.remove();
     const sheet=$('modalSheet');
     [...(sheet?.querySelectorAll('button')||[])].forEach(b=>{if((b.textContent||'').trim()==='삭제')b.remove()});
-    const note=sheet?.querySelector('.note');if(note)note.textContent='총관리자 계정은 모임 생성 시 자동 등록되며 이름·구분·역할·삭제는 변경할 수 없습니다. 출생연도·성별·급수만 수정할 수 있습니다.';
+    const note=sheet?.querySelector('.note');if(note)note.textContent='개발자 계정은 모임 생성 시 자동 등록되며 이름·구분·역할·삭제는 변경할 수 없습니다. 출생연도·성별·급수만 수정할 수 있습니다.';
   }
 };
 
 const deleteMemberNow36=deleteMemberNow;
-deleteMemberNow=async function(){const m=M(editMemberId);if(m&&roleOf(m)==='admin')return alert('총관리자 계정은 삭제할 수 없습니다.');return deleteMemberNow36()};
+deleteMemberNow=async function(){const m=M(editMemberId);if(m&&roleOf(m)==='admin')return alert('개발자 계정은 삭제할 수 없습니다.');return deleteMemberNow36()};
 
 const saveGroup36=saveGroup;
 saveGroup=async function(id){
@@ -251,7 +251,7 @@ saveGroup=async function(id){
   try{
     const x=await tool37('create_group',{name,pin,sourceGroupId:currentGroupId});
     closeModal();await loadGroups();
-    alert(`${x.groupName||name} 모임을 생성했습니다.\n총관리자가 회원명부에 자동 등록되었습니다.`);
+    alert(`${x.groupName||name} 모임을 생성했습니다.\n개발자가 회원명부에 자동 등록되었습니다.`);
   }catch(e){showError(e)}
 };
 
@@ -260,10 +260,10 @@ function parseBulk37(text){
   lines.forEach((line,idx)=>{
     const cells=(line.includes('\t')?line.split('\t'):line.split(',')).map(x=>x.trim());
     if(idx===0&&['이름','name'].includes((cells[0]||'').toLowerCase()))return;
-    const [name,yearRaw,gender,clsRaw,typeRaw='일반회원']=cells;
+    const [name,yearRaw,gender,clsRaw,typeRaw='일반']=cells;
     const year=Number(yearRaw),cls=String(clsRaw||'').toUpperCase();
-    let type='member';const t=String(typeRaw||'일반회원').trim().toLowerCase();
-    if(['게스트','guest'].includes(t))type='guest';else if(!['일반회원','회원','member',''].includes(t))errors.push(`${idx+1}행: 구분은 일반회원 또는 게스트로 입력해주세요.`);
+    let type='member';const t=String(typeRaw||'일반').trim().toLowerCase();
+    if(['게스트','guest'].includes(t))type='guest';else if(!['일반','회원','member',''].includes(t))errors.push(`${idx+1}행: 구분은 일반 또는 게스트로 입력해주세요.`);
     if(!name)errors.push(`${idx+1}행: 이름이 없습니다.`);
     if(!Number.isInteger(year)||year<1900||year>new Date().getFullYear())errors.push(`${idx+1}행: 출생연도를 확인해주세요.`);
     if(!['남','여'].includes(gender))errors.push(`${idx+1}행: 성별은 남 또는 여로 입력해주세요.`);
@@ -274,7 +274,7 @@ function parseBulk37(text){
 }
 
 window.openBulkMembers37=function(){
-  openModal(`<h3>회원 일괄등록</h3><div class="note">엑셀에서 아래 순서의 여러 행을 그대로 복사해 붙여넣을 수 있습니다.<br><b>이름 / 출생연도 / 성별 / 급수 / 구분</b><br>구분을 비우면 일반회원으로 등록됩니다.</div><div class="bulkExample37">홍길동\t1990\t남\tC\t일반회원<br>김민지\t1994\t여\tD\t게스트</div><div class="field"><label>회원 목록 붙여넣기</label><textarea id="bulkText37" rows="10" placeholder="홍길동    1990    남    C    일반회원\n김민지    1994    여    D    게스트"></textarea></div><div id="bulkPreview37" class="meta">탭으로 구분된 엑셀 복사 또는 쉼표(,) 구분 입력을 지원합니다.</div><div class="acts"><button class="btn ghost" onclick="previewBulk37()">내용 확인</button><button class="btn pri" onclick="submitBulk37()">일괄등록</button></div><button class="btn ghost" style="width:100%;margin-top:8px" onclick="closeModal()">취소</button>`);
+  openModal(`<h3>회원 일괄등록</h3><div class="note">엑셀에서 아래 순서의 여러 행을 그대로 복사해 붙여넣을 수 있습니다.<br><b>이름 / 출생연도 / 성별 / 급수 / 구분</b><br>구분을 비우면 일반으로 등록됩니다.</div><div class="bulkExample37">홍길동\t1990\t남\tC\t일반<br>김민지\t1994\t여\tD\t게스트</div><div class="field"><label>회원 목록 붙여넣기</label><textarea id="bulkText37" rows="10" placeholder="홍길동    1990    남    C    일반\n김민지    1994    여    D    게스트"></textarea></div><div id="bulkPreview37" class="meta">탭으로 구분된 엑셀 복사 또는 쉼표(,) 구분 입력을 지원합니다.</div><div class="acts"><button class="btn ghost" onclick="previewBulk37()">내용 확인</button><button class="btn pri" onclick="submitBulk37()">일괄등록</button></div><button class="btn ghost" style="width:100%;margin-top:8px" onclick="closeModal()">취소</button>`);
   setTimeout(()=>$('bulkText37')?.focus(),50);
 };
 
@@ -283,7 +283,7 @@ window.previewBulk37=function(){
   if(!p.rows.length){el.innerHTML='<span class="bulkErr37">등록할 내용을 붙여넣어주세요.</span>';return}
   if(p.errors.length){el.innerHTML=`<span class="bulkErr37">${p.errors.slice(0,8).map(esc).join('<br>')}</span>`;return}
   const guests=p.rows.filter(x=>x.type==='guest').length;
-  el.innerHTML=`<b>${p.rows.length}명</b> 등록 준비 · 일반회원 ${p.rows.length-guests}명 · 게스트 ${guests}명`;
+  el.innerHTML=`<b>${p.rows.length}명</b> 등록 준비 · 일반 ${p.rows.length-guests}명 · 게스트 ${guests}명`;
 };
 
 window.submitBulk37=async function(){
@@ -352,7 +352,7 @@ function loginInputCommon39(el){
 
 renderLoginName=function(){
   const box=$('loginBox');if(!box)return;
-  box.innerHTML=`<h1>🏸 콕매치</h1><div class="meta" style="font-size:14px;margin-bottom:18px">모임 회원 로그인</div><div class="field"><label>등록된 이름</label><input id="loginName" type="text" autocomplete="username" enterkeyhint="next" placeholder="이름"></div><button class="btn pri" style="width:100%" onclick="startLogin()">다음</button><div id="loginErr" class="error"></div><div class="note" style="margin-top:12px">일반회원은 <b>소속 모임 PIN</b>, 모임관리자·게임편성자는 <b>본인 역할 PIN</b>으로 로그인합니다.</div>`;
+  box.innerHTML=`<h1>🏸 콕매치</h1><div class="meta" style="font-size:14px;margin-bottom:18px">모임 회원 로그인</div><div class="field"><label>등록된 이름</label><input id="loginName" type="text" autocomplete="username" enterkeyhint="next" placeholder="이름"></div><button class="btn pri" style="width:100%" onclick="startLogin()">다음</button><div id="loginErr" class="error"></div><div class="note" style="margin-top:12px">일반은 <b>소속 모임 PIN</b>, 모임장·운영진는 <b>본인 역할 PIN</b>으로 로그인합니다.</div>`;
   const name=$('loginName');loginInputCommon39(name);
   name?.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.isComposing){e.preventDefault();startLogin()}});
 };
@@ -430,7 +430,7 @@ const UPDATE_STATE40='kokmatch_update_state_v40';
 function canDaily40(){return !!me&&(me.globalAdmin||me.role==='manager'||me.role==='organizer')}
 function canCumulative40(){return !!me&&(me.globalAdmin||me.role==='manager')}
 function canRoster40(){return !!me?.globalAdmin}
-function pinRole40(){return me?.globalAdmin?'총관리자':me?.role==='manager'?'모임관리자':'게임편성자'}
+function pinRole40(){return me?.globalAdmin?'개발자':me?.role==='manager'?'모임장':'운영진'}
 
 const renderSettings39=renderSettings;
 renderSettings=function(){
@@ -444,21 +444,21 @@ renderSettings=function(){
   if(!(canDaily40()||canCumulative40()||canRoster40()))return;
   const versionCard=[...box.querySelectorAll(':scope > .card')].find(c=>(c.textContent||'').includes('프로그램 버전'));
   const parts=[];
-  if(canDaily40())parts.push(`<div class="card resetTier40"><b>가. 당일 게임 기록 및 로그인세션 초기화</b><div class="meta" style="margin:7px 0 10px;line-height:1.6">현재 모임의 개인대기·편성대기·진행중 경기·오늘 경기기록·참가상태를 초기화하고, 이 모임 로그인세션을 종료합니다.<br><b>회원명부, 누적 총 게임횟수, 같이한 경기 기록은 유지</b>합니다.</div><button class="btn danger" style="width:100%" onclick="resetTier40('reset_daily')">당일 기록 및 세션 초기화</button><div class="meta" style="margin-top:7px">권한: 게임편성자 · 모임관리자 · 총관리자</div></div>`);
-  if(canCumulative40())parts.push(`<div class="card resetTier40"><b>나. 누적기록 포함 초기화</b><div class="meta" style="margin:7px 0 10px;line-height:1.6">가 항목의 초기화에 더해 회원명부에 저장된 <b>누적 총 게임횟수와 같이한 경기 기록까지 0으로 초기화</b>합니다.<br><b>회원명단과 역할은 그대로 유지</b>합니다.</div><button class="btn danger" style="width:100%" onclick="resetTier40('reset_cumulative')">누적기록까지 초기화</button><div class="meta" style="margin-top:7px">권한: 모임관리자 · 총관리자</div></div>`);
-  if(canRoster40())parts.push(`<div class="card resetTier40"><b>다. 회원정보 전체 정리 초기화</b><div class="warn" style="margin:7px 0 10px;line-height:1.6">현재 모임에서 <b>총관리자와 모임관리자만 남기고</b> 게임편성자·일반회원·게스트 정보를 모두 삭제합니다. 게임·대기·누적기록도 함께 초기화됩니다.<br>다른 모임에는 영향을 주지 않습니다.</div><button class="btn danger" style="width:100%" onclick="resetTier40('reset_roster')">관리자 제외 인원정보 전체 초기화</button><div class="meta" style="margin-top:7px">권한: 총관리자 전용</div></div>`);
+  if(canDaily40())parts.push(`<div class="card resetTier40"><b>가. 당일 게임 기록 및 로그인세션 초기화</b><div class="meta" style="margin:7px 0 10px;line-height:1.6">현재 모임의 개인대기·편성대기·진행중 경기·오늘 경기기록·참가상태를 초기화하고, 이 모임 로그인세션을 종료합니다.<br><b>회원명부, 누적 총 게임횟수, 같이한 경기 기록은 유지</b>합니다.</div><button class="btn danger" style="width:100%" onclick="resetTier40('reset_daily')">당일 기록 및 세션 초기화</button><div class="meta" style="margin-top:7px">권한: 운영진 · 모임장 · 개발자</div></div>`);
+  if(canCumulative40())parts.push(`<div class="card resetTier40"><b>나. 누적기록 포함 초기화</b><div class="meta" style="margin:7px 0 10px;line-height:1.6">가 항목의 초기화에 더해 회원명부에 저장된 <b>누적 총 게임횟수와 같이한 경기 기록까지 0으로 초기화</b>합니다.<br><b>회원명단과 역할은 그대로 유지</b>합니다.</div><button class="btn danger" style="width:100%" onclick="resetTier40('reset_cumulative')">누적기록까지 초기화</button><div class="meta" style="margin-top:7px">권한: 모임장 · 개발자</div></div>`);
+  if(canRoster40())parts.push(`<div class="card resetTier40"><b>다. 회원정보 전체 정리 초기화</b><div class="warn" style="margin:7px 0 10px;line-height:1.6">현재 모임에서 <b>개발자와 모임장만 남기고</b> 운영진·일반·게스트 정보를 모두 삭제합니다. 게임·대기·누적기록도 함께 초기화됩니다.<br>다른 모임에는 영향을 주지 않습니다.</div><button class="btn danger" style="width:100%" onclick="resetTier40('reset_roster')">관리자 제외 인원정보 전체 초기화</button><div class="meta" style="margin-top:7px">권한: 개발자 전용</div></div>`);
   if(parts.length){const html=`<div class="subhead"><b>모임 리셋</b></div>`+parts.join('');if(versionCard)versionCard.insertAdjacentHTML('beforebegin',html);else box.insertAdjacentHTML('beforeend',html)}
 };
 
 window.resetTier40=async function(action){
-  const labels={reset_daily:'당일 게임 기록 및 로그인세션',reset_cumulative:'당일 기록과 회원 누적기록',reset_roster:'총관리자·모임관리자를 제외한 인원정보 전체'};
+  const labels={reset_daily:'당일 게임 기록 및 로그인세션',reset_cumulative:'당일 기록과 회원 누적기록',reset_roster:'개발자·모임장를 제외한 인원정보 전체'};
   const allowed=action==='reset_daily'?canDaily40():action==='reset_cumulative'?canCumulative40():canRoster40();
   if(!allowed)return alert('해당 초기화 권한이 없습니다.');
   const pin=prompt(`${pinRole40()} PIN을 입력해주세요.`);if(pin===null)return;if(!pin.trim())return alert('PIN을 입력해주세요.');
   const gname=group?.name||'현재 모임';
   let msg=`${gname}의 ${labels[action]}을(를) 초기화하시겠습니까?`;
   if(action==='reset_cumulative')msg+='\n\n회원명단은 유지되지만 누적 게임기록은 0으로 돌아갑니다.';
-  if(action==='reset_roster')msg+='\n\n총관리자와 모임관리자를 제외한 회원정보가 삭제되며 되돌릴 수 없습니다.';
+  if(action==='reset_roster')msg+='\n\n개발자와 모임장를 제외한 회원정보가 삭제되며 되돌릴 수 없습니다.';
   if(!confirm(msg))return;
   try{
     const r=await fetch(RESET_V40,{method:'POST',headers:{'content-type':'application/json','authorization':'Bearer '+T},body:JSON.stringify({action,groupId:currentGroupId,pin:pin.trim()}),cache:'no-store'});
@@ -527,12 +527,12 @@ const renderMembers41=renderMembers;
 renderMembers=function(){
   renderMembers41();
   const note=$('members')?.querySelector('.note');if(!note)return;
-  note.innerHTML=me?.globalAdmin?'총관리자는 모든 인원정보와 모임관리자·게임편성자 역할을 관리할 수 있습니다.':me?.role==='manager'?'모임관리자는 이 모임의 최고 운영권한으로 회원·게스트 관리, 게임편성자 지정·해제, 게임운영과 리셋을 관리합니다.':me?.role==='organizer'?'게임편성자는 일반회원·게스트 신규등록, 게임편성 및 당일게임 리셋만 사용할 수 있습니다.':'회원정보와 현재 참가상태를 확인할 수 있습니다.';
+  note.innerHTML=me?.globalAdmin?'개발자는 모든 인원정보와 모임장·운영진 역할을 관리할 수 있습니다.':me?.role==='manager'?'모임장는 이 모임의 최고 운영권한으로 회원·게스트 관리, 운영진 지정·해제, 게임운영과 리셋을 관리합니다.':me?.role==='organizer'?'운영진는 일반·게스트 신규등록, 게임편성 및 당일게임 리셋만 사용할 수 있습니다.':'회원정보와 현재 참가상태를 확인할 수 있습니다.';
 };
 
 openEditMember=function(id){
   const m=M(id);if(!m)return;
-  if(me?.role==='organizer'&&!me?.globalAdmin)return alert('게임편성자는 신규 회원/게스트 등록만 가능합니다.');
+  if(me?.role==='organizer'&&!me?.globalAdmin)return alert('운영진는 신규 회원/게스트 등록만 가능합니다.');
   if(!editable42(m))return alert('이 회원정보를 수정할 권한이 없습니다.');
   editMemberId=id;openMemberModal(m);
 };
@@ -540,7 +540,7 @@ openEditMember=function(id){
 openMemberModal=function(m){
   const add=!m,r=roleOf(m),opts=roleOptions42(m,add),isAdmin=!add&&r==='admin',managerSelf=!add&&r==='manager'&&!me?.globalAdmin&&m.id===me?.memberId;
   const roleSelect=opts.length?`<div class="field"><label>역할</label><select id="fmRole" onchange="syncMember42()">${opts.map(x=>`<option value="${x}" ${(add?(x==='member'):r===x)?'selected':''}>${roleLabel(x)}</option>`).join('')}</select></div><div id="fmPinWrap" class="field hide"><label>${add?'역할 PIN':'새 역할 PIN (변경할 때만 입력)'}</label><input id="fmPin" type="tel" inputmode="numeric" maxlength="8" autocomplete="off" placeholder="숫자 4~8자리"></div>`:'';
-  openModal(`<h3>${add?'회원등록':'회원 정보 수정'}</h3><div class="note">${add?(opts.length?'구분은 일반회원/게스트이며, 권한이 있으면 등록과 동시에 역할을 지정할 수 있습니다.':'게임편성자는 일반회원 또는 게스트 신규등록만 가능합니다.'):(isAdmin?'총관리자 계정은 기본정보만 수정할 수 있습니다.':managerSelf?'모임관리자 본인의 기본정보를 수정합니다.':'회원정보와 역할을 관리합니다.')}</div><div class="field"><label>이름</label><input id="fmName" value="${esc(m?.name||'')}" ${isAdmin?'disabled':''}></div><div class="grid2"><div class="field"><label>출생연도</label><input id="fmYear" type="number" inputmode="numeric" value="${esc(m?.year||'')}"></div><div class="field"><label>성별</label><select id="fmGender"><option ${m?.gender!=='여'?'selected':''}>남</option><option ${m?.gender==='여'?'selected':''}>여</option></select></div><div class="field"><label>연령대</label><select id="fmAge">${[20,30,40,50,60,70].map(a=>`<option value="${a}" ${String(m?.age||'30')===String(a)?'selected':''}>${a}대</option>`).join('')}</select></div><div class="field"><label>급수</label><select id="fmCls">${['A','B','C','D','E'].map(c=>`<option ${String(m?.cls||'C')===c?'selected':''}>${c}</option>`).join('')}</select></div></div><div class="field"><label>구분</label><select id="fmType" onchange="syncMember42()" ${isAdmin?'disabled':''}><option value="member" ${m?.type!=='guest'?'selected':''}>일반회원</option><option value="guest" ${m?.type==='guest'?'selected':''}>게스트</option></select></div>${roleSelect}<div class="acts">${!add&&deletable42(m)?'<button class="btn danger" onclick="deleteMemberNow()">삭제</button>':''}<button class="btn ghost" onclick="closeModal()">취소</button><button class="btn pri" onclick="saveMemberNow()">${add?'등록':'저장'}</button></div>`);
+  openModal(`<h3>${add?'회원등록':'회원 정보 수정'}</h3><div class="note">${add?(opts.length?'구분은 일반/게스트이며, 권한이 있으면 등록과 동시에 역할을 지정할 수 있습니다.':'운영진는 일반 또는 게스트 신규등록만 가능합니다.'):(isAdmin?'개발자 계정은 기본정보만 수정할 수 있습니다.':managerSelf?'모임장 본인의 기본정보를 수정합니다.':'회원정보와 역할을 관리합니다.')}</div><div class="field"><label>이름</label><input id="fmName" value="${esc(m?.name||'')}" ${isAdmin?'disabled':''}></div><div class="grid2"><div class="field"><label>출생연도</label><input id="fmYear" type="number" inputmode="numeric" value="${esc(m?.year||'')}"></div><div class="field"><label>성별</label><select id="fmGender"><option ${m?.gender!=='여'?'selected':''}>남</option><option ${m?.gender==='여'?'selected':''}>여</option></select></div><div class="field"><label>연령대</label><select id="fmAge">${[20,30,40,50,60,70].map(a=>`<option value="${a}" ${String(m?.age||'30')===String(a)?'selected':''}>${a}대</option>`).join('')}</select></div><div class="field"><label>급수</label><select id="fmCls">${['A','B','C','D','E'].map(c=>`<option ${String(m?.cls||'C')===c?'selected':''}>${c}</option>`).join('')}</select></div></div><div class="field"><label>구분</label><select id="fmType" onchange="syncMember42()" ${isAdmin?'disabled':''}><option value="member" ${m?.type!=='guest'?'selected':''}>일반</option><option value="guest" ${m?.type==='guest'?'selected':''}>게스트</option></select></div>${roleSelect}<div class="acts">${!add&&deletable42(m)?'<button class="btn danger" onclick="deleteMemberNow()">삭제</button>':''}<button class="btn ghost" onclick="closeModal()">취소</button><button class="btn pri" onclick="saveMemberNow()">${add?'등록':'저장'}</button></div>`);
   setTimeout(()=>{const y=$('fmYear');if(y)y.addEventListener('input',()=>{const year=Number(y.value);if(year>1900){const age=Math.max(10,Math.floor((new Date().getFullYear()-year)/10)*10);$('fmAge').value=String(Math.min(70,age))}});syncMember42()},0);
 };
 
@@ -585,13 +585,13 @@ renderSettings=function(){
 
 renderGroups=function(){
   if(!$('groups')||!canManageGroups())return;
-  $('groups').innerHTML=`<div class="title"><h2>모임관리</h2><button class="btn pri" onclick="openGroupEditor()">+ 모임 생성</button></div><div class="note">총관리자는 모임을 생성·수정·삭제할 수 있습니다. 삭제된 모임은 복구하거나 완전삭제할 수 있으며, 완전삭제하면 회원·인증·게임데이터가 복구되지 않습니다.</div>${groupSummaries.map(g=>`<div class="card groupCard ${g.isActive?'':'inactive'}"><div class="between"><div><b>${esc(g.name)}</b><div class="meta">${g.isActive?'운영중':'삭제됨'}</div></div><span class="tag">${g.memberCount}명</span></div><div class="groupStats"><span>모임관리자 ${g.managers.length?esc(g.managers.join(', ')):'미지정'}</span><span>게임편성자 ${g.organizers.length?esc(g.organizers.join(', ')):'없음'}</span><span>대기 ${g.waiting}</span><span>게임중 ${g.playing}</span></div><div class="groupActs">${g.isActive?`<button class="btn pri" onclick="switchGroup('${g.groupId}','members')">인원/권한 관리</button><button class="btn ghost" onclick="openGroupEditor('${g.groupId}')">모임 수정</button><button class="btn danger" onclick="deleteGroup('${g.groupId}')">모임 삭제</button>`:`<button class="btn pri" onclick="restoreGroup('${g.groupId}')">모임 복구</button><button class="btn danger" onclick="purgeGroup42('${g.groupId}')">완전삭제</button>`}</div></div>`).join('')||'<div class="empty">등록된 모임이 없습니다.</div>'}`;
+  $('groups').innerHTML=`<div class="title"><h2>모임관리</h2><button class="btn pri" onclick="openGroupEditor()">+ 모임 생성</button></div><div class="note">개발자는 모임을 생성·수정·삭제할 수 있습니다. 삭제된 모임은 복구하거나 완전삭제할 수 있으며, 완전삭제하면 회원·인증·게임데이터가 복구되지 않습니다.</div>${groupSummaries.map(g=>`<div class="card groupCard ${g.isActive?'':'inactive'}"><div class="between"><div><b>${esc(g.name)}</b><div class="meta">${g.isActive?'운영중':'삭제됨'}</div></div><span class="tag">${g.memberCount}명</span></div><div class="groupStats"><span>모임장 ${g.managers.length?esc(g.managers.join(', ')):'미지정'}</span><span>운영진 ${g.organizers.length?esc(g.organizers.join(', ')):'없음'}</span><span>대기 ${g.waiting}</span><span>게임중 ${g.playing}</span></div><div class="groupActs">${g.isActive?`<button class="btn pri" onclick="switchGroup('${g.groupId}','members')">인원/권한 관리</button><button class="btn ghost" onclick="openGroupEditor('${g.groupId}')">모임 수정</button><button class="btn danger" onclick="deleteGroup('${g.groupId}')">모임 삭제</button>`:`<button class="btn pri" onclick="restoreGroup('${g.groupId}')">모임 복구</button><button class="btn danger" onclick="purgeGroup42('${g.groupId}')">완전삭제</button>`}</div></div>`).join('')||'<div class="empty">등록된 모임이 없습니다.</div>'}`;
 };
 
 window.purgeGroup42=async function(id){
   const g=groupSummaries.find(x=>x.groupId===id);if(!g)return;
   const typed=prompt(`완전삭제는 되돌릴 수 없습니다.\n확인을 위해 모임 이름을 그대로 입력해주세요.\n\n${g.name}`);if(typed===null)return;if(typed.trim()!==g.name)return alert('모임 이름이 일치하지 않습니다.');
-  const pin=prompt('총관리자 PIN을 입력해주세요.');if(pin===null)return;if(!pin.trim())return alert('총관리자 PIN을 입력해주세요.');
+  const pin=prompt('개발자 PIN을 입력해주세요.');if(pin===null)return;if(!pin.trim())return alert('개발자 PIN을 입력해주세요.');
   if(!confirm(`${g.name} 모임의 회원·인증·게임데이터를 완전히 삭제하시겠습니까?\n이 작업은 복구할 수 없습니다.`))return;
   try{await manage42('purge_group',{groupId:id,pin:pin.trim()});await loadGroups();alert(`${g.name} 모임을 완전삭제했습니다.`)}catch(e){showError(e)}
 };
@@ -732,7 +732,7 @@ saveMemberNow=async function(){syncAge44();return saveMemberNow43()};
 
 function parseBulk44(text){
  const lines=String(text||'').split(/\r?\n/).map(x=>x.trim()).filter(Boolean),rows=[],errors=[];
- lines.forEach((line,idx)=>{const cells=(line.includes('\t')?line.split('\t'):line.split(',')).map(x=>x.trim());if(idx===0&&['이름','name'].includes((cells[0]||'').toLowerCase()))return;const [name,yr,gender,clsRaw,typeRaw='일반회원']=cells,year=Number(yr),cls=String(clsRaw||'').toUpperCase(),t=String(typeRaw||'일반회원').toLowerCase();const type=['게스트','guest'].includes(t)?'guest':'member';if(!name)errors.push(`${idx+1}행: 이름이 없습니다.`);if(!Number.isInteger(year)||year<1900||year>currentYearKst44())errors.push(`${idx+1}행: 출생연도를 확인해주세요.`);if(!['남','여'].includes(gender))errors.push(`${idx+1}행: 성별은 남 또는 여로 입력해주세요.`);if(!['A','B','C','D','E'].includes(cls))errors.push(`${idx+1}행: 급수는 A~E로 입력해주세요.`);if(!['일반회원','회원','member','게스트','guest',''].includes(t))errors.push(`${idx+1}행: 구분은 일반회원 또는 게스트로 입력해주세요.`);rows.push({name,year,gender,cls,type,age:String(ageBand44(year))})});return{rows,errors}
+ lines.forEach((line,idx)=>{const cells=(line.includes('\t')?line.split('\t'):line.split(',')).map(x=>x.trim());if(idx===0&&['이름','name'].includes((cells[0]||'').toLowerCase()))return;const [name,yr,gender,clsRaw,typeRaw='일반']=cells,year=Number(yr),cls=String(clsRaw||'').toUpperCase(),t=String(typeRaw||'일반').toLowerCase();const type=['게스트','guest'].includes(t)?'guest':'member';if(!name)errors.push(`${idx+1}행: 이름이 없습니다.`);if(!Number.isInteger(year)||year<1900||year>currentYearKst44())errors.push(`${idx+1}행: 출생연도를 확인해주세요.`);if(!['남','여'].includes(gender))errors.push(`${idx+1}행: 성별은 남 또는 여로 입력해주세요.`);if(!['A','B','C','D','E'].includes(cls))errors.push(`${idx+1}행: 급수는 A~E로 입력해주세요.`);if(!['일반','회원','member','게스트','guest',''].includes(t))errors.push(`${idx+1}행: 구분은 일반 또는 게스트로 입력해주세요.`);rows.push({name,year,gender,cls,type,age:String(ageBand44(year))})});return{rows,errors}
 }
 window.submitBulk37=async function(){
  const p=parseBulk44($('bulkText37')?.value||'');if(!p.rows.length)return alert('등록할 회원 목록을 붙여넣어주세요.');if(p.errors.length)return alert(p.errors.slice(0,12).join('\n'));if(!confirm(`${group?.name||'현재 모임'}에 ${p.rows.length}명을 한 번에 등록하시겠습니까?`))return;
@@ -740,7 +740,7 @@ window.submitBulk37=async function(){
 };
 
 const roleBadge43=roleBadge;
-roleBadge=function(m){const r=roleOf(m);if(r==='member'&&m?.type!=='guest'&&!isTemp(m))return '<span class="roleBadge role-member44">일반회원</span>';return roleBadge43(m)};
+roleBadge=function(m){const r=roleOf(m);if(r==='member'&&m?.type!=='guest'&&!isTemp(m))return '<span class="roleBadge role-member44">일반</span>';return roleBadge43(m)};
 
 const renderQueue43=renderQueue;
 renderQueue=function(){
@@ -891,7 +891,7 @@ function loggedMemberFirst46(list){
 }
 function filteredMembers46(){
  const q=memberQuery46.trim().toLowerCase();
- const base=!q?S.members:S.members.filter(m=>[m.name,m.cls,m.gender,m.inviter,roleLabel(roleOf(m)),m.type==='guest'?'게스트':'일반회원'].some(v=>String(v||'').toLowerCase().includes(q)));
+ const base=!q?S.members:S.members.filter(m=>[m.name,m.cls,m.gender,m.inviter,roleLabel(roleOf(m)),m.type==='guest'?'게스트':'일반'].some(v=>String(v||'').toLowerCase().includes(q)));
  return loggedMemberFirst46(base);
 }
 function jsId46(id){return String(id||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'")}
@@ -1009,7 +1009,7 @@ async function groupsRequest47(action,body={}){
 loadGroups=async function(){if(!canManageGroups())return;const x=await groupsRequest47('list_groups');groupSummaries=x.groups||[];renderGroups();return x};
 saveGroup=async function(id){
  const name=$('fgName')?.value.trim()||'',pin=$('fgPin')?.value.trim()||'';if(!name)return alert('모임 이름을 입력해주세요.');
- try{const x=await groupsRequest47(id?'update_group':'create_group',{groupId:id||'',name,pin});closeModal();await loadGroups();if(!id)alert(`${x.groupName||name} 모임을 생성했습니다. 총관리자가 회원명부에 자동 등록되었습니다.`)}catch(e){showError(e)}
+ try{const x=await groupsRequest47(id?'update_group':'create_group',{groupId:id||'',name,pin});closeModal();await loadGroups();if(!id)alert(`${x.groupName||name} 모임을 생성했습니다. 개발자가 회원명부에 자동 등록되었습니다.`)}catch(e){showError(e)}
 };
 deleteGroup=async function(id){
  const g=groupSummaries.find(x=>x.groupId===id);if(!g||!confirm(`${g.name} 모임을 삭제하시겠습니까?\n데이터는 보존되며 삭제된 모임에서 복구 또는 완전삭제를 선택할 수 있습니다.`))return;
@@ -1104,9 +1104,9 @@ function canSeeGlobal50(){const mode=String(S?.adminBadgeVisibility||'all');if(m
 roleBadge=function(m){
  const r=roleOf(m),prior=roleBadge49(m);
  const globalLike=r==='admin'||(me?.globalAdmin&&m?.name===me.displayName);
- if(globalLike){if(!canSeeGlobal50())return '';return shuttleBadge50('global','총관리자')}
- if(r==='manager')return shuttleBadge50('manager','모임관리자');
- if(r==='organizer')return shuttleBadge50('organizer','게임편성자');
+ if(globalLike){if(!canSeeGlobal50())return '';return shuttleBadge50('global','개발자')}
+ if(r==='manager')return shuttleBadge50('manager','모임장');
+ if(r==='organizer')return shuttleBadge50('organizer','운영진');
  if(isTemp(m))return shuttleBadge50('temp','임시편성자');
  return prior;
 };
@@ -1194,10 +1194,10 @@ roleBadge=function(m){
  const globalLike=r==='admin'||(me?.globalAdmin&&m?.name===me.displayName);
  if(globalLike){
   if(!canSeeGlobal51())return '';
-  return shuttleBadge51('global','총관리자');
+  return shuttleBadge51('global','개발자');
  }
- if(r==='manager')return shuttleBadge51('manager','모임관리자');
- if(r==='organizer')return shuttleBadge51('organizer','게임편성자');
+ if(r==='manager')return shuttleBadge51('manager','모임장');
+ if(r==='organizer')return shuttleBadge51('organizer','운영진');
  if(isTemp(m))return shuttleBadge51('temp','임시편성자');
  return '';
 };
@@ -1207,7 +1207,7 @@ renderSettings=function(){
  renderSettings50();
  const box=$('settings');if(!box)return;
  [...box.querySelectorAll('.meta')].forEach(el=>{
-  if((el.textContent||'').includes('콕매치 v50'))el.textContent='콕매치 v51 · 셔틀콕 아이콘 리디자인 · 일반회원 배지 제거';
+  if((el.textContent||'').includes('콕매치 v50'))el.textContent='콕매치 v51 · 셔틀콕 아이콘 리디자인 · 일반 배지 제거';
  });
 };
 
@@ -1279,9 +1279,9 @@ function shuttleBadge52(kind,label){
 roleBadge=function(m){
  const r=roleOf(m);
  const globalLike=r==='admin'||(me?.globalAdmin&&m?.name===me.displayName);
- if(globalLike){if(!canSeeGlobal52())return '';return shuttleBadge52('global','총관리자')}
- if(r==='manager')return shuttleBadge52('manager','모임관리자');
- if(r==='organizer')return shuttleBadge52('organizer','게임편성자');
+ if(globalLike){if(!canSeeGlobal52())return '';return shuttleBadge52('global','개발자')}
+ if(r==='manager')return shuttleBadge52('manager','모임장');
+ if(r==='organizer')return shuttleBadge52('organizer','운영진');
  if(isTemp(m))return shuttleBadge52('temp','임시편성자');
  return '';
 };
@@ -1311,12 +1311,12 @@ roleBadge=function(m){
  const globalLike=r==='admin'||(me?.globalAdmin&&m?.name===me.displayName);
  if(globalLike){
   if(!canSeeGlobal53())return '';
-  return '<span class="roleBadge role-global">총관리자</span>';
+  return '<span class="roleBadge role-global">개발자</span>';
  }
- if(r==='manager')return '<span class="roleBadge role-manager">모임관리자</span>';
- if(r==='organizer')return '<span class="roleBadge role-organizer">게임편성자</span>';
+ if(r==='manager')return '<span class="roleBadge role-manager">모임장</span>';
+ if(r==='organizer')return '<span class="roleBadge role-organizer">운영진</span>';
  if(isTemp(m))return '<span class="roleBadge role-temp">임시편성자</span>';
- return '<span class="roleBadge role-member44">일반회원</span>';
+ return '<span class="roleBadge role-member44">일반</span>';
 };
 
 function badge53(m){
@@ -1387,11 +1387,11 @@ function badge54(m){
  const r=roleOf(m);
  const globalLike=r==='admin'||(me?.globalAdmin&&m?.name===me.displayName);
  if(m?.type==='guest')return '<span class="roleBadge guest45">게스트</span>';
- if(globalLike){if(!canSeeGlobal54())return '';return '<span class="roleBadge role-global">총관리자</span>'}
- if(r==='manager')return '<span class="roleBadge role-manager">모임관리자</span>';
- if(r==='organizer')return '<span class="roleBadge role-organizer">게임편성자</span>';
+ if(globalLike){if(!canSeeGlobal54())return '';return '<span class="roleBadge role-global">개발자</span>'}
+ if(r==='manager')return '<span class="roleBadge role-manager">모임장</span>';
+ if(r==='organizer')return '<span class="roleBadge role-organizer">운영진</span>';
  if(isTemp(m))return '<span class="roleBadge role-temp">임시편성자</span>';
- return '<span class="roleBadge role-member44">일반회원</span>';
+ return '<span class="roleBadge role-member44">일반</span>';
 }
 
 function genderPerson54(m,compact=false){
@@ -1604,16 +1604,16 @@ function deletable60(m){return canMemberInfo60()&&roleOf(m)!=='admin'}
 function roleOptions60(){return me?.globalAdmin||me?.role==='manager'?['member','organizer','manager']:[]}
 async function v60Request(op,body={}){const r=await fetch(V60_API,{method:'POST',headers:{'content-type':'application/json','authorization':'Bearer '+T},body:JSON.stringify({op,groupId:currentGroupId,...body}),cache:'no-store'});const x=await r.json().catch(()=>({}));if(!r.ok){if(r.status===401){reloginLatest();throw new Error('로그인이 만료되었습니다.')}throw new Error(x.error||'v60 작업에 실패했습니다.')}return x}
 memberControls=function(m){const attendance=canAttendance60(),edit=editable60(m);let bs='';if(attendance&&m.state!=='playing'&&m.state!=='matched'){if(m.state!=='waiting')bs+=`<button class="btn enter" onclick="setOther('${m.id}','waiting')">입장</button>`;if(m.state!=='spectator')bs+=`<button class="btn watch" onclick="setOther('${m.id}','spectator')">관람</button>`;if(m.state!=='out')bs+=`<button class="btn danger" onclick="setOther('${m.id}','out')">퇴장</button>`}if(edit)bs+=`<button class="btn ghost" onclick="openEditMember('${m.id}')">수정</button>`;return `<div class="memberActions60"><div class="status">${stateLabel(m.state)}</div><div class="memberBtns">${bs}</div></div>`};
-const renderMembers59=renderMembers;renderMembers=function(){renderMembers59();const box=$('members');if(!box)return;const note=box.querySelector('.note');if(note){const a=actor60();note.textContent=a==='admin'?'총관리자는 모든 모임과 회원정보·역할·운영을 관리할 수 있습니다.':a==='manager'?'모임관리자는 현재 모임의 모든 회원정보·역할·입장상태·운영을 관리할 수 있습니다.':a==='organizer'?'게임편성자는 현재 모임의 회원정보 관리, 일반회원·게스트 관리, 임시편성자 지정과 게임운영을 할 수 있습니다.':a==='temp'?'임시편성자는 회원정보 수정 없이 입장상태와 게임편성·코트운영만 할 수 있습니다.':'회원정보와 현재 참가상태를 확인할 수 있습니다.'}};
+const renderMembers59=renderMembers;renderMembers=function(){renderMembers59();const box=$('members');if(!box)return;const note=box.querySelector('.note');if(note){const a=actor60();note.textContent=a==='admin'?'개발자는 모든 모임과 회원정보·역할·운영을 관리할 수 있습니다.':a==='manager'?'모임장는 현재 모임의 모든 회원정보·역할·입장상태·운영을 관리할 수 있습니다.':a==='organizer'?'운영진는 현재 모임의 회원정보 관리, 일반·게스트 관리, 임시편성자 지정과 게임운영을 할 수 있습니다.':a==='temp'?'임시편성자는 회원정보 수정 없이 입장상태와 게임편성·코트운영만 할 수 있습니다.':'회원정보와 현재 참가상태를 확인할 수 있습니다.'}};
 openEditMember=function(id){const m=M(id);if(!m)return;if(!editable60(m))return alert('이 회원정보를 수정할 권한이 없습니다.');editMemberId=id;openMemberModal(m)};openAddMember=function(){if(!canMemberInfo60())return alert('회원등록 권한이 없습니다.');editMemberId=null;openMemberModal(null)};
-openMemberModal=function(m){const add=!m,r=roleOf(m),opts=roleOptions60(),isAdmin=!add&&r==='admin',organizer=me?.role==='organizer'&&!me?.globalAdmin;const roleSelect=opts.length?`<div class="field"><label>역할</label><select id="fmRole" onchange="syncMember60()">${opts.map(x=>`<option value="${x}" ${(add?(x==='member'):r===x)?'selected':''}>${roleLabel(x)}</option>`).join('')}</select></div><div id="fmPinWrap" class="field ${r==='member'||add?'hide':''}"><label>${add?'역할 PIN':'새 역할 PIN (변경할 때만 입력)'}</label><input id="fmPin" type="tel" inputmode="numeric" maxlength="8" autocomplete="off" placeholder="숫자 4~8자리"></div>`:'';const typeLocked=organizer&&!add&&r!=='member';openModal(`<h3>${add?'회원등록':'회원 정보 수정'}</h3><div class="note">${organizer?'게임편성자는 회원 기본정보와 일반회원·게스트 구분을 관리할 수 있으며 관리자 역할은 변경할 수 없습니다.':'회원 기본정보·구분·역할을 관리합니다.'}</div><div class="field"><label>이름</label><input id="fmName" value="${esc(m?.name||'')}" ${isAdmin?'disabled':''}></div><div class="grid2"><div class="field"><label>출생연도</label><input id="fmYear" type="number" inputmode="numeric" value="${esc(m?.year||'')}"></div><div class="field"><label>성별</label><select id="fmGender"><option ${m?.gender!=='여'?'selected':''}>남</option><option ${m?.gender==='여'?'selected':''}>여</option></select></div><div class="field"><label>급수</label><select id="fmCls">${['A','B','C','D','E'].map(c=>`<option ${String(m?.cls||'C')===c?'selected':''}>${c}</option>`).join('')}</select></div><div class="field"><label>구분</label><select id="fmType" onchange="syncMember60()" ${isAdmin||typeLocked?'disabled':''}><option value="member" ${m?.type!=='guest'?'selected':''}>일반회원</option><option value="guest" ${m?.type==='guest'?'selected':''}>게스트</option></select></div></div>${roleSelect}<div id="fmInviterWrap60" class="field ${m?.type==='guest'?'':'hide'}"><label>초대인</label><input id="fmInviter60" value="${esc(m?.inviter||'')}" maxlength="40" placeholder="초대한 회원 이름"></div><div class="acts">${!add&&deletable60(m)?'<button class="btn danger" onclick="deleteMemberNow()">삭제</button>':''}<button class="btn ghost" onclick="closeModal()">취소</button><button class="btn pri" onclick="saveMemberNow()">${add?'등록':'저장'}</button></div>`);setTimeout(()=>syncMember60(),0)};
+openMemberModal=function(m){const add=!m,r=roleOf(m),opts=roleOptions60(),isAdmin=!add&&r==='admin',organizer=me?.role==='organizer'&&!me?.globalAdmin;const roleSelect=opts.length?`<div class="field"><label>역할</label><select id="fmRole" onchange="syncMember60()">${opts.map(x=>`<option value="${x}" ${(add?(x==='member'):r===x)?'selected':''}>${roleLabel(x)}</option>`).join('')}</select></div><div id="fmPinWrap" class="field ${r==='member'||add?'hide':''}"><label>${add?'역할 PIN':'새 역할 PIN (변경할 때만 입력)'}</label><input id="fmPin" type="tel" inputmode="numeric" maxlength="8" autocomplete="off" placeholder="숫자 4~8자리"></div>`:'';const typeLocked=organizer&&!add&&r!=='member';openModal(`<h3>${add?'회원등록':'회원 정보 수정'}</h3><div class="note">${organizer?'운영진는 회원 기본정보와 일반·게스트 구분을 관리할 수 있으며 관리자 역할은 변경할 수 없습니다.':'회원 기본정보·구분·역할을 관리합니다.'}</div><div class="field"><label>이름</label><input id="fmName" value="${esc(m?.name||'')}" ${isAdmin?'disabled':''}></div><div class="grid2"><div class="field"><label>출생연도</label><input id="fmYear" type="number" inputmode="numeric" value="${esc(m?.year||'')}"></div><div class="field"><label>성별</label><select id="fmGender"><option ${m?.gender!=='여'?'selected':''}>남</option><option ${m?.gender==='여'?'selected':''}>여</option></select></div><div class="field"><label>급수</label><select id="fmCls">${['A','B','C','D','E'].map(c=>`<option ${String(m?.cls||'C')===c?'selected':''}>${c}</option>`).join('')}</select></div><div class="field"><label>구분</label><select id="fmType" onchange="syncMember60()" ${isAdmin||typeLocked?'disabled':''}><option value="member" ${m?.type!=='guest'?'selected':''}>일반</option><option value="guest" ${m?.type==='guest'?'selected':''}>게스트</option></select></div></div>${roleSelect}<div id="fmInviterWrap60" class="field ${m?.type==='guest'?'':'hide'}"><label>초대인</label><input id="fmInviter60" value="${esc(m?.inviter||'')}" maxlength="40" placeholder="초대한 회원 이름"></div><div class="acts">${!add&&deletable60(m)?'<button class="btn danger" onclick="deleteMemberNow()">삭제</button>':''}<button class="btn ghost" onclick="closeModal()">취소</button><button class="btn pri" onclick="saveMemberNow()">${add?'등록':'저장'}</button></div>`);setTimeout(()=>syncMember60(),0)};
 window.syncMember60=function(){const type=$('fmType')?.value||'member',role=$('fmRole');if(role&&type==='guest')role.value='member';if(role)role.disabled=type==='guest';const rr=role?.value||'member';$('fmPinWrap')?.classList.toggle('hide',rr==='member'||type==='guest');$('fmInviterWrap60')?.classList.toggle('hide',type!=='guest')};
 saveMemberNow=async function(){const cur=editMemberId?M(editMemberId):null,organizer=me?.role==='organizer'&&!me?.globalAdmin;if(!canMemberInfo60())return alert('회원정보 관리 권한이 없습니다.');const type=$('fmType')?.value||(cur?.type||'member');const role=organizer?(cur?roleOf(cur):'member'):($('fmRole')?.value||(cur?roleOf(cur):'member'));const body={memberId:editMemberId||'',name:$('fmName')?.value.trim()||(cur?.name||''),year:Number($('fmYear')?.value),gender:$('fmGender')?.value||'남',cls:$('fmCls')?.value||'C',type,role,pin:$('fmPin')?.value.trim()||'',inviter:type==='guest'?($('fmInviter60')?.value.trim()||''):''};if(!body.name)return alert('이름을 입력해주세요.');if(type==='guest'&&!body.inviter)return alert('게스트의 초대인을 입력해주세요.');try{const x=await v60Request('member_save',body);S=x.data;normalizeClient();closeModal();renderAll()}catch(e){showError(e)}};
 deleteMemberNow=async function(){const m=M(editMemberId);if(!m||!deletable60(m))return alert('이 회원을 삭제할 권한이 없습니다.');if(!confirm(`${m.name} 회원정보를 삭제하시겠습니까?`))return;try{const x=await v60Request('member_delete',{memberId:m.id});S=x.data;normalizeClient();closeModal();renderAll()}catch(e){showError(e)}};
 const act59=act;act=async function(action,body={},opts={}){const routed=['set_temp','set_my_attendance','set_member_attendance','create_pending','remove_from_pending','add_to_pending','move_pending_order','cancel_pending','begin_game','finish_game','set_game_court','set_courts','set_court_name'];if(!routed.includes(action))return act59(action,body,opts);const x=await v60Request('action',{action,...body});if(x.data){S=x.data;normalizeClient();renderAll()}return x};
 gameHtml=function(g){return `<div class="teams"><div class="team">${playerLine(g.players[0])}${playerLine(g.players[1])}</div><b>VS</b><div class="team">${playerLine(g.players[2])}${playerLine(g.players[3])}</div></div><div class="foot"><span class="meta">${new Date(g.startedAt).toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'})} 시작</span><div class="gameBtns">${canGame()?`<button class="btn ghost" onclick="openCourtChange('${g.id}')">코트변경</button>`:''}${canFinish60()?`<button class="btn danger" onclick="finishGameNow('${g.id}')">경기종료</button>`:''}</div></div>`};
-const renderSettings59=renderSettings;renderSettings=function(){renderSettings59();const box=$('settings');if(!box)return;[...box.querySelectorAll(':scope > .card')].forEach(c=>{const t=c.textContent||'';if(t.includes('당일 임시편성자')||t.includes('다. 회원정보 전체 정리 초기화'))c.remove()});if(canTempAssign60()){const eligible=S.members.filter(m=>m.type!=='guest'&&roleOf(m)==='member'&&m.state!=='out'),versionCard=[...box.querySelectorAll(':scope > .card')].find(c=>(c.textContent||'').includes('프로그램 버전')),html=`<div class="card"><b>당일 임시편성자</b><div class="meta" style="margin:5px 0 10px">일반회원에게 오늘만 게임편성·입장상태·코트설정 권한을 부여합니다.</div>${eligible.map(m=>`<div class="between" style="padding:7px 0;border-bottom:1px solid #edf0f7"><span>${esc(m.name)} ${ageTag(m)}</span><button class="btn ${isTemp(m)?'danger':'ghost'}" onclick="toggleTemp('${m.id}',${!isTemp(m)})">${isTemp(m)?'해제':'임시 지정'}</button></div>`).join('')||'<div class="empty">지정 가능한 참석 회원이 없습니다.</div>'}</div>`;if(versionCard)versionCard.insertAdjacentHTML('beforebegin',html);else box.insertAdjacentHTML('beforeend',html)}if((me?.globalAdmin||me?.role==='manager')&&!box.querySelector('.rosterReset60')){const versionCard=[...box.querySelectorAll(':scope > .card')].find(c=>(c.textContent||'').includes('프로그램 버전')),html=`<div class="card rosterReset60"><b>회원정보 전체 정리 초기화</b><div class="warn" style="margin:7px 0 10px;line-height:1.6">현재 모임에서 총관리자·모임관리자를 남기고 게임편성자·일반회원·게스트와 게임·대기·누적기록을 정리합니다.</div><button class="btn danger" style="width:100%" onclick="resetRoster60()">현재 모임 회원정보 전체 정리</button><div class="meta" style="margin-top:7px">권한: 모임관리자 · 총관리자</div></div>`;if(versionCard)versionCard.insertAdjacentHTML('beforebegin',html);else box.insertAdjacentHTML('beforeend',html)}[...box.querySelectorAll('.meta')].forEach(el=>{if((el.textContent||'').includes('콕매치 v59'))el.textContent='콕매치 v60 · 역할별 권한체계 재정비 · 전체회원 상태관리'})};
-window.resetRoster60=async function(){if(!(me?.globalAdmin||me?.role==='manager'))return alert('모임관리자 이상 권한이 필요합니다.');const pin=prompt(`${me?.globalAdmin?'총관리자':'모임관리자'} PIN을 입력해주세요.`);if(pin===null||!pin.trim())return;if(!confirm(`${group?.name||'현재 모임'}의 회원정보를 전체 정리하시겠습니까?\n총관리자와 모임관리자는 유지됩니다.`))return;try{const x=await v60Request('reset_roster',{pin:pin.trim()});S=x.data;normalizeClient();renderAll();alert(`회원정보 정리 완료 · 삭제 ${Number(x.removedCount)||0}명`)}catch(e){showError(e)}};
+const renderSettings59=renderSettings;renderSettings=function(){renderSettings59();const box=$('settings');if(!box)return;[...box.querySelectorAll(':scope > .card')].forEach(c=>{const t=c.textContent||'';if(t.includes('당일 임시편성자')||t.includes('다. 회원정보 전체 정리 초기화'))c.remove()});if(canTempAssign60()){const eligible=S.members.filter(m=>m.type!=='guest'&&roleOf(m)==='member'&&m.state!=='out'),versionCard=[...box.querySelectorAll(':scope > .card')].find(c=>(c.textContent||'').includes('프로그램 버전')),html=`<div class="card"><b>당일 임시편성자</b><div class="meta" style="margin:5px 0 10px">일반에게 오늘만 게임편성·입장상태·코트설정 권한을 부여합니다.</div>${eligible.map(m=>`<div class="between" style="padding:7px 0;border-bottom:1px solid #edf0f7"><span>${esc(m.name)} ${ageTag(m)}</span><button class="btn ${isTemp(m)?'danger':'ghost'}" onclick="toggleTemp('${m.id}',${!isTemp(m)})">${isTemp(m)?'해제':'임시 지정'}</button></div>`).join('')||'<div class="empty">지정 가능한 참석 회원이 없습니다.</div>'}</div>`;if(versionCard)versionCard.insertAdjacentHTML('beforebegin',html);else box.insertAdjacentHTML('beforeend',html)}if((me?.globalAdmin||me?.role==='manager')&&!box.querySelector('.rosterReset60')){const versionCard=[...box.querySelectorAll(':scope > .card')].find(c=>(c.textContent||'').includes('프로그램 버전')),html=`<div class="card rosterReset60"><b>회원정보 전체 정리 초기화</b><div class="warn" style="margin:7px 0 10px;line-height:1.6">현재 모임에서 개발자·모임장를 남기고 운영진·일반·게스트와 게임·대기·누적기록을 정리합니다.</div><button class="btn danger" style="width:100%" onclick="resetRoster60()">현재 모임 회원정보 전체 정리</button><div class="meta" style="margin-top:7px">권한: 모임장 · 개발자</div></div>`;if(versionCard)versionCard.insertAdjacentHTML('beforebegin',html);else box.insertAdjacentHTML('beforeend',html)}[...box.querySelectorAll('.meta')].forEach(el=>{if((el.textContent||'').includes('콕매치 v59'))el.textContent='콕매치 v60 · 역할별 권한체계 재정비 · 전체회원 상태관리'})};
+window.resetRoster60=async function(){if(!(me?.globalAdmin||me?.role==='manager'))return alert('모임장 이상 권한이 필요합니다.');const pin=prompt(`${me?.globalAdmin?'개발자':'모임장'} PIN을 입력해주세요.`);if(pin===null||!pin.trim())return;if(!confirm(`${group?.name||'현재 모임'}의 회원정보를 전체 정리하시겠습니까?\n개발자와 모임장는 유지됩니다.`))return;try{const x=await v60Request('reset_roster',{pin:pin.trim()});S=x.data;normalizeClient();renderAll();alert(`회원정보 정리 완료 · 삭제 ${Number(x.removedCount)||0}명`)}catch(e){showError(e)}};
 if(location.pathname.startsWith('/launch/v60'))history.replaceState(null,'','/?loaded=60');if(me)renderAll();
 })();
 
@@ -1817,9 +1817,9 @@ const act65=act;
 act=async function(action,body={},opts={}){const silent=new Set(['create_pending','add_to_pending','move_pending_member','swap_pending_queue','swap_pending_players']);return act65(action,silent.has(action)?{...body,forceRepeat:true}:body,opts)};
 
 async function callReset66(action,pin){const r=await fetch(RESET66,{method:'POST',headers:{'content-type':'application/json','authorization':'Bearer '+T},body:JSON.stringify({action,groupId:currentGroupId,pin}),cache:'no-store'});const x=await r.json().catch(()=>({}));if(!r.ok)throw new Error(x.error||'초기화에 실패했습니다.');return x}
-function resetRole66(){return me?.globalAdmin?'총관리자':me?.role==='manager'?'모임관리자':'게임편성자'}
+function resetRole66(){return me?.globalAdmin?'개발자':me?.role==='manager'?'모임장':'운영진'}
 window.resetTier40=async function(action){const allowed=action==='reset_daily'?(me?.globalAdmin||me?.role==='manager'||me?.role==='organizer'):action==='reset_cumulative'?(me?.globalAdmin||me?.role==='manager'):(me?.globalAdmin||me?.role==='manager');if(!allowed)return alert('해당 초기화 권한이 없습니다.');const pin=prompt(`${resetRole66()} PIN을 입력해주세요.`);if(pin===null||!pin.trim())return;const labels={reset_daily:'당일 게임 기록 및 로그인세션',reset_cumulative:'당일 기록·누적기록·파트너 설정',reset_roster:'회원정보 전체 정리·파트너 설정'};if(!confirm(`${group?.name||'현재 모임'}의 ${labels[action]}을(를) 초기화하시겠습니까?`))return;try{const x=await callReset66(action,pin.trim());if(me?.globalAdmin){S=x.data;normalizeClient();renderAll();goView('settings');alert('초기화를 완료했습니다.')}else{localStorage.removeItem(TOKEN_KEY);T='';location.replace('/launch/v66.html?afterReset='+Date.now())}}catch(e){showError(e)}};
-window.resetRoster60=async function(){if(!(me?.globalAdmin||me?.role==='manager'))return alert('모임관리자 이상 권한이 필요합니다.');const pin=prompt(`${me?.globalAdmin?'총관리자':'모임관리자'} PIN을 입력해주세요.`);if(pin===null||!pin.trim())return;if(!confirm(`${group?.name||'현재 모임'}의 회원정보를 전체 정리하시겠습니까?\n총관리자와 모임관리자는 유지되고 파트너 설정도 초기화됩니다.`))return;try{const x=await callReset66('reset_roster',pin.trim());if(me?.globalAdmin){S=x.data;normalizeClient();renderAll();goView('settings');alert(`회원정보 정리 완료 · 삭제 ${Number(x.removedCount)||0}명`)}else{localStorage.removeItem(TOKEN_KEY);T='';location.replace('/launch/v66.html?afterReset='+Date.now())}}catch(e){showError(e)}};
+window.resetRoster60=async function(){if(!(me?.globalAdmin||me?.role==='manager'))return alert('모임장 이상 권한이 필요합니다.');const pin=prompt(`${me?.globalAdmin?'개발자':'모임장'} PIN을 입력해주세요.`);if(pin===null||!pin.trim())return;if(!confirm(`${group?.name||'현재 모임'}의 회원정보를 전체 정리하시겠습니까?\n개발자와 모임장는 유지되고 파트너 설정도 초기화됩니다.`))return;try{const x=await callReset66('reset_roster',pin.trim());if(me?.globalAdmin){S=x.data;normalizeClient();renderAll();goView('settings');alert(`회원정보 정리 완료 · 삭제 ${Number(x.removedCount)||0}명`)}else{localStorage.removeItem(TOKEN_KEY);T='';location.replace('/launch/v66.html?afterReset='+Date.now())}}catch(e){showError(e)}};
 
 const renderSettings65=renderSettings;
 renderSettings=function(){renderSettings65();const box=$('settings');if(!box)return;box.querySelector('.partnerCard66')?.remove();const mine=me?.memberId?M(me.memberId):null;if(mine){const p=partner66(mine),versionCard=[...box.querySelectorAll(':scope > .card')].find(c=>(c.textContent||'').includes('프로그램 버전'));const html=`<div class="card partnerCard66"><div class="between"><div><b>오늘 파트너</b><div class="meta">${p?esc(p.name):'설정 없음'} · 자정 자동 해제</div></div><button class="btn ghost" onclick="openPartner66('${esc(mine.id)}')">${p?'변경':'설정'}</button></div></div>`;if(versionCard)versionCard.insertAdjacentHTML('beforebegin',html);else box.insertAdjacentHTML('beforeend',html)}[...box.querySelectorAll(':scope > .card')].forEach(c=>{const t=c.textContent||'';if((t.includes('나. 누적기록 포함 초기화')||t.includes('회원정보 전체 정리 초기화'))&&!c.querySelector('.partnerResetNote66'))c.insertAdjacentHTML('beforeend','<div class="meta partnerResetNote66" style="margin-top:7px">당일 파트너 설정도 함께 해제됩니다.</div>')});[...box.querySelectorAll('.meta')].forEach(el=>{if((el.textContent||'').includes('콕매치 v65'))el.textContent='콕매치 v66 · 당일 파트너 · 3게임 이상 즉시 경고'})};
@@ -2091,7 +2091,7 @@ renderMembers=function(){
  }
 
  if(addBtn)addBtn.remove();
- if(note)note.textContent='일반회원과 게스트는 회원명부에서 본인 정보만 확인할 수 있으며, 본인의 입장·관람·퇴장 상태만 변경할 수 있습니다.';
+ if(note)note.textContent='일반과 게스트는 회원명부에서 본인 정보만 확인할 수 있으며, 본인의 입장·관람·퇴장 상태만 변경할 수 있습니다.';
  const selfRow=rows.find(x=>String(x.m.id)===sid);
  rows.forEach(x=>{if(x!==selfRow)x.card.remove()});
  if(!selfRow){
@@ -2133,7 +2133,7 @@ renderMembers=function(){
  const oldTemp=me?.tempOrganizer;if(me)me.tempOrganizer=true;
  try{renderMembers69()}finally{if(me)me.tempOrganizer=oldTemp}
  const box=$('members');if(!box)return;
- const note=box.querySelector('.note');if(note)note.textContent='모든 회원이 현재 모임의 전체 회원명부를 볼 수 있습니다. 일반회원과 게스트는 본인의 입장·관람·퇴장만 변경할 수 있습니다.';
+ const note=box.querySelector('.note');if(note)note.textContent='모든 회원이 현재 모임의 전체 회원명부를 볼 수 있습니다. 일반과 게스트는 본인의 입장·관람·퇴장만 변경할 수 있습니다.';
  const self=box.querySelector('.memberSelf69'),my=mine70();
  [...box.querySelectorAll('.memberCard')].forEach(card=>{
   card.querySelector('.pairBtn:not(.partnerSetBtn66)')?.remove();
@@ -2372,7 +2372,7 @@ function renderPolls72(){
  return `<div class="subhead"><b>운동 참석 투표</b>${pollAdmin72()?'<button class="btn pri" onclick="openPollCreate72()">+ 투표 만들기</button>':''}</div>${ps.length?ps.map(renderPollCard72).join(''):'<div class="empty">진행 중인 참석 투표가 없습니다.</div>'}`;
 }
 window.openPollCreate72=function(){
- if(!pollAdmin72())return alert('게임편성자 이상 권한이 필요합니다.');
+ if(!pollAdmin72())return alert('운영진 이상 권한이 필요합니다.');
  const d=typeof businessDay71==='function'?businessDay71():todayKst();
  openModal(`<h3>운동 참석 투표 만들기</h3><div class="field"><label>일자</label><input id="pollDate72" type="date" value="${esc(d)}"></div><div class="field"><label>운동 시작 시간</label><input id="pollTime72" type="time" value="19:00"></div><div class="field"><label>제목</label><input id="pollTitle72" maxlength="40" value="운동 참석 투표"></div><div class="acts"><button class="btn ghost" onclick="closeModal()">취소</button><button class="btn pri" onclick="createPoll72()">투표 시작</button></div>`);
 };
@@ -2393,7 +2393,7 @@ window.deletePoll72=async function(id){
 window.openPollMembers72=function(id){
  const p=polls72().find(x=>String(x.id)===String(id));if(!p)return;
  const ms=yesMembers72(p).sort((a,b)=>roleRank72(a)-roleRank72(b)||String(a.name||'').localeCompare(String(b.name||''),'ko'));
- openModal(`<h3>참석 회원 ${ms.length}명</h3><div class="note">총관리자 → 모임관리자 → 게임편성자 → 임시편성자 → 일반회원 순으로 표시됩니다.</div>${ms.length?ms.map(m=>`<div class="pollMember72">${genderChip72(m)}<span class="pollName72">${esc(m.name)}</span><span class="tag">${esc(m.cls||'C')}</span>${roleBadge(m)}</div>`).join(''):'<div class="empty">참석을 선택한 회원이 없습니다.</div>'}<button class="btn ghost" style="width:100%;margin-top:10px" onclick="closeModal()">닫기</button>`);
+ openModal(`<h3>참석 회원 ${ms.length}명</h3><div class="note">개발자 → 모임장 → 운영진 → 임시편성자 → 일반 순으로 표시됩니다.</div>${ms.length?ms.map(m=>`<div class="pollMember72">${genderChip72(m)}<span class="pollName72">${esc(m.name)}</span><span class="tag">${esc(m.cls||'C')}</span>${roleBadge(m)}</div>`).join(''):'<div class="empty">참석을 선택한 회원이 없습니다.</div>'}<button class="btn ghost" style="width:100%;margin-top:10px" onclick="closeModal()">닫기</button>`);
 };
 window.openPollGuests72=function(id){
  const p=polls72().find(x=>String(x.id)===String(id));if(!p)return;const gs=guests72(p);
@@ -2548,7 +2548,7 @@ window.syncPollTitle73=function(force=false){
  if(force||title.dataset.manual!=='1')title.value=autoPollTitle73(date,time,location);
 };
 window.openPollCreate72=function(){
- if(!(me?.globalAdmin||me?.role==='manager'||me?.role==='organizer'))return alert('게임편성자 이상 권한이 필요합니다.');
+ if(!(me?.globalAdmin||me?.role==='manager'||me?.role==='organizer'))return alert('운영진 이상 권한이 필요합니다.');
  const d=todayKst();
  openModal(`<h3>운동 참석 투표 만들기</h3>
   <div class="field"><label>일자</label><input id="pollDate72" type="date" value="${esc(d)}"></div>
@@ -2587,7 +2587,7 @@ function patchResetText73(box){
   }else if(t.includes('나. 누적기록 포함')){
    const d=card.querySelector('.meta,.warn');if(d)d.innerHTML='가 항목의 초기화에 더해 회원별 <b>월간 출석 횟수와 월별 누적 출석기록</b>, 같이한 경기 누적기록을 초기화하고 당일 파트너 설정도 해제합니다.<br><b>회원명단·역할·모임 가입일은 유지</b>합니다.';
   }else if(t.includes('다. 회원정보 전체 정리')){
-   const d=card.querySelector('.warn,.meta');if(d)d.innerHTML='현재 모임에서 <b>총관리자와 모임관리자만 남기고</b> 게임편성자·일반회원·게스트 정보를 삭제합니다. 게임·대기·월간/누적 출석기록도 함께 초기화됩니다.<br>다른 모임에는 영향을 주지 않습니다.';
+   const d=card.querySelector('.warn,.meta');if(d)d.innerHTML='현재 모임에서 <b>개발자와 모임장만 남기고</b> 운영진·일반·게스트 정보를 삭제합니다. 게임·대기·월간/누적 출석기록도 함께 초기화됩니다.<br>다른 모임에는 영향을 주지 않습니다.';
   }
  });
 }
@@ -2640,7 +2640,7 @@ async function createPollRequest74(body){
 }
 window.syncPollTitle74=function(force=false){const title=$('pollTitle72'),date=$('pollDate72')?.value||'',time=$('pollTime72')?.value||'',location=$('pollLocation73')?.value.trim()||'';if(!title)return;if(force||title.dataset.manual!=='1')title.value=autoPollTitle74(date,time,location)};
 window.openPollCreate72=function(){
- if(!(me?.globalAdmin||me?.role==='manager'||me?.role==='organizer'))return alert('게임편성자 이상 권한이 필요합니다.');
+ if(!(me?.globalAdmin||me?.role==='manager'||me?.role==='organizer'))return alert('운영진 이상 권한이 필요합니다.');
  const d=today74();
  openModal(`<h3>운동 참석 투표 만들기</h3><div class="pollCreateForm74">
   <div class="field"><label>일자</label><input id="pollDate72" type="date" value="${esc(d)}"></div>
@@ -2760,7 +2760,7 @@ window.syncPollTitle76=function(force=false){
  if(force||title.dataset.manual!=='1')title.value=autoTitle76(date,time,location);
 };
 window.openPollCreate72=function(){
- if(!pollAdmin76())return alert('게임편성자 이상 권한이 필요합니다.');
+ if(!pollAdmin76())return alert('운영진 이상 권한이 필요합니다.');
  const d=today76(),time='18:30';
  openModal(`<h3>운동 참석 투표 만들기</h3><div class="pollCreateForm74">
   <div class="field"><label>일자</label><div class="pollDateRow76"><input id="pollDate72" type="date" value="${esc(d)}"><span id="pollWeekday76" class="pollWeekday76">${dateWeekday76(d)}</span></div></div>
@@ -2883,7 +2883,7 @@ function preparePartnerCompat82(){const b=businessDay82(),c=todayKst();if(b===c|
 function partner82(m){if(!m||!m.partnerId||!validPartnerDay82(m.partnerDay))return null;const p=M(String(m.partnerId));return p?{id:String(p.id),name:String(p.name||''),member:p}:null}
 function canSetPartner82(m){return !!m&&!!me&&(String(me.memberId||'')===String(m.id)||me.globalAdmin||me.role==='manager'||me.role==='organizer')}
 function memberLabel82(m){if(!m)return '-';return `${String(m.name||'-')} ${String(m.age||'')}${String(m.cls||'')}${String(m.gender||'')}`.trim()}
-function roleText82(m){if(!m)return'';if(m.type==='guest')return'게스트';const r=roleOf(m);return r==='admin'?'총관리자':r==='manager'?'모임관리자':r==='organizer'?'게임편성자':isTemp(m)?'임시편성자':'일반회원'}
+function roleText82(m){if(!m)return'';if(m.type==='guest')return'게스트';const r=roleOf(m);return r==='admin'?'개발자':r==='manager'?'모임장':r==='organizer'?'운영진':isTemp(m)?'임시편성자':'일반'}
 
 async function partnerRequest82(action,body={}){
  const r=await fetch(PARTNER82,{method:'POST',headers:{'content-type':'application/json','authorization':'Bearer '+T},body:JSON.stringify({action,groupId:currentGroupId,...body}),cache:'no-store'});
@@ -2927,9 +2927,9 @@ preparePartnerCompat82();if(me)renderAll();
 
 /* migrated into v6.0: app-v83.js */
 (()=>{
-const ROLE_REPLACE83=[['임시편성자','편성자'],['게임편성자','운영진'],['모임관리자','모임장'],['일반회원','일반']];
+const ROLE_REPLACE83=[['임시편성자','편성자'],['운영진','운영진'],['모임장','모임장'],['일반','일반']];
 
-roleLabel=function(r){return r==='admin'?'총관리자':r==='manager'?'모임장':r==='organizer'?'운영진':'일반'};
+roleLabel=function(r){return r==='admin'?'개발자':r==='manager'?'모임장':r==='organizer'?'운영진':'일반'};
 
 function translateString83(v){let s=String(v??'');for(const [a,b] of ROLE_REPLACE83)s=s.split(a).join(b);return s}
 function translateNode83(root){
@@ -3017,7 +3017,7 @@ roleBadge=function(m){
  const globalLike=r==='admin'||(me?.globalAdmin&&m?.name===me.displayName);
  if(globalLike){
   return canSeeGlobal84()
-   ? '<span class="roleBadge role-global">총관리자</span>'
+   ? '<span class="roleBadge role-global">개발자</span>'
    : '<span class="roleBadge role-member44">일반</span>';
  }
  if(r==='manager')return '<span class="roleBadge role-manager">모임장</span>';
@@ -3068,7 +3068,7 @@ const renderSettings83=renderSettings;
 renderSettings=function(){
  renderSettings83();const box=$('settings');if(!box)return;
  [...box.querySelectorAll('.meta')].forEach(el=>{
-  if((el.textContent||'').includes('콕매치 v83'))el.textContent='콕매치 v84 · 회원명부 간격/정렬 · 숨김 총관리자 일반표시';
+  if((el.textContent||'').includes('콕매치 v83'))el.textContent='콕매치 v84 · 회원명부 간격/정렬 · 숨김 개발자 일반표시';
  });
 };
 
@@ -3530,7 +3530,7 @@ if(me)renderAll();
 
 /* migrated into v6.0: app-v92.js */
 (()=>{
-const ROLE_REPLACE92=[['총관리자','개발자']];
+const ROLE_REPLACE92=[['개발자','개발자']];
 roleLabel=function(r){return r==='admin'?'개발자':r==='manager'?'모임장':r==='organizer'?'운영진':'일반'};
 function translate92(root){
  if(!root)return;
@@ -3658,9 +3658,6 @@ const oldSettings97=renderSettings;renderSettings=function(){oldSettings97();con
 if(location.pathname.startsWith('/launch/v97'))history.replaceState(null,'','/?loaded=97');
 if(me){renderAll();setTimeout(enhance97,40)}
 })();
-
-/* migrated into v6.0: app-v98.js */
-
 
 /* migrated into v6.0: app-v99.js */
 (()=>{
@@ -5328,13 +5325,13 @@ async function loginReq33(action,body={}){
 }
 function loginChoiceHtml33(c,i,globalAdmin){
  const year=c.year?`${esc(c.year)}년생`:'출생연도 미등록';
- const role=globalAdmin?'총관리자':esc(c.roleLabel||'회원');
+ const role=globalAdmin?'개발자':esc(c.roleLabel||'회원');
  return `<button type="button" class="choiceBtn loginChoice33" onclick="chooseLoginGroup33(${i})"><b>${esc(pendingLoginName)} · ${year}</b><span>${esc(c.groupName||'모임')}</span><small>${role}</small></button>`;
 }
 function renderLoginPin33(){
  const c=selectedLogin33;if(!c)return renderLoginName();
  const year=c.year?`${esc(c.year)}년생`:'출생연도 미등록';
- const role=c.globalAdmin?'총관리자':esc(c.roleLabel||'회원');
+ const role=c.globalAdmin?'개발자':esc(c.roleLabel||'회원');
  $('loginBox').innerHTML=`<h2>PIN 인증</h2><div class="loginMember33"><b>${esc(pendingLoginName)} · ${year}</b><span>${esc(c.groupName||'모임')}</span><small>${role}</small></div><div class="field"><label>PIN</label><input id="loginPin" type="password" inputmode="numeric" autocomplete="current-password" placeholder="PIN 입력"></div><button id="loginSubmit33" class="btn pri" style="width:100%" onclick="submitLogin()">로그인</button><div id="loginErr" class="error"></div><button class="btn ghost" style="width:100%;margin-top:8px" onclick="${loginChoices33.length>1?'renderLoginChoices33()':'renderLoginName()'}">← ${loginChoices33.length>1?'모임 다시 선택':'이름 다시 입력'}</button>`;
  const p=$('loginPin');if(p){p.addEventListener('keydown',e=>{if(e.key==='Enter')submitLogin()});setTimeout(()=>p.focus(),30)}
 }
@@ -5356,7 +5353,7 @@ startLogin=async function(){
   const x=await loginReq33('probe',{name});pendingLoginName=name;
   loginChoices33=(Array.isArray(x.memberships)?x.memberships:[]).map(c=>({...c}));
   loginChoices33._globalAdmin=!!x.globalAdmin;
-  if(!loginChoices33.length&&x.globalAdmin)loginChoices33.push({groupId:'',groupName:'전체 모임',memberId:'',year:'',roleLabel:'총관리자'});
+  if(!loginChoices33.length&&x.globalAdmin)loginChoices33.push({groupId:'',groupName:'전체 모임',memberId:'',year:'',roleLabel:'개발자'});
   if(loginChoices33.length===1){selectedLogin33={...loginChoices33[0],globalAdmin:!!x.globalAdmin};renderLoginPin33()}else renderLoginChoices33();
  }catch(e){if(err)err.textContent=e.message}finally{loginBusy33=false}
 };
@@ -5409,7 +5406,7 @@ const BULK34_API='https://wjelumpbjklfrdjxbesj.supabase.co/functions/v1/kokmatch
 function yearNow34(){return Number(new Intl.DateTimeFormat('en',{timeZone:'Asia/Seoul',year:'numeric'}).format(new Date()))||new Date().getFullYear()}
 function roleLabel34(r){return r==='manager'?'모임장':r==='organizer'?'운영진':'일반'}
 function canAssign34(role){if(me?.globalAdmin)return ['member','organizer','manager'].includes(role);if(me?.role==='manager')return ['member','organizer'].includes(role);return role==='member'}
-function parseRole34(raw){const t=String(raw||'일반').trim().toLowerCase();if(['모임장','모임관리자','manager'].includes(t))return{type:'member',role:'manager'};if(['운영진','게임편성자','organizer'].includes(t))return{type:'member',role:'organizer'};if(['일반','일반회원','회원','member',''].includes(t))return{type:'member',role:'member'};if(['게스트','guest'].includes(t))return{type:'guest',role:'member'};return null}
+function parseRole34(raw){const t=String(raw||'일반').trim().toLowerCase();if(['모임장','모임장','manager'].includes(t))return{type:'member',role:'manager'};if(['운영진','운영진','organizer'].includes(t))return{type:'member',role:'organizer'};if(['일반','일반','회원','member',''].includes(t))return{type:'member',role:'member'};if(['게스트','guest'].includes(t))return{type:'guest',role:'member'};return null}
 function parseBulk34(text){const lines=String(text||'').split(/\r?\n/).map(x=>x.trim()).filter(Boolean),rows=[],errors=[];lines.forEach((line,idx)=>{const cells=(line.includes('\t')?line.split('\t'):line.split(',')).map(x=>x.trim());if(idx===0&&['이름','name'].includes((cells[0]||'').toLowerCase()))return;const [name,yr,gender,clsRaw,kindRaw='일반']=cells,year=Number(yr),cls=String(clsRaw||'').toUpperCase(),rr=parseRole34(kindRaw);if(!name)errors.push(`${idx+1}행: 이름이 없습니다.`);if(!Number.isInteger(year)||year<1900||year>yearNow34())errors.push(`${idx+1}행: 출생연도를 확인해주세요.`);if(!['남','여'].includes(gender))errors.push(`${idx+1}행: 성별은 남 또는 여로 입력해주세요.`);if(!['A','B','C','D','E'].includes(cls))errors.push(`${idx+1}행: 급수는 A~E로 입력해주세요.`);if(!rr)errors.push(`${idx+1}행: 구분은 모임장, 운영진, 일반 또는 게스트로 입력해주세요.`);else if(rr.type!=='guest'&&!canAssign34(rr.role))errors.push(`${idx+1}행: ${roleLabel34(rr.role)} 역할을 등록할 권한이 없습니다.`);rows.push({name,year,gender,cls,type:rr?.type||'member',role:rr?.role||'member'})});return{rows,errors}}
 function duplicateSig34(x){return [String(x?.name||'').trim(),String(Number(x?.year)||''),String(x?.gender||'').trim(),String(x?.cls||'').trim().toUpperCase()].join('|')}
 function duplicateLabel34(x){return `${String(x?.name||'').trim()} · ${Number(x?.year)||''}년생 · ${String(x?.gender||'')} · ${String(x?.cls||'').toUpperCase()}급`}
@@ -5436,14 +5433,14 @@ function candidateInfo35(c){const year=c.year?`${esc(c.year)}년생`:'출생연�
 function candidateHtml35(c,i){return`<button type="button" class="choiceBtn loginChoice33" onclick="chooseLoginMember35(${i})"><b>${esc(pendingLoginName)}</b><span>${candidateInfo35(c)}</span><small>${esc(c.groupName||'모임')}</small></button>`}
 function renderLoginCandidates35(){if(!loginCandidates35.length)return renderLoginName();$('loginBox').innerHTML=`<h2>${loginCandidates35.length>1?'동명이인 회원 선택':'회원 확인'}</h2><div class="authName">${esc(pendingLoginName)}</div><div class="note loginGuide33">${loginCandidates35.length>1?'같은 이름으로 등록된 회원이 있습니다. 본인의 출생연도·성별·급수·역할을 확인하고 선택해주세요.':'회원정보를 확인해주세요.'}</div><div class="choiceList loginChoices33">${loginCandidates35.map((c,i)=>candidateHtml35(c,i)).join('')}</div><div id="loginErr" class="error"></div><button class="btn ghost" style="width:100%;margin-top:9px" onclick="renderLoginName()">← 이름 다시 입력</button>`}
 window.chooseLoginMember35=function(i){const c=loginCandidates35[Number(i)];if(!c)return;selectedLogin35=c;renderLoginPin35()};
-function renderLoginPin35(){const c=selectedLogin35;if(!c)return renderLoginCandidates35();const adminOnly=!!c.globalAdminOnly;const title=adminOnly?'총관리자 PIN':'모임 PIN';$('loginBox').innerHTML=`<h2>${title} 입력</h2><div class="loginMember33"><b>${esc(pendingLoginName)}</b><span>${adminOnly?'총관리자':candidateInfo35(c)}</span><small>${adminOnly?'':esc(c.groupName||'모임')}</small></div><div class="note" style="margin-bottom:12px">${adminOnly?'총관리자 PIN을 입력해주세요.':'선택한 모임의 모임 PIN을 입력해주세요.'}</div><div class="field"><label>${title}</label><input id="loginPin" type="password" inputmode="numeric" autocomplete="current-password" placeholder="${title} 입력"></div><button id="loginSubmit35" class="btn pri" style="width:100%" onclick="submitLogin()">로그인</button><div id="loginErr" class="error"></div><button class="btn ghost" style="width:100%;margin-top:8px" onclick="${loginCandidates35.length>1?'renderLoginCandidates35()':'renderLoginName()'}">← ${loginCandidates35.length>1?'회원 다시 선택':'이름 다시 입력'}</button>`;const p=$('loginPin');if(p){p.addEventListener('keydown',e=>{if(e.key==='Enter')submitLogin()});setTimeout(()=>p.focus(),30)}}
+function renderLoginPin35(){const c=selectedLogin35;if(!c)return renderLoginCandidates35();const adminOnly=!!c.globalAdminOnly;const title=adminOnly?'개발자 PIN':'모임 PIN';$('loginBox').innerHTML=`<h2>${title} 입력</h2><div class="loginMember33"><b>${esc(pendingLoginName)}</b><span>${adminOnly?'개발자':candidateInfo35(c)}</span><small>${adminOnly?'':esc(c.groupName||'모임')}</small></div><div class="note" style="margin-bottom:12px">${adminOnly?'개발자 PIN을 입력해주세요.':'선택한 모임의 모임 PIN을 입력해주세요.'}</div><div class="field"><label>${title}</label><input id="loginPin" type="password" inputmode="numeric" autocomplete="current-password" placeholder="${title} 입력"></div><button id="loginSubmit35" class="btn pri" style="width:100%" onclick="submitLogin()">로그인</button><div id="loginErr" class="error"></div><button class="btn ghost" style="width:100%;margin-top:8px" onclick="${loginCandidates35.length>1?'renderLoginCandidates35()':'renderLoginName()'}">← ${loginCandidates35.length>1?'회원 다시 선택':'이름 다시 입력'}</button>`;const p=$('loginPin');if(p){p.addEventListener('keydown',e=>{if(e.key==='Enter')submitLogin()});setTimeout(()=>p.focus(),30)}}
 renderLoginName=function(){loginCandidates35=[];selectedLogin35=null;pendingLoginPin='';$('loginBox').innerHTML=`<h1>🏸 콕매치</h1><div class="meta" style="font-size:14px;margin-bottom:18px">모임 회원 로그인</div><div class="field"><label>등록된 이름</label><input id="loginName" autocomplete="username" placeholder="이름"></div><button class="btn pri" style="width:100%" onclick="startLogin()">다음</button><div id="loginErr" class="error"></div><div class="note" style="margin-top:12px">동명이인이 있으면 <b>이름 · 출생연도 · 성별 · 급수 · 역할</b>을 확인해 본인을 선택한 뒤 모임 PIN으로 로그인합니다.</div>`;const n=$('loginName');if(n){n.addEventListener('keydown',e=>{if(e.key==='Enter')startLogin()});setTimeout(()=>n.focus(),30)}};
-startLogin=async function(){if(loginBusy35)return;const name=$('loginName')?.value.trim()||'',err=$('loginErr');if(err)err.textContent='';if(!name){if(err)err.textContent='이름을 입력해주세요.';return}loginBusy35=true;try{const x=await loginReq35('probe',{name});pendingLoginName=name;loginCandidates35=(Array.isArray(x.memberships)?x.memberships:[]).map(c=>({...c}));if(!loginCandidates35.length&&x.globalAdmin)loginCandidates35.push({globalAdminOnly:true,groupId:'',groupName:'',memberId:'',year:'',gender:'',cls:'',roleLabel:'총관리자'});if(loginCandidates35.length===1){selectedLogin35=loginCandidates35[0];renderLoginPin35()}else renderLoginCandidates35()}catch(e){if(err)err.textContent=e.message}finally{loginBusy35=false}};
+startLogin=async function(){if(loginBusy35)return;const name=$('loginName')?.value.trim()||'',err=$('loginErr');if(err)err.textContent='';if(!name){if(err)err.textContent='이름을 입력해주세요.';return}loginBusy35=true;try{const x=await loginReq35('probe',{name});pendingLoginName=name;loginCandidates35=(Array.isArray(x.memberships)?x.memberships:[]).map(c=>({...c}));if(!loginCandidates35.length&&x.globalAdmin)loginCandidates35.push({globalAdminOnly:true,groupId:'',groupName:'',memberId:'',year:'',gender:'',cls:'',roleLabel:'개발자'});if(loginCandidates35.length===1){selectedLogin35=loginCandidates35[0];renderLoginPin35()}else renderLoginCandidates35()}catch(e){if(err)err.textContent=e.message}finally{loginBusy35=false}};
 async function finalizeLogin35(x,c){T=x.token;localStorage.setItem(TOKEN_KEY,T);const gid=x.groupId||c?.groupId||'';if(gid){currentGroupId=gid;localStorage.setItem(GROUP_KEY,currentGroupId)}$('login').classList.add('hide');pendingLoginPin='';await loadState(true);const mine=me?.memberId?M(me.memberId):null;if(mine?.state==='out')openEntry()}
 submitLogin=async function(){if(loginBusy35)return;const c=selectedLogin35||loginCandidates35[0];if(!c){renderLoginCandidates35();return}const pin=$('loginPin')?.value.trim()||pendingLoginPin;if(!pin){const e=$('loginErr');if(e)e.textContent='모임 PIN을 입력해주세요.';return}pendingLoginPin=pin;loginBusy35=true;loginFinalizing35=true;const btn=$('loginSubmit35');if(btn)btn.disabled=true;try{let x=await loginReq35('login',{name:pendingLoginName,pin,groupId:c.groupId||'',memberId:c.memberId||''});try{await finalizeLogin35(x,c)}catch(e){if(!/로그인이 만료|로그인이 필요|401/i.test(String(e?.message||e)))throw e;await new Promise(r=>setTimeout(r,120));x=await loginReq35('login',{name:pendingLoginName,pin,groupId:c.groupId||'',memberId:c.memberId||''});await finalizeLogin35(x,c)}}catch(e){$('login')?.classList.remove('hide');const el=$('loginErr');if(el)el.textContent=e.message;else alert(e.message)}finally{loginFinalizing35=false;loginBusy35=false;if(btn)btn.disabled=false}};
 function memberSig35(x){const type=String(x?.type||'member')==='guest'?'guest':'member',role=type==='guest'?'member':String(x?.role||'member');return[String(x?.name||'').trim(),String(Number(x?.year)||''),String(x?.gender||'남'),String(x?.cls||'C').toUpperCase(),type,role].join('|')}
 function formMember35(){const cur=editMemberId?M(editMemberId):null,type=$('fmType')?.value==='guest'?'guest':'member';let role=$('fmRole')?.value||(cur?roleOf(cur):'member');if(type==='guest')role='member';return{name:$('fmName')?.value.trim()||'',year:Number($('fmYear')?.value),gender:$('fmGender')?.value||'남',cls:($('fmCls')?.value||'C').toUpperCase(),type,role}}
-const saveMemberNow35=saveMemberNow;saveMemberNow=async function(){const f=formMember35();if(f.name){const dup=(S?.members||[]).find(m=>String(m?.id)!==String(editMemberId||'')&&memberSig35(m)===memberSig35(f));if(dup){const kind=f.type==='guest'?'게스트':f.role==='manager'?'모임장':f.role==='organizer'?'운영진':'일반회원';return alert(`동일한 회원 정보가 이미 등록되어 있습니다.\n\n${f.name} · ${f.year}년생 · ${f.gender} · ${f.cls}급 · ${kind}\n\n출생연도·성별·급수·구분·역할 중 하나라도 다르면 동명이인으로 등록할 수 있습니다.`)}}return saveMemberNow35()};
+const saveMemberNow35=saveMemberNow;saveMemberNow=async function(){const f=formMember35();if(f.name){const dup=(S?.members||[]).find(m=>String(m?.id)!==String(editMemberId||'')&&memberSig35(m)===memberSig35(f));if(dup){const kind=f.type==='guest'?'게스트':f.role==='manager'?'모임장':f.role==='organizer'?'운영진':'일반';return alert(`동일한 회원 정보가 이미 등록되어 있습니다.\n\n${f.name} · ${f.year}년생 · ${f.gender} · ${f.cls}급 · ${kind}\n\n출생연도·성별·급수·구분·역할 중 하나라도 다르면 동명이인으로 등록할 수 있습니다.`)}}return saveMemberNow35()};
 const openMemberModal35=openMemberModal;openMemberModal=function(m){const r=openMemberModal35(m);if(!m)setTimeout(()=>{if($('sameNameGuide35'))return;const field=$('fmName')?.closest('.field');field?.insertAdjacentHTML('afterend','<div id="sameNameGuide35" class="meta" style="margin:-2px 0 8px">동명이인은 출생연도·성별·급수·구분·역할 중 하나라도 다르면 등록할 수 있습니다.</div>')},0);return r};
 const renderSettings34=renderSettings;renderSettings=function(){renderSettings34();const b=$('settings');if(!b)return;[...b.querySelectorAll('.meta')].forEach(el=>{if(/콕매치 v(?:\d+|\d+\.\d+)/.test(el.textContent||''))el.textContent='콕매치 v3.5 · 동명이인 개별등록 허용 · 완전일치만 중복차단 · 로그인 성별 구분'})};
 if(!T)renderLoginName();
@@ -5454,7 +5451,7 @@ if(!T)renderLoginName();
 const MEMBER36_API='https://wjelumpbjklfrdjxbesj.supabase.co/functions/v1/kokmatch-member-v45';
 function role36(){const type=$('fmType')?.value==='guest'?'guest':'member';let role=$('fmRole')?.value||'member';if(type==='guest')role='member';return{type,role}}
 function sig36(x){const type=String(x?.type||'member')==='guest'?'guest':'member',role=type==='guest'?'member':String(x?.role||'member');return[String(x?.name||'').trim(),String(Number(x?.year)||''),String(x?.gender||'남'),String(x?.cls||'C').toUpperCase(),type,role].join('|')}
-function label36(x){const kind=x.type==='guest'?'게스트':x.role==='manager'?'모임장':x.role==='organizer'?'운영진':'일반회원';return`${x.name} · ${x.year}년생 · ${x.gender} · ${x.cls}급 · ${kind}`}
+function label36(x){const kind=x.type==='guest'?'게스트':x.role==='manager'?'모임장':x.role==='organizer'?'운영진':'일반';return`${x.name} · ${x.year}년생 · ${x.gender} · ${x.cls}급 · ${kind}`}
 const saveMemberNowPrev36=saveMemberNow;
 saveMemberNow=async function(){
  if(editMemberId)return saveMemberNowPrev36();
@@ -5515,8 +5512,8 @@ window.renderLoginCandidates37=function(){
 window.chooseLoginMember37=function(i){const c=loginCandidates37[Number(i)];if(!c)return;selectedLogin37=c;renderLoginPin37()};
 function renderLoginPin37(){
  const c=selectedLogin37;if(!c)return renderLoginCandidates37();
- const adminOnly=!!c.globalAdminOnly,title=adminOnly?'총관리자 PIN':'모임 PIN';
- $('loginBox').innerHTML=`<h2>${title} 입력</h2><div class="loginMember33"><b>${esc(pendingLoginName)}</b><span>${adminOnly?'총관리자':candidateInfo37(c)}</span><small>${adminOnly?'':esc(c.groupName||'모임')}</small></div><div class="note" style="margin-bottom:12px">${adminOnly?'총관리자 PIN을 입력해주세요.':'선택한 모임의 모임 PIN을 입력해주세요.'}</div><div class="field"><label>${title}</label><input id="loginPin" type="password" inputmode="numeric" autocomplete="current-password" placeholder="${title} 입력"></div><button id="loginSubmit37" class="btn pri" style="width:100%" onclick="submitLogin()">로그인</button><div id="loginErr" class="error"></div><button class="btn ghost" style="width:100%;margin-top:8px" onclick="${loginCandidates37.length>1?'renderLoginCandidates37()':'renderLoginName()'}">← ${loginCandidates37.length>1?'회원 다시 선택':'이름 다시 입력'}</button>`;
+ const adminOnly=!!c.globalAdminOnly,title=adminOnly?'개발자 PIN':'모임 PIN';
+ $('loginBox').innerHTML=`<h2>${title} 입력</h2><div class="loginMember33"><b>${esc(pendingLoginName)}</b><span>${adminOnly?'개발자':candidateInfo37(c)}</span><small>${adminOnly?'':esc(c.groupName||'모임')}</small></div><div class="note" style="margin-bottom:12px">${adminOnly?'개발자 PIN을 입력해주세요.':'선택한 모임의 모임 PIN을 입력해주세요.'}</div><div class="field"><label>${title}</label><input id="loginPin" type="password" inputmode="numeric" autocomplete="current-password" placeholder="${title} 입력"></div><button id="loginSubmit37" class="btn pri" style="width:100%" onclick="submitLogin()">로그인</button><div id="loginErr" class="error"></div><button class="btn ghost" style="width:100%;margin-top:8px" onclick="${loginCandidates37.length>1?'renderLoginCandidates37()':'renderLoginName()'}">← ${loginCandidates37.length>1?'회원 다시 선택':'이름 다시 입력'}</button>`;
  const p=$('loginPin');if(p){p.addEventListener('keydown',e=>{if(e.key==='Enter')submitLogin()});setTimeout(()=>p.focus(),20)}
 }
 function scheduleProbe37(){
@@ -5536,7 +5533,7 @@ startLogin=async function(){
  try{
   const x=await probeName37(name);pendingLoginName=name;
   loginCandidates37=(Array.isArray(x.memberships)?x.memberships:[]).map(c=>({...c}));
-  if(!loginCandidates37.length&&x.globalAdmin)loginCandidates37.push({globalAdminOnly:true,groupId:'',groupName:'',memberId:'',year:'',gender:'',cls:'',roleLabel:'총관리자'});
+  if(!loginCandidates37.length&&x.globalAdmin)loginCandidates37.push({globalAdminOnly:true,groupId:'',groupName:'',memberId:'',year:'',gender:'',cls:'',roleLabel:'개발자'});
   if(loginCandidates37.length===1){selectedLogin37=loginCandidates37[0];renderLoginPin37()}else renderLoginCandidates37();
  }catch(e){if(err)err.textContent=e.message}
  finally{loginBusy37=false;if(btn&&document.body.contains(btn)){btn.disabled=false;btn.textContent='다음'}}
@@ -5548,7 +5545,7 @@ async function finalizeLogin37(x,c){
 }
 submitLogin=async function(){
  if(loginBusy37)return;const c=selectedLogin37||loginCandidates37[0];if(!c){renderLoginCandidates37();return}
- const pin=$('loginPin')?.value.trim()||pendingLoginPin;if(!pin){const e=$('loginErr');if(e)e.textContent=c.globalAdminOnly?'총관리자 PIN을 입력해주세요.':'모임 PIN을 입력해주세요.';return}
+ const pin=$('loginPin')?.value.trim()||pendingLoginPin;if(!pin){const e=$('loginErr');if(e)e.textContent=c.globalAdminOnly?'개발자 PIN을 입력해주세요.':'모임 PIN을 입력해주세요.';return}
  pendingLoginPin=pin;loginBusy37=true;loginFinalizing37=true;const btn=$('loginSubmit37');if(btn){btn.disabled=true;btn.textContent='로그인 중...'}
  try{
   let x=await loginReq37('login',{name:pendingLoginName,pin,groupId:c.groupId||'',memberId:c.memberId||''});
@@ -5559,7 +5556,7 @@ submitLogin=async function(){
 
 function roleForm37(){const type=$('fmType')?.value==='guest'?'guest':'member';let role=$('fmRole')?.value||'member';if(type==='guest')role='member';return{type,role}}
 function sig37(x){const type=String(x?.type||'member')==='guest'?'guest':'member',role=type==='guest'?'member':String(x?.role||'member');return[String(x?.name||'').trim(),String(Number(x?.year)||''),String(x?.gender||'남'),String(x?.cls||'C').toUpperCase(),type,role].join('|')}
-function label37(x){const kind=x.type==='guest'?'게스트':x.role==='manager'?'모임장':x.role==='organizer'?'운영진':'일반회원';return`${x.name} · ${x.year}년생 · ${x.gender} · ${x.cls}급 · ${kind}`}
+function label37(x){const kind=x.type==='guest'?'게스트':x.role==='manager'?'모임장':x.role==='organizer'?'운영진':'일반';return`${x.name} · ${x.year}년생 · ${x.gender} · ${x.cls}급 · ${kind}`}
 const saveMemberPrev37=saveMemberNow;
 saveMemberNow=async function(){
  if(editMemberId)return saveMemberPrev37();
@@ -6714,12 +6711,14 @@ function boot(){installCss();installAvatar();cleanMemberLegacy();decorateQueue()
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
 })();
 
-/* migrated into v6.0: app-v5.4-fix22.js */
+/* v6.0 canonical member roster */
 (()=>{
 'use strict';
 if(window.__kokmatchV54Fix22)return;
 window.__kokmatchV54Fix22=true;
 window.__kokmatchRosterCanonical='22.3';
+window.__kokmatchRosterCanonicalV6='6.0.1';
+document.documentElement.dataset.kokmatchRoster='6.0.1';
 
 function e22(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function jsId22(id){return String(id||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'")}
@@ -6730,10 +6729,10 @@ function roleBadge22(m){
  if(m?.type==='guest')return '<span class="roleBadge guest45">게스트</span>';
  const r=String(m?.role||'member');
  if(r==='admin')return '<span class="roleBadge role-global">개발자</span>';
- if(r==='manager')return '<span class="roleBadge role-manager">모임관리자</span>';
- if(r==='organizer')return '<span class="roleBadge role-organizer">게임편성자</span>';
- try{if(typeof isTemp==='function'&&isTemp(m))return '<span class="roleBadge role-temp">임시편성자</span>'}catch{}
- return '<span class="roleBadge role-member44">일반회원</span>';
+ if(r==='manager')return '<span class="roleBadge role-manager">모임장</span>';
+ if(r==='organizer')return '<span class="roleBadge role-organizer">운영진</span>';
+ try{if(typeof isTemp==='function'&&isTemp(m))return '<span class="roleBadge role-temp">편성자</span>'}catch{}
+ return '<span class="roleBadge role-member44">일반</span>';
 }
 function userFirst22(list){const a=Array.isArray(list)?list:[],id=String(me?.memberId||'');if(!id)return a.slice();const mine=a.find(m=>String(m?.id||'')===id);return mine?[mine,...a.filter(m=>String(m?.id||'')!==id)]:a.slice()}
 function replaceAvatar22(card,m){
@@ -6764,14 +6763,18 @@ function patchActions22(card,m){
   }else if(/^\s*openEditMember\s*\(/.test(raw))btn.setAttribute('onclick',`openEditMember('${safe}')`);
  });
 }
+function businessMonth22(){const d=new Date(Date.now()-5*60*60*1000);return new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Seoul',year:'numeric',month:'2-digit'}).format(d)}
+function monthLabel22(){return Number(businessMonth22().slice(5,7))+'월'}
+function attendanceCount22(m){const k=businessMonth22(),h=m?.attendanceHistory&&typeof m.attendanceHistory==='object'&&!Array.isArray(m.attendanceHistory)?m.attendanceHistory:null;if(h&&h[k]!=null)return Math.max(0,Number(h[k])||0);return String(m?.attendanceMonth||'')===k?Math.max(0,Number(m?.attendanceCount)||0):0}
+function canPartner22(m){return !!m&&!!me&&(String(me.memberId||'')===String(m.id)||me.globalAdmin||me.role==='manager'||me.role==='organizer')}
 function patchVisibleInfo22(card,m){
- const info=card.querySelector('.memberInfo48')||card.children?.[1];if(!info)return;
- const line=info.querySelector('.memberMainLine45')||info.querySelector('.name');
- if(line){line.classList.add('memberMainLine45');line.innerHTML=`<span class="memberName45">${e22(m.name)}</span>${grade22(m)}<span class="gamecnt">총 게임 ${Number(m.totalGames)||0}회</span>${roleBadge22(m)}`}
- const meta=info.querySelector(':scope > .meta')||info.querySelector('.meta');
- if(meta){const inv=inviter22(m);meta.innerHTML=`${e22(m.year||'')}년생 · ${e22(m.gender||'')}${inv?` <span class="inviteInfo45">· 초대 ${e22(inv)}</span>`:''}`}
- let pair=info.querySelector('.pairBtn');if(!pair){pair=document.createElement('button');pair.className='pairBtn';pair.textContent='같이한 경기 보기';info.appendChild(pair)}
- card.querySelectorAll('.v54genderText,.genderMark53').forEach(x=>x.remove());
+ const info=card.querySelector('.memberInfo48')||card.children?.[1];if(!info)return;info.classList.add('memberInfoV6');
+ const line=info.querySelector('.memberMainLine45')||info.querySelector('.name');if(line){line.classList.add('memberMainLine45');line.innerHTML="<span class='memberName45'>"+e22(m.name)+"</span>"+grade22(m)+roleBadge22(m)}
+ info.querySelectorAll('.gamecnt,.recordBtn73,.pairBtn,.memberAttendance71').forEach(x=>x.remove());
+ const meta=info.querySelector(':scope > .meta')||info.querySelector('.meta');if(meta){meta.classList.add('memberMetaV6');meta.innerHTML=e22(m.year||'')+'년생 · '+e22(m.gender||'')}
+ info.querySelectorAll('.memberRecordActions73,.memberRosterFooterV6').forEach(x=>x.remove());
+ const footer=document.createElement('div');footer.className='memberRosterFooterV6';footer.innerHTML="<span class='memberAttendanceV6'>"+monthLabel22()+' 출석 '+attendanceCount22(m)+"회</span>"+(canPartner22(m)?"<button type='button' class='partnerSetBtn66 rosterPartnerBtnV6'>파트너 설정</button>":'');info.appendChild(footer);
+ card.dataset.gradeV6=String(m?.cls||'C').trim().toUpperCase();card.dataset.memberId22=String(m?.id||'');card.dataset.memberId=String(m?.id||'');card.querySelectorAll('.v54genderText,.genderMark53').forEach(x=>x.remove());
 }
 function finalizeRoster22(){
  const box=document.getElementById('members');if(!box)return;
@@ -6807,404 +6810,114 @@ if(typeof originalSearch22==='function')window.searchMembers46=function(v){const
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(finalizeRoster22,0),{once:true});else setTimeout(finalizeRoster22,0);
 })();
 
-/* migrated into v6.0: app-v5.4-fix23.js */
+
+/* V6_ROSTER_REENTRY_BEGIN */
+(()=>{'use strict';let busy=false;function repair(){if(busy||currentView!=='members')return;busy=true;try{const q=String(document.getElementById('memberSearchInput46')?.value||'').trim();if(!q&&typeof window.resetMemberList46==='function')window.resetMemberList46();else if(typeof renderMembers==='function')renderMembers();try{window.__kokmatchFinalizeRoster22?.()}catch{}}catch(e){console.warn('v6 roster reentry',e)}finally{setTimeout(()=>{busy=false},100)}}const old=goView;goView=function(id,...args){const was=currentView,r=old(id,...args);if(id==='members'&&was!=='members'){queueMicrotask(repair);requestAnimationFrame(repair);setTimeout(repair,80)}return r};window.goView=goView;})();
+/* V6_ROSTER_REENTRY_END */
+
+/* v6.0 canonical interaction core: replaces legacy fix23/fix24/fix26 overlap */
 (()=>{
 'use strict';
-if(window.__kokmatchV54Fix23)return;
-window.__kokmatchV54Fix23=true;
-window.__kokmatchInteractionPatch='23.1';
+if(window.__kokmatchInteractionCore==='6.0')return;
+window.__kokmatchInteractionCore='6.0';
+document.documentElement.dataset.kokmatchInteractionCore='6.0';
+const AUTH_V6='https://wjelumpbjklfrdjxbesj.supabase.co/functions/v1/kokmatch-auth-v38';
+const MULTI_V6='https://wjelumpbjklfrdjxbesj.supabase.co/functions/v1/kokmatch-multi-api';
+let groupBusyV6=false,lastTouchV6=0,sxV6=0,syV6=0,stV6=0,movedV6=false,syncBusyV6=false;
+const pageFnV6=typeof window.memberPageGo46==='function'?window.memberPageGo46:null;
+const legacyLogoutV6=typeof logout==='function'?logout:null;
+function tokenV6(){try{return String(T||window.T||localStorage.getItem('kokmatch_token')||'')}catch{return String(window.T||localStorage.getItem('kokmatch_token')||'')}}
+function gidV6(){try{return String(currentGroupId||window.currentGroupId||localStorage.getItem('kokmatch_group_id')||'')}catch{return String(window.currentGroupId||localStorage.getItem('kokmatch_group_id')||'')}}
+function mineV6(){try{return me||window.me||null}catch{return window.me||null}}
+function membersV6(){try{return Array.isArray(S?.members)?S.members:(Array.isArray(window.S?.members)?window.S.members:[])}catch{return Array.isArray(window.S?.members)?window.S.members:[]}}
+function memberV6(id){id=String(id||'');return membersV6().find(m=>String(m?.id||'')===id)||null}
+function cardIdV6(card){return String(card?.dataset?.memberId22||card?.dataset?.memberId46||card?.dataset?.memberId||'')}
+function escV6(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function showV6(e){const msg=e?.message||String(e||'처리 중 오류가 발생했습니다.');try{typeof showError==='function'?showError(new Error(msg)):alert(msg)}catch{}}
+async function jsonV6(url,opt={}){const r=await fetch(url,{cache:'no-store',...opt}),x=await r.json().catch(()=>({}));if(!r.ok)throw new Error(x.error||x.message||('요청 실패 ('+r.status+')'));return x}
+function setTokenV6(v){v=String(v||'');try{T=v}catch{};window.T=v;try{localStorage.setItem('kokmatch_token',v)}catch{}}
+function setGroupV6(v){v=String(v||'');try{currentGroupId=v}catch{};window.currentGroupId=v;try{localStorage.setItem('kokmatch_group_id',v)}catch{}}
+function closeModalV6(){try{if(typeof closeModal==='function')return closeModal()}catch{};document.getElementById('modal')?.classList.remove('on')}
+function openModalV6(html){try{if(typeof openModal==='function'){openModal(html);return true}}catch{};const m=document.getElementById('modal'),s=document.getElementById('modalSheet');if(!m||!s)return false;s.innerHTML=html;m.classList.add('on');return true}
+function editV6(id){id=String(id||'');const m=memberV6(id);if(!m)return showV6(new Error('수정할 회원을 찾지 못했습니다.'));try{editMemberId=id}catch{};try{if(typeof openMemberModal==='function'){openMemberModal(m);return true}}catch(e){showV6(e)}return false}
+async function attendanceV6(id,mode){id=String(id||'');if(!memberV6(id))throw new Error('상태를 변경할 회원을 찾지 못했습니다.');const u=new URL(MULTI_V6);u.searchParams.set('api','action');u.searchParams.set('_v6',Date.now());const x=await jsonV6(u,{method:'POST',headers:{'content-type':'application/json',authorization:'Bearer '+tokenV6()},body:JSON.stringify({action:'set_member_attendance',groupId:gidV6(),memberId:id,mode})});if(x?.data){try{S=x.data}catch{};window.S=x.data;try{typeof normalizeClient==='function'&&normalizeClient()}catch{};try{typeof renderAll==='function'&&renderAll()}catch{}}return true}
+async function membershipsV6(){const m=mineV6();if(!m)return[];if(m.globalAdmin){try{return (Array.isArray(groups)?groups:window.groups||[]).map(g=>({groupId:String(g.groupId||g.group_id||''),groupName:String(g.name||g.groupName||'모임'),roleLabel:'개발자'})).filter(x=>x.groupId)}catch{return[]}}const x=await jsonV6(AUTH_V6,{method:'POST',headers:{'content-type':'application/json',authorization:'Bearer '+tokenV6()},body:JSON.stringify({action:'my_memberships',currentGroupId:gidV6()})});return Array.isArray(x.memberships)?x.memberships:[]}
+async function switchGroupV6(target){target=String(target||'');if(!target||groupBusyV6)return false;if(target===gidV6()){closeModalV6();return true}groupBusyV6=true;try{const oldToken=tokenV6();let newToken=oldToken;if(!mineV6()?.globalAdmin){const a=await jsonV6(AUTH_V6,{method:'POST',headers:{'content-type':'application/json',authorization:'Bearer '+oldToken},body:JSON.stringify({action:'switch_group',groupId:target})});target=String(a.groupId||target);newToken=String(a.token||oldToken)}const u=new URL(MULTI_V6);u.searchParams.set('api','state');u.searchParams.set('groupId',target);u.searchParams.set('_v6',Date.now());const x=await jsonV6(u,{headers:{authorization:'Bearer '+newToken}});if(String(x?.group?.groupId||'')!==target)throw new Error('선택한 모임 정보를 불러오지 못했습니다.');setTokenV6(newToken);setGroupV6(target);try{S=x.data;me=x.user;group=x.group;if(Array.isArray(x.groups))groups=x.groups;if(Array.isArray(x.groupSummaries))groupSummaries=x.groupSummaries}catch(e){throw e}window.S=S;window.me=me;window.group=group;window.currentGroupId=target;try{typeof normalizeClient==='function'&&normalizeClient()}catch{};try{typeof renderAll==='function'&&renderAll()}catch{};try{pageFnV6&&pageFnV6(1)}catch{};closeModalV6();try{window.scrollTo(0,0)}catch{};return true}catch(e){showV6(e);return false}finally{groupBusyV6=false;queueMicrotask(syncUiV6)}}
+async function openGroupsV6(){if(groupBusyV6||!mineV6())return false;groupBusyV6=true;try{openModalV6('<h3>모임 변경</h3><div class="note">가입된 모임을 불러오는 중…</div>');const list=await membershipsV6();if(!list.length){openModalV6('<h3>모임 변경</h3><div class="note">변경할 수 있는 가입 모임이 없습니다.</div><div class="acts"><button id="closeGroupV6" class="btn ghost">닫기</button></div>');document.getElementById('closeGroupV6')?.addEventListener('click',closeModalV6);return true}const cur=gidV6();openModalV6('<h3>모임 변경</h3><div class="note">이동할 모임을 선택해주세요.</div><div id="groupChoiceV6" class="choiceList">'+list.map(x=>'<button class="choiceBtn'+(String(x.groupId)===cur?' current':'')+'" type="button" data-group-v6="'+escV6(x.groupId)+'"><b>'+escV6(x.groupName||'모임')+(String(x.groupId)===cur?' · 현재':'')+'</b><span class="meta">'+escV6(x.role==='admin'?'개발자':x.role==='manager'?'모임장':x.role==='organizer'?'운영진':x.role==='member'?'일반':x.roleLabel||'')+'</span></button>').join('')+'</div><button id="closeGroupV6" class="btn ghost" style="width:100%;margin-top:9px">닫기</button>');document.querySelectorAll('#groupChoiceV6 button[data-group-v6]').forEach(btn=>{let touched=0;const fire=ev=>{touched=Date.now();ev?.preventDefault?.();ev?.stopPropagation?.();switchGroupV6(String(btn.dataset.groupV6||''))};btn.addEventListener('touchend',fire,{passive:false});btn.addEventListener('click',ev=>{if(Date.now()-touched<800){ev.preventDefault();return}fire(ev)})});document.getElementById('closeGroupV6')?.addEventListener('click',closeModalV6);return true}catch(e){showV6(e);return false}finally{groupBusyV6=false}}
+window.openGroupSwitchV6=openGroupsV6;window.switchGroupV6=switchGroupV6;
+function callV6(fn,...args){try{const r=fn?.(...args);if(r&&typeof r.then==='function')r.catch(showV6);return r}catch(e){showV6(e);return null}}
+function routeButtonV6(btn){if(!btn||btn.closest?.('#modal'))return false;if(btn.id==='groupBtn'){callV6(openGroupsV6);return true}const pager=btn.closest?.('#members .memberPager46');if(pager&&pageFnV6){const t=String(btn.textContent||'');const cur=Math.max(1,Number(window.__kokmatchMemberPage46)||1);if(t.includes('다음'))callV6(pageFnV6,cur+1);else if(t.includes('이전'))callV6(pageFnV6,Math.max(1,cur-1));else return false;return true}if(btn.closest?.('#members .title')&&String(btn.textContent||'').includes('회원등록')){const f=window.openAddMember||(typeof openAddMember==='function'?openAddMember:null);if(f){callV6(f);return true}}const card=btn.closest?.('#members .memberCard');if(!card)return false;const id=cardIdV6(card);if(!id)return false;const t=String(btn.textContent||'').trim();if(btn.classList.contains('partnerSetBtn66')&&typeof window.openPartner66==='function'){callV6(window.openPartner66,id);return true}if(btn.classList.contains('recordBtn73')||(btn.classList.contains('pairBtn')&&!btn.classList.contains('partnerSetBtn66'))||t.includes('가입·출석')||t.includes('같이한 경기')){const f=window.openPairs||(typeof openPairs==='function'?openPairs:null);if(f){callV6(f,id);return true}}if(t==='수정'){editV6(id);return true}if(btn.classList.contains('enter')||t==='운동'||t==='입장'){callV6(attendanceV6,id,'waiting');return true}if(btn.classList.contains('watch')||t==='관람'){callV6(attendanceV6,id,'spectator');return true}if((btn.classList.contains('danger')&&t==='퇴장')||t==='퇴장'){callV6(attendanceV6,id,'out');return true}return false}
+function bindProfileV6(){const card=document.getElementById('profileCard53');if(!card)return;let input=card.querySelector('#profileFile53');const label=card.querySelector('label[for="profileFile53"]');if(label){label.style.pointerEvents='auto';label.removeAttribute('aria-disabled')}if(input&&!input.dataset.v6clean){const fresh=input.cloneNode(true);fresh.dataset.v6clean='1';fresh.removeAttribute('onchange');fresh.disabled=false;input.replaceWith(fresh);input=fresh;input.addEventListener('change',()=>{const f=window.changeProfile53;if(typeof f==='function')Promise.resolve(f(input)).catch(showV6)})}const del=card.querySelector('#profileDelete21')||[...card.querySelectorAll('button')].find(b=>String(b.textContent||'').includes('기본 사진으로'));if(del&&!del.dataset.v6clean){del.dataset.v6clean='1';del.removeAttribute('onclick');del.onclick=null;del.addEventListener('click',ev=>{ev.preventDefault();const f=window.deleteProfile53;if(typeof f==='function')Promise.resolve(f()).catch(showV6)})}}
 
-const AUTH23='https://wjelumpbjklfrdjxbesj.supabase.co/functions/v1/kokmatch-auth-v38';
-const MULTI23='https://wjelumpbjklfrdjxbesj.supabase.co/functions/v1/kokmatch-multi-api';
-const legacyPageGo23=typeof window.memberPageGo46==='function'?window.memberPageGo46:null;
-const legacyOpenEdit23=typeof window.openEditMember==='function'?window.openEditMember:null;
-let switching23=false,membershipsBusy23=false,syncBusy23=false;
 
-function esc23(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
-function tok23(){try{return String(T||window.T||localStorage.getItem('kokmatch_token')||'')}catch{return String(window.T||localStorage.getItem('kokmatch_token')||'')}}
-function gid23(){try{return String(currentGroupId||window.currentGroupId||localStorage.getItem('kokmatch_group_id')||'')}catch{return String(window.currentGroupId||localStorage.getItem('kokmatch_group_id')||'')}}
-function mine23(){try{return me||window.me||null}catch{return window.me||null}}
-function grp23(){try{return group||window.group||null}catch{return window.group||null}}
-function member23(id){try{return typeof M==='function'?M(String(id||'')):null}catch{return null}}
-function setToken23(v){v=String(v||'');try{T=v}catch{};try{window.T=v}catch{};try{localStorage.setItem('kokmatch_token',v)}catch{}}
-function setGroup23(v){v=String(v||'');try{currentGroupId=v}catch{};try{window.currentGroupId=v}catch{};try{localStorage.setItem('kokmatch_group_id',v)}catch{}}
-function show23(e){const msg=e?.message||String(e||'처리 중 오류가 발생했습니다.');try{if(typeof showError==='function')showError(new Error(msg));else alert(msg)}catch{}}
-async function json23(url,opt={}){const r=await fetch(url,{cache:'no-store',...opt}),x=await r.json().catch(()=>({}));if(!r.ok){const e=new Error(x.error||x.message||`요청 실패 (${r.status})`);e.status=r.status;throw e}return x}
-
-/* Pagination: bind real buttons instead of depending on stacked inline handlers. */
-function page23(p){
- if(typeof legacyPageGo23!=='function')return false;
- const n=Math.max(1,Number(p)||1);
- const r=legacyPageGo23(n);
- queueMicrotask(sync23);requestAnimationFrame(sync23);setTimeout(sync23,50);
- return r;
+function installHeaderStyleV6(){
+ if(document.getElementById('kokmatchHeaderStyleV6'))return;
+ const s=document.createElement('style');s.id='kokmatchHeaderStyleV6';s.textContent='.toprow>#topActions50,.toprow>#topActions51,.toprow>#topActions52,.toprow>.logout{display:none!important}#topActionsV6{margin-left:auto;display:flex;align-items:center;justify-content:flex-end;gap:5px;position:relative;z-index:300;pointer-events:auto;min-width:0}#currentVersionV6{font-size:10px;font-weight:900;padding:6px 5px;border-radius:8px;background:rgba(255,255,255,.18);white-space:nowrap;flex:0 0 auto}#headerRefreshV6,#logoutV6{min-height:30px;padding:6px 8px;font-size:10.5px;font-weight:850;white-space:nowrap}#logoutV6{flex:0 0 64px}@media(max-width:380px){#currentVersionV6{display:none}#headerRefreshV6{max-width:120px;font-size:9.5px}#logoutV6{flex-basis:56px;width:56px;padding:6px 4px}}';document.head.appendChild(s)
 }
-window.memberPageGo46=page23;try{memberPageGo46=page23}catch{}
-function bindPager23(){
+async function explicitLogoutV6(){
+ if(window.__kokmatchLogoutBusyV6)return false;window.__kokmatchLogoutBusyV6=true;
+ try{if(typeof legacyLogoutV6==='function'){await legacyLogoutV6();return true}try{localStorage.removeItem('kokmatch_token')}catch{};location.replace('/');return true}
+ finally{setTimeout(()=>{window.__kokmatchLogoutBusyV6=false},500)}
+}
+function blockLegacyLogoutV6(){
+ const guard=function(){console.warn('콕매치 v6: 구형 로그아웃 호출 차단');return false};
+ guard.__kokmatchV6Guard=true;
+ try{logout=guard}catch{};try{window.logout=guard}catch{}
+}
+function normalizeHeaderV6(){
+ installHeaderStyleV6();blockLegacyLogoutV6();
+ const row=document.querySelector('.toprow');if(!row)return;
+ row.querySelectorAll('#topActions50,#topActions51,#topActions52,:scope > .logout').forEach(el=>el.remove());
+ let actions=document.getElementById('topActionsV6');
+ if(!actions){actions=document.createElement('div');actions.id='topActionsV6';actions.innerHTML='<span id="currentVersionV6">v6.0</span><button id="headerRefreshV6" class="btn ghost" type="button">↻ 새로고침</button><button id="logoutV6" type="button">로그아웃</button>';row.appendChild(actions);actions.querySelector('#headerRefreshV6')?.addEventListener('click',ev=>{ev.preventDefault();try{typeof saveRefreshState==='function'&&saveRefreshState()}catch{};location.reload()});actions.querySelector('#logoutV6')?.addEventListener('click',ev=>{ev.preventDefault();ev.stopPropagation();explicitLogoutV6()})}
+ const ver=actions.querySelector('#currentVersionV6');if(ver)ver.textContent='v6.0';
+ document.title='콕매치 v6.0';document.documentElement.dataset.kokmatchVersion='6.0';
+}
+
+function memberControlHtmlV6(m){
+ if(!m)return '';
+ let manage=false;try{manage=typeof canManageMembers==='function'&&canManageMembers()}catch{}
+ const state=String(m.state||'out');
+ const stateText=typeof stateLabel==='function'?stateLabel(state):(state==='waiting'?'게임대기':state==='matched'?'편성대기':state==='playing'?'게임중':state==='spectator'?'관람':'미입장');
+ if(!manage)return '<div class="status">'+escV6(stateText)+'</div>';
+ let r='member';try{r=typeof roleOf==='function'?roleOf(m):String(m.role||'member')}catch{r=String(m.role||'member')}
+ let editable=false;
+ try{editable=!!mineV6()?.globalAdmin||(mineV6()?.role==='manager'?(r!=='manager'||String(m.id)===String(mineV6()?.memberId||'')):r==='member')}catch{}
+ let buttons='';
+ if(state!=='playing'&&state!=='matched'){
+  if(state!=='waiting')buttons+='<button class="btn enter" type="button">운동</button>';
+  if(state!=='spectator')buttons+='<button class="btn watch" type="button">관람</button>';
+  if(state!=='out')buttons+='<button class="btn danger" type="button">퇴장</button>';
+ }
+ if(editable)buttons+='<button class="btn ghost" type="button">수정</button>';
+ return '<div class="memberActions48 v6MemberActions"><div class="status">'+escV6(stateText)+'</div><div class="memberBtns">'+buttons+'</div></div>';
+}
+function repairMemberControlsV6(){
  const box=document.getElementById('members');if(!box)return;
- const pager=box.querySelector('.memberPager46');if(!pager)return;
- const buttons=[...pager.querySelectorAll('button')];
- buttons.forEach(btn=>{
-  if(btn.dataset.v23pager)return;btn.dataset.v23pager='1';
-  const dir=(btn.textContent||'').includes('이전')?-1:(btn.textContent||'').includes('다음')?1:0;if(!dir)return;
-  btn.removeAttribute('onclick');btn.onclick=null;
-  btn.addEventListener('click',ev=>{ev.preventDefault();ev.stopPropagation();if(btn.disabled)return;const cur=Math.max(1,Number(window.__kokmatchMemberPage46)||1);page23(cur+dir)});
+ box.querySelectorAll('.memberCard').forEach(card=>{
+  const id=cardIdV6(card),m=memberV6(id);if(!m)return;
+  const expected=memberControlHtmlV6(m);if(!expected)return;
+  const current=card.querySelector(':scope > .v6MemberActions,:scope > .memberActions48')||[...card.children].find((el,i)=>i>=2&&!el.classList?.contains('avatar')&&!el.classList?.contains('memberInfo48'));
+  const signature=[String(m.state||'out'),String(m.role||'member'),String(m.type||'member'),String(m.id||''),String(mineV6()?.role||''),String(!!mineV6()?.globalAdmin),String(mineV6()?.memberId||'')].join('|');
+  if(current?.dataset?.v6ControlSig===signature)return;
+  const temp=document.createElement('div');temp.innerHTML=expected;const next=temp.firstElementChild;if(!next)return;next.dataset.v6ControlSig=signature;
+  if(current&&current!==card.querySelector('.memberInfo48')&&!current.classList?.contains('avatar'))current.replaceWith(next);else card.appendChild(next);
  });
 }
 
-/* Member edit: always open the member stored on that exact card. */
-function openEdit23(id){
- id=String(id||'');const m=member23(id);if(!m){if(legacyOpenEdit23)return legacyOpenEdit23(id);return false}
- try{editMemberId=id}catch{}
- try{if(typeof openMemberModal==='function'){openMemberModal(m);return true}}catch(e){show23(e);return false}
- if(legacyOpenEdit23)return legacyOpenEdit23(id);return false;
-}
-window.openEditMember=openEdit23;try{openEditMember=openEdit23}catch{}
-function bindMemberEdit23(){
- const box=document.getElementById('members');if(!box)return;
- [...box.querySelectorAll('.memberCard')].forEach(card=>{
-  const id=String(card.dataset.memberId22||card.dataset.memberId46||'');if(!id)return;
-  [...card.querySelectorAll('button')].filter(b=>(b.textContent||'').trim()==='수정'||/^\s*openEditMember\s*\(/.test(String(b.getAttribute('onclick')||''))).forEach(btn=>{
-   if(btn.dataset.v23edit)return;btn.dataset.v23edit='1';btn.removeAttribute('onclick');btn.onclick=null;
-   btn.addEventListener('click',ev=>{ev.preventDefault();ev.stopPropagation();openEdit23(id)});
-  });
- });
-}
-
-/* Profile picker: remove stacked legacy change listeners and keep exactly one current handler. */
-function bindProfile23(){
- const card=document.getElementById('profileCard53');if(!card)return;
- let input=card.querySelector('#profileFile53');const label=card.querySelector('label[for="profileFile53"]');
- if(label){label.style.pointerEvents='auto';label.style.opacity='';label.removeAttribute('aria-disabled')}
- if(input&&!input.dataset.v23clean){
-  const fresh=input.cloneNode(true);fresh.dataset.v23clean='1';fresh.dataset.v21bound='1';fresh.dataset.v54bound='1';fresh.disabled=false;fresh.removeAttribute('onchange');fresh.value='';
-  input.replaceWith(fresh);input=fresh;
-  input.addEventListener('change',()=>{const fn=window.changeProfile53; if(typeof fn==='function')Promise.resolve(fn(input)).catch(show23)});
- }
- if(input)input.disabled=false;
- const del=card.querySelector('#profileDelete21')||[...card.querySelectorAll('button')].find(b=>(b.textContent||'').includes('기본 사진으로'));
- if(del&&!del.dataset.v23delete){del.dataset.v23delete='1';del.onclick=null;del.removeAttribute('onclick');del.addEventListener('click',ev=>{ev.preventDefault();const fn=window.deleteProfile53;if(typeof fn==='function')Promise.resolve(fn()).catch(show23)})}
-}
-
-/* Group switch for every logged-in membership, not only global admin. */
-function setGroupButtonBusy23(on){const b=document.getElementById('groupBtn');if(!b)return;b.disabled=!!on;b.classList.toggle('switching52',!!on);if(on)b.textContent='모임 변경 중…'}
-async function memberships23(){
- const m=mine23();if(!m)return[];
- if(m.globalAdmin){try{return (Array.isArray(groups)?groups:[]).map(g=>({groupId:String(g.groupId||g.group_id||''),groupName:String(g.name||g.groupName||'모임'),roleLabel:'개발자'})).filter(x=>x.groupId)}catch{return[]}}
- const x=await json23(AUTH23,{method:'POST',headers:{'content-type':'application/json',authorization:'Bearer '+tok23()},body:JSON.stringify({action:'my_memberships',currentGroupId:gid23()})});
- return Array.isArray(x.memberships)?x.memberships:[];
-}
-async function state23(target,token){const u=new URL(MULTI23);u.searchParams.set('api','state');u.searchParams.set('groupId',target);u.searchParams.set('_fix23',Date.now());const x=await json23(u,{headers:{authorization:'Bearer '+token}});if(String(x?.group?.groupId||'')!==String(target))throw new Error('선택한 모임 정보를 불러오지 못했습니다.');return x}
-function applyState23(x,target,token){
- setToken23(token);setGroup23(target);
- try{S=x.data;me=x.user;group=x.group;if(Array.isArray(x.groups))groups=x.groups;if(Array.isArray(x.groupSummaries))groupSummaries=x.groupSummaries}catch(e){throw e}
- try{
-  window.S=S;window.me=me;window.group=group;window.currentGroupId=String(target);window.T=String(token||'');
-  if(typeof groups!=='undefined')window.groups=groups;
-  if(typeof groupSummaries!=='undefined')window.groupSummaries=groupSummaries;
- }catch{}
- try{if(typeof normalizeClient==='function')normalizeClient()}catch{}
- try{window.__kokmatchProfilesLoaded21=''}catch{}
- try{if(typeof renderAll==='function')renderAll()}catch{}
- try{if(typeof window.memberPageGo46==='function')window.memberPageGo46(1)}catch{}
- try{window.scrollTo(0,0)}catch{}
- sync23();return true;
-}
-async function switchGroup23(target){
- target=String(target||'');if(!target||switching23)return false;if(target===gid23()){try{closeModal()}catch{};return true}
- switching23=true;setGroupButtonBusy23(true);const oldToken=tok23();
- try{
-  let newToken=oldToken;
-  if(!mine23()?.globalAdmin){const a=await json23(AUTH23,{method:'POST',headers:{'content-type':'application/json',authorization:'Bearer '+oldToken},body:JSON.stringify({action:'switch_group',groupId:target})});target=String(a.groupId||target);newToken=String(a.token||oldToken)}
-  const x=await state23(target,newToken);applyState23(x,target,newToken);try{closeModal()}catch{};return true;
- }catch(e){show23(e);return false}
- finally{switching23=false;setGroupButtonBusy23(false);sync23()}
-}
-window.switchOwnGroup38=id=>switchGroup23(id);
-window.adminSwitchGroup38=(id)=>switchGroup23(id);
-window.switchGroup=(id)=>switchGroup23(id);
-try{switchOwnGroup38=window.switchOwnGroup38}catch{};try{adminSwitchGroup38=window.adminSwitchGroup38}catch{};try{switchGroup=window.switchGroup}catch{}
-
-async function openGroup23(){
- if(membershipsBusy23||!mine23())return;membershipsBusy23=true;
- try{
-  if(typeof openModal!=='function')return;
-  openModal('<h3>모임 변경</h3><div class="note">가입된 모임을 불러오는 중…</div>');
-  const list=await memberships23();
-  if(!list.length){openModal('<h3>모임 변경</h3><div class="note">변경할 수 있는 가입 모임이 없습니다.</div><div class="acts"><button class="btn ghost" onclick="closeModal()">닫기</button></div>');return}
-  const cur=gid23();openModal(`<h3>모임 변경</h3><div class="note">이동할 모임을 선택해주세요.</div><div id="groupChoice23" class="choiceList">${list.map(x=>`<button class="choiceBtn${String(x.groupId)===cur?' current':''}" type="button" data-group-id="${esc23(x.groupId)}"><b>${esc23(x.groupName||'모임')}${String(x.groupId)===cur?' · 현재':''}</b><span class="meta">${esc23(x.roleLabel||'')}</span></button>`).join('')}</div><div id="groupErr23" class="error"></div><button class="btn ghost" style="width:100%;margin-top:9px" onclick="closeModal()">닫기</button>`);
-  document.querySelectorAll('#groupChoice23 button[data-group-id]').forEach(b=>b.addEventListener('click',async()=>{const id=String(b.dataset.groupId||'');if(id===cur){closeModal();return}document.querySelectorAll('#groupChoice23 button').forEach(x=>x.disabled=true);const ok=await switchGroup23(id);if(!ok)document.querySelectorAll('#groupChoice23 button').forEach(x=>x.disabled=false)}));
- }catch(e){show23(e)}finally{membershipsBusy23=false}
-}
-window.openGroupSwitch=openGroup23;window.openGroupSwitch23=openGroup23;try{openGroupSwitch=openGroup23}catch{}
-function bindGroup23(){const b=document.getElementById('groupBtn');if(!b||!mine23())return;if(!switching23)b.disabled=false;if(!switching23){const name=String(grp23()?.name||'모임');b.textContent=name+' ▾'}b.onclick=ev=>{ev?.preventDefault?.();ev?.stopPropagation?.();openGroup23()}}
-
-function sync23(){
- if(syncBusy23)return;syncBusy23=true;
- try{bindPager23();bindMemberEdit23();bindProfile23();bindGroup23()}finally{syncBusy23=false}
-}
-function after23(r){queueMicrotask(sync23);requestAnimationFrame(sync23);return r}
-try{const h=renderHeader;renderHeader=function(){return after23(h())};window.renderHeader=renderHeader}catch{}
-try{const m=renderMembers;renderMembers=function(){return after23(m())};window.renderMembers=renderMembers}catch{}
-try{const s=renderSettings;renderSettings=function(){return after23(s())};window.renderSettings=renderSettings}catch{}
-try{const a=renderAll;renderAll=function(){return after23(a())};window.renderAll=renderAll}catch{}
-
-if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(sync23,0),{once:true});else setTimeout(sync23,0);
+function syncUiV6(){if(syncBusyV6)return;syncBusyV6=true;try{repairMemberControlsV6();const b=document.getElementById('groupBtn');if(b&&mineV6()){b.disabled=false;b.removeAttribute('disabled');b.style.pointerEvents='auto';b.style.touchAction='manipulation';if(!groupBusyV6)b.textContent=String((typeof group!=='undefined'?group:window.group)?.name||'모임')+' ▾'}document.querySelectorAll('#members button').forEach(b=>b.style.touchAction='manipulation');bindProfileV6()}finally{syncBusyV6=false}}
+function laterV6(){queueMicrotask(syncUiV6);requestAnimationFrame(syncUiV6);setTimeout(syncUiV6,60)}
+document.addEventListener('click',ev=>{if(Date.now()-lastTouchV6<750)return;const btn=ev.target?.closest?.('button');if(routeButtonV6(btn)){ev.preventDefault();ev.stopPropagation();ev.stopImmediatePropagation();laterV6()}},true);
+window.addEventListener('touchstart',ev=>{if(ev.target?.closest?.('#modal'))return;const t=ev.touches?.[0];if(!t)return;sxV6=t.clientX;syV6=t.clientY;stV6=Date.now();movedV6=false},{capture:true,passive:true});
+window.addEventListener('touchmove',ev=>{if(ev.target?.closest?.('#modal'))return;const t=ev.touches?.[0];if(!t)return;if(Math.abs(t.clientX-sxV6)>12||Math.abs(t.clientY-syV6)>12)movedV6=true},{capture:true,passive:true});
+window.addEventListener('touchend',ev=>{if(ev.target?.closest?.('#modal'))return;const t=ev.changedTouches?.[0];if(!t||movedV6||Date.now()-stV6>900)return;let btn=ev.target?.closest?.('button');if(!btn&&typeof document.elementsFromPoint==='function'){for(const el of document.elementsFromPoint(t.clientX,t.clientY)){const b=el?.closest?.('button');if(b){btn=b;break}}}if(routeButtonV6(btn)){lastTouchV6=Date.now();ev.preventDefault();ev.stopPropagation();ev.stopImmediatePropagation();laterV6()}},{capture:true,passive:false});
+try{const f=renderHeader;renderHeader=function(...a){const r=f.apply(this,a);normalizeHeaderV6();laterV6();return r};window.renderHeader=renderHeader}catch{}
+try{const f=renderMembers;renderMembers=function(...a){const r=f.apply(this,a);laterV6();return r};window.renderMembers=renderMembers}catch{}
+try{const f=renderSettings;renderSettings=function(...a){const r=f.apply(this,a);laterV6();return r};window.renderSettings=renderSettings}catch{}
+try{const f=renderAll;renderAll=function(...a){const r=f.apply(this,a);laterV6();return r};window.renderAll=renderAll}catch{}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>{normalizeHeaderV6();laterV6()},{once:true});else{normalizeHeaderV6();laterV6()}
 })();
 
-/* migrated into v6.0: app-v5.4-fix24.js */
-(()=>{
-'use strict';
-if(window.__kokmatchV54Fix24)return;
-window.__kokmatchV54Fix24=true;
-window.__kokmatchInteractionPatch='24.1';
-
-function safe24(fn,...args){
- try{const r=fn?.(...args);if(r&&typeof r.then==='function')r.catch(err=>{try{typeof showError==='function'?showError(err):alert(err?.message||String(err))}catch{}});return r}catch(err){try{typeof showError==='function'?showError(err):alert(err?.message||String(err))}catch{};return null}
-}
-function currentMember24(id){
- id=String(id||'');if(!id)return null;
- try{return typeof M==='function'?M(id):(window.S?.members||[]).find(m=>String(m?.id||'')===id)||null}catch{return (window.S?.members||[]).find(m=>String(m?.id||'')===id)||null}
-}
-function cardId24(card){return String(card?.dataset?.memberId22||card?.dataset?.memberId46||card?.dataset?.memberId||'')}
-function replaceButton24(btn,key,handler,{enable=false}={}){
- if(!btn)return null;
- if(btn.dataset.v24clean===key){
-  btn.removeAttribute('onclick');btn.onclick=null;
-  if(enable){btn.disabled=false;btn.removeAttribute('disabled');btn.style.pointerEvents='auto';btn.removeAttribute('aria-disabled')}
-  return btn
- }
- const fresh=btn.cloneNode(true);
- fresh.dataset.v24clean=key;
- fresh.removeAttribute('onclick');fresh.onclick=null;
- if(enable){fresh.disabled=false;fresh.removeAttribute('disabled');fresh.style.pointerEvents='auto';fresh.removeAttribute('aria-disabled')}
- fresh.addEventListener('click',ev=>{ev.preventDefault();ev.stopPropagation();ev.stopImmediatePropagation();handler(ev,fresh)});
- btn.replaceWith(fresh);return fresh;
-}
-function callSetOther24(id,state){const fn=window.setOther||(typeof setOther==='function'?setOther:null);if(typeof fn!=='function')return false;safe24(fn,id,state);return true}
-function callEdit24(id){const fn=window.openEditMember||(typeof openEditMember==='function'?openEditMember:null);if(typeof fn!=='function')return false;safe24(fn,id);return true}
-function callPairs24(id){const fn=window.openPairs||(typeof openPairs==='function'?openPairs:null);if(typeof fn!=='function')return false;safe24(fn,id);return true}
-function callPartner24(id){const fn=window.openPartner66;if(typeof fn!=='function')return false;safe24(fn,id);return true}
-function callAdd24(){const fn=window.openAddMember||(typeof openAddMember==='function'?openAddMember:null);if(typeof fn!=='function')return false;safe24(fn);return true}
-function callPage24(next){
- const fn=window.memberPageGo46||(typeof memberPageGo46==='function'?memberPageGo46:null);if(typeof fn!=='function')return false;
- const cur=Math.max(1,Number(window.__kokmatchMemberPage46)||1);safe24(fn,Math.max(1,cur+next));return true
-}
-function callGroup24(){const fn=window.openGroupSwitch23||window.openGroupSwitch||(typeof openGroupSwitch==='function'?openGroupSwitch:null);if(typeof fn!=='function')return false;safe24(fn);return true}
-function cleanGroup24(){
- const b=document.getElementById('groupBtn');if(!b)return;
- const mine=(()=>{try{return me||window.me}catch{return window.me}})();if(!mine)return;
- const g=(()=>{try{return group||window.group}catch{return window.group}})();
- const fresh=replaceButton24(b,'group',()=>callGroup24(),{enable:true});
- if(fresh){fresh.disabled=false;fresh.removeAttribute('disabled');fresh.style.pointerEvents='auto';fresh.removeAttribute('aria-disabled');const n=String(g?.name||'모임');if(!String(fresh.textContent||'').includes('변경 중'))fresh.textContent=n+' ▾'}
-}
-function cleanPager24(){
- const pager=document.querySelector('#members .memberPager46');if(!pager)return;
- [...pager.querySelectorAll('button')].forEach(btn=>{const t=String(btn.textContent||'').trim();if(t.includes('이전'))replaceButton24(btn,'pager-prev',()=>callPage24(-1));else if(t.includes('다음'))replaceButton24(btn,'pager-next',()=>callPage24(1))})
-}
-function cleanRoster24(){
- const box=document.getElementById('members');if(!box)return;
- const add=[...box.querySelectorAll('.title button')].find(b=>String(b.textContent||'').includes('회원등록'));if(add)replaceButton24(add,'add',()=>callAdd24());
- [...box.querySelectorAll('.memberCard')].forEach(card=>{
-  const id=cardId24(card);if(!id||!currentMember24(id))return;
-  const record=card.querySelector('.recordBtn73,.pairBtn:not(.partnerSetBtn66)');if(record)replaceButton24(record,'record-'+id,()=>callPairs24(id));
-  const partner=card.querySelector('.partnerSetBtn66');if(partner)replaceButton24(partner,'partner-'+id,()=>callPartner24(id));
-  [...card.querySelectorAll('.memberBtns button')].forEach(btn=>{
-   const txt=String(btn.textContent||'').trim();
-   if(txt==='수정'||/openEditMember\s*\(/.test(String(btn.getAttribute('onclick')||'')))replaceButton24(btn,'edit-'+id,()=>callEdit24(id));
-   else if(btn.classList.contains('enter')||txt==='운동'||txt==='입장')replaceButton24(btn,'waiting-'+id,()=>callSetOther24(id,'waiting'));
-   else if(btn.classList.contains('watch')||txt==='관람')replaceButton24(btn,'spectator-'+id,()=>callSetOther24(id,'spectator'));
-   else if(btn.classList.contains('danger')&&txt==='퇴장')replaceButton24(btn,'out-'+id,()=>callSetOther24(id,'out'))
-  })
- })
-}
-let refreshing24=false;
-function refresh24(){if(refreshing24)return;refreshing24=true;try{cleanGroup24();cleanPager24();cleanRoster24()}finally{refreshing24=false}}
-function later24(){queueMicrotask(refresh24);requestAnimationFrame(refresh24);setTimeout(refresh24,30);setTimeout(refresh24,120)}
-
-try{const h=renderHeader;renderHeader=function(...a){const r=h.apply(this,a);later24();return r};window.renderHeader=renderHeader}catch{}
-try{const m=renderMembers;renderMembers=function(...a){const r=m.apply(this,a);later24();return r};window.renderMembers=renderMembers}catch{}
-try{const a=renderAll;renderAll=function(...x){const r=a.apply(this,x);later24();return r};window.renderAll=renderAll}catch{}
-try{const g=goView;goView=function(...x){const r=g.apply(this,x);later24();return r};window.goView=goView}catch{}
-
-document.addEventListener('click',ev=>{
- const btn=ev.target?.closest?.('button');if(!btn)return;
- const groupBtn=btn.id==='groupBtn',pager=btn.closest?.('#members .memberPager46'),card=btn.closest?.('#members .memberCard');
- const add=btn.closest?.('#members .title')&&String(btn.textContent||'').includes('회원등록');
- if(!groupBtn&&!pager&&!card&&!add)return;
- let handled=false;
- if(groupBtn)handled=callGroup24();
- else if(pager){const t=String(btn.textContent||'');handled=t.includes('이전')?callPage24(-1):t.includes('다음')?callPage24(1):false}
- else if(add)handled=callAdd24();
- else if(card){
-  const id=cardId24(card),t=String(btn.textContent||'').trim();
-  if(id){
-   if(btn.classList.contains('partnerSetBtn66'))handled=callPartner24(id);
-   else if(btn.classList.contains('recordBtn73')||(btn.classList.contains('pairBtn')&&!btn.classList.contains('partnerSetBtn66'))||t.includes('가입·출석')||t.includes('같이한 경기'))handled=callPairs24(id);
-   else if(t==='수정')handled=callEdit24(id);
-   else if(btn.classList.contains('enter')||t==='운동'||t==='입장')handled=callSetOther24(id,'waiting');
-   else if(btn.classList.contains('watch')||t==='관람')handled=callSetOther24(id,'spectator');
-   else if(btn.classList.contains('danger')&&t==='퇴장')handled=callSetOther24(id,'out')
-  }
- }
- if(handled){ev.preventDefault();ev.stopPropagation();ev.stopImmediatePropagation();later24()}
-},true);
-
-if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',later24,{once:true});else later24();
-})();
-
-/* migrated into v6.0: app-v5.4-fix26.js */
-(()=>{
-'use strict';
-if(window.__kokmatchV54Fix26)return;
-window.__kokmatchV54Fix26=true;
-window.__kokmatchDirectTouch='26.2';
-document.documentElement.dataset.kokmatchDirectTouch='26.2';
-
-const AUTH26='https://wjelumpbjklfrdjxbesj.supabase.co/functions/v1/kokmatch-auth-v38';
-const MULTI26='https://wjelumpbjklfrdjxbesj.supabase.co/functions/v1/kokmatch-multi-api';
-let prepBusy26=false,groupBusy26=false,observer26=null;
-let sx26=0,sy26=0,st26=0,moved26=false;
-
-function trace26(msg){
- try{
-  const s=String(msg||'');window.__kokmatchV26Last=s;
-  if(!location.pathname.includes('ios-diagnostic'))return;
-  let el=document.getElementById('kokmatchV26Status');
-  if(!el){el=document.createElement('div');el.id='kokmatchV26Status';el.style.cssText='position:fixed;left:8px;right:8px;bottom:calc(74px + env(safe-area-inset-bottom));z-index:9999;background:#172033e8;color:#fff;border-radius:10px;padding:7px 10px;font:700 11px/1.35 -apple-system,BlinkMacSystemFont,sans-serif;pointer-events:none';document.body.appendChild(el)}
-  el.textContent='v26.2 · '+s;
- }catch{}
-}
-function err26(e){trace26('오류: '+(e?.message||String(e)));try{typeof showError==='function'?showError(e):alert(e?.message||String(e))}catch{}}
-function token26(){try{return String(T||window.T||localStorage.getItem('kokmatch_token')||'')}catch{return String(window.T||localStorage.getItem('kokmatch_token')||'')}}
-function gid26(){try{return String(currentGroupId||window.currentGroupId||localStorage.getItem('kokmatch_group_id')||'')}catch{return String(window.currentGroupId||localStorage.getItem('kokmatch_group_id')||'')}}
-function me26(){try{return me||window.me||null}catch{return window.me||null}}
-function members26(){try{return Array.isArray(S?.members)?S.members:(Array.isArray(window.S?.members)?window.S.members:[])}catch{return Array.isArray(window.S?.members)?window.S.members:[]}}
-function member26(id){id=String(id||'');return members26().find(m=>String(m?.id||'')===id)||null}
-function cardId26(card){return String(card?.dataset?.memberId22||card?.dataset?.memberId46||card?.dataset?.memberId||'')}
-function esc26(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
-function modalOwns26(target){try{return !!target?.closest?.('#modal.on')}catch{return false}}
-function openModal26(html){try{if(typeof openModal==='function'){openModal(html);return true}}catch{};const m=document.getElementById('modal'),s=document.getElementById('modalSheet');if(!m||!s)return false;s.innerHTML=html;m.classList.add('on');return true}
-function closeModal26(){try{if(typeof closeModal==='function')return closeModal()}catch{};const m=document.getElementById('modal'),s=document.getElementById('modalSheet');m?.classList.remove('on');if(s)s.innerHTML=''}
-async function json26(url,opt={}){const r=await fetch(url,{cache:'no-store',...opt}),x=await r.json().catch(()=>({}));if(!r.ok)throw new Error(x.error||x.message||`요청 실패 (${r.status})`);return x}
-
-function edit26(id){
- id=String(id||'');const m=member26(id);if(!m){err26(new Error('수정할 회원을 찾지 못했습니다.'));return false}
- trace26('회원수정 실행 · '+String(m.name||id));
- try{editMemberId=id}catch{}
- try{if(typeof openMemberModal==='function'){openMemberModal(m);return true}}catch(e){err26(e);return false}
- try{if(typeof window.openMemberModal==='function'){window.openMemberModal(m);return true}}catch(e){err26(e);return false}
- err26(new Error('회원 수정창 함수를 찾지 못했습니다.'));return false;
-}
-function attendance26(id,mode){
- id=String(id||'');if(!member26(id)){err26(new Error('상태를 변경할 회원을 찾지 못했습니다.'));return false}
- trace26((mode==='waiting'?'입장':mode==='spectator'?'관람':'퇴장')+' 요청 · '+id);
- const u=new URL(MULTI26);u.searchParams.set('api','action');u.searchParams.set('_fix26',Date.now());
- const body={action:'set_member_attendance',groupId:gid26(),memberId:id,mode};
- Promise.resolve(json26(u,{method:'POST',headers:{'content-type':'application/json',authorization:'Bearer '+token26()},body:JSON.stringify(body)})).then(x=>{
-  if(x?.data){try{S=x.data;window.S=S}catch{};try{if(typeof normalizeClient==='function')normalizeClient()}catch{};try{if(typeof renderAll==='function')renderAll()}catch{}}
-  trace26('상태변경 완료 · '+id);later26();
- }).catch(err26);
- return true;
-}
-
-function setToken26(v){v=String(v||'');try{T=v}catch{};try{window.T=v}catch{};try{localStorage.setItem('kokmatch_token',v)}catch{}}
-function setGroup26(v){v=String(v||'');try{currentGroupId=v}catch{};try{window.currentGroupId=v}catch{};try{localStorage.setItem('kokmatch_group_id',v)}catch{}}
-async function memberships26(){
- const m=me26();if(!m)return[];
- if(m.globalAdmin){try{return (Array.isArray(groups)?groups:window.groups||[]).map(g=>({groupId:String(g.groupId||g.group_id||''),groupName:String(g.name||g.groupName||'모임'),roleLabel:'개발자'})).filter(x=>x.groupId)}catch{return[]}}
- return (await json26(AUTH26,{method:'POST',headers:{'content-type':'application/json',authorization:'Bearer '+token26()},body:JSON.stringify({action:'my_memberships',currentGroupId:gid26()})})).memberships||[];
-}
-async function switchGroup26(target){
- target=String(target||'');if(!target||groupBusy26)return false;if(target===gid26()){closeModal26();return true}
- groupBusy26=true;trace26('모임전환 요청 · '+target);
- try{
-  const oldToken=token26();let newToken=oldToken;
-  if(!me26()?.globalAdmin){const a=await json26(AUTH26,{method:'POST',headers:{'content-type':'application/json',authorization:'Bearer '+oldToken},body:JSON.stringify({action:'switch_group',groupId:target})});target=String(a.groupId||target);newToken=String(a.token||oldToken)}
-  const u=new URL(MULTI26);u.searchParams.set('api','state');u.searchParams.set('groupId',target);u.searchParams.set('_fix26',Date.now());
-  const x=await json26(u,{headers:{authorization:'Bearer '+newToken}});if(String(x?.group?.groupId||'')!==target)throw new Error('선택한 모임 정보를 불러오지 못했습니다.');
-  setToken26(newToken);setGroup26(target);
-  try{S=x.data;me=x.user;group=x.group;if(Array.isArray(x.groups))groups=x.groups;if(Array.isArray(x.groupSummaries))groupSummaries=x.groupSummaries}catch(e){throw e}
-  try{window.S=S;window.me=me;window.group=group;window.currentGroupId=target;window.T=newToken;if(typeof groups!=='undefined')window.groups=groups;if(typeof groupSummaries!=='undefined')window.groupSummaries=groupSummaries}catch{}
-  try{if(typeof normalizeClient==='function')normalizeClient()}catch{}
-  try{if(typeof renderAll==='function')renderAll()}catch{}
-  try{if(typeof memberPageGo46==='function')memberPageGo46(1)}catch{}
-  closeModal26();trace26('모임전환 완료 · '+String(x.group?.name||target));return true;
- }catch(e){err26(e);return false}finally{groupBusy26=false;later26()}
-}
-function bindChoice26(btn,id){
- if(!btn||btn.dataset.v26choice)return;btn.dataset.v26choice='1';let touched=0;
- const fire=ev=>{touched=Date.now();try{ev.preventDefault();ev.stopPropagation();ev.stopImmediatePropagation()}catch{};switchGroup26(id)};
- btn.addEventListener('touchend',fire,{passive:false});
- btn.addEventListener('click',ev=>{if(Date.now()-touched<800){ev.preventDefault();return}fire(ev)});
-}
-async function openGroups26(){
- if(groupBusy26||!me26())return false;groupBusy26=true;trace26('가입 모임 조회 중');
- try{
-  openModal26('<h3>모임 변경</h3><div class="note">가입된 모임을 불러오는 중…</div>');
-  const list=await memberships26();if(!list.length){openModal26('<h3>모임 변경</h3><div class="note">변경할 수 있는 가입 모임이 없습니다.</div><div class="acts"><button id="closeGroup26" class="btn ghost">닫기</button></div>');const c=document.getElementById('closeGroup26');if(c)bindDirect26(c,'close',()=>closeModal26());trace26('변경 가능한 모임 없음');return true}
-  const cur=gid26();openModal26(`<h3>모임 변경</h3><div class="note">이동할 모임을 선택해주세요.</div><div id="groupChoice26" class="choiceList">${list.map(x=>`<button class="choiceBtn${String(x.groupId)===cur?' current':''}" type="button" data-group26="${esc26(x.groupId)}"><b>${esc26(x.groupName||'모임')}${String(x.groupId)===cur?' · 현재':''}</b><span class="meta">${esc26(x.roleLabel||'')}</span></button>`).join('')}</div><button id="closeGroup26" class="btn ghost" style="width:100%;margin-top:9px">닫기</button>`);
-  document.querySelectorAll('#groupChoice26 button[data-group26]').forEach(b=>bindChoice26(b,String(b.dataset.group26||'')));const c=document.getElementById('closeGroup26');if(c)bindDirect26(c,'close',()=>closeModal26());trace26('모임목록 표시 · '+list.length+'개');return true;
- }catch(e){err26(e);return false}finally{groupBusy26=false}
-}
-window.openGroupSwitch26=openGroups26;window.switchGroup26=switchGroup26;
-
-function bindDirect26(btn,key,handler){
- if(!btn)return null;if(btn.dataset.v26direct===key)return btn;
- const fresh=btn.cloneNode(true);fresh.dataset.v26direct=key;fresh.removeAttribute('onclick');fresh.onclick=null;fresh.disabled=false;fresh.removeAttribute('disabled');fresh.style.pointerEvents='auto';fresh.style.touchAction='manipulation';
- let touched=0;
- const fire=ev=>{touched=Date.now();try{ev.preventDefault();ev.stopPropagation();ev.stopImmediatePropagation()}catch{};handler(fresh,ev)};
- fresh.addEventListener('touchend',fire,{passive:false});
- fresh.addEventListener('click',ev=>{if(Date.now()-touched<800){try{ev.preventDefault();ev.stopPropagation();ev.stopImmediatePropagation()}catch{};return}fire(ev)});
- btn.replaceWith(fresh);return fresh;
-}
-function prep26(){
- if(document.getElementById('modal')?.classList.contains('on'))return;
- if(prepBusy26)return;prepBusy26=true;
- try{
-  const gb=document.getElementById('groupBtn');if(gb&&me26())bindDirect26(gb,'group',()=>openGroups26());
-  document.querySelectorAll('#members .memberCard').forEach(card=>{
-   const id=cardId26(card);if(!id)return;
-   card.querySelectorAll('.memberBtns button').forEach(btn=>{
-    const t=String(btn.textContent||'').trim();
-    if(t==='수정'){bindDirect26(btn,'edit-'+id,()=>edit26(id));return}
-    if(btn.classList.contains('enter')||t==='운동'||t==='입장'){bindDirect26(btn,'wait-'+id,()=>attendance26(id,'waiting'));return}
-    if(btn.classList.contains('watch')||t==='관람'){bindDirect26(btn,'watch-'+id,()=>attendance26(id,'spectator'));return}
-    if((btn.classList.contains('danger')&&t==='퇴장')||t==='퇴장')bindDirect26(btn,'out-'+id,()=>attendance26(id,'out'));
-   });
-  });
- }finally{prepBusy26=false}
-}
-function directCapture26(btn){
- if(!btn)return false;
- if(btn.id==='groupBtn'){openGroups26();return true}
- const card=btn.closest?.('#members .memberCard');if(!card||!btn.closest?.('.memberBtns'))return false;
- const id=cardId26(card);if(!id)return false;const t=String(btn.textContent||'').trim();
- if(t==='수정')return edit26(id);
- if(btn.classList.contains('enter')||t==='운동'||t==='입장')return attendance26(id,'waiting');
- if(btn.classList.contains('watch')||t==='관람')return attendance26(id,'spectator');
- if((btn.classList.contains('danger')&&t==='퇴장')||t==='퇴장')return attendance26(id,'out');
- return false;
-}
-window.addEventListener('touchstart',ev=>{if(modalOwns26(ev.target))return;const t=ev.touches?.[0];if(!t)return;sx26=t.clientX;sy26=t.clientY;st26=Date.now();moved26=false},{capture:true,passive:true});
-window.addEventListener('touchmove',ev=>{if(modalOwns26(ev.target))return;const t=ev.touches?.[0];if(!t)return;if(Math.abs(t.clientX-sx26)>12||Math.abs(t.clientY-sy26)>12)moved26=true},{capture:true,passive:true});
-window.addEventListener('touchend',ev=>{
- if(modalOwns26(ev.target))return;
- const t=ev.changedTouches?.[0];if(!t||moved26||Date.now()-st26>900)return;
- let btn=ev.target?.closest?.('button');
- if(!btn&&typeof document.elementsFromPoint==='function'){for(const el of document.elementsFromPoint(t.clientX,t.clientY)){if(modalOwns26(el))return;const b=el?.closest?.('button');if(b){btn=b;break}}}
- if(!directCapture26(btn))return;
- try{ev.preventDefault();ev.stopPropagation();ev.stopImmediatePropagation()}catch{}
- later26();
-},{capture:true,passive:false});
-
-function later26(){queueMicrotask(prep26);requestAnimationFrame(prep26);setTimeout(prep26,25);setTimeout(prep26,90);setTimeout(prep26,220);setTimeout(prep26,420)}
-try{const rm=renderMembers;renderMembers=function(...a){const r=rm.apply(this,a);later26();return r};window.renderMembers=renderMembers}catch{}
-try{const rh=renderHeader;renderHeader=function(...a){const r=rh.apply(this,a);later26();return r};window.renderHeader=renderHeader}catch{}
-try{const ra=renderAll;renderAll=function(...a){const r=ra.apply(this,a);later26();return r};window.renderAll=renderAll}catch{}
-if(typeof MutationObserver==='function'){observer26=new MutationObserver(()=>setTimeout(prep26,0));observer26.observe(document.documentElement,{subtree:true,childList:true})}
-if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>{trace26('직접터치 준비');later26()},{once:true});else{trace26('직접터치 준비');later26()}
-})();
 
 window.__kokmatchStandalone='6.0';
 window.__kokmatchVersionLock='6.0';
