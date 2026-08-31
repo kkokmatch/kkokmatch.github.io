@@ -2913,6 +2913,10 @@ html:not(.kokmatch-ready86) .app{visibility:visible!important}
 
 
 
+
+
+
+
 /* V6_CANONICAL_ROSTER_CSS_BEGIN */
 #members .memberCard{grid-template-columns:46px minmax(0,1fr) 90px!important;column-gap:5px!important;align-items:center!important;padding:10px 4px 10px 8px!important;overflow:visible!important}
 #members .memberInfo48,#members .memberInfoV6{min-width:0!important;width:100%!important;overflow:visible!important;position:static!important;transform:none!important}
@@ -2954,4 +2958,10 @@ html:not(.kokmatch-ready86) .app{visibility:visible!important}
 #members .memberBtns .btn,#members .memberBtns65 .btn{width:100%!important;min-width:0!important;margin:0!important;padding:6px 2px!important;line-height:1.05!important;text-align:center!important}
 #members .memberBtns .btn:nth-child(odd):last-child,#members .memberBtns65 .btn:nth-child(odd):last-child{grid-column:1/-1!important}
 @media(max-width:430px){#members .memberBtns,#members .memberBtns65{gap:2px!important}#members .memberBtns .btn,#members .memberBtns65 .btn{padding:6px 1px!important;font-size:9px!important}}
+
+/* v6.17 no-flicker roster geometry */
+#members .memberCard{contain:layout style!important;transform:translateZ(0)}
+#members .memberInfo48,#members .memberInfoV6{min-height:52px!important;justify-content:center!important}
+#members .memberMetaV6{margin-top:4px!important}
+#members .v6MemberActions,#members .memberActions48,#members .memberActions60,#members .memberActions65{min-height:54px!important}
 /* V6_UI_STABILITY_CSS_END */

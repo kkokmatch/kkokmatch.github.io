@@ -1,21 +1,23 @@
 {
-  "version": "6.16",
-  "build": "v6.16",
+  "version": "6.17",
+  "build": "v6.17",
   "features": [
-    "partner name is suppressed without deleting member-card DOM nodes",
-    "partner relation renderers no longer create visible partner-name rows",
-    "member action column is locked independently from member information height",
-    "entry, spectator, exit and edit buttons use a stable two-column action grid",
-    "name-to-birth/gender gap restored to 4px",
-    "single v6.15 pointer router remains the only roster action router",
-    "short visible version label v6.16"
+    "removed original three-second loadState full repaint loop",
+    "removed unconditional sixty-second renderAll repaint",
+    "disabled legacy v99 document-wide roster mutation observer",
+    "disabled legacy v99 1.2-second developer roster watchdog",
+    "disabled legacy developer full-roster self-render repair",
+    "background state polling now repaints only when server state actually changes",
+    "member editor and partner overlays pause background polling while open",
+    "member card geometry is contained and the requested 4px name-to-meta spacing is preserved"
   ],
   "validation": [
     "javascript syntax",
-    "no automatic /refresh/vXX navigation",
-    "v6.16 partner display filter marker",
+    "no legacy 3s full repaint loop",
+    "no legacy 1.2s roster watchdog",
+    "v6.17 change-only background poll marker",
+    "legacy roster observer disabled marker",
     "4px member meta spacing",
-    "stable action-grid CSS marker",
     "fresh-entry bootstrap marker"
   ],
   "functionalQaPolicy": "functional/browser/device QA omitted from deployment gate per operator request"
