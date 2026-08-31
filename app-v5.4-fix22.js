@@ -2,18 +2,17 @@
 'use strict';
 if(window.__kokmatchV54Fix22)return;
 window.__kokmatchV54Fix22=true;
-window.__kokmatchRosterCanonical='22.2';
+window.__kokmatchRosterCanonical='22.3';
 
 function e22(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function jsId22(id){return String(id||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'")}
 function getMember22(id){try{return typeof M==='function'?M(String(id||'')):null}catch{return null}}
 function inviter22(m){return m?.type==='guest'?String(m?.inviter||'').trim():''}
 function grade22(m){const c=String(m?.cls||'C').trim().toUpperCase(),safe=['A','B','C','D','E'].includes(c)?c:'C';return `<span class="tag gradeBadge50 grade-${safe.toLowerCase()}50">${e22(m?.age||'30')}${e22(safe)}</span>`}
-function canSeeAdmin22(){const mode=String(S?.adminBadgeVisibility||'all');if(me?.globalAdmin)return true;if(mode==='all')return true;if(mode==='staff')return me?.role==='manager'||me?.role==='organizer';return false}
 function roleBadge22(m){
  if(m?.type==='guest')return '<span class="roleBadge guest45">게스트</span>';
  const r=String(m?.role||'member');
- if(r==='admin')return canSeeAdmin22()?'<span class="roleBadge role-global">총관리자</span>':'';
+ if(r==='admin')return '<span class="roleBadge role-global">개발자</span>';
  if(r==='manager')return '<span class="roleBadge role-manager">모임관리자</span>';
  if(r==='organizer')return '<span class="roleBadge role-organizer">게임편성자</span>';
  try{if(typeof isTemp==='function'&&isTemp(m))return '<span class="roleBadge role-temp">임시편성자</span>'}catch{}
