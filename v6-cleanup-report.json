@@ -17,7 +17,8 @@
     "current-month attendance + partner setting row",
     "four-character member name lane with right-aligned action area",
     "grade-matched pastel roster cards",
-    "member roster re-entry forces full roster refresh"
+    "member roster re-entry forces full roster refresh",
+    "cache-busted JS/CSS URLs for Kakao/iOS webviews"
   ],
   "validation": [
     "javascript syntax",
