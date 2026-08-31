@@ -1,25 +1,24 @@
 {
-  "version": "6.12",
-  "build": "v6.12",
+  "version": "6.13",
+  "build": "v6.13",
   "features": [
-    "short visible version label v6.12",
-    "reliable Kakao/iOS tap handling for header and modal buttons with scroll movement threshold",
-    "legacy automatic version navigation removed",
+    "name-to-birth spacing tightened by 3px",
+    "birth-to-monthly-attendance spacing increased by 3px",
+    "member card pastel backgrounds strengthened two steps",
+    "optimistic immediate member attendance UI before server response",
+    "isolated v6 member editor for birth year, gender, grade, type, role and PIN/password",
+    "short visible version label v6.13",
     "manual latest-version refresh only",
-    "original v50 grade badge colors restored: A magenta, B cyan, C green, D rose, E yellow",
-    "grade-matched pastel member cards",
-    "compact member name/birth/gender/attendance/partner spacing",
-    "role badges: 개발자/모임장/운영진/일반",
-    "member roster re-entry forces full roster refresh"
+    "role badges: 개발자/모임장/운영진/일반"
   ],
   "validation": [
     "javascript syntax",
     "no automatic /refresh/vXX navigation",
     "short build label source",
-    "reliable action tap bridge",
-    "logout fallback remains callable",
-    "original grade palette present",
-    "compact roster CSS present",
+    "optimistic member attendance installed",
+    "dedicated member editor installed",
+    "stronger roster palette present",
+    "requested roster spacing present",
     "fresh-entry bootstrap marker"
   ],
   "functionalQaPolicy": "functional/browser/device QA omitted from deployment gate per operator request"

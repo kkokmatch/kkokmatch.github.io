@@ -6749,6 +6749,10 @@ function businessMonth22(){const d=new Date();return new Intl.DateTimeFormat('en
 function monthLabel22(){return Number(businessMonth22().slice(5,7))+'월'}
 function attendanceCount22(m){const k=businessMonth22(),h=m?.attendanceHistory&&typeof m.attendanceHistory==='object'&&!Array.isArray(m.attendanceHistory)?m.attendanceHistory:null;if(h&&h[k]!=null)return Math.max(0,Number(h[k])||0);return String(m?.attendanceMonth||'')===k?Math.max(0,Number(m?.attendanceCount)||0):0}
 function canPartner22(m){return !!m&&!!me&&(String(me.memberId||'')===String(m.id)||me.globalAdmin||me.role==='manager'||me.role==='organizer')}
+function businessMonth22(){const d=new Date();return new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Seoul',year:'numeric',month:'2-digit'}).format(d)}
+function monthLabel22(){return Number(businessMonth22().slice(5,7))+'월'}
+function attendanceCount22(m){const k=businessMonth22(),h=m?.attendanceHistory&&typeof m.attendanceHistory==='object'&&!Array.isArray(m.attendanceHistory)?m.attendanceHistory:null;if(h&&h[k]!=null)return Math.max(0,Number(h[k])||0);return String(m?.attendanceMonth||'')===k?Math.max(0,Number(m?.attendanceCount)||0):0}
+function canPartner22(m){return !!m&&!!me&&(String(me.memberId||'')===String(m.id)||me.globalAdmin||me.role==='manager'||me.role==='organizer')}
 function patchVisibleInfo22(card,m){
  const info=card.querySelector('.memberInfo48')||card.children?.[1];if(!info)return;info.classList.add('memberInfoV6');
  const line=info.querySelector('.memberMainLine45')||info.querySelector('.name');if(line){line.classList.add('memberMainLine45');line.innerHTML="<span class='memberName45'>"+e22(m.name)+"</span>"+grade22(m)+roleBadge22(m)}
@@ -6818,6 +6822,8 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 
 
 
+
+
 /* V6_ROSTER_REENTRY_BEGIN */
 (()=>{'use strict';let busy=false;async function repair(){if(busy||currentView!=='members')return;busy=true;try{const input=document.getElementById('memberSearchInput46');if(input)input.value='';try{window.__kokmatchMemberPage46=1}catch{}if(typeof window.enterMembers42==='function'){await window.enterMembers42(true)}else if(typeof window.refreshMembers46==='function'){await window.refreshMembers46()}else if(typeof renderMembers==='function'){renderMembers()}try{window.resetMemberList46?.()}catch{}try{window.__kokmatchFinalizeRoster22?.()}catch{}}catch(e){console.warn('v6 roster reentry',e);try{typeof renderMembers==='function'&&renderMembers();window.__kokmatchFinalizeRoster22?.()}catch{}}finally{busy=false}}const old=goView;goView=function(id,...args){const was=currentView,r=old(id,...args);if(id==='members'&&was!=='members'){queueMicrotask(()=>repair());requestAnimationFrame(()=>repair())}return r};window.goView=goView;window.__kokmatchRepairRosterV6=repair;})();
 /* V6_ROSTER_REENTRY_END */
@@ -6862,11 +6868,12 @@ function bindProfileV6(){const card=document.getElementById('profileCard53');if(
 
 
 
+
 function installHeaderStyleV6(){
  let s=document.getElementById('kokmatchHeaderStyleV6');if(!s){s=document.createElement('style');s.id='kokmatchHeaderStyleV6';document.head.appendChild(s)}
  s.textContent='.toprow{gap:6px!important}.toprow>div:first-child{min-width:0;flex:1 1 auto}.toprow>#topActions50,.toprow>#topActions51,.toprow>#topActions52,.toprow>.logout{display:none!important}#topActionsV6{margin-left:auto;display:flex;align-items:center;justify-content:flex-end;gap:4px;position:relative;z-index:300;pointer-events:auto;min-width:0;flex:0 0 auto}#currentVersionV6{font-size:9.5px;font-weight:900;padding:5px 5px;border-radius:8px;background:rgba(255,255,255,.18);white-space:nowrap;flex:0 0 auto;letter-spacing:-.2px}#headerRefreshV6,#logoutV6{min-height:30px;padding:6px 7px;font-size:9.7px;font-weight:850;white-space:nowrap;border-radius:8px}#headerRefreshV6{max-width:128px}#logoutV6{flex:0 0 58px}@media(max-width:390px){#topActionsV6{gap:3px}#currentVersionV6{font-size:8.3px;padding:5px 3px}#headerRefreshV6{font-size:8.4px;padding:6px 4px;max-width:108px}#logoutV6{flex-basis:52px;width:52px;font-size:9px;padding:6px 3px}}';
 }
-function buildLabelV6(){return 'v6.12'}
+function buildLabelV6(){return 'v6.13'}
 async function forceLatestHeaderRefreshV6(){
  if(window.__kokmatchHeaderRefreshBusyV6)return false;window.__kokmatchHeaderRefreshBusyV6=true;
  const b=document.getElementById('headerRefreshV6');if(b){b.disabled=true;b.textContent='업데이트 중...'}
@@ -6886,10 +6893,10 @@ async function explicitLogoutV6(){
 function blockLegacyLogoutV6(){return true}
 /* V6_RELIABLE_ACTION_TAP_BEGIN */
 function installReliableActionTapV6(){
- if(window.__kokmatchReliableActionTapV6)return;
- window.__kokmatchReliableActionTapV6='v6.12';
+ if(window.__kokmatchReliableActionTapV6==='v6.13')return;
+ window.__kokmatchReliableActionTapV6='v6.13';
  let tap=null;
- const pick=t=>t?.closest?.('#topActionsV6 button,#modal .sheet button');
+ const pick=t=>t?.closest?.('#topActionsV6 button,#modal .sheet button,#memberEditorV613 button');
  document.addEventListener('touchstart',ev=>{
   const btn=pick(ev.target),t=ev.touches?.[0];
   if(!btn||btn.disabled||!t){tap=null;return}
@@ -6908,13 +6915,110 @@ function installReliableActionTapV6(){
   ev.preventDefault();ev.stopPropagation();a.btn.click();
  },{capture:true,passive:false});
 }
+
+function installFastMemberActionsV6(){
+ if(window.__kokmatchFastMemberActionsV6==='v6.13')return;
+ window.__kokmatchFastMemberActionsV6='v6.13';
+ const serverAttendance=attendanceV6;
+ attendanceV6=async function(id,mode){
+  id=String(id||'');const m=memberV6(id);if(!m)throw new Error('상태를 변경할 회원을 찾지 못했습니다.');
+  const beforeState=String(m.state||'out');
+  const beforeQueue=Array.isArray(S?.queue)?S.queue.slice():[];
+  try{
+   m.state=mode;
+   if(Array.isArray(S?.queue)){
+    S.queue=S.queue.filter(x=>String(x)!==id);
+    if(mode==='waiting')S.queue.push(id);
+   }
+   try{typeof renderMembers==='function'&&renderMembers()}catch{}
+   try{typeof renderHeader==='function'&&renderHeader()}catch{}
+   try{window.__kokmatchFinalizeRoster22?.()}catch{}
+   return await serverAttendance(id,mode);
+  }catch(e){
+   try{m.state=beforeState;S.queue=beforeQueue;typeof renderMembers==='function'&&renderMembers();typeof renderHeader==='function'&&renderHeader();window.__kokmatchFinalizeRoster22?.()}catch{}
+   throw e;
+  }
+ };
+ window.attendanceV6=attendanceV6;
+}
+
+function memberEditorEscV613(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function closeMemberEditorV613(){document.getElementById('memberEditorV613')?.remove()}
+function editorRoleOptionsV613(){return me?.globalAdmin||me?.role==='manager'?['member','organizer','manager']:[]}
+function editorRoleLabelV613(r){return r==='admin'?'개발자':r==='manager'?'모임장':r==='organizer'?'운영진':'일반'}
+function syncMemberEditorV613(){
+ const type=document.getElementById('fmType')?.value||'member';
+ const role=document.getElementById('fmRole');
+ if(role&&type==='guest'){role.value='member';role.disabled=true}else if(role)role.disabled=false;
+ const rr=role?.value||document.getElementById('fmFixedRoleV613')?.dataset.role||'member';
+ const pinWrap=document.getElementById('fmPinWrap');if(pinWrap)pinWrap.classList.toggle('hide',type==='guest'||!['manager','organizer'].includes(rr));
+ const inv=document.getElementById('fmInviterWrap60');if(inv)inv.classList.toggle('hide',type!=='guest');
+}
+async function memberApiV613(op,body={}){
+ const r=await fetch('https://wjelumpbjklfrdjxbesj.supabase.co/functions/v1/kokmatch-v60-api',{method:'POST',headers:{'content-type':'application/json','authorization':'Bearer '+String(typeof T!=='undefined'?T:'')},body:JSON.stringify({op,groupId:String(typeof currentGroupId!=='undefined'?currentGroupId:''),...body}),cache:'no-store'});
+ const x=await r.json().catch(()=>({}));
+ if(!r.ok){if(r.status===401){try{reloginLatest()}catch{};throw new Error('로그인이 만료되었습니다.')}throw new Error(x.error||'회원정보 저장에 실패했습니다.')}
+ return x;
+}
+async function saveMemberEditorV613(){
+ const cur=editMemberId?memberV6(editMemberId):null;
+ const name=document.getElementById('fmName')?.value.trim()||cur?.name||'';
+ const year=Number(document.getElementById('fmYear')?.value||0);
+ const gender=document.getElementById('fmGender')?.value||'남';
+ const cls=document.getElementById('fmCls')?.value||'C';
+ const type=document.getElementById('fmType')?.value||cur?.type||'member';
+ const fixedRole=document.getElementById('fmFixedRoleV613')?.dataset.role||'';
+ const role=fixedRole||document.getElementById('fmRole')?.value||(cur?roleOf(cur):'member');
+ const pin=document.getElementById('fmPin')?.value.trim()||'';
+ const inviter=type==='guest'?(document.getElementById('fmInviter60')?.value.trim()||''):'';
+ if(!name)return alert('이름을 입력해주세요.');
+ if(!Number.isInteger(year)||year<1900||year>new Date().getFullYear())return alert('출생연도를 확인해주세요.');
+ if(type==='guest'&&!inviter)return alert('게스트의 초대인을 입력해주세요.');
+ if(pin&&!/^\d{4,8}$/.test(pin))return alert('PIN/비밀번호는 숫자 4~8자리로 입력해주세요.');
+ const save=document.getElementById('memberEditorSaveV613');if(save){save.disabled=true;save.textContent='저장 중...'}
+ try{
+  const x=await memberApiV613('member_save',{memberId:editMemberId||'',name,year,gender,cls,type,role,pin,inviter});
+  if(x.data){S=x.data;window.S=x.data;try{normalizeClient()}catch{}}
+  closeMemberEditorV613();try{renderAll()}catch{}
+ }catch(e){showV6(e)}finally{if(save?.isConnected){save.disabled=false;save.textContent=editMemberId?'저장':'등록'}}
+}
+async function deleteMemberEditorV613(){
+ const m=editMemberId?memberV6(editMemberId):null;if(!m||roleOf(m)==='admin')return;
+ if(!confirm(m.name+' 회원정보를 삭제하시겠습니까?'))return;
+ try{const x=await memberApiV613('member_delete',{memberId:m.id});if(x.data){S=x.data;window.S=x.data;try{normalizeClient()}catch{}}closeMemberEditorV613();try{renderAll()}catch{}}catch(e){showV6(e)}
+}
+function openMemberEditorV613(m){
+ const add=!m,r=m?roleOf(m):'member',isAdmin=!add&&r==='admin';
+ const actor=me?.globalAdmin?'admin':String(me?.role||'member');
+ const opts=editorRoleOptionsV613();
+ const organizer=actor==='organizer'&&!me?.globalAdmin;
+ const typeLocked=isAdmin||(organizer&&!add&&r!=='member');
+ const roleHtml=isAdmin?'<div class="field"><label>역할</label><div id="fmFixedRoleV613" data-role="admin" class="memberEditorFixedV613">개발자</div></div>':opts.length?'<div class="field"><label>역할</label><select id="fmRole">'+opts.map(x=>'<option value="'+x+'" '+((add?x==='member':r===x)?'selected':'')+'>'+editorRoleLabelV613(x)+'</option>').join('')+'</select></div>':'<div class="field"><label>역할</label><div id="fmFixedRoleV613" data-role="'+memberEditorEscV613(r)+'" class="memberEditorFixedV613">'+editorRoleLabelV613(r)+'</div></div>';
+ const root=document.createElement('div');root.id='memberEditorV613';root.className='memberEditorOverlayV613';
+ root.innerHTML='<div class="memberEditorSheetV613"><h3>'+(add?'회원등록':'회원 정보 수정')+'</h3><div class="note">출생연도·성별·급수·구분·역할과 PIN/비밀번호를 수정할 수 있습니다.</div><div class="field"><label>이름</label><input id="fmName" value="'+memberEditorEscV613(m?.name||'')+'" '+(isAdmin?'disabled':'')+'></div><div class="grid2"><div class="field"><label>출생연도</label><input id="fmYear" type="number" inputmode="numeric" value="'+memberEditorEscV613(m?.year||'')+'"></div><div class="field"><label>성별</label><select id="fmGender"><option '+(m?.gender!=='여'?'selected':'')+'>남</option><option '+(m?.gender==='여'?'selected':'')+'>여</option></select></div><div class="field"><label>급수</label><select id="fmCls">'+['A','B','C','D','E'].map(c=>'<option '+(String(m?.cls||'C')===c?'selected':'')+'>'+c+'</option>').join('')+'</select></div><div class="field"><label>구분</label><select id="fmType" '+(typeLocked?'disabled':'')+'><option value="member" '+(m?.type!=='guest'?'selected':'')+'>일반</option><option value="guest" '+(m?.type==='guest'?'selected':'')+'>게스트</option></select></div></div>'+roleHtml+'<div id="fmPinWrap" class="field '+((!['manager','organizer'].includes(r))||m?.type==='guest'||add?'hide':'')+'"><label>로그인 PIN / 비밀번호</label><input id="fmPin" type="password" inputmode="numeric" maxlength="8" autocomplete="new-password" placeholder="변경 시 숫자 4~8자리"></div><div id="fmInviterWrap60" class="field '+(m?.type==='guest'?'':'hide')+'"><label>초대인</label><input id="fmInviter60" value="'+memberEditorEscV613(m?.inviter||'')+'" maxlength="40" placeholder="초대한 회원 이름"></div><div class="acts">'+(!add&&!isAdmin?'<button id="memberEditorDeleteV613" class="btn danger" type="button">삭제</button>':'')+'<button id="memberEditorCancelV613" class="btn ghost" type="button">취소</button><button id="memberEditorSaveV613" class="btn pri" type="button">'+(add?'등록':'저장')+'</button></div></div>';
+ document.getElementById('modal')?.classList.remove('on');closeMemberEditorV613();document.body.appendChild(root);
+ const role=document.getElementById('fmRole'),type=document.getElementById('fmType');
+ role?.addEventListener('change',syncMemberEditorV613);type?.addEventListener('change',syncMemberEditorV613);
+ document.getElementById('memberEditorCancelV613')?.addEventListener('click',closeMemberEditorV613);
+ document.getElementById('memberEditorSaveV613')?.addEventListener('click',saveMemberEditorV613);
+ document.getElementById('memberEditorDeleteV613')?.addEventListener('click',deleteMemberEditorV613);
+ root.addEventListener('click',ev=>{if(ev.target===root)closeMemberEditorV613()});
+ syncMemberEditorV613();
+ const y=document.getElementById('fmYear');if(y)y.focus({preventScroll:true});
+ return true;
+}
+function installCanonicalMemberEditorV6(){
+ if(window.__kokmatchCanonicalMemberEditorV6==='v6.13')return;
+ window.__kokmatchCanonicalMemberEditorV6='v6.13';
+ openMemberModal=function(m){return openMemberEditorV613(m)};window.openMemberModal=openMemberModal;
+}
 /* V6_RELIABLE_ACTION_TAP_END */
 function normalizeHeaderV6(){
- installHeaderStyleV6();blockLegacyLogoutV6();installReliableActionTapV6();
+ installHeaderStyleV6();blockLegacyLogoutV6();installReliableActionTapV6();installFastMemberActionsV6();installCanonicalMemberEditorV6();
  const row=document.querySelector('.toprow');if(!row)return;
  row.querySelectorAll('#topActions50,#topActions51,#topActions52,:scope > .logout').forEach(el=>el.remove());
  let actions=document.getElementById('topActionsV6');
- if(!actions){actions=document.createElement('div');actions.id='topActionsV6';actions.innerHTML='<span id="currentVersionV6" title="현재 실행 버전">v6.12</span><button id="headerRefreshV6" class="btn ghost" type="button">↻ 최신버전으로 새로고침</button><button id="logoutV6" type="button">로그아웃</button>';row.appendChild(actions);actions.querySelector('#headerRefreshV6')?.addEventListener('click',ev=>{ev.preventDefault();ev.stopPropagation();forceLatestHeaderRefreshV6()});actions.querySelector('#logoutV6')?.addEventListener('click',ev=>{ev.preventDefault();ev.stopPropagation();explicitLogoutV6()})}
+ if(!actions){actions=document.createElement('div');actions.id='topActionsV6';actions.innerHTML='<span id="currentVersionV6" title="현재 실행 버전">v6.13</span><button id="headerRefreshV6" class="btn ghost" type="button">↻ 최신버전으로 새로고침</button><button id="logoutV6" type="button">로그아웃</button>';row.appendChild(actions);actions.querySelector('#headerRefreshV6')?.addEventListener('click',ev=>{ev.preventDefault();ev.stopPropagation();forceLatestHeaderRefreshV6()});actions.querySelector('#logoutV6')?.addEventListener('click',ev=>{ev.preventDefault();ev.stopPropagation();explicitLogoutV6()})}
  const ver=actions.querySelector('#currentVersionV6');if(ver){ver.textContent=buildLabelV6();ver.title='현재 실행 버전: '+String(window.__kokmatchBuild||buildLabelV6())+'\n실행 주소: '+location.href}
  document.title='콕매치 '+buildLabelV6();document.documentElement.dataset.kokmatchVersion='6.0';
 }
