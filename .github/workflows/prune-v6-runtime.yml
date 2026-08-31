@@ -6,6 +6,7 @@ on:
       - 'scripts/prune-v6-runtime.mjs'
       - 'scripts/v6-canonical-member-controls.mjs'
       - '.github/tests/qa-v26-direct-touch.mjs'
+      - '.github/tests/qa-v6-auth-reset-diag.mjs'
       - '.github/workflows/prune-v6-runtime.yml'
   workflow_dispatch:
 permissions:
@@ -36,10 +37,12 @@ jobs:
         run: |
           npm install --no-save playwright@1.55.0
           npx playwright install --with-deps webkit
-      - name: Run v6 iPhone Kakao standalone QA
+      - name: Trace v6 auth state
         run: |
           python3 -m http.server 4173 >/tmp/kokmatch-v6-http.log 2>&1 &
-          node .github/tests/qa-v26-direct-touch.mjs
+          node .github/tests/qa-v6-auth-reset-diag.mjs
+      - name: Run v6 iPhone Kakao standalone QA
+        run: node .github/tests/qa-v26-direct-touch.mjs
       - name: Update cleanup metadata
         run: |
           node - <<'NODE'
