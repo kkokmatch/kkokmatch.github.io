@@ -58,7 +58,9 @@ jobs:
         run: |
           python3 -m http.server 4173 >/tmp/kokmatch-v6-http.log 2>&1 &
       - name: Trace v6 auth state
-        run: node .github/tests/qa-v6-auth-reset-diag.mjs
+        run: |
+          node .github/tests/qa-v6-auth-reset-diag.mjs > qa-auth-trace.log 2>&1
+          cat qa-auth-trace.log
       - name: Run v6 iPhone Kakao direct-touch QA
         run: |
           set +e
@@ -66,12 +68,14 @@ jobs:
           code=$?
           cat qa-direct-touch.log
           exit $code
-      - name: Upload direct-touch diagnostics
+      - name: Upload v6 diagnostics
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: v6-direct-touch-diagnostics
-          path: qa-direct-touch.log
+          name: v6-runtime-diagnostics
+          path: |
+            qa-auth-trace.log
+            qa-direct-touch.log
           if-no-files-found: warn
           retention-days: 2
       - name: Run v6 roster feature QA
