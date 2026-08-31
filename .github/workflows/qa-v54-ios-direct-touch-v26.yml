@@ -1,19 +1,10 @@
-name: QA v5.4 iOS direct touch v26
+name: Legacy QA v5.4 iOS direct touch (manual only)
 on:
-  push:
-    branches: [main]
   workflow_dispatch:
 jobs:
-  webkit-direct-touch:
+  legacy-webkit-direct-touch:
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-      - run: npm install --no-save playwright@1.55.0
-      - run: npx playwright install --with-deps webkit
-      - name: Tap direct member and group controls in iPhone Kakao WebKit
-        run: |
-          python3 -m http.server 4173 >/tmp/kokmatch-http.log 2>&1 &
-          node .github/tests/qa-v26-direct-touch.mjs
+      - run: |
+          echo "Legacy v5.4 workflow is retired."
+          echo "Use Prune Kokmatch v6 runtime and Validate standalone runtime for current QA."
