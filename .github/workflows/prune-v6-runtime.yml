@@ -9,6 +9,7 @@ on:
       - 'scripts/v6-roster-cleanup.mjs'
       - 'scripts/v6-disable-legacy-auto-update.mjs'
       - 'scripts/v6-ui-terminology.mjs'
+      - 'scripts/v6-ui-stability.mjs'
       - '.github/workflows/prune-v6-runtime.yml'
   workflow_dispatch:
 concurrency:
@@ -32,6 +33,7 @@ jobs:
           node scripts/v6-roster-cleanup.mjs
           node scripts/v6-disable-legacy-auto-update.mjs
           node scripts/v6-ui-terminology.mjs
+          node scripts/v6-ui-stability.mjs
       - name: Validate generated source only
         run: |
           node --check app-v6.0.js
@@ -56,6 +58,15 @@ jobs:
           grep -q 'currentVersionV6' app-v6.0.js
           grep -q '최신버전으로 새로고침' app-v6.0.js
           grep -q 'https://kkokmatch.github.io/' app-v6.0.js
+          grep -Fq "function buildLabelV6(){return 'v6.12'}" app-v6.0.js
+          grep -Fq "__kokmatchReliableActionTapV6='v6.12'" app-v6.0.js
+          grep -Fq 'function blockLegacyLogoutV6(){return true}' app-v6.0.js
+          grep -q 'V6_UI_STABILITY_CSS_BEGIN' app-v6.0.css
+          grep -q '#A60093' app-v6.0.css
+          grep -q '#00CFC6' app-v6.0.css
+          grep -q '#10D400' app-v6.0.css
+          grep -q '#DE9999' app-v6.0.css
+          grep -q '#EBE202' app-v6.0.css
           ! grep -Eq '총관리자|모임관리자|게임편성자|일반회원' app-v6.0.js
           grep -q "data-kokmatch-entry='fresh-v1'\|dataset.kokmatchEntry='fresh-v1'" index.html
           grep -q "app-v6.0.js?_km=" index.html
@@ -64,11 +75,11 @@ jobs:
         run: |
           node - <<'NODE'
           const fs=require('fs');
-          const build='2026.08.31.standalone.11';
+          const build='v6.12';
           const p='latest-version.json';const x=JSON.parse(fs.readFileSync(p,'utf8'));
-          x.version=60;x.label='6.0';x.semanticVersion='6.0';x.build=build;x.updatedAt='2026-08-31T14:10:00+09:00';x.note='v6.0 독립 운영본 · 로그인 무한새로고침 제거 · 구형 자동 업데이트 완전 차단 · 수동 최신버전 새로고침만 허용';
+          x.version=60;x.label='v6.12';x.semanticVersion='6.12';x.build=build;x.updatedAt='2026-08-31T14:30:00+09:00';x.note='버튼 탭 안정화 · 기존 급수배지 색상 복원 · 회원정보 간격 축소';
           fs.writeFileSync(p,JSON.stringify(x,null,2)+'\n');
-          fs.writeFileSync('v6-cleanup-report.json',JSON.stringify({version:'6.0',build,features:['legacy automatic version navigation removed, including migrated app-v75 updater','login screen never auto-navigates to /refresh/vXX','manual latest-version refresh remains available in the header','header shows current standalone build left of refresh/logout','header latest-refresh clears Cache API and unregisters service workers','header latest-refresh always redirects to https://kkokmatch.github.io/ with a fresh nonce','role badges: 개발자/모임장/운영진/일반','remove roster together-game action and total-game badge','current-month attendance + partner setting row','four-character member name lane','grade-matched pastel roster cards','member roster re-entry forces full roster refresh','Kakao/iOS fresh-entry bootstrap with unique navigation and asset nonce'],validation:['javascript syntax','no auto-v6 updater','no app-v75 refreshTo75/targetReady75 updater','no automatic /refresh/vXX location navigation','visible build label source present','canonical manual latest-refresh source present','canonical official URL present','member card id stamped at render time','canonical roster index fallback mapping present','fresh-entry bootstrap marker'],functionalQaPolicy:'functional/browser/device QA omitted from deployment gate per operator request'},null,2)+'\n');
+          fs.writeFileSync('v6-cleanup-report.json',JSON.stringify({version:'6.12',build,features:['short visible version label v6.12','reliable Kakao/iOS tap handling for header and modal buttons with scroll movement threshold','legacy automatic version navigation removed','manual latest-version refresh only','original v50 grade badge colors restored: A magenta, B cyan, C green, D rose, E yellow','grade-matched pastel member cards','compact member name/birth/gender/attendance/partner spacing','role badges: 개발자/모임장/운영진/일반','member roster re-entry forces full roster refresh'],validation:['javascript syntax','no automatic /refresh/vXX navigation','short build label source','reliable action tap bridge','logout fallback remains callable','original grade palette present','compact roster CSS present','fresh-entry bootstrap marker'],functionalQaPolicy:'functional/browser/device QA omitted from deployment gate per operator request'},null,2)+'\n');
           let html=fs.readFileSync('index.html','utf8');
           html=html.replace(/data-kokmatch-build="[^"]*"/,`data-kokmatch-build="${build}"`);
           html=html.replace(/const BUILD_FALLBACK='[^']*'/,`const BUILD_FALLBACK='${build}'`);
@@ -79,6 +90,6 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add app-v6.0.js app-v6.0.css index.html latest-version.json v6-cleanup-report.json
-          git commit -m "Remove legacy automatic refresh loop [skip ci]" || exit 0
+          git commit -m "Fix mobile buttons and restore roster styles [skip ci]" || exit 0
           git pull --rebase origin main
           git push
