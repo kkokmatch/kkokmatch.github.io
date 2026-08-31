@@ -1,7 +1,10 @@
 {
   "version": "6.0",
-  "build": "2026.08.31.standalone.10",
+  "build": "2026.08.31.standalone.11",
   "features": [
+    "legacy automatic version navigation removed, including migrated app-v75 updater",
+    "login screen never auto-navigates to /refresh/vXX",
+    "manual latest-version refresh remains available in the header",
     "header shows current standalone build left of refresh/logout",
     "header latest-refresh clears Cache API and unregisters service workers",
     "header latest-refresh always redirects to https://kkokmatch.github.io/ with a fresh nonce",
@@ -15,12 +18,14 @@
   ],
   "validation": [
     "javascript syntax",
+    "no auto-v6 updater",
+    "no app-v75 refreshTo75/targetReady75 updater",
+    "no automatic /refresh/vXX location navigation",
     "visible build label source present",
-    "canonical latest-refresh source present",
+    "canonical manual latest-refresh source present",
     "canonical official URL present",
     "member card id stamped at render time",
     "canonical roster index fallback mapping present",
-    "standalone-source ownership",
     "fresh-entry bootstrap marker"
   ],
   "functionalQaPolicy": "functional/browser/device QA omitted from deployment gate per operator request"
