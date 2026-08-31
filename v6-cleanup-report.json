@@ -1,24 +1,23 @@
 {
-  "version": "6.14",
-  "build": "v6.14",
+  "version": "6.15",
+  "build": "v6.15",
   "features": [
-    "partner settings opens from local roster data in a dedicated instant overlay",
-    "member attendance buttons paint locally before network response",
-    "heavy roster synchronization deferred during taps",
-    "member editor uses dedicated v6.14 state and unique controls for gender, grade, type, role and PIN",
-    "member_save persists year, gender, grade, type, role and PIN through kokmatch-v60-api",
-    "name-to-birth spacing tightened by another 5px",
-    "birth-to-monthly-attendance spacing increased by another 5px",
-    "short visible version label v6.14",
-    "manual latest-version refresh only"
+    "partner name text removed from roster cards while partner setting button remains",
+    "legacy global touch router excluded from roster cards and dedicated overlays",
+    "single pointer router handles roster attendance, edit and partner actions",
+    "member editor uses unique native select/input controls for gender, grade, type, role and PIN",
+    "member save sends all edited fields to kokmatch-v60-api",
+    "optimistic attendance paints the target card immediately",
+    "UI sync reduced from repeated microtask/rAF/timer passes to one rAF pass",
+    "short visible version label v6.15"
   ],
   "validation": [
     "javascript syntax",
     "no automatic /refresh/vXX navigation",
-    "v6.14 fast partner overlay installed",
-    "v6.14 optimistic member attendance installed",
-    "v6.14 dedicated member editor state installed",
-    "requested -8px/+8px roster spacing present",
+    "single v6.15 member pointer router marker",
+    "legacy router exclusion marker",
+    "v6.15 native editor marker",
+    "partner-name stripping marker",
     "fresh-entry bootstrap marker"
   ],
   "functionalQaPolicy": "functional/browser/device QA omitted from deployment gate per operator request"
