@@ -10,6 +10,9 @@ on:
       - '.github/tests/qa-v6-auth-reset-diag.mjs'
       - '.github/workflows/prune-v6-runtime.yml'
   workflow_dispatch:
+concurrency:
+  group: kokmatch-v6-runtime-cleanup
+  cancel-in-progress: true
 permissions:
   contents: write
 jobs:
@@ -68,4 +71,5 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add app-v6.0.js latest-version.json v6-cleanup-report.json
           git commit -m "Prune duplicate v6 interaction patches [skip ci]" || exit 0
+          git pull --rebase origin main
           git push
