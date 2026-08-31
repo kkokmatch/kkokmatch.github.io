@@ -40,6 +40,10 @@ jobs:
           ! grep -q 'migrated into v6.0: app-v5.4-fix24.js' app-v6.0.js
           ! grep -q 'migrated into v6.0: app-v5.4-fix26.js' app-v6.0.js
           ! grep -q 'auto-v6' app-v6.0.js
+          ! grep -q 'refreshTo75' app-v6.0.js
+          ! grep -q 'targetReady75' app-v6.0.js
+          ! grep -Fq 'location.replace(`/refresh/v' app-v6.0.js
+          ! grep -Fq 'location.assign(`/refresh/v' app-v6.0.js
           grep -q "__kokmatchInteractionCore='6.0'" app-v6.0.js
           grep -q "__kokmatchRosterCanonicalV6='6.0.4'" app-v6.0.js
           grep -q 'data-member-id22="${esc(m.id)}"' app-v6.0.js
@@ -60,11 +64,11 @@ jobs:
         run: |
           node - <<'NODE'
           const fs=require('fs');
-          const build='2026.08.31.standalone.10';
+          const build='2026.08.31.standalone.11';
           const p='latest-version.json';const x=JSON.parse(fs.readFileSync(p,'utf8'));
-          x.version=60;x.label='6.0';x.semanticVersion='6.0';x.build=build;x.updatedAt='2026-08-31T13:35:00+09:00';x.note='v6.0 독립 운영본 · 헤더 현재버전 표시 · 최신버전 강제 새로고침 · 공식 주소 강제 진입 · 회원명부 UI 실제 적용';
+          x.version=60;x.label='6.0';x.semanticVersion='6.0';x.build=build;x.updatedAt='2026-08-31T14:10:00+09:00';x.note='v6.0 독립 운영본 · 로그인 무한새로고침 제거 · 구형 자동 업데이트 완전 차단 · 수동 최신버전 새로고침만 허용';
           fs.writeFileSync(p,JSON.stringify(x,null,2)+'\n');
-          fs.writeFileSync('v6-cleanup-report.json',JSON.stringify({version:'6.0',build,features:['header shows current standalone build left of refresh/logout','header latest-refresh clears Cache API and unregisters service workers','header latest-refresh always redirects to https://kkokmatch.github.io/ with a fresh nonce','role badges: 개발자/모임장/운영진/일반','remove roster together-game action and total-game badge','current-month attendance + partner setting row','four-character member name lane','grade-matched pastel roster cards','member roster re-entry forces full roster refresh','Kakao/iOS fresh-entry bootstrap with unique navigation and asset nonce'],validation:['javascript syntax','visible build label source present','canonical latest-refresh source present','canonical official URL present','member card id stamped at render time','canonical roster index fallback mapping present','standalone-source ownership','fresh-entry bootstrap marker'],functionalQaPolicy:'functional/browser/device QA omitted from deployment gate per operator request'},null,2)+'\n');
+          fs.writeFileSync('v6-cleanup-report.json',JSON.stringify({version:'6.0',build,features:['legacy automatic version navigation removed, including migrated app-v75 updater','login screen never auto-navigates to /refresh/vXX','manual latest-version refresh remains available in the header','header shows current standalone build left of refresh/logout','header latest-refresh clears Cache API and unregisters service workers','header latest-refresh always redirects to https://kkokmatch.github.io/ with a fresh nonce','role badges: 개발자/모임장/운영진/일반','remove roster together-game action and total-game badge','current-month attendance + partner setting row','four-character member name lane','grade-matched pastel roster cards','member roster re-entry forces full roster refresh','Kakao/iOS fresh-entry bootstrap with unique navigation and asset nonce'],validation:['javascript syntax','no auto-v6 updater','no app-v75 refreshTo75/targetReady75 updater','no automatic /refresh/vXX location navigation','visible build label source present','canonical manual latest-refresh source present','canonical official URL present','member card id stamped at render time','canonical roster index fallback mapping present','fresh-entry bootstrap marker'],functionalQaPolicy:'functional/browser/device QA omitted from deployment gate per operator request'},null,2)+'\n');
           let html=fs.readFileSync('index.html','utf8');
           html=html.replace(/data-kokmatch-build="[^"]*"/,`data-kokmatch-build="${build}"`);
           html=html.replace(/const BUILD_FALLBACK='[^']*'/,`const BUILD_FALLBACK='${build}'`);
@@ -75,6 +79,6 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add app-v6.0.js app-v6.0.css index.html latest-version.json v6-cleanup-report.json
-          git commit -m "Show current build and force latest refresh [skip ci]" || exit 0
+          git commit -m "Remove legacy automatic refresh loop [skip ci]" || exit 0
           git pull --rebase origin main
           git push
