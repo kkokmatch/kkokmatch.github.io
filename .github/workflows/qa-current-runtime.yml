@@ -1,0 +1,39 @@
+name: QA current single runtime
+
+on:
+  push:
+    paths:
+      - 'index.html'
+      - 'latest-version.json'
+      - 'app-v*.js'
+      - 'app-v*.css'
+      - 'scripts/qa-current-runtime.mjs'
+      - '.github/workflows/qa-current-runtime.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Validate standalone runtime
+        run: node scripts/validate-standalone-runtime.mjs
+      - name: Install Playwright
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install --with-deps chromium
+      - name: Start local static server
+        run: |
+          python3 -m http.server 4173 >/tmp/kokmatch-http.log 2>&1 &
+          echo $! >/tmp/kokmatch-http.pid
+          for i in {1..20}; do curl -fsS http://127.0.0.1:4173/ >/dev/null && exit 0; sleep 0.25; done
+          cat /tmp/kokmatch-http.log
+          exit 1
+      - name: Mobile roster smoke QA
+        run: node scripts/qa-current-runtime.mjs
