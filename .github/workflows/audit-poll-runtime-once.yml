@@ -3,8 +3,6 @@ on:
   push:
     paths:
       - '.github/workflows/audit-poll-runtime-once.yml'
-      - 'scripts/debug-roster-v623.mjs'
-      - 'scripts/roster-v623-final.js'
   workflow_dispatch:
 permissions:
   contents: read
@@ -13,19 +11,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-      - run: |
-          node scripts/build-v623-poll-cleanup.mjs
-          printf '\n\n' >> app-v6.23.js
-          cat scripts/roster-v623-final.js >> app-v6.23.js
-          node --check app-v6.23.js
-      - run: |
-          npm install --no-save playwright@1.55.0
-          npx playwright install chromium
-      - run: |
-          python3 -m http.server 4173 >/tmp/http.log 2>&1 &
-          for i in {1..20}; do curl -fsS http://127.0.0.1:4173/ >/dev/null && exit 0; sleep .25; done
-          exit 1
-      - run: node scripts/debug-roster-v623.mjs
+      - name: Inspect mixed blocks after removed poll generations
+        run: |
+          node <<'NODE'
+          const fs=require('fs'),s=fs.readFileSync('app-v6.22.js','utf8');
+          const wanted=['app-v2.3.js','app-v3.3.js','app-v5.1.js','app-v72.js','app-v73.js','app-v74.js','app-v91.js','app-v1.8.js'];
+          for(const name of wanted){
+            const a=s.indexOf(`/* migrated into v6.0: ${name} */`),b=s.indexOf('/* migrated into v6.0:',a+1);if(a<0)continue;const lines=s.slice(a,b<0?s.length:b).split('\n');
+            console.log('\n### '+name);
+            const shown=new Set();
+            lines.forEach((line,i)=>{if(/poll|Poll/.test(line)){for(let j=Math.max(0,i-1);j<=Math.min(lines.length-1,i+1);j++)shown.add(j)}});
+            [...shown].sort((x,y)=>x-y).forEach(i=>console.log(String(i+1).padStart(4,' ')+': '+lines[i]));
+          }
+          NODE
