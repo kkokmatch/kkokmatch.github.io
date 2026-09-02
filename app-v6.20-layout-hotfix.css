@@ -1,11 +1,11 @@
-/* 콕매치 v6.20 layout hotfix · 2026-09-02
+/* 콕매치 v6.21 layout hotfix · 2026-09-02
    - 회원명부 이름 글리프 잘림 방지
    - 게임대기 화면과 동일한 급수 배지 적용
-   - 입장/관람/퇴장/수정 액션열 4칸 일렬 고정
+   - 원래 3버튼 고정 동작 복원
    - 모바일 상단 모임명/사용자 정보 영역 확장
 */
 
-/* 1) 회원명부 이름이 좌측/상단에서 잘리지 않도록 여유 확보 */
+/* 1) 회원명부 이름 잘림 방지 */
 #members .memberInfo48,
 #members .memberInfoV6,
 #members .memberInfoV618{
@@ -31,7 +31,7 @@
   text-overflow:clip!important;
 }
 
-/* 2) 회원명부 급수 배지를 게임대기 급수배지(v50)와 완전히 동일하게 */
+/* 2) 회원명부 급수 배지 = 게임대기 급수 배지 */
 #members .memberMainLine45 .tag[class*="grade-"],
 #members .memberCard .tag[class*="grade-"]{
   font-weight:900!important;
@@ -51,23 +51,28 @@
 #members .memberCard[data-grade-v6="E"] .grade-e50,
 #members .grade-e50{background:#EBE202!important;color:#3b3800!important;border-color:transparent!important}
 
-/* 3) 액션 버튼은 상태와 관계없이 4개의 고정 열을 사용한다.
-      운동=1열 / 관람=2열 / 퇴장=3열 / 수정=4열 */
+/* 3) 원래 사용하던 3버튼 고정 레이아웃
+   미입장 : 입장 | 관람 | 수정
+   게임대기: 퇴장 | 관람 | 수정
+   관람   : 입장 | 퇴장 | 수정
+   버튼의 의미만 바뀌고 위치/크기는 절대 이동하지 않는다.
+*/
 #members .memberCard{
-  grid-template-columns:46px minmax(0,1fr) 126px!important;
-  column-gap:6px!important;
+  grid-template-columns:46px minmax(0,1fr) 110px!important;
+  column-gap:7px!important;
 }
 #members .memberActions48,
 #members .v6MemberActions,
 #members .memberActions60,
 #members .memberActions64,
-#members .memberActions65{
+#members .memberActions65,
+#members .kmRosterActions621{
   position:static!important;
   inset:auto!important;
   transform:none!important;
-  width:126px!important;
-  min-width:126px!important;
-  max-width:126px!important;
+  width:110px!important;
+  min-width:110px!important;
+  max-width:110px!important;
   align-self:center!important;
   justify-self:end!important;
   margin-left:auto!important;
@@ -78,82 +83,62 @@
 #members .v6MemberActions .status,
 #members .memberActions60 .status,
 #members .memberActions64 .status,
-#members .memberActions65 .status{
-  width:126px!important;
-  min-width:126px!important;
-  max-width:126px!important;
+#members .memberActions65 .status,
+#members .kmRosterActions621 .status{
+  width:110px!important;
+  min-width:110px!important;
+  max-width:110px!important;
   margin:0 0 4px!important;
   text-align:right!important;
+  line-height:1.1!important;
 }
 #members .memberBtns,
 #members .memberBtns61,
 #members .memberBtns64,
-#members .memberBtns65{
+#members .memberBtns65,
+#members .kmRosterBtns621{
   position:static!important;
   inset:auto!important;
   transform:none!important;
   display:grid!important;
-  grid-template-columns:repeat(4,30px)!important;
-  grid-template-rows:30px!important;
+  grid-template-columns:repeat(3,34px)!important;
+  grid-template-rows:31px!important;
   grid-auto-flow:column!important;
-  gap:2px!important;
-  width:126px!important;
-  min-width:126px!important;
-  max-width:126px!important;
-  height:30px!important;
-  min-height:30px!important;
+  gap:4px!important;
+  width:110px!important;
+  min-width:110px!important;
+  max-width:110px!important;
+  height:31px!important;
+  min-height:31px!important;
   align-items:stretch!important;
   justify-content:start!important;
   overflow:visible!important;
 }
-/* 버튼이 빠져도 나머지 버튼은 자기 고정 열에서 움직이지 않는다. */
-#members .memberBtns>.enter,
-#members .memberBtns61>.enter,
-#members .memberBtns64>.enter,
-#members .memberBtns65>.enter{grid-column:1!important;grid-row:1!important}
-#members .memberBtns>.watch,
-#members .memberBtns61>.watch,
-#members .memberBtns64>.watch,
-#members .memberBtns65>.watch{grid-column:2!important;grid-row:1!important}
-#members .memberBtns>.danger,
-#members .memberBtns61>.danger,
-#members .memberBtns64>.danger,
-#members .memberBtns65>.danger{grid-column:3!important;grid-row:1!important}
-#members .memberBtns>.ghost,
-#members .memberBtns61>.ghost,
-#members .memberBtns64>.ghost,
-#members .memberBtns65>.ghost{grid-column:4!important;grid-row:1!important}
-#members .memberBtn-enter61{grid-column:1!important;grid-row:1!important}
-#members .memberBtn-watch61{grid-column:2!important;grid-row:1!important}
-#members .memberBtn-leave61{grid-column:3!important;grid-row:1!important}
-#members .memberBtn-edit61{grid-column:4!important;grid-row:1!important}
-#members .memberBtnSlot61,
-#members .memberBtnPlaceholder61{
-  width:30px!important;
-  min-width:30px!important;
-  max-width:30px!important;
-  height:30px!important;
-  min-height:30px!important;
-  margin:0!important;
-}
-#members .memberBtnSlot61{
+#members .kmRosterSlot-first621{grid-column:1!important;grid-row:1!important}
+#members .kmRosterSlot-second621{grid-column:2!important;grid-row:1!important}
+#members .kmRosterSlot-edit621{grid-column:3!important;grid-row:1!important}
+#members .kmRosterSlot621,
+#members .kmRosterPlaceholder621{
   display:flex!important;
+  width:34px!important;
+  min-width:34px!important;
+  max-width:34px!important;
+  height:31px!important;
+  min-height:31px!important;
+  margin:0!important;
   align-items:stretch!important;
   justify-content:stretch!important;
 }
-#members .memberBtns .btn,
-#members .memberBtns61 .btn,
-#members .memberBtns64 .btn,
-#members .memberBtns65 .btn,
-#members .memberBtnSlot61 .btn{
+#members .kmRosterPlaceholder621{visibility:hidden!important;pointer-events:none!important}
+#members .kmRosterAction621{
   position:static!important;
   inset:auto!important;
   transform:none!important;
-  width:30px!important;
-  min-width:30px!important;
-  max-width:30px!important;
-  height:30px!important;
-  min-height:30px!important;
+  width:34px!important;
+  min-width:34px!important;
+  max-width:34px!important;
+  height:31px!important;
+  min-height:31px!important;
   margin:0!important;
   padding:0!important;
   display:flex!important;
@@ -163,22 +148,28 @@
   overflow:hidden!important;
   text-overflow:clip!important;
   line-height:1!important;
-  font-size:8.5px!important;
+  font-size:9px!important;
   border-radius:8px!important;
+  flex:0 0 34px!important;
 }
-#members .memberBtns .btn:active,
-#members .memberBtns61 .btn:active,
-#members .memberBtns64 .btn:active,
-#members .memberBtns65 .btn:active,
-#members .memberBtns .btn.v615Pressed,
-#members .memberBtns61 .btn.v615Pressed,
-#members .memberBtns64 .btn.v615Pressed,
-#members .memberBtns65 .btn.v615Pressed{
+#members .kmRosterAction621:active,
+#members .kmRosterAction621.v615Pressed{
   transform:none!important;
   filter:none!important;
 }
 
-/* 4~5) 상단: 액션버튼은 우상단에 두고 모임/사용자 줄에는 화면 전체 폭을 배정 */
+/* 기존 4칸/자동배치 보정의 영향 제거 */
+#members .memberBtnSlot61,
+#members .memberBtnPlaceholder61{
+  min-width:0!important;
+  max-width:none!important;
+}
+#members .memberBtns61,
+#members .memberBtns64{
+  grid-template-areas:none!important;
+}
+
+/* 4) 상단 모임 선택 / 사용자 정보 영역 확대 */
 @media(max-width:599px){
   .toprow{
     position:relative!important;
@@ -259,7 +250,7 @@
 
 @media(max-width:430px){
   #members .memberCard{
-    grid-template-columns:42px minmax(0,1fr) 118px!important;
+    grid-template-columns:42px minmax(0,1fr) 98px!important;
     column-gap:5px!important;
     padding-left:7px!important;
     padding-right:4px!important;
@@ -269,42 +260,43 @@
   #members .memberActions60,
   #members .memberActions64,
   #members .memberActions65,
+  #members .kmRosterActions621,
   #members .memberActions48 .status,
   #members .v6MemberActions .status,
   #members .memberActions60 .status,
   #members .memberActions64 .status,
   #members .memberActions65 .status,
+  #members .kmRosterActions621 .status,
   #members .memberBtns,
   #members .memberBtns61,
   #members .memberBtns64,
-  #members .memberBtns65{
-    width:118px!important;
-    min-width:118px!important;
-    max-width:118px!important;
+  #members .memberBtns65,
+  #members .kmRosterBtns621{
+    width:98px!important;
+    min-width:98px!important;
+    max-width:98px!important;
   }
   #members .memberBtns,
   #members .memberBtns61,
   #members .memberBtns64,
-  #members .memberBtns65{
-    grid-template-columns:repeat(4,28px)!important;
-    grid-template-rows:29px!important;
-    height:29px!important;
-    min-height:29px!important;
+  #members .memberBtns65,
+  #members .kmRosterBtns621{
+    grid-template-columns:repeat(3,31px)!important;
+    grid-template-rows:30px!important;
+    gap:2.5px!important;
+    height:30px!important;
+    min-height:30px!important;
   }
-  #members .memberBtnSlot61,
-  #members .memberBtnPlaceholder61,
-  #members .memberBtns .btn,
-  #members .memberBtns61 .btn,
-  #members .memberBtns64 .btn,
-  #members .memberBtns65 .btn,
-  #members .memberBtnSlot61 .btn{
-    width:28px!important;
-    min-width:28px!important;
-    max-width:28px!important;
-    height:29px!important;
-    min-height:29px!important;
-    font-size:8px!important;
+  #members .kmRosterSlot621,
+  #members .kmRosterPlaceholder621,
+  #members .kmRosterAction621{
+    width:31px!important;
+    min-width:31px!important;
+    max-width:31px!important;
+    height:30px!important;
+    min-height:30px!important;
   }
+  #members .kmRosterAction621{font-size:8.5px!important;flex-basis:31px!important}
 }
 
 @media(max-width:359px){
@@ -315,7 +307,7 @@
   .groupLine .groupBtn{font-size:10px!important;padding:6px!important}
   .groupLine .who,.groupLine .whoInline85{font-size:9.5px!important;padding:5px 6px!important}
   #members .memberCard{
-    grid-template-columns:39px minmax(0,1fr) 110px!important;
+    grid-template-columns:39px minmax(0,1fr) 92px!important;
     column-gap:4px!important;
     padding-left:6px!important;
     padding-right:3px!important;
@@ -325,40 +317,41 @@
   #members .memberActions60,
   #members .memberActions64,
   #members .memberActions65,
+  #members .kmRosterActions621,
   #members .memberActions48 .status,
   #members .v6MemberActions .status,
   #members .memberActions60 .status,
   #members .memberActions64 .status,
   #members .memberActions65 .status,
+  #members .kmRosterActions621 .status,
   #members .memberBtns,
   #members .memberBtns61,
   #members .memberBtns64,
-  #members .memberBtns65{
-    width:110px!important;
-    min-width:110px!important;
-    max-width:110px!important;
+  #members .memberBtns65,
+  #members .kmRosterBtns621{
+    width:92px!important;
+    min-width:92px!important;
+    max-width:92px!important;
   }
   #members .memberBtns,
   #members .memberBtns61,
   #members .memberBtns64,
-  #members .memberBtns65{
-    grid-template-columns:repeat(4,26px)!important;
-    grid-template-rows:28px!important;
-    height:28px!important;
-    min-height:28px!important;
+  #members .memberBtns65,
+  #members .kmRosterBtns621{
+    grid-template-columns:repeat(3,29px)!important;
+    grid-template-rows:29px!important;
+    gap:2.5px!important;
+    height:29px!important;
+    min-height:29px!important;
   }
-  #members .memberBtnSlot61,
-  #members .memberBtnPlaceholder61,
-  #members .memberBtns .btn,
-  #members .memberBtns61 .btn,
-  #members .memberBtns64 .btn,
-  #members .memberBtns65 .btn,
-  #members .memberBtnSlot61 .btn{
-    width:26px!important;
-    min-width:26px!important;
-    max-width:26px!important;
-    height:28px!important;
-    min-height:28px!important;
-    font-size:7.5px!important;
+  #members .kmRosterSlot621,
+  #members .kmRosterPlaceholder621,
+  #members .kmRosterAction621{
+    width:29px!important;
+    min-width:29px!important;
+    max-width:29px!important;
+    height:29px!important;
+    min-height:29px!important;
   }
+  #members .kmRosterAction621{font-size:7.8px!important;flex-basis:29px!important}
 }
