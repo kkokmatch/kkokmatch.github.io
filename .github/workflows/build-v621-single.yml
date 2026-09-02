@@ -24,6 +24,9 @@ jobs:
         run: node scripts/build-v621-single.mjs
       - name: Syntax check
         run: node --check app-v6.21.js
+      - name: Show legacy asset contexts
+        shell: bash
+        run: grep -n -C 3 'app-v5.4-fix' app-v6.21.js || true
       - name: Standalone runtime check
         run: node scripts/validate-standalone-runtime.mjs
       - name: Verify canonical cleanup
