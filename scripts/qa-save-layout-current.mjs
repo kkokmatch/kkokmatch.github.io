@@ -15,6 +15,7 @@ await page.route('https://wjelumpbjklfrdjxbesj.supabase.co/functions/v1/**',asyn
  if(url.pathname.endsWith('/kokmatch-v60-api')){
   if(body.op==='member_save'){
    memberSaveCalls++;lastMemberSave=body;const id=String(body.memberId||'m-new');let m=state.members.find(x=>String(x.id)===id);if(!m){m={id,state:'out',totalGames:0};state.members.push(m)}Object.assign(m,{name:body.name,year:body.year,gender:body.gender,age:'30',cls:body.cls,type:body.type,role:body.role,inviter:body.inviter||''});
+   if(body.compact===true)return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({success:true,member:JSON.parse(JSON.stringify(m)),group:{groupId:'qa',name:'QA'}})});
   }
   return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({success:true,data:clone(),group:{groupId:'qa',name:'QA'}})});
  }
@@ -31,11 +32,11 @@ try{
  await page.fill('#v618Name','저장속도QA');await page.locator('#v618Save').click();await page.waitForSelector('#memberEditorV615',{state:'detached',timeout:5000});
  await page.waitForFunction(()=>S.members?.some(m=>m.id==='m1'&&m.name==='저장속도QA'),null,{timeout:3000});
  if(memberSaveCalls!==1)throw new Error('member save request count '+memberSaveCalls);
- if(!lastMemberSave||lastMemberSave.op!=='member_save')throw new Error('member save payload missing');
+ if(!lastMemberSave||lastMemberSave.op!=='member_save'||lastMemberSave.compact!==true)throw new Error('compact member save payload missing: '+JSON.stringify(lastMemberSave));
  await page.evaluate(()=>goView('stats'));await page.waitForSelector('.pollWrap623');
  const layout=await page.evaluate(()=>{const box=document.getElementById('stats'),poll=box?.querySelector('.pollWrap623'),todayTitle=[...box?.children||[]].find(x=>x.classList?.contains('title')&&(x.textContent||'').includes('오늘 통계')),day=box?.querySelector('.pollDay623');return{first:box?.firstElementChild===poll,pollIndex:poll?[...box.children].indexOf(poll):-1,todayIndex:todayTitle?[...box.children].indexOf(todayTitle):-1,radius:day?getComputedStyle(day).borderRadius:'',bg:day?getComputedStyle(day).backgroundColor:''}});
  if(!layout.first||layout.todayIndex<=layout.pollIndex)throw new Error('poll is not above today stats: '+JSON.stringify(layout));
  if(layout.radius!=='50%')throw new Error('calendar day design is not restored to circular style: '+JSON.stringify(layout));
  if(pageErrors.length)throw new Error('page errors: '+pageErrors.join(' | '));
- console.log(`PASS save/layout QA v${VERSION}`);console.log('PASS member save single request / editor note removed');console.log('PASS exercise poll at top / today stats below');console.log('PASS previous-style circular poll calendar');
+ console.log(`PASS save/layout QA v${VERSION}`);console.log('PASS compact member save single request / editor note removed');console.log('PASS exercise poll at top / today stats below');console.log('PASS previous-style circular poll calendar');
 }finally{await browser.close();}
