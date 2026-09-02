@@ -1,0 +1,47 @@
+name: Build v6.27 stats once
+on:
+  push:
+    paths:
+      - '.github/workflows/build-v627-once.yml'
+      - 'scripts/build-v627-stats.mjs'
+      - 'scripts/stats-v627-runtime.js'
+      - 'scripts/stats-v627.css'
+      - 'scripts/qa-save-layout-current.mjs'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  build-test-commit:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Build v6.27 candidate
+        run: node scripts/build-v627-stats.mjs
+      - name: Install Playwright
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install --with-deps chromium
+      - name: Start server
+        run: |
+          python3 -m http.server 4173 >/tmp/kokmatch-http.log 2>&1 &
+          for i in {1..20}; do curl -fsS http://127.0.0.1:4173/ >/dev/null && exit 0; sleep .25; done
+          cat /tmp/kokmatch-http.log
+          exit 1
+      - name: Boot QA
+        run: node scripts/qa-boot-diagnostic.mjs
+      - name: Roster QA
+        run: node scripts/qa-current-runtime.mjs
+      - name: Partner and poll QA
+        run: node scripts/qa-partner-poll-current.mjs
+      - name: Date and monthly stats QA
+        run: node scripts/qa-save-layout-current.mjs
+      - name: Commit only after green QA
+        run: |
+          git config user.name 'kkokmatch'
+          git config user.email 'hanarin0201@gmail.com'
+          git add app-v6.27.js app-v6.27.css index.html latest-version.json
+          git commit -m 'v6.27 add selected-date and monthly member stats'
+          git push
