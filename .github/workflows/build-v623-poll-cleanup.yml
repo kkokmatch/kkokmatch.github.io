@@ -1,0 +1,48 @@
+name: Build v6.23 canonical poll runtime
+on:
+  push:
+    paths:
+      - '.github/workflows/build-v623-poll-cleanup.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  build-test-commit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Build v6.23
+        run: node scripts/build-v623-poll-cleanup.mjs
+      - name: Validate no legacy poll API or removed blocks
+        run: |
+          ! grep -Eq 'kokmatch-v(18|19|72|73|74|76|90)-api' app-v6.23.js
+          ! grep -Eq 'migrated into v6.0: app-v(76|90|1\.9|2\.0|2\.1|2\.2)\.js' app-v6.23.js
+          grep -q 'kokmatch-v21-api' app-v6.23.js
+          node --check app-v6.23.js
+          node scripts/validate-standalone-runtime.mjs
+      - name: Install Playwright chromium
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install chromium
+      - name: Start server
+        run: |
+          python3 -m http.server 4173 >/tmp/http.log 2>&1 &
+          for i in {1..20}; do curl -fsS http://127.0.0.1:4173/ >/dev/null && exit 0; sleep 0.25; done
+          cat /tmp/http.log
+          exit 1
+      - name: Existing mobile roster QA
+        run: node scripts/qa-current-runtime.mjs
+      - name: Canonical partner and poll QA
+        run: node scripts/qa-partner-poll-current.mjs
+      - name: Commit generated runtime and remove one-time tooling
+        run: |
+          git config user.name 'kkokmatch'
+          git config user.email 'hanarin0201@gmail.com'
+          git add app-v6.23.js app-v6.23.css index.html latest-version.json
+          git rm -f scripts/poll-v623-canonical.js scripts/build-v623-poll-cleanup.mjs .github/workflows/audit-poll-runtime-once.yml .github/workflows/build-v623-poll-cleanup.yml || true
+          if [ -f .github/workflows/qa-focused-fast.yml ]; then git rm -f .github/workflows/qa-focused-fast.yml; fi
+          git commit -m 'Consolidate exercise attendance poll runtime in v6.23'
+          git push
