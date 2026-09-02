@@ -1,8 +1,8 @@
 {
-  "version": 62,
-  "label": "v6.22",
-  "semanticVersion": "6.22",
-  "build": "v6.22",
-  "updatedAt": "2026-09-02T14:01:00+09:00",
-  "note": "v6.22 파트너 검색 상태수명 수정 · 동명이인 구분·선택·저장 · 운동투표 전체 흐름 QA"
+  "version": 63,
+  "label": "v6.23",
+  "semanticVersion": "6.23",
+  "build": "v6.23",
+  "updatedAt": "2026-09-02T15:00:00+09:00",
+  "note": "v6.23 운동참석투표 canonical 단일화 · v21 API 통합 · 중복 투표 런타임/Observer 제거 · 안정화 QA"
 }
