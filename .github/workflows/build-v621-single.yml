@@ -47,3 +47,5 @@ jobs:
           fi
           git commit -m 'Consolidate KokMatch v6.21 into single runtime'
           git push
+
+# one-time migration workflow; remove after successful consolidation
