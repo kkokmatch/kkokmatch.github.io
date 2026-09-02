@@ -24,20 +24,27 @@ jobs:
         run: node scripts/build-v621-single.mjs
       - name: Syntax check
         run: node --check app-v6.21.js
-      - name: Show legacy asset contexts
-        shell: bash
-        run: grep -n -C 3 'app-v5.4-fix' app-v6.21.js || true
       - name: Standalone runtime check
         run: node scripts/validate-standalone-runtime.mjs
       - name: Verify canonical cleanup
         shell: bash
         run: |
-          test "$(grep -o '/app-v6.21.js' index.html | wc -l)" -eq 1
-          test "$(grep -o '/app-v6.21.css' index.html | wc -l)" -eq 1
-          ! grep -q 'Member attendance fast path: preserve scroll' app-v6.21.js
-          ! grep -q "location.pathname.startsWith('/launch/v" app-v6.21.js
-          grep -q '__kokmatchThreeButtonRoster621' app-v6.21.js
-          grep -q '__kokmatchMemberApiHotfixV621' app-v6.21.js
+          node - <<'NODE'
+          const fs=require('fs');
+          const html=fs.readFileSync('index.html','utf8');
+          const js=fs.readFileSync('app-v6.21.js','utf8');
+          const checks={
+            oneCurrentJs:(html.match(/\/app-v6\.21\.js/g)||[]).length===1,
+            oneCurrentCss:(html.match(/\/app-v6\.21\.css/g)||[]).length===1,
+            noLegacyV99FastPath:!js.includes('Member attendance fast path: preserve scroll'),
+            noLegacyLaunchRoute:!js.includes("location.pathname.startsWith('/launch/v"),
+            threeButtonCanonical:js.includes('__kokmatchThreeButtonRoster621'),
+            memberApiCanonical:js.includes('__kokmatchMemberApiHotfixV621'),
+            noCrossVersionAssets:![...js.matchAll(/[\"'](\/app-v[^\"'?]+\.(?:js|css))/g)].some(m=>!['/app-v6.21.js','/app-v6.21.css'].includes(m[1]))
+          };
+          for(const [name,ok] of Object.entries(checks))console.log(`${ok?'PASS':'FAIL'} ${name}`);
+          if(Object.values(checks).some(v=>!v))process.exit(1);
+          NODE
       - name: Commit consolidated runtime
         shell: bash
         run: |
