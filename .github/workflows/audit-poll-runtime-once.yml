@@ -11,16 +11,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Inspect mixed blocks after removed poll generations
+      - name: Print mixed blocks
         run: |
           node <<'NODE'
           const fs=require('fs'),s=fs.readFileSync('app-v6.22.js','utf8');
           const wanted=['app-v2.3.js','app-v3.3.js','app-v5.1.js','app-v72.js','app-v73.js','app-v74.js','app-v91.js','app-v1.8.js'];
-          for(const name of wanted){
-            const a=s.indexOf(`/* migrated into v6.0: ${name} */`),b=s.indexOf('/* migrated into v6.0:',a+1);if(a<0)continue;const lines=s.slice(a,b<0?s.length:b).split('\n');
-            console.log('\n### '+name);
-            const shown=new Set();
-            lines.forEach((line,i)=>{if(/poll|Poll/.test(line)){for(let j=Math.max(0,i-1);j<=Math.min(lines.length-1,i+1);j++)shown.add(j)}});
-            [...shown].sort((x,y)=>x-y).forEach(i=>console.log(String(i+1).padStart(4,' ')+': '+lines[i]));
-          }
+          for(const name of wanted){const a=s.indexOf(`/* migrated into v6.0: ${name} */`),b=s.indexOf('/* migrated into v6.0:',a+1);if(a<0)continue;console.log(`\n===== ${name} =====\n`+s.slice(a,b<0?s.length:b)+`\n===== END ${name} =====`)}
           NODE
