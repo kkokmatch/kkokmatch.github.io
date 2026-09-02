@@ -14,16 +14,16 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Build and trace roster handlers
+      - name: Build and inspect canonical roster path
         run: |
           node scripts/build-v623-poll-cleanup.mjs
-          echo '--- V6.22 roster refs ---'
-          grep -nE 'changeAttendance|setOther|set_member_attendance|kmRosterAction621|data-km621' app-v6.22.js | tail -80 || true
-          echo '--- V6.23 roster refs ---'
-          grep -nE 'changeAttendance|setOther|set_member_attendance|kmRosterAction621|data-km621' app-v6.23.js | tail -80 || true
-          echo '--- removed block references to roster/action ---'
           node <<'NODE'
-          const fs=require('fs'),s=fs.readFileSync('app-v6.22.js','utf8');
-          const blocks=['app-v76.js','app-v90.js','app-v1.9.js','app-v2.0.js','app-v2.1.js','app-v2.2.js'];
-          for(const name of blocks){const a=s.indexOf(`/* migrated into v6.0: ${name} */`),b=s.indexOf('/* migrated into v6.0:',a+1),x=s.slice(a,b);const hits=x.split('\n').filter(l=>/setOther|changeAttendance|memberBtns|renderMembers|addEventListener\(['"]click|pointer/.test(l));console.log('\n### '+name);console.log(hits.join('\n')||'(none)')}
+          const fs=require('fs');
+          for(const f of ['app-v6.22.js','app-v6.23.js']){
+            const s=fs.readFileSync(f,'utf8');
+            console.log('\n==== '+f+' ====');
+            for(const needle of ['async function stableApi','async function changeAttendance','const pick=t=>']){
+              const i=s.lastIndexOf(needle);console.log('\n-- '+needle+' @ '+i+' --');console.log(s.slice(Math.max(0,i-700),i+3200));
+            }
+          }
           NODE
