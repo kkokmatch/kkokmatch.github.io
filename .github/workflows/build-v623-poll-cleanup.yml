@@ -20,7 +20,18 @@ jobs:
         with:
           node-version: 22
       - name: Build v6.23 single runtime
-        run: node scripts/build-v623-poll-cleanup.mjs
+        run: |
+          set +e
+          node scripts/build-v623-poll-cleanup.mjs
+          status=$?
+          if [ "$status" -ne 0 ] && [ -f app-v6.23.js ]; then
+            node <<'NODE'
+          const fs=require('fs'),s=fs.readFileSync('app-v6.23.js','utf8'),needle='selectPollDate22';
+          let from=0,n=0;
+          while((from=s.indexOf(needle,from))>=0){n++;const pre=s.lastIndexOf('/* migrated into v6.0:',from);const end=s.indexOf('\n',pre);console.log('LEGACY_OCCURRENCE',n,s.slice(pre,end),s.slice(Math.max(0,from-300),Math.min(s.length,from+500)));from+=needle.length}
+          NODE
+          fi
+          exit "$status"
       - name: Validate canonical runtime structure
         run: |
           ! grep -Eq 'kokmatch-v(18|19|74|76|90)-api' app-v6.23.js
