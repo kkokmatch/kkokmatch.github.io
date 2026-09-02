@@ -1,0 +1,55 @@
+name: Audit legacy app assets once
+
+on:
+  push:
+    paths:
+      - '.github/workflows/audit-legacy-assets-once.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Current runtime guard
+        run: node scripts/validate-standalone-runtime.mjs
+      - name: Audit legacy root app assets
+        shell: bash
+        run: |
+          set -u
+          current_js="app-v6.21.js"
+          current_css="app-v6.21.css"
+          mapfile -t assets < <(find . -maxdepth 1 -type f \( -name 'app-v*.js' -o -name 'app-v*.css' \) -printf '%f\n' | sort -V)
+          echo "TOTAL_APP_ASSETS=${#assets[@]}"
+          live=0
+          dead=0
+          for f in "${assets[@]}"; do
+            [[ "$f" == "$current_js" || "$f" == "$current_css" ]] && continue
+            refs=$(grep -RIlF --exclude="$f" --exclude-dir=.git --exclude-dir=node_modules -- "$f" . 2>/dev/null || true)
+            if [[ -n "$refs" ]]; then
+              live=$((live+1))
+              echo "REFERENCED $f"
+              while IFS= read -r ref; do echo "  <- $ref"; done <<< "$refs"
+            else
+              dead=$((dead+1))
+              echo "UNREFERENCED $f"
+            fi
+          done
+          echo "REFERENCED_LEGACY=$live"
+          echo "UNREFERENCED_LEGACY=$dead"
+      - name: Audit current JS for loaders and cache APIs
+        shell: bash
+        run: |
+          echo '--- app-v6.21 runtime loader/cache references ---'
+          grep -nE 'serviceWorker|caches\.|createElement\(.script|createElement\(.link|app-v[^ ]+\.(js|css)|/launch/v' app-v6.21.js || true
+          echo '--- auxiliary HTML / manifest / worker candidates ---'
+          find . -maxdepth 3 -type f \( -name '*.html' -o -name '*.webmanifest' -o -iname '*worker*' -o -name 'sw.js' \) -print | sort
+      - name: Audit legacy tests
+        shell: bash
+        run: |
+          echo '--- files under .github/tests ---'
+          find .github/tests -maxdepth 1 -type f -print 2>/dev/null | sort || true
+          echo '--- remaining workflow references to .github/tests ---'
+          grep -RInF '.github/tests' .github/workflows || true
