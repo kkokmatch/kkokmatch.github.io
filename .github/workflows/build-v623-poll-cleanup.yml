@@ -21,14 +21,23 @@ jobs:
           node-version: 22
       - name: Build v6.23 single runtime
         run: |
+          node <<'NODE'
+          const fs=require('fs'),p='scripts/build-v623-poll-cleanup.mjs';
+          let s=fs.readFileSync(p,'utf8');
+          const needle="editMigrationBlock('app-v72.js'";
+          if(!s.includes("editMigrationBlock('app-v2.8.js'")){
+            s=s.replace(needle,`editMigrationBlock('app-v2.8.js',b=>{\n  b=replaceOnce(b,'let statsDecorating28=false,statsRaf28=0;\\n','');\n  b=cutBetween(b,'function todayParts28(){','function renameStatsNav28(){');\n  b=replaceOnce(b,\"if(me&&currentView==='stats')decorateStats28();\",'');\n  return b;\n});\n\n${needle}`);
+            fs.writeFileSync(p,s);
+          }
+          NODE
           set +e
           node scripts/build-v623-poll-cleanup.mjs
           status=$?
           if [ "$status" -ne 0 ] && [ -f app-v6.23.js ]; then
             node <<'NODE'
-          const fs=require('fs'),s=fs.readFileSync('app-v6.23.js','utf8'),needle='selectPollDate22';
-          let from=0,n=0;
-          while((from=s.indexOf(needle,from))>=0){n++;const pre=s.lastIndexOf('/* migrated into v6.0:',from);const end=s.indexOf('\n',pre);console.log('LEGACY_OCCURRENCE',n,s.slice(pre,end),s.slice(Math.max(0,from-300),Math.min(s.length,from+500)));from+=needle.length}
+          const fs=require('fs'),s=fs.readFileSync('app-v6.23.js','utf8');
+          const needles=['openPollEdit90','openPollCreate72','createPoll72','savePollEdit90','selectPollDate22','movePollMonth22','togglePollVote22','openPollAttendees18','patchPollCounts18','decoratePollCards33','decoratePollNow51'];
+          for(const needle of needles){let from=0,n=0;while((from=s.indexOf(needle,from))>=0){n++;const pre=s.lastIndexOf('/* migrated into v6.0:',from),end=s.indexOf('\n',pre);console.log('LEGACY_OCCURRENCE',needle,n,s.slice(pre,end),s.slice(Math.max(0,from-220),Math.min(s.length,from+420)));from+=needle.length}}
           NODE
           fi
           exit "$status"
@@ -37,7 +46,7 @@ jobs:
           ! grep -Eq 'kokmatch-v(18|19|74|76|90)-api' app-v6.23.js
           ! grep -Eq 'migrated into v6.0: app-v(76|90|1\.9|2\.0|2\.1|2\.2)\.js' app-v6.23.js
           ! grep -Eq 'openPollEdit90|openPollCreate72|createPoll72|savePollEdit90|selectPollDate22|movePollMonth22|togglePollVote22|openPollAttendees18|patchPollCounts18|decoratePollCards33|decoratePollNow51' app-v6.23.js
-          ! grep -q 'new MutationObserver(scheduleStats33)' app-v6.23.js
+          ! grep -Eq 'new MutationObserver\((scheduleStats33|scheduleStats28)\)' app-v6.23.js
           grep -q 'KokMatch v6.23 canonical exercise attendance poll runtime' app-v6.23.js
           grep -q 'kokmatch-v21-api' app-v6.23.js
           grep -q 'kokmatch-v72-api' app-v6.23.js
