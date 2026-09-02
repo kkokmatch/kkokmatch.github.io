@@ -1,0 +1,17 @@
+import fs from 'node:fs';
+import { chromium } from 'playwright';
+const V='6.23';
+const state={courtCount:8,courtNames:Array.from({length:8},(_,i)=>`${i+1}코트`),members:[{id:'mgr',name:'관리자',year:1985,gender:'남',age:'40',cls:'B',type:'member',role:'manager',state:'out'},{id:'out1',name:'미입장회원',year:1990,gender:'남',age:'30',cls:'C',type:'member',role:'member',state:'out'}],queue:[],pendingGames:[],games:[],history:[],pairCounts:{}};
+const copy=()=>JSON.parse(JSON.stringify(state));
+const reqs=[];
+const browser=await chromium.launch({headless:true});const page=await browser.newPage({viewport:{width:390,height:844},isMobile:true,hasTouch:true});
+await page.route('https://wjelumpbjklfrdjxbesj.supabase.co/functions/v1/**',async route=>{const req=route.request(),url=new URL(req.url());let body={};try{body=JSON.parse(req.postData()||'{}')}catch{};if(url.pathname.endsWith('/kokmatch-v60-api')){reqs.push(body);if(body.action==='set_member_attendance'){const m=state.members.find(x=>x.id===body.memberId);if(m)m.state=body.mode;}return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({success:true,data:copy()})})}return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({success:true,data:copy(),profiles:{},groups:[]})})});
+await page.goto('http://127.0.0.1:4173/?debug=roster',{waitUntil:'networkidle'});await page.waitForFunction(v=>window.__kokmatchVersionLock===v,V);
+await page.evaluate(state=>{T='qa-token';currentGroupId='qa';currentView='members';S=JSON.parse(JSON.stringify(state));window.S=S;me={memberId:'mgr',displayName:'관리자',role:'manager',globalAdmin:false,tempOrganizer:false};group={groupId:'qa',name:'QA'};groups=[];normalizeClient();renderAll();document.getElementById('login')?.classList.add('hide')},copy());await page.waitForTimeout(300);
+const target=page.locator('#members .memberCard[data-member-id22="out1"] .kmRosterAction621').filter({hasText:'입장'}).first();
+console.log('BEFORE',await page.evaluate(()=>({s:S.members.find(m=>m.id==='out1')?.state,w:window.S?.members?.find(m=>m.id==='out1')?.state,buttons:[...document.querySelector('#members .memberCard[data-member-id22="out1"] .memberBtns').querySelectorAll('button')].map(b=>b.textContent.trim())})));
+await target.click();await page.waitForTimeout(500);
+console.log('AFTER_CLICK',await page.evaluate(()=>({s:S.members.find(m=>m.id==='out1')?.state,w:window.S?.members?.find(m=>m.id==='out1')?.state,buttons:[...document.querySelector('#members .memberCard[data-member-id22="out1"] .memberBtns').querySelectorAll('button')].map(b=>b.textContent.trim())})), 'REQS',JSON.stringify(reqs));
+await page.evaluate(()=>window.setOther('out1','waiting'));await page.waitForTimeout(500);
+console.log('AFTER_DIRECT',await page.evaluate(()=>({s:S.members.find(m=>m.id==='out1')?.state,w:window.S?.members?.find(m=>m.id==='out1')?.state,buttons:[...document.querySelector('#members .memberCard[data-member-id22="out1"] .memberBtns').querySelectorAll('button')].map(b=>b.textContent.trim())})), 'REQS',JSON.stringify(reqs));
+await browser.close();
