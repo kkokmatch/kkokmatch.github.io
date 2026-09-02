@@ -1,0 +1,41 @@
+name: Fix v6.22 partner state lifecycle
+
+on:
+  push:
+    paths:
+      - '.github/workflows/fix-v622-partner-state-once.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fix partner overlay state order
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('app-v6.22.js')
+          s=p.read_text()
+          old="const cur=String(m.partnerDay||'')===v615PartnerDay()?String(m.partnerId||''):'';partnerEditorStateV615={targetId:id,selectedId:cur};const root=document.createElement('div');"
+          new="const cur=String(m.partnerDay||'')===v615PartnerDay()?String(m.partnerId||''):'';closePartnerOverlayV615();partnerEditorStateV615={targetId:id,selectedId:cur};const root=document.createElement('div');"
+          assert old in s, 'partner state setup marker missing'
+          s=s.replace(old,new,1)
+          old2="</div></div>';closePartnerOverlayV615();document.getElementById('modal')?.classList.remove('on');document.body.appendChild(root);"
+          new2="</div></div>';document.getElementById('modal')?.classList.remove('on');document.body.appendChild(root);"
+          assert old2 in s, 'late close marker missing'
+          s=s.replace(old2,new2,1)
+          p.write_text(s)
+          PY
+          node --check app-v6.22.js
+          node scripts/validate-standalone-runtime.mjs
+      - name: Commit fix and remove one-shot workflow
+        run: |
+          rm -f .github/workflows/fix-v622-partner-state-once.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "v6.22 fix partner picker state lifecycle"
+          git push
