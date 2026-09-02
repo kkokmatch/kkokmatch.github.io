@@ -1,8 +1,8 @@
 {
-  "version": 61,
-  "label": "v6.21",
-  "semanticVersion": "6.21",
-  "build": "v6.21",
-  "updatedAt": "2026-09-02T10:15:00+09:00",
-  "note": "v6.21 단일본 통합 · 런타임 JS/CSS 각 1개 · v5.4 외부 fix 로더/v99 충돌 상태변경/구버전 launch 죽은코드 제거"
+  "version": 62,
+  "label": "v6.22",
+  "semanticVersion": "6.22",
+  "build": "v6.22",
+  "updatedAt": "2026-09-02T13:45:00+09:00",
+  "note": "v6.22 파트너 검색·동명이인 선택 저장 안정화 · 운동투표 canonical 검수"
 }

@@ -9,7 +9,9 @@ const members=[
   {id:'mgr',name:'관리자',year:1985,gender:'남',age:'40',cls:'B',type:'member',role:'manager',totalGames:0,state:'out',joinedAt:null},
   {id:'out1',name:'미입장회원',year:1990,gender:'남',age:'30',cls:'C',type:'member',role:'member',totalGames:0,state:'out',joinedAt:null},
   {id:'wait1',name:'대기회원',year:1991,gender:'여',age:'30',cls:'D',type:'member',role:'member',totalGames:0,state:'waiting',joinedAt:Date.now()-60000},
-  {id:'spec1',name:'관람회원',year:1992,gender:'남',age:'30',cls:'E',type:'member',role:'member',totalGames:0,state:'spectator',joinedAt:Date.now()-60000}
+  {id:'spec1',name:'관람회원',year:1992,gender:'남',age:'30',cls:'E',type:'member',role:'member',totalGames:0,state:'spectator',joinedAt:Date.now()-60000},
+  {id:'same1',name:'김민수',year:1990,gender:'남',age:'30',cls:'B',type:'member',role:'member',totalGames:0,state:'out',joinedAt:null},
+  {id:'same2',name:'김민수',year:1992,gender:'여',age:'30',cls:'C',type:'member',role:'member',totalGames:0,state:'out',joinedAt:null}
 ];
 const state={courtCount:8,courtNames:Array.from({length:8},(_,i)=>`${i+1}코트`),members,queue:['wait1'],pendingGames:[],games:[],history:[],pairCounts:{}};
 const copy=()=>JSON.parse(JSON.stringify(state));
@@ -110,6 +112,16 @@ try{
   expect(await labels('out1'),['입장','퇴장','수정'],'waiting→spectator');
   await clickLabel('out1','퇴장');
   expect(await labels('out1'),['입장','관람','수정'],'spectator→out');
+
+  await page.evaluate(()=>window.openPartner66?.('mgr'));
+  await page.waitForSelector('#partnerOverlayV615 #v615PartnerSearch');
+  await page.fill('#v615PartnerSearch','김민수');
+  const partnerRows=await page.locator('#v615PartnerResults .v615PartnerResult').allTextContents();
+  if(partnerRows.length!==2||!partnerRows.some(x=>x.includes('1990년생')&&x.includes('남')&&x.includes('B급'))||!partnerRows.some(x=>x.includes('1992년생')&&x.includes('여')&&x.includes('C급')))throw new Error('partner duplicate-name results are not distinguishable: '+JSON.stringify(partnerRows));
+  await page.locator('#v615PartnerResults .v615PartnerResult').filter({hasText:'1992년생'}).click();
+  const picked=await page.locator('#v615PartnerPicked').textContent();
+  if(!picked?.includes('김민수')||!picked.includes('1992년생'))throw new Error('partner selection did not react: '+picked);
+  await page.locator('#partnerOverlayV615 [data-v615-action="partnercancel"]').click();
 
   const uniqueAssets=[...new Set(appAssets)];
   const expectedAssets=[`/app-v${VERSION}.css`,`/app-v${VERSION}.js`].sort();
