@@ -1,8 +1,0 @@
-/* v79: move member information block slightly downward while keeping avatar position unchanged. */
-.memberCard73.memberCard71 .memberInfo48{
-  position:relative!important;
-  top:4px!important;
-}
-@media(max-width:359px){
-  .memberCard73.memberCard71 .memberInfo48{top:3px!important}
-}

@@ -1,1 +1,0 @@
-(()=>{const rs=renderSettings;renderSettings=function(){rs();const b=$('settings');if(b)[...b.querySelectorAll('.meta')].forEach(e=>{if((e.textContent||'').includes('콕매치 v92'))e.textContent='콕매치 v93 · 편성화면 역할배지/X 위치 보정'})};if(location.pathname.startsWith('/launch/v93'))history.replaceState(null,'','/?loaded=93');if(me)renderAll();})();

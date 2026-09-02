@@ -1,5 +1,0 @@
-/* v44: role colors + faster mobile touch feedback */
-.role-organizer{background:#fff1df!important;color:#b85d00!important;border:1px solid #efc187!important}
-.role-member44{background:#f0f1f3;color:#5f6673;border:1px solid #d1d5db}
-button,.btn,.choiceBtn,.queueCard,.pendingSlot{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
-button:active,.btn:active{filter:brightness(.97)}

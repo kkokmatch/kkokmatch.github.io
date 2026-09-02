@@ -1,8 +1,0 @@
-/* v97: game screen enlarged after VS removal */
-#playing .vs,#playing .vs54,#playing .versus,#playing [class*="vs"]{display:none!important}
-#playing .team,#playing .team54,#playing .players,#playing .players54{gap:5px!important;flex:1 1 auto!important}
-#playing .player54,#playing .playerCard,#playing .courtPlayer{flex:1 1 0!important;min-width:0!important;padding-left:6px!important;padding-right:6px!important}
-#playing .player54 .name,#playing .playerCard .name,#playing .courtPlayer .name{font-size:clamp(15px,3.8vw,19px)!important;font-weight:900!important}
-#playing .player54 .tag,#playing .playerCard .tag,#playing .courtPlayer .tag{font-size:clamp(10px,2.6vw,13px)!important;padding:3px 5px!important}
-#playing .player54 .meta,#playing .playerCard .meta,#playing .courtPlayer .meta{font-size:clamp(11px,2.8vw,14px)!important}
-@media(min-width:600px){#playing .player54 .name,#playing .playerCard .name,#playing .courtPlayer .name{font-size:19px!important}#playing .player54 .tag,#playing .playerCard .tag,#playing .courtPlayer .tag{font-size:13px!important}}

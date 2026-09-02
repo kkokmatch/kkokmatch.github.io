@@ -1,5 +1,0 @@
-/* v56: Kakao in-app browser resilient update flow */
-.updateBanner56{position:fixed;left:50%;bottom:calc(76px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:95;width:min(720px,calc(100% - 24px));display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 11px;border-radius:14px;background:#172033;color:#fff;box-shadow:0 8px 24px rgba(23,32,51,.24);font-size:12px}
-.updateBanner56 b{font-size:12px}.updateBanner56 span{opacity:.84;font-size:10px}.updateBanner56 button{flex:0 0 auto;border:0;border-radius:10px;background:#fff;color:#2453d4;font-weight:900;padding:7px 9px;font-size:10px}
-.updateBanner56.hide56{display:none!important}
-@media(max-width:359px){.updateBanner56{bottom:calc(70px + env(safe-area-inset-bottom));width:calc(100% - 16px);padding:8px 9px}.updateBanner56 span{display:none}}

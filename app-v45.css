@@ -1,9 +1,0 @@
-/* v45: keep member summary on one line + neutral guest/inviter styling */
-.memberMainLine45{display:flex;align-items:center;gap:5px;flex-wrap:nowrap;white-space:nowrap;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;min-width:0}
-.memberMainLine45::-webkit-scrollbar{display:none}
-.memberMainLine45 .tag,.memberMainLine45 .gamecnt,.memberMainLine45 .roleBadge{flex:0 0 auto;margin-left:0}
-.memberName45{font-weight:900;flex:0 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis}
-.guest45{background:#f0f1f3!important;color:#5f6673!important;border:1px solid #d1d5db!important}
-.inviteInfo45{color:#7a8498;font-size:11px;font-weight:750;white-space:nowrap}
-.inviteSub45{display:block;color:#7a8498;font-size:10px;font-weight:750;line-height:1.35;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-@media(max-width:430px){.memberMainLine45{gap:4px}.memberMainLine45 .tag,.memberMainLine45 .gamecnt,.memberMainLine45 .roleBadge{font-size:10px;padding:3px 6px}.memberName45{font-size:15px}.inviteInfo45{font-size:10px}}

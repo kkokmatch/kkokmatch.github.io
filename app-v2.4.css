@@ -1,4 +1,0 @@
-/* v2.4: responsive, immediate bottom navigation */
-#nav button[data-v]{touch-action:manipulation;-webkit-tap-highlight-color:transparent;user-select:none;cursor:pointer;will-change:transform}
-#nav button[data-v]:active,#nav button[data-v].navPress24{transform:scale(.97)}
-@media(max-width:767px){#nav button[data-v]{transition:transform .06s ease,background-color .08s ease,color .08s ease}}
