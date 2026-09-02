@@ -1,0 +1,50 @@
+
+/* KokMatch v6.27 selected-date + monthly member statistics */
+(()=>{
+'use strict';
+const STATS627_API='https://wjelumpbjklfrdjxbesj.supabase.co/functions/v1/kokmatch-stats-v54';
+const today627=()=>new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Seoul',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
+let statsDate627=today627(),statsMonth627=statsDate627.slice(0,7),statsData627=null,statsKey627='',statsSig627='',statsLoading627=false,statsError627='',statsSeq627=0,sortKey627='attendance',sortDir627='desc',zeroOnly627=false;
+
+function esc627(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function currentMonth627(){return today627().slice(0,7)}
+function stateSig627(){try{return (S?.members||[]).map(m=>[m.id,m.totalGames,m.attendanceMonth,m.attendanceCount,m.attendanceHistory?.[statsMonth627]??''].join(':')).join('|')+'#'+String(S?.history?.length||0)}catch{return''}}
+function dateTitle627(dt){const [y,m,d]=String(dt||'').split('-').map(Number);if(!y||!m||!d)return String(dt||'')+' 통계';return `${m}월 ${d}일 통계${dt===today627()?' · 오늘':''}`}
+function fmtMinutes627(n){const v=Math.round((Number(n)||0)*10)/10;return Number.isInteger(v)?String(v):v.toFixed(1)}
+function roleText627(r){r=String(r||'member');return r==='admin'?'개발자':r==='manager'?'모임장':r==='organizer'?'운영진':'일반'}
+function roleRank627(r){r=String(r||'member');return r==='admin'?0:r==='manager'?1:r==='organizer'?2:3}
+function monthShift627(ym,delta){const [y,m]=String(ym).split('-').map(Number),d=new Date(Date.UTC(y,m-1+Number(delta||0),1));return `${d.getUTCFullYear()}-${String(d.getUTCMonth()+1).padStart(2,'0')}`}
+function baselineMap627(data){return new Map((data?.baselines||[]).map(b=>[String(b.memberId||''),b]))}
+function attendanceFor627(m,data){const hist=m?.attendanceHistory&&typeof m.attendanceHistory==='object'?m.attendanceHistory:{};const hv=Number(hist[statsMonth627]);if(Number.isFinite(hv))return Math.max(0,hv);if(String(m?.attendanceMonth||'')===statsMonth627)return Math.max(0,Number(m?.attendanceCount)||0);const b=baselineMap627(data).get(String(m?.id||''));return Math.max(0,Number(b?.attendanceCount)||0)}
+function gamesFor627(m,data){const id=String(m?.id||''),games=(data?.monthGames||[]).filter(g=>(g?.players||[]).map(String).includes(id)),b=baselineMap627(data).get(id);if(!b)return games.length;const captured=Number(b.capturedAtMs)||0;return Math.max(0,Number(b.gameCount)||0)+games.filter(g=>(Number(g?.endedAt)||0)>captured).length}
+function rows627(){const data=statsData627||{},rows=(data.members||[]).filter(m=>String(m?.type||'member')!=='guest').map(m=>({id:String(m.id||''),name:String(m.name||''),year:Number(m.year)||0,age:String(m.age||''),cls:String(m.cls||''),role:String(m.role||'member'),attendance:attendanceFor627(m,data),games:gamesFor627(m,data)}));return rows}
+function compare627(a,b){let n=0;if(sortKey627==='name')n=a.name.localeCompare(b.name,'ko');else if(sortKey627==='year')n=a.year-b.year;else if(sortKey627==='agegrade')n=(Number(a.age)||0)-(Number(b.age)||0)||a.cls.localeCompare(b.cls,'ko');else if(sortKey627==='role')n=roleRank627(a.role)-roleRank627(b.role)||a.name.localeCompare(b.name,'ko');else if(sortKey627==='games')n=a.games-b.games;else n=a.attendance-b.attendance;if(n===0&&sortKey627!=='name')n=a.name.localeCompare(b.name,'ko');return sortDir627==='asc'?n:-n}
+function arrow627(key){return sortKey627===key?(sortDir627==='asc'?' ▲':' ▼'):''}
+function renameStatsNav627(){const b=document.querySelector('nav button[data-v="stats"]');if(b)b.innerHTML='<i>▥</i>운동통계'}
+
+function statsHtml627(){
+ const data=statsData627,loading=statsLoading627&&!data,error=statsError627;
+ const daily=data?.rangeGames||[],mins=daily.reduce((a,g)=>a+(Number(g?.durationMin)||0),0),people=new Set(daily.flatMap(g=>(g?.players||[]).map(String))).size;
+ let all=rows627(),zeroCount=all.filter(r=>r.attendance===0).length,shown=(zeroOnly627?all.filter(r=>r.attendance===0):all).slice().sort(compare627);
+ const monthLabel=statsMonth627.replace('-','년 ')+'월';
+ const rows=shown.map(r=>`<tr data-member-id627="${esc627(r.id)}"><td><b>${esc627(r.name)}</b></td><td>${r.year?`${r.year}년`:'-'}</td><td>${esc627((r.age||'-')+(r.cls||''))}</td><td><span class="statsRole627 role-${esc627(r.role)}">${roleText627(r.role)}</span></td><td><b>${r.attendance}</b>회</td><td><b>${r.games}</b>회</td></tr>`).join('');
+ return `<section class="statsDate627"><div class="statsSectionHead627"><div><b class="statsDateTitle627" data-date="${esc627(statsDate627)}">${esc627(dateTitle627(statsDate627))}</b><span>달력에서 날짜를 누르면 해당 날짜 기록으로 바뀝니다.</span></div></div>${loading?'<div class="statsLoading627">통계를 불러오는 중...</div>':error?`<div class="warn statsError627">${esc627(error)} <button class="miniBtn" onclick="reloadStats627()">다시 불러오기</button></div>`:`<div class="statsGrid statsDateGrid627"><div class="stat"><b>${daily.length}</b>완료 게임</div><div class="stat"><b>${fmtMinutes627(mins)}분</b>플레이시간</div><div class="stat"><b>${people}</b>참여 인원</div></div>`}</section><section class="statsMonthly627"><div class="statsMonthlyHead627"><div><b>월간 회원 기록</b><span>${esc627(monthLabel)} · 현재 등록 회원 기준</span></div><div class="statsMonthPicker627"><button type="button" onclick="moveStatsMonth627(-1)" aria-label="이전 달">‹</button><input id="statsMonthInput627" type="month" value="${esc627(statsMonth627)}" max="${esc627(currentMonth627())}" onchange="changeStatsMonth627(this.value)"><button type="button" ${statsMonth627>=currentMonth627()?'disabled':''} onclick="moveStatsMonth627(1)" aria-label="다음 달">›</button></div></div><div class="statsFilter627"><button type="button" class="${zeroOnly627?'':'on'}" onclick="setZeroAttendance627(false)">전체 ${all.length}명</button><button id="statsZeroOnly627" type="button" class="${zeroOnly627?'on':''}" onclick="setZeroAttendance627(true)">출석 0회 ${zeroCount}명</button></div>${loading?'<div class="statsLoading627">월간 기록을 불러오는 중...</div>':error?`<div class="warn statsError627">${esc627(error)}</div>`:`<div class="statsTableScroll627"><table class="statsMonthlyTable627"><thead><tr><th><button data-stats-sort627="name" onclick="sortMonthly627('name')">이름${arrow627('name')}</button></th><th><button data-stats-sort627="year" onclick="sortMonthly627('year')">년생${arrow627('year')}</button></th><th><button data-stats-sort627="agegrade" onclick="sortMonthly627('agegrade')">나이/급수${arrow627('agegrade')}</button></th><th><button data-stats-sort627="role" onclick="sortMonthly627('role')">역할${arrow627('role')}</button></th><th><button data-stats-sort627="attendance" onclick="sortMonthly627('attendance')">출석${arrow627('attendance')}</button></th><th><button data-stats-sort627="games" onclick="sortMonthly627('games')">게임${arrow627('games')}</button></th></tr></thead><tbody>${rows||`<tr><td colspan="6" class="statsEmpty627">${zeroOnly627?'선택한 달에 출석 0회인 회원이 없습니다.':'표시할 회원 기록이 없습니다.'}</td></tr>`}</tbody></table></div>`}</section>`;
+}
+
+function renderStatsDetail627(){const box=document.getElementById('stats');if(!box)return;renameStatsNav627();let detail=box.querySelector('.statsDetail627');if(!detail){detail=document.createElement('div');detail.className='statsDetail627';box.appendChild(detail)}[...box.children].forEach(el=>{if(el!==detail&&!el.classList.contains('pollWrap623'))el.remove()});const poll=box.querySelector('.pollWrap623');if(poll&&box.firstElementChild!==poll)box.prepend(poll);if(poll&&poll.nextElementSibling!==detail)poll.after(detail);detail.innerHTML=statsHtml627()}
+async function loadStats627(force=false){if(!me||!currentGroupId)return;const key=`${currentGroupId}|${statsDate627}|${statsMonth627}`,sig=stateSig627();if(!force&&statsData627&&statsKey627===key&&statsSig627===sig){renderStatsDetail627();return}const seq=++statsSeq627;statsLoading627=true;statsError627='';renderStatsDetail627();try{const u=new URL(STATS627_API);u.searchParams.set('groupId',currentGroupId);u.searchParams.set('from',statsDate627);u.searchParams.set('to',statsDate627);u.searchParams.set('month',statsMonth627);const r=await fetch(u,{headers:{authorization:'Bearer '+T},cache:'no-store'}),x=await r.json().catch(()=>({}));if(!r.ok){if(r.status===401){try{reloginLatest()}catch{};throw new Error('로그인이 만료되었습니다.')}throw new Error(x.error||'통계를 불러오지 못했습니다.')}if(seq!==statsSeq627)return;statsData627=x;statsKey627=key;statsSig627=sig;statsError627=''}catch(e){if(seq!==statsSeq627)return;statsError627=e?.message||String(e||'통계를 불러오지 못했습니다.')}finally{if(seq===statsSeq627){statsLoading627=false;renderStatsDetail627()}}}
+function mountStats627(){renderStatsDetail627();loadStats627(false)}
+
+window.__kokmatchStatsDateChanged627=function(dt,mon){if(/^\d{4}-\d{2}-\d{2}$/.test(String(dt||'')))statsDate627=String(dt);if(/^\d{4}-\d{2}$/.test(String(mon||'')))statsMonth627=String(mon);zeroOnly627=false;statsKey627='';window.__qaLastStatsDate=statsDate627;mountStats627()};
+window.changeStatsMonth627=function(mon){mon=String(mon||'');if(!/^\d{4}-\d{2}$/.test(mon)||mon>currentMonth627())return;statsMonth627=mon;zeroOnly627=false;statsKey627='';mountStats627()};
+window.moveStatsMonth627=function(delta){const next=monthShift627(statsMonth627,delta);if(next>currentMonth627())return;changeStatsMonth627(next)};
+window.setZeroAttendance627=function(on){zeroOnly627=!!on;renderStatsDetail627()};
+window.sortMonthly627=function(key){if(!['name','year','agegrade','role','attendance','games'].includes(key))return;if(sortKey627===key)sortDir627=sortDir627==='asc'?'desc':'asc';else{sortKey627=key;sortDir627='asc'}renderStatsDetail627()};
+window.reloadStats627=function(){statsKey627='';loadStats627(true)};
+
+const renderStatsBefore627=renderStats;
+renderStats=function(...args){const r=renderStatsBefore627.apply(this,args);mountStats627();return r};window.renderStats=renderStats;
+const goViewBefore627=goView;
+goView=function(id){const r=goViewBefore627(id);if(id==='stats')mountStats627();return r};window.goView=goView;
+if(me&&currentView==='stats')mountStats627();
+})();
