@@ -1,8 +1,8 @@
 {
   "version": 60,
-  "label": "v6.20",
-  "semanticVersion": "6.20",
-  "build": "v6.20",
-  "updatedAt": "2026-08-31T17:08:00+09:00",
-  "note": "회원수정 저장 Can't find variable 오류 제거 · v6.20 독립 저장 API · 액션버튼 간격 2px 추가"
+  "label": "v6.21",
+  "semanticVersion": "6.21",
+  "build": "v6.21",
+  "updatedAt": "2026-09-02T09:43:00+09:00",
+  "note": "동명이인 이름+출생연도+성별 판정 · 개발자 기본정보 수정 허용 · 회원명부 3버튼 고정 상태전환 복원"
 }
