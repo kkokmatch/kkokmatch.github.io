@@ -30,17 +30,7 @@ jobs:
             fs.writeFileSync(p,s);
           }
           NODE
-          set +e
           node scripts/build-v623-poll-cleanup.mjs
-          status=$?
-          if [ "$status" -ne 0 ] && [ -f app-v6.23.js ]; then
-            node <<'NODE'
-          const fs=require('fs'),s=fs.readFileSync('app-v6.23.js','utf8');
-          const needles=['openPollEdit90','openPollCreate72','createPoll72','savePollEdit90','selectPollDate22','movePollMonth22','togglePollVote22','openPollAttendees18','patchPollCounts18','decoratePollCards33','decoratePollNow51'];
-          for(const needle of needles){let from=0,n=0;while((from=s.indexOf(needle,from))>=0){n++;const pre=s.lastIndexOf('/* migrated into v6.0:',from),end=s.indexOf('\n',pre);console.log('LEGACY_OCCURRENCE',needle,n,s.slice(pre,end),s.slice(Math.max(0,from-220),Math.min(s.length,from+420)));from+=needle.length}}
-          NODE
-          fi
-          exit "$status"
       - name: Validate canonical runtime structure
         run: |
           ! grep -Eq 'kokmatch-v(18|19|74|76|90)-api' app-v6.23.js
@@ -68,7 +58,21 @@ jobs:
       - name: Mobile roster stability QA
         run: node scripts/qa-current-runtime.mjs
       - name: Canonical partner and poll QA
-        run: node scripts/qa-partner-poll-current.mjs
+        run: |
+          cp scripts/qa-partner-poll-current.mjs /tmp/qa-partner-poll-current.mjs
+          node <<'NODE'
+          const fs=require('fs'),p='scripts/qa-partner-poll-current.mjs';let s=fs.readFileSync(p,'utf8');
+          s=s.replace('const pageErrors=[],pollApiPaths=[];','const pageErrors=[],pollApiPaths=[],pollBodies=[];');
+          s=s.replace("if(url.pathname.endsWith('/kokmatch-v21-api')){","if(url.pathname.endsWith('/kokmatch-v21-api')){\n    pollBodies.push(JSON.parse(JSON.stringify(body))); ");
+          const old="await page.getByRole('button',{name:'투표 시작',exact:true}).click();await page.waitForFunction(()=>S.attendancePolls?.some(x=>x.id==='poll-created'));";
+          const neu="await page.getByRole('button',{name:'투표 시작',exact:true}).click();await page.waitForTimeout(700);console.log('CREATE_DIAG',JSON.stringify({pollBodies,nodePolls:state.attendancePolls.map(x=>({id:x.id,date:x.date,location:x.location,title:x.title})),browser:await page.evaluate(()=>({polls:(S.attendancePolls||[]).map(x=>({id:x.id,date:x.date,location:x.location,title:x.title})),modal:document.getElementById('modalSheet')?.textContent||'',form:{date:document.getElementById('pollDate19')?.value,start:document.getElementById('pollStart19')?.value,end:document.getElementById('pollEnd19')?.value,location:document.getElementById('pollLocation19')?.value,title:document.getElementById('pollTitle19')?.value}}),errors:pageErrors}));await page.waitForFunction(()=>S.attendancePolls?.some(x=>x.id==='poll-created'),null,{timeout:5000});";
+          if(!s.includes(old))throw new Error('create QA needle missing');s=s.replace(old,neu);fs.writeFileSync(p,s);
+          NODE
+          set +e
+          node scripts/qa-partner-poll-current.mjs
+          status=$?
+          mv /tmp/qa-partner-poll-current.mjs scripts/qa-partner-poll-current.mjs
+          exit "$status"
       - name: Commit generated runtime and remove one-time tooling
         run: |
           git config user.name 'kkokmatch'
