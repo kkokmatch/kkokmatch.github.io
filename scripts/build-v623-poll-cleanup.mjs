@@ -6,29 +6,106 @@ const write=(p,s)=>fs.writeFileSync(p,s);
 const srcPath='app-v6.22.js';
 let src=read(srcPath);
 const beforeBytes=Buffer.byteLength(src);
+const cleanup={};
 
-function removeMigrationBlock(name){
+function blockBounds(name){
   const marker=`/* migrated into v6.0: ${name} */`;
   const start=src.indexOf(marker);
   if(start<0)throw new Error(`missing migration block ${name}`);
   const next=src.indexOf('/* migrated into v6.0:',start+marker.length);
   if(next<0)throw new Error(`missing next block after ${name}`);
-  const removed=src.slice(start,next);
+  return {start,next,marker};
+}
+function removeMigrationBlock(name){
+  const {start,next}=blockBounds(name),removed=src.slice(start,next);
   src=src.slice(0,start)+src.slice(next);
+  cleanup[name]=(cleanup[name]||0)+Buffer.byteLength(removed);
   return Buffer.byteLength(removed);
 }
+function editMigrationBlock(name,fn){
+  const {start,next}=blockBounds(name),old=src.slice(start,next),fresh=fn(old);
+  if(fresh===old)throw new Error(`cleanup made no change in ${name}`);
+  src=src.slice(0,start)+fresh+src.slice(next);
+  cleanup[name]=(cleanup[name]||0)+(Buffer.byteLength(old)-Buffer.byteLength(fresh));
+}
+function cutBetween(text,startNeedle,endNeedle,replacement=''){
+  const a=text.indexOf(startNeedle);if(a<0)throw new Error(`missing start needle: ${startNeedle}`);
+  const b=text.indexOf(endNeedle,a+startNeedle.length);if(b<0)throw new Error(`missing end needle after ${startNeedle}: ${endNeedle}`);
+  return text.slice(0,a)+replacement+text.slice(b);
+}
+function replaceOnce(text,needle,replacement){
+  const i=text.indexOf(needle);if(i<0)throw new Error(`missing replace needle: ${needle}`);
+  return text.slice(0,i)+replacement+text.slice(i+needle.length);
+}
 
+// Fully superseded poll generations: safe to remove as whole migration blocks.
 const pureBlocks=['app-v76.js','app-v90.js','app-v1.9.js','app-v2.0.js','app-v2.1.js','app-v2.2.js'];
-let removedBytes=0;
-for(const b of pureBlocks)removedBytes+=removeMigrationBlock(b);
+for(const b of pureBlocks)removeMigrationBlock(b);
 
-// Any legacy poll request path left in mixed historical blocks is routed to the single canonical v21 API.
-src=src.replace(/kokmatch-v(?:18|19|72|73|74|76|90)-api/g,'kokmatch-v21-api');
+// Mixed generations: remove only poll code and preserve unrelated queue/login/member/game/settings behavior.
+editMigrationBlock('app-v2.3.js',b=>{
+  b=cutBetween(b,'const HOLIDAY23={','function genderPerson23(m){');
+  b=cutBetween(b,'function fixPollForm23(){','const renderQueue22=renderQueue;');
+  b=cutBetween(b,'const openCreate22=window.openPollCreate72;','if(me){');
+  b=replaceOnce(b,"if(me){if(currentView==='queue')decorateComposerGender23();if(currentView==='stats')decorateCalendar23()}","if(me&&currentView==='queue')decorateComposerGender23()");
+  return b;
+});
 
-// Current runtime identity.
-src=src.replace("window.__kokmatchStandalone='6.22';","window.__kokmatchStandalone='6.23';");
-src=src.replace("window.__kokmatchVersionLock='6.22';","window.__kokmatchVersionLock='6.23';");
-src=src.replace("sessionStorage.setItem('kokmatch_runtime_version','6.22')","sessionStorage.setItem('kokmatch_runtime_version','6.23')");
+editMigrationBlock('app-v3.3.js',b=>{
+  b=replaceOnce(b,'let loginChoices33=[],selectedLogin33=null,loginBusy33=false,loginFinalizing33=false,statsBusy33=false,statsRaf33=0;','let loginChoices33=[],selectedLogin33=null,loginBusy33=false,loginFinalizing33=false;');
+  b=cutBetween(b,'function selectedPollDate33(){','if(!T)renderLoginName();');
+  b=replaceOnce(b,"if(!T)renderLoginName();if(me&&currentView==='stats')decorateStats33();","if(!T)renderLoginName();");
+  return b;
+});
+
+editMigrationBlock('app-v5.1.js',b=>{
+  b=cutBetween(b,'function selectedPollDate51(){','setTimeout(()=>{ensure51();');
+  b=replaceOnce(b,"setTimeout(()=>{ensure51();latestCheck51();if(me&&currentView==='stats')decoratePollNow51()},0);setInterval(()=>latestCheck51(),60000);","setTimeout(()=>{ensure51();latestCheck51()},0);setInterval(()=>latestCheck51(),60000);");
+  return b;
+});
+
+editMigrationBlock('app-v72.js',b=>{
+  b=cutBetween(b,'function mine72(){','function avgWaitMin72(){');
+  b=cutBetween(b,'/* Attendance polls */','const renderStats71=renderStats;');
+  b=cutBetween(b,'const renderStats71=renderStats;','/* Settings: common cards -> court settings -> reset accordion -> admin extras. */',`const renderStats71=renderStats;\nrenderStats=function(){\n renderStats71();const box=$('stats');if(!box)return;\n const grid=box.querySelector('.statsGrid');if(grid){grid.classList.add('statsGrid72');grid.insertAdjacentHTML('beforeend',\`<div class="stat"><b>\${avgWaitMin72()}분</b>평균 게임 대기시간</div>\`)}\n};\n\n`);
+  b=b.replace('콕매치 v72 · 참석투표 · 평균대기 · 설정정리','콕매치 v72 · 평균대기 · 설정정리');
+  return b;
+});
+
+editMigrationBlock('app-v73.js',b=>{
+  b=cutBetween(b,'function autoPollTitle73(date,time,location){','function patchResetText73(box){');
+  b=b.replace('콕매치 v73 · 가입/출석 기록 · 30분 투표시간 · 장소/자동제목','콕매치 v73 · 가입/출석 기록 · 리셋문구 개선');
+  return b;
+});
+
+editMigrationBlock('app-v74.js',b=>{
+  b=replaceOnce(b,"const POLL74_API='https://wjelumpbjklfrdjxbesj.supabase.co/functions/v1/kokmatch-v73-api';\n",'');
+  b=cutBetween(b,'function autoPollTitle74(date,time,location){','const renderSettings73=renderSettings;');
+  b=b.replace('콕매치 v74 · 회원정보 좌측정렬 · 연도별출석 · 투표폼 개선','콕매치 v74 · 회원정보 좌측정렬 · 연도별출석');
+  return b;
+});
+
+editMigrationBlock('app-v91.js',b=>{
+  b=cutBetween(b,'function autoTitle91(date,time,location){','const renderSettings90=renderSettings;');
+  b=b.replace('콕매치 v91 · 전 화면 가독성 확대 · 투표 시간제한/자동제목 개선','콕매치 v91 · 전 화면 가독성 확대 · 파트너 표시 개선');
+  return b;
+});
+
+editMigrationBlock('app-v1.8.js',b=>{
+  b=replaceOnce(b,"const POLL18_API='https://wjelumpbjklfrdjxbesj.supabase.co/functions/v1/kokmatch-v18-api';\nconst DEV_NAME18='박태영';\n",'');
+  b=cutBetween(b,'function poll18(id){','/* iPhone/tablet member search: detach all legacy IME listeners and filter existing cards without re-rendering. */');
+  b=b.replace('콕매치 v1.8 · 투표 게스트 당일회원 연동 · 참석명단 통합 · 검색 입력 안정화','콕매치 v1.8 · 회원검색 입력 안정화');
+  b=replaceOnce(b,'if(me){try{bindMemberSearch18();patchPollCounts18()}catch{}}','if(me){try{bindMemberSearch18()}catch{}}');
+  return b;
+});
+
+// Important: v72/v73 APIs also carry game/court/attendance-history actions. Do NOT rewrite them.
+// Poll requests are now provided only by the canonical v6.23 module below.
+
+// Current runtime identity: normalize every historical lock that could overwrite the final version.
+src=src.replaceAll("window.__kokmatchStandalone='6.22';","window.__kokmatchStandalone='6.23';");
+src=src.replaceAll("window.__kokmatchVersionLock='6.22';","window.__kokmatchVersionLock='6.23';");
+src=src.replaceAll("sessionStorage.setItem('kokmatch_runtime_version','6.22')","sessionStorage.setItem('kokmatch_runtime_version','6.23')");
 
 const canonical=read('scripts/poll-v623-canonical.js').trim();
 src+='\n\n'+canonical+'\n';
@@ -43,15 +120,18 @@ index=index.replaceAll('app-v6.22.css?v=6.22','app-v6.23.css?v=6.23').replaceAll
 write('index.html',index);
 
 const latest=JSON.parse(read('latest-version.json'));
-latest.version=63;latest.label='v6.23';latest.semanticVersion='6.23';latest.build='v6.23';latest.updatedAt='2026-09-02T15:00:00+09:00';latest.note='v6.23 운동참석투표 canonical 단일화 · v21 API 통합 · 중복 투표 런타임 제거 · 안정화 QA';
+latest.version=63;latest.label='v6.23';latest.semanticVersion='6.23';latest.build='v6.23';latest.updatedAt='2026-09-02T15:00:00+09:00';latest.note='v6.23 운동참석투표 canonical 단일화 · v21 API 통합 · 중복 투표 런타임/Observer 제거 · 안정화 QA';
 write('latest-version.json',JSON.stringify(latest,null,2)+'\n');
 
 // Runtime assertions.
 if(!src.includes('KokMatch v6.23 canonical exercise attendance poll runtime'))throw new Error('canonical poll module missing');
 for(const b of pureBlocks)if(src.includes(`/* migrated into v6.0: ${b} */`))throw new Error(`dead poll block still present: ${b}`);
-for(const old of ['kokmatch-v18-api','kokmatch-v19-api','kokmatch-v72-api','kokmatch-v73-api','kokmatch-v74-api','kokmatch-v76-api','kokmatch-v90-api'])if(src.includes(old))throw new Error(`legacy poll API still referenced: ${old}`);
-if(!src.includes('kokmatch-v21-api'))throw new Error('canonical v21 API missing');
+for(const legacy of ['openPollEdit90','openPollCreate72','createPoll72','savePollEdit90','selectPollDate22','movePollMonth22','togglePollVote22','openPollAttendees18','patchPollCounts18','decoratePollCards33','decoratePollNow51'])if(src.includes(legacy))throw new Error(`legacy poll symbol still present: ${legacy}`);
+for(const api of ['kokmatch-v18-api','kokmatch-v19-api','kokmatch-v74-api','kokmatch-v76-api','kokmatch-v90-api'])if(src.includes(api))throw new Error(`legacy poll-only API still referenced: ${api}`);
+if(!src.includes('kokmatch-v21-api'))throw new Error('canonical v21 poll API missing');
+if(!src.includes('kokmatch-v72-api')||!src.includes('kokmatch-v73-api'))throw new Error('non-poll game APIs v72/v73 were accidentally removed');
+if(src.includes('new MutationObserver(scheduleStats33)'))throw new Error('legacy poll MutationObserver still present');
 
 cp.execFileSync('node',['--check','app-v6.23.js'],{stdio:'inherit'});
 cp.execFileSync('node',['scripts/validate-standalone-runtime.mjs'],{stdio:'inherit'});
-console.log(JSON.stringify({beforeBytes,afterBytes:Buffer.byteLength(src),removedPurePollBytes:removedBytes,removedBlocks:pureBlocks,api:'kokmatch-v21-api'},null,2));
+console.log(JSON.stringify({beforeBytes,afterBytes:Buffer.byteLength(src),removedBytes:beforeBytes-Buffer.byteLength(src),cleanup,api:'kokmatch-v21-api',preservedGameApis:['kokmatch-v72-api','kokmatch-v73-api']},null,2));
