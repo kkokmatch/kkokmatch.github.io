@@ -35,7 +35,14 @@
     const hotfix=document.createElement('link');
     hotfix.rel='stylesheet';hotfix.href='/app-v6.20-layout-hotfix.css?_km='+encodeURIComponent(nonce);document.head.appendChild(hotfix);
     const js=document.createElement('script');
-    js.src='/app-v6.0.js?_km='+encodeURIComponent(nonce);js.async=false;document.head.appendChild(js);
+    js.src='/app-v6.0.js?_km='+encodeURIComponent(nonce);js.async=false;
+    js.addEventListener('load',()=>{
+      const memberHotfix=document.createElement('script');
+      memberHotfix.src='/app-v6.20-member-hotfix.js?_km='+encodeURIComponent(nonce);
+      memberHotfix.async=false;
+      document.head.appendChild(memberHotfix);
+    });
+    document.head.appendChild(js);
     let visibleAt=Date.now();
     document.addEventListener('visibilitychange',()=>{
       if(document.visibilityState==='hidden'){visibleAt=Date.now();return;}
