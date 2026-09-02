@@ -3,6 +3,10 @@ on:
   push:
     paths:
       - '.github/workflows/build-v623-poll-cleanup.yml'
+      - 'scripts/build-v623-poll-cleanup.mjs'
+      - 'scripts/poll-v623-canonical.js'
+      - 'scripts/qa-current-runtime.mjs'
+      - 'scripts/qa-partner-poll-current.mjs'
   workflow_dispatch:
 permissions:
   contents: write
