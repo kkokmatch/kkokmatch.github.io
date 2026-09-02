@@ -15,6 +15,9 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
+      - name: Audit remaining old poll selectors
+        run: |
+          grep -n -C 3 -E 'pollCalDay21|pollWrap90|pollCard21|decoratePollCards33|decoratePollNow51|patchPollCounts18' app-v6.23.js || true
       - name: Build cleaned v6.24 runtime
         run: node scripts/build-v624-remove-legacy-poll.mjs
       - name: Install browser QA
