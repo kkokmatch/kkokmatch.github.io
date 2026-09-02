@@ -5,9 +5,9 @@ on:
       - '.github/workflows/build-v623-poll-cleanup.yml'
       - 'scripts/build-v623-poll-cleanup.mjs'
       - 'scripts/poll-v623-canonical.js'
-      - 'scripts/roster-v623-final.js'
       - 'scripts/qa-current-runtime.mjs'
       - 'scripts/qa-partner-poll-current.mjs'
+      - 'scripts/qa-boot-diagnostic.mjs'
   workflow_dispatch:
 permissions:
   contents: write
@@ -19,18 +19,18 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Build v6.23 and append final roster module
+      - name: Build v6.23 single runtime
+        run: node scripts/build-v623-poll-cleanup.mjs
+      - name: Validate canonical runtime structure
         run: |
-          node scripts/build-v623-poll-cleanup.mjs
-          printf '\n\n' >> app-v6.23.js
-          cat scripts/roster-v623-final.js >> app-v6.23.js
-      - name: Validate canonical runtime
-        run: |
-          ! grep -Eq 'kokmatch-v(18|19|72|73|74|76|90)-api' app-v6.23.js
+          ! grep -Eq 'kokmatch-v(18|19|74|76|90)-api' app-v6.23.js
           ! grep -Eq 'migrated into v6.0: app-v(76|90|1\.9|2\.0|2\.1|2\.2)\.js' app-v6.23.js
+          ! grep -Eq 'openPollEdit90|openPollCreate72|createPoll72|savePollEdit90|selectPollDate22|movePollMonth22|togglePollVote22|openPollAttendees18|patchPollCounts18|decoratePollCards33|decoratePollNow51' app-v6.23.js
+          ! grep -q 'new MutationObserver(scheduleStats33)' app-v6.23.js
           grep -q 'KokMatch v6.23 canonical exercise attendance poll runtime' app-v6.23.js
-          grep -q 'KokMatch v6.23 final roster stability module' app-v6.23.js
           grep -q 'kokmatch-v21-api' app-v6.23.js
+          grep -q 'kokmatch-v72-api' app-v6.23.js
+          grep -q 'kokmatch-v73-api' app-v6.23.js
           node --check app-v6.23.js
           node scripts/validate-standalone-runtime.mjs
       - name: Install Playwright chromium
@@ -43,6 +43,8 @@ jobs:
           for i in {1..20}; do curl -fsS http://127.0.0.1:4173/ >/dev/null && exit 0; sleep 0.25; done
           cat /tmp/http.log
           exit 1
+      - name: Boot diagnostic
+        run: node scripts/qa-boot-diagnostic.mjs
       - name: Mobile roster stability QA
         run: node scripts/qa-current-runtime.mjs
       - name: Canonical partner and poll QA
@@ -51,8 +53,7 @@ jobs:
         run: |
           git config user.name 'kkokmatch'
           git config user.email 'hanarin0201@gmail.com'
-          git add app-v6.23.js app-v6.23.css index.html latest-version.json scripts/qa-current-runtime.mjs scripts/qa-partner-poll-current.mjs
-          git rm -f scripts/poll-v623-canonical.js scripts/roster-v623-final.js scripts/build-v623-poll-cleanup.mjs scripts/debug-roster-v623.mjs .github/workflows/audit-poll-runtime-once.yml .github/workflows/build-v623-poll-cleanup.yml || true
-          if [ -f .github/workflows/qa-focused-fast.yml ]; then git rm -f .github/workflows/qa-focused-fast.yml; fi
-          git commit -m 'Consolidate exercise attendance poll runtime in v6.23'
+          git add app-v6.23.js app-v6.23.css index.html latest-version.json scripts/qa-current-runtime.mjs scripts/qa-partner-poll-current.mjs scripts/qa-boot-diagnostic.mjs
+          git rm -f scripts/poll-v623-canonical.js scripts/roster-v623-final.js scripts/build-v623-poll-cleanup.mjs scripts/debug-roster-v623.mjs .github/workflows/audit-poll-runtime-once.yml .github/workflows/build-v623-poll-cleanup.yml .github/workflows/qa-focused-fast.yml || true
+          git commit -m 'Consolidate legacy poll dependencies in v6.23'
           git push
