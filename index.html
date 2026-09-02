@@ -32,6 +32,8 @@
     manifest.rel='manifest';manifest.href='/manifest.webmanifest?_km='+encodeURIComponent(nonce);document.head.appendChild(manifest);
     const css=document.createElement('link');
     css.rel='stylesheet';css.href='/app-v6.0.css?_km='+encodeURIComponent(nonce);document.head.appendChild(css);
+    const hotfix=document.createElement('link');
+    hotfix.rel='stylesheet';hotfix.href='/app-v6.20-layout-hotfix.css?_km='+encodeURIComponent(nonce);document.head.appendChild(hotfix);
     const js=document.createElement('script');
     js.src='/app-v6.0.js?_km='+encodeURIComponent(nonce);js.async=false;document.head.appendChild(js);
     let visibleAt=Date.now();
