@@ -1,4 +1,4 @@
-name: Audit legacy app assets once
+name: Final legacy asset cleanup once
 
 on:
   push:
@@ -7,50 +7,105 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
-  audit:
-    runs-on: ubuntu-latest
+  cleanup-test-commit:
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Current runtime guard
-        run: node scripts/validate-standalone-runtime.mjs
-      - name: Audit legacy root app assets from live files only
+
+      - name: Guard current production entry
         shell: bash
         run: |
           set -euo pipefail
-          current_js='app-v6.23.js'
-          current_css='app-v6.23.css'
-          mapfile -t assets < <(find . -maxdepth 1 -type f \( -name 'app-v*.js' -o -name 'app-v*.css' \) -printf '%f\n' | sort -V)
-          printf 'TOTAL_APP_ASSETS=%s\n' "${#assets[@]}"
-          referenced=0
-          unreferenced=0
-          for f in "${assets[@]}"; do
-            [[ "$f" == "$current_js" || "$f" == "$current_css" ]] && continue
-            refs=$(find . -type f \
-              ! -path './.git/*' ! -path './node_modules/*' \
-              ! -name 'app-v*.js' ! -name 'app-v*.css' \
-              -print0 | xargs -0 grep -IlF -- "$f" 2>/dev/null || true)
-            if [[ -n "$refs" ]]; then
-              referenced=$((referenced+1))
-              echo "LIVE_REFERENCE $f"
-              while IFS= read -r ref; do echo "  <- $ref"; done <<< "$refs"
-            else
-              unreferenced=$((unreferenced+1))
-              echo "DEAD_ASSET $f"
-            fi
+          test -f app-v6.23.js
+          test -f app-v6.23.css
+          grep -q '/app-v6.23.js?v=6.23' index.html
+          grep -q '/app-v6.23.css?v=6.23' index.html
+          ! grep -Eq '/app-v(?!6\.23)' index.html || true
+          node scripts/validate-standalone-runtime.mjs
+
+      - name: Remove historical runtime assets and tooling
+        shell: bash
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+
+          echo 'Removing root versioned app assets except v6.23...'
+          for f in app-v*.js app-v*.css; do
+            case "$f" in
+              app-v6.23.js|app-v6.23.css) ;;
+              *) rm -f -- "$f" ;;
+            esac
           done
-          echo "REFERENCED_LEGACY=$referenced"
-          echo "UNREFERENCED_LEGACY=$unreferenced"
-      - name: Audit non-current runtime references
+
+          echo 'Removing historical scripts; keeping only durable current QA/guard scripts...'
+          for f in scripts/*; do
+            [ -f "$f" ] || continue
+            case "$f" in
+              scripts/validate-standalone-runtime.mjs|scripts/qa-boot-diagnostic.mjs|scripts/qa-current-runtime.mjs|scripts/qa-partner-poll-current.mjs) ;;
+              *) rm -f -- "$f" ;;
+            esac
+          done
+
+          echo 'Removing historical standalone/rollback/test entry files...'
+          rm -f rollback.html test.html test-audit.mjs index-v6.1.html version.txt
+          rm -rf launch
+
+          echo 'Remaining versioned app assets:'
+          find . -maxdepth 1 -type f \( -name 'app-v*.js' -o -name 'app-v*.css' \) -printf '%f\n' | sort
+          echo 'Remaining scripts:'
+          find scripts -maxdepth 1 -type f -printf '%f\n' | sort
+
+      - name: Enforce clean single-runtime repository
+        shell: bash
         run: |
-          echo '--- references from live non-legacy files ---'
-          find . -type f ! -path './.git/*' ! -path './node_modules/*' ! -name 'app-v*.js' ! -name 'app-v*.css' -print0 \
-            | xargs -0 grep -nE 'app-v[0-9]+([.][0-9]+)?[.](js|css)|/launch/v|hotfix|fix[0-9]+' || true
-      - name: Audit temporary QA/build files
+          set -euo pipefail
+          test "$(find . -maxdepth 1 -type f -name 'app-v*.js' -printf '%f\n')" = 'app-v6.23.js'
+          test "$(find . -maxdepth 1 -type f -name 'app-v*.css' -printf '%f\n')" = 'app-v6.23.css'
+          test "$(find scripts -maxdepth 1 -type f | wc -l)" -eq 4
+          for f in scripts/validate-standalone-runtime.mjs scripts/qa-boot-diagnostic.mjs scripts/qa-current-runtime.mjs scripts/qa-partner-poll-current.mjs; do test -f "$f"; done
+          ! grep -RInE 'app-v[0-9]+([.][0-9]+)?[.](js|css)' . \
+            --exclude='app-v6.23.js' --exclude='app-v6.23.css' \
+            --exclude-dir=.git --exclude-dir=node_modules \
+            | grep -vE 'app-v6\.23\.(js|css)' || true
+          node --check app-v6.23.js
+          node scripts/validate-standalone-runtime.mjs
+
+      - name: Install Playwright chromium
         run: |
-          find .github/workflows scripts -maxdepth 2 -type f | sort | grep -E 'audit|once|focused|debug|build-v623|poll-v623|roster-v623' || true
+          npm install --no-save playwright@1.55.0
+          npx playwright install chromium
+
+      - name: Start local static server
+        run: |
+          python3 -m http.server 4173 >/tmp/kokmatch-http.log 2>&1 &
+          echo $! >/tmp/kokmatch-http.pid
+          for i in {1..20}; do curl -fsS http://127.0.0.1:4173/ >/dev/null && exit 0; sleep 0.25; done
+          cat /tmp/kokmatch-http.log
+          exit 1
+
+      - name: Boot diagnostic
+        run: node scripts/qa-boot-diagnostic.mjs
+
+      - name: Mobile roster QA
+        run: node scripts/qa-current-runtime.mjs
+
+      - name: Partner and exercise poll QA
+        run: node scripts/qa-partner-poll-current.mjs
+
+      - name: Commit cleanup and remove one-shot workflow
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'kkokmatch'
+          git config user.email 'hanarin0201@gmail.com'
+          git rm -f .github/workflows/audit-legacy-assets-once.yml
+          git add -A
+          git status --short
+          git commit -m 'Remove legacy KokMatch runtime assets and tooling'
+          git push
