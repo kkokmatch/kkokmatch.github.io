@@ -1,0 +1,29 @@
+{
+  "version": "6.21",
+  "sources": [
+    "app-v6.0.js",
+    "app-v6.0.css",
+    "app-v6.20-member-hotfix.js",
+    "app-v6.20-layout-hotfix.css"
+  ],
+  "outputs": [
+    "app-v6.21.js",
+    "app-v6.21.css",
+    "index.html"
+  ],
+  "removed": {
+    "legacyFixLoader": 1,
+    "legacyLaunchRedirects": 54,
+    "v99AttendanceFastPath": 1
+  },
+  "bytes": {
+    "before": {
+      "jsBytes": 728447,
+      "cssBytes": 172304
+    },
+    "after": {
+      "jsBytes": 732527,
+      "cssBytes": 183455
+    }
+  }
+}

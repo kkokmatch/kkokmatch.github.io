@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="ko" data-kokmatch-version="6.0" data-kokmatch-build="v6.21">
+<html lang="ko" data-kokmatch-version="6.21" data-kokmatch-build="v6.21">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
@@ -10,49 +10,25 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <title>콕매치 v6.0</title>
+  <title>콕매치 v6.21</title>
+  <link rel="manifest" href="/manifest.webmanifest?v=6.21">
+  <link rel="stylesheet" href="/app-v6.21.css?v=6.21">
   <script>
   (()=>{
     'use strict';
-    const BUILD_FALLBACK='v6.21';
-    const u=new URL(location.href);
-    const launch=u.searchParams.get('_km');
-    if(!launch){
-      u.searchParams.set('_km',Date.now().toString(36));
-      location.replace(u.pathname+u.search+u.hash);
-      return;
-    }
-    const nonce=Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,8);
-    window.__kokmatchStandalone='6.0';
-    window.__kokmatchVersionLock='6.0';
-    window.__kokmatchBuild=BUILD_FALLBACK;
-    window.__kokmatchEntryNonce=nonce;
-    document.documentElement.dataset.kokmatchEntry='fresh-v1';
-    const manifest=document.createElement('link');
-    manifest.rel='manifest';manifest.href='/manifest.webmanifest?_km='+encodeURIComponent(nonce);document.head.appendChild(manifest);
-    const css=document.createElement('link');
-    css.rel='stylesheet';css.href='/app-v6.0.css?_km='+encodeURIComponent(nonce);document.head.appendChild(css);
-    const hotfix=document.createElement('link');
-    hotfix.rel='stylesheet';hotfix.href='/app-v6.20-layout-hotfix.css?_km='+encodeURIComponent(nonce);document.head.appendChild(hotfix);
-    const js=document.createElement('script');
-    js.src='/app-v6.0.js?_km='+encodeURIComponent(nonce);js.async=false;
-    js.addEventListener('load',()=>{
-      const memberHotfix=document.createElement('script');
-      memberHotfix.src='/app-v6.20-member-hotfix.js?_km='+encodeURIComponent(nonce);
-      memberHotfix.async=false;
-      document.head.appendChild(memberHotfix);
-    });
-    document.head.appendChild(js);
-    let visibleAt=Date.now();
+    window.__kokmatchStandalone='6.21';
+    window.__kokmatchVersionLock='6.21';
+    window.__kokmatchBuild='v6.21';
+    document.documentElement.dataset.kokmatchEntry='single-v621';
+    let hiddenAt=0;
     document.addEventListener('visibilitychange',()=>{
-      if(document.visibilityState==='hidden'){visibleAt=Date.now();return;}
-      if(Date.now()-visibleAt>30000){
-        const next=new URL(location.href);next.searchParams.set('_km',Date.now().toString(36));location.replace(next.pathname+next.search+next.hash);
-      }
+      if(document.hidden){hiddenAt=Date.now();return;}
+      if(hiddenAt&&Date.now()-hiddenAt>30000){const u=new URL(location.href);u.searchParams.set('_km',Date.now().toString(36));location.replace(u.pathname+u.search+u.hash)}
     });
-    window.addEventListener('pageshow',e=>{if(e.persisted){const next=new URL(location.href);next.searchParams.set('_km',Date.now().toString(36));location.replace(next.pathname+next.search+next.hash)}});
+    addEventListener('pageshow',e=>{if(e.persisted){const u=new URL(location.href);u.searchParams.set('_km',Date.now().toString(36));location.replace(u.pathname+u.search+u.hash)}});
   })();
   </script>
+  <script defer src="/app-v6.21.js?v=6.21"></script>
 </head>
 <body></body>
 </html>
