@@ -8,6 +8,7 @@ on:
       - 'app-v*.js'
       - 'app-v*.css'
       - 'scripts/qa-current-runtime.mjs'
+      - 'scripts/qa-partner-poll-current.mjs'
       - '.github/workflows/qa-current-runtime.yml'
   workflow_dispatch:
 
@@ -37,3 +38,5 @@ jobs:
           exit 1
       - name: Mobile roster smoke QA
         run: node scripts/qa-current-runtime.mjs
+      - name: Partner and exercise poll QA
+        run: node scripts/qa-partner-poll-current.mjs
