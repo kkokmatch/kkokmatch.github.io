@@ -33,9 +33,9 @@ await page.route('https://wjelumpbjklfrdjxbesj.supabase.co/functions/v1/**',asyn
     if(m){m.partnerId=String(body.partnerId||'');m.partnerDay=today;}
     return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({success:true,data:clone()})});
   }
-  if(url.pathname.endsWith('/kokmatch-v21-api')){
+  if(url.pathname.endsWith('/kokmatch-v21-api')||url.pathname.endsWith('/kokmatch-v19-api')){
     const action=String(body.action||'');
-    if(action==='poll_toggle_vote'){
+    if(action==='poll_toggle_vote'||action==='poll_vote'){
       const p=state.attendancePolls.find(x=>String(x.id)===String(body.pollId));
       if(p){p.memberVotes=p.memberVotes||{};if(p.memberVotes.mgr==='yes')delete p.memberVotes.mgr;else p.memberVotes.mgr='yes';}
     }else if(action==='poll_create'){
@@ -60,7 +60,6 @@ try{
     group={groupId:'qa',name:'QA 모임'};groups=[];normalizeClient();renderAll();document.getElementById('login')?.classList.add('hide');
   },{state:clone()});
 
-  // Partner: search -> duplicate-name disambiguation -> select -> save.
   await page.evaluate(()=>window.openPartner66('mgr'));
   await page.fill('#v615PartnerSearch','김민수');
   const rows=await page.locator('#v615PartnerResults .v615PartnerResult').allTextContents();
@@ -72,7 +71,6 @@ try{
   const savedPartner=await page.evaluate(()=>S.members.find(x=>x.id==='mgr')?.partnerId||'');
   if(savedPartner!=='same2')throw new Error('partner save did not persist selected member id: '+savedPartner);
 
-  // Poll: identify today's single poll by state/date, not presentation-decorator title.
   await page.evaluate(()=>goView('stats'));
   await page.waitForSelector('.pollCard21');
   let cards=page.locator('.pollCard21');
@@ -82,7 +80,7 @@ try{
   if(!openText?.includes('QA 코트'))throw new Error('today poll location missing from card: '+openText);
   await openCard.getByRole('button',{name:'참석',exact:true}).click();
   await page.waitForTimeout(120);
-  cards=page.locator('.pollCard21');openCard=cards.first();
+  openCard=page.locator('.pollCard21').first();
   if(!(await openCard.textContent()).includes('참석중'))throw new Error('poll attendance toggle ON failed');
   await openCard.getByRole('button',{name:/참석 명단/}).click();
   if(!(await page.locator('#modalSheet').textContent()).includes('관리자'))throw new Error('poll attendee list did not include voter');
@@ -92,7 +90,6 @@ try{
   await page.waitForTimeout(120);
   if((await page.locator('.pollCard21').first().textContent()).includes('참석중'))throw new Error('poll attendance toggle OFF failed');
 
-  // Poll create -> edit -> delete. Verify state values first, UI by stable location text.
   await page.getByRole('button',{name:'+ 투표 만들기'}).click();
   await page.fill('#pollLocation19','신규 QA 코트');
   await page.fill('#pollTitle19','신규 QA 투표');
@@ -118,7 +115,6 @@ try{
   await page.waitForFunction(()=>!S.attendancePolls?.some(x=>x.id==='poll-created'));
   if(await page.locator('.pollCard21').filter({hasText:'수정 QA 코트'}).count())throw new Error('poll delete render failed');
 
-  // Ended poll: yesterday has exactly one card; verify read-only state independent of title decoration.
   await page.evaluate(d=>window.selectPollDate22(d),yesterday);
   await page.waitForSelector('.pollCard21');
   const endedCards=page.locator('.pollCard21');
