@@ -6212,7 +6212,7 @@ setInterval(()=>latestCheck50(),60000);
 
 /* migrated into v6.0: app-v5.1.js */
 (()=>{
-window.__kokmatchVersionLock='6.21';
+window.__kokmatchVersionLock='6.22';
 const CUR51='5.1';let latest51=CUR51,refreshBusy51=false;
 function style51(){if(document.getElementById('v51style'))return;const s=document.createElement('style');s.id='v51style';s.textContent='#topActions50{display:none!important}#topActions51{margin-left:auto;display:flex;align-items:center;justify-content:flex-end;gap:4px;position:relative;z-index:150;pointer-events:auto;min-width:0}#currentVersion51{font-size:10px;font-weight:900;padding:6px 5px;border-radius:8px;background:rgba(255,255,255,.18);white-space:nowrap;flex:0 0 auto}#headerRefresh51{flex:0 1 auto;min-width:0;max-width:170px;min-height:30px;padding:6px 8px;font-size:10.5px;font-weight:800;line-height:1.15;white-space:normal;overflow-wrap:anywhere}#logout51{flex:0 0 64px;width:64px;min-width:64px;max-width:64px;min-height:30px;padding:6px 4px;font-size:11px;white-space:nowrap}@media(max-width:380px){#currentVersion51{display:none}#headerRefresh51{max-width:135px;font-size:9.5px}#logout51{flex-basis:56px;width:56px;min-width:56px;max-width:56px;font-size:10px}}';document.head.appendChild(s)}
 function cmp51(a,b){const A=String(a||'0').replace(/^v/i,'').split('.').map(n=>Number(n)||0),B=String(b||'0').replace(/^v/i,'').split('.').map(n=>Number(n)||0);for(let i=0;i<Math.max(A.length,B.length);i++){const x=A[i]||0,y=B[i]||0;if(x!==y)return x>y?1:-1}return 0}
@@ -6274,7 +6274,7 @@ setTimeout(()=>{ensure51();latestCheck51();if(me&&currentView==='stats')decorate
 /* migrated into v6.0: app-v5.2.js */
 (()=>{
 const CUR52='5.2';
-window.__kokmatchVersionLock='6.21';
+window.__kokmatchVersionLock='6.22';
 const AUTH52='https://wjelumpbjklfrdjxbesj.supabase.co/functions/v1/kokmatch-auth-v38';
 const STATE52='https://wjelumpbjklfrdjxbesj.supabase.co/functions/v1/kokmatch-state-v46';
 let switchBusy52=false,latest52=CUR52,refreshBusy52=false;
@@ -6423,7 +6423,7 @@ window.changeProfile53=async function(input){const file=input?.files?.[0];if(!fi
 window.deleteProfile53=async function(){if(!T||!me?.memberId)return;try{await profileReq54(PROFILE54,{method:'POST',headers:{'content-type':'application/json',authorization:'Bearer '+T},body:JSON.stringify({action:'delete_profile',groupId:gid54()}),cache:'no-store'});profileSaveSeq54++;profileLoadSeq54++;delete profiles54[String(me.memberId)];profilesGroup54=gid54();renderMembers();renderQueue();if(currentView==='settings'){renderSettings();patchProfileCard54()}}catch(e){if(typeof showError==='function')showError(e)}};
 
 async function syncLatest54(){const b=document.getElementById('headerRefresh52');if(!b)return;try{const r=await fetch('/latest-version.json?t='+Date.now(),{cache:'no-store'}),x=await r.json(),latest=String(x.semanticVersion||x.label||CUR54).replace(/^v/i,'');b.classList.toggle('v54hidden',latest===CUR54);if(latest!==CUR54)b.textContent=`v${latest} 업데이트 · 새로고침`}catch{b.classList.add('v54hidden')}}
-function mark54(){document.title='콕매치 v6.0';document.documentElement.dataset.kokmatchVersion='6.21';const old=document.getElementById('currentVersion52');if(old&&old.textContent!=='v5.4'){const v=old.cloneNode(true);v.textContent='v5.4';old.replaceWith(v)}syncLatest54()}
+function mark54(){document.title='콕매치 v6.22';document.documentElement.dataset.kokmatchVersion='6.22';const old=document.getElementById('currentVersion52');if(old&&old.textContent!=='v5.4'){const v=old.cloneNode(true);v.textContent='v5.4';old.replaceWith(v)}syncLatest54()}
 const rq54=renderQueue;renderQueue=function(){ensureDraft54();const r=rq54();style54();mirrorPendingLayout54();decoratePhotoGender54();saveDraft54();mark54();return r};
 const ra54=renderAll;renderAll=function(){ensureDraft54();const r=ra54();style54();try{mirrorPendingLayout54();decoratePhotoGender54();if(currentView==='settings')patchProfileCard54()}catch{}saveDraft54();mark54();const g=gid54();if(T&&g&&g!=='__global__'&&profilesGroup54!==g)queueMicrotask(()=>loadProfiles54().catch(()=>{}));return r};
 const rs54=renderSettings;renderSettings=function(){const r=rs54();style54();patchProfileCard54();return r};
@@ -6497,7 +6497,7 @@ const rq=renderQueue;renderQueue=function(){const r=rq();mirror5();return r};con
 (()=>{
 if(window.__kokmatchV54KakaoLoginFix)return;
 window.__kokmatchV54KakaoLoginFix='1.0';
-window.__kokmatchVersionLock='6.21';
+window.__kokmatchVersionLock='6.22';
 
 const baseLoadStateKakao54=typeof loadState==='function'?loadState:null;
 const baseOpenEntryKakao54=typeof openEntry==='function'?openEntry:null;
@@ -7010,7 +7010,7 @@ function normalizeHeaderV6(){
  let actions=document.getElementById('topActionsV6');
  if(!actions){actions=document.createElement('div');actions.id='topActionsV6';actions.innerHTML='<span id="currentVersionV6" title="현재 실행 버전">v6.16</span><button id="headerRefreshV6" class="btn ghost" type="button">↻ 최신버전으로 새로고침</button><button id="logoutV6" type="button">로그아웃</button>';row.appendChild(actions);actions.querySelector('#headerRefreshV6')?.addEventListener('click',ev=>{ev.preventDefault();ev.stopPropagation();forceLatestHeaderRefreshV6()});actions.querySelector('#logoutV6')?.addEventListener('click',ev=>{ev.preventDefault();ev.stopPropagation();explicitLogoutV6()})}
  const ver=actions.querySelector('#currentVersionV6');if(ver){ver.textContent=buildLabelV6();ver.title='현재 실행 버전: '+String(window.__kokmatchBuild||buildLabelV6())+'\n실행 주소: '+location.href}
- document.title='콕매치 '+buildLabelV6();document.documentElement.dataset.kokmatchVersion='6.21';
+ document.title='콕매치 '+buildLabelV6();document.documentElement.dataset.kokmatchVersion='6.22';
 }
 
 function memberControlHtmlV6(m){
@@ -7058,10 +7058,10 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 })();
 
 
-window.__kokmatchStandalone='6.21';
-window.__kokmatchVersionLock='6.21';
-document.documentElement.dataset.kokmatchVersion='6.21';
-document.title='콕매치 v6.0';
+window.__kokmatchStandalone='6.22';
+window.__kokmatchVersionLock='6.22';
+document.documentElement.dataset.kokmatchVersion='6.22';
+document.title='콕매치 v6.22';
 
 
 
