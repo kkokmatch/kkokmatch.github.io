@@ -1,8 +1,8 @@
 {
-  "version": 64,
-  "label": "v6.24",
-  "semanticVersion": "6.24",
-  "build": "v6.24",
-  "updatedAt": "2026-09-02T15:43:00+09:00",
-  "note": "v6.24 과거 투표 코드 의존성 제거 · canonical 단일 런타임 · v21 투표 API 단일화 · 회귀 안정화"
+  "version": 65,
+  "label": "v6.25",
+  "semanticVersion": "6.25",
+  "build": "v6.25",
+  "updatedAt": "2026-09-02T16:00:00+09:00",
+  "note": "v6.25 회원 저장 렌더링 경량화 · 회원등록 설명 정리 · 투표 저장 부분갱신 · 이전형 달력 디자인 · 참석투표 상단 배치"
 }
