@@ -26,6 +26,9 @@ jobs:
         run: node --check app-v6.21.js
       - name: Standalone runtime check
         run: node scripts/validate-standalone-runtime.mjs
+      - name: Diagnose legacy launch refs
+        shell: bash
+        run: grep -n -C 2 "location.pathname.startsWith('/launch/v" app-v6.21.js || true
       - name: Verify canonical cleanup
         shell: bash
         run: |
@@ -38,7 +41,7 @@ jobs:
             oneCurrentCss:(html.match(/\/app-v6\.21\.css/g)||[]).length===1,
             noLegacyV99FastPath:!js.includes('Member attendance fast path: preserve scroll'),
             noLegacyLaunchRoute:!js.includes("location.pathname.startsWith('/launch/v"),
-            threeButtonCanonical:js.includes('__kokmatchThreeButtonRoster621'),
+            threeButtonCanonical:js.includes('function controlsHtml(m)')&&js.includes('kmRosterAction621'),
             memberApiCanonical:js.includes('__kokmatchMemberApiHotfixV621'),
             noCrossVersionAssets:![...js.matchAll(/[\"'](\/app-v[^\"'?]+\.(?:js|css))/g)].some(m=>!['/app-v6.21.js','/app-v6.21.css'].includes(m[1]))
           };
