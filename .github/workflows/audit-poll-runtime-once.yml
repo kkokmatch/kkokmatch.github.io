@@ -11,10 +11,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Print mixed blocks
+      - name: Print v2.8 mixed block
         run: |
           node <<'NODE'
-          const fs=require('fs'),s=fs.readFileSync('app-v6.22.js','utf8');
-          const wanted=['app-v2.3.js','app-v3.3.js','app-v5.1.js','app-v72.js','app-v73.js','app-v74.js','app-v91.js','app-v1.8.js'];
-          for(const name of wanted){const a=s.indexOf(`/* migrated into v6.0: ${name} */`),b=s.indexOf('/* migrated into v6.0:',a+1);if(a<0)continue;console.log(`\n===== ${name} =====\n`+s.slice(a,b<0?s.length:b)+`\n===== END ${name} =====`)}
+          const fs=require('fs'),s=fs.readFileSync('app-v6.22.js','utf8'),name='app-v2.8.js';
+          const a=s.indexOf(`/* migrated into v6.0: ${name} */`),b=s.indexOf('/* migrated into v6.0:',a+1);
+          if(a<0)throw new Error('missing '+name);
+          console.log(s.slice(a,b<0?s.length:b));
           NODE
