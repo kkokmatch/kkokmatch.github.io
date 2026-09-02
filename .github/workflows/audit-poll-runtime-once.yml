@@ -11,24 +11,19 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Detail candidate poll blocks
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Build and trace roster handlers
         run: |
+          node scripts/build-v623-poll-cleanup.mjs
+          echo '--- V6.22 roster refs ---'
+          grep -nE 'changeAttendance|setOther|set_member_attendance|kmRosterAction621|data-km621' app-v6.22.js | tail -80 || true
+          echo '--- V6.23 roster refs ---'
+          grep -nE 'changeAttendance|setOther|set_member_attendance|kmRosterAction621|data-km621' app-v6.23.js | tail -80 || true
+          echo '--- removed block references to roster/action ---'
           node <<'NODE'
-          const fs=require('fs');
-          const src=fs.readFileSync('app-v6.22.js','utf8');
-          const re=/\/\* migrated into v6\.0: ([^*]+) \*\//g;
-          const marks=[];let m;while((m=re.exec(src)))marks.push({name:m[1].trim(),start:m.index});marks.push({name:'EOF',start:src.length});
-          const wanted=new Set(['app-v72.js','app-v73.js','app-v74.js','app-v76.js','app-v90.js','app-v91.js','app-v1.8.js','app-v1.9.js','app-v2.0.js','app-v2.1.js','app-v2.2.js','app-v2.3.js','app-v3.3.js','app-v5.1.js']);
-          for(let i=0;i<marks.length-1;i++){
-            if(!wanted.has(marks[i].name))continue;
-            const b=src.slice(marks[i].start,marks[i+1].start);
-            const names=[];
-            for(const mm of b.matchAll(/(?:function\s+([A-Za-z0-9_$]+)|window\.([A-Za-z0-9_$]+)\s*=|const\s+([A-Za-z0-9_$]+)\s*=|let\s+([A-Za-z0-9_$]+)\s*=)/g)){
-              const n=mm[1]||mm[2]||mm[3]||mm[4];if(n&&!names.includes(n))names.push(n);
-            }
-            console.log('\n###',marks[i].name,'bytes='+b.length);
-            console.log(names.join(','));
-            const snippets=b.split('\n').filter(x=>/renderMembers|renderQueue|renderSettings|background|MutationObserver|setInterval|addEventListener/.test(x));
-            console.log('MIXED_LINES');console.log(snippets.slice(0,80).join('\n'));
-          }
+          const fs=require('fs'),s=fs.readFileSync('app-v6.22.js','utf8');
+          const blocks=['app-v76.js','app-v90.js','app-v1.9.js','app-v2.0.js','app-v2.1.js','app-v2.2.js'];
+          for(const name of blocks){const a=s.indexOf(`/* migrated into v6.0: ${name} */`),b=s.indexOf('/* migrated into v6.0:',a+1),x=s.slice(a,b);const hits=x.split('\n').filter(l=>/setOther|changeAttendance|memberBtns|renderMembers|addEventListener\(['"]click|pointer/.test(l));console.log('\n### '+name);console.log(hits.join('\n')||'(none)')}
           NODE
