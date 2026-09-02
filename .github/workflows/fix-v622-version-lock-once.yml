@@ -13,16 +13,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Normalize v6.22 version lock
+      - name: Normalize all v6.22 version locks
         run: |
           python3 - <<'PY'
           from pathlib import Path
           p=Path('app-v6.22.js')
           s=p.read_text()
-          old="window.__kokmatchStandalone='6.21';\nwindow.__kokmatchVersionLock='6.21';\ndocument.documentElement.dataset.kokmatchVersion='6.21';\ndocument.title='콕매치 v6.0';"
-          new="window.__kokmatchStandalone='6.22';\nwindow.__kokmatchVersionLock='6.22';\ndocument.documentElement.dataset.kokmatchVersion='6.22';\ndocument.title='콕매치 v6.22';"
-          assert old in s, 'trailing v6.21 version lock not found'
-          s=s.replace(old,new,1)
+          before=s
+          s=s.replace("window.__kokmatchStandalone='6.21';","window.__kokmatchStandalone='6.22';")
+          s=s.replace("window.__kokmatchVersionLock='6.21';","window.__kokmatchVersionLock='6.22';")
+          s=s.replace("document.documentElement.dataset.kokmatchVersion='6.21';","document.documentElement.dataset.kokmatchVersion='6.22';")
+          s=s.replace("document.title='콕매치 v6.0';","document.title='콕매치 v6.22';")
+          assert s!=before, 'no stale v6.21 lock found'
           assert "__kokmatchStandalone='6.21'" not in s
           assert "__kokmatchVersionLock='6.21'" not in s
           p.write_text(s)
