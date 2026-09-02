@@ -27,10 +27,10 @@ js=js.replace(/^\s*if\(location\.pathname\.startsWith\(['"]\/launch\/v[^'"]+['"]
 
 // 2) v99 회원 상태변경 fast-path는 v6.21 canonical 3버튼 핸들러와 직접 충돌하므로 제거한다.
 const fastStart='/* Member attendance fast path: preserve scroll, avoid full roster repaint/flicker. */';
-const fastEnd="if(location.pathname.startsWith('/launch/v99'))";
 const si=js.indexOf(fastStart);
 if(si>=0){
-  const ei=js.indexOf(fastEnd,si);
+  let ei=js.indexOf("if(location.pathname.startsWith('/launch/v99'))",si);
+  if(ei<0)ei=js.indexOf('if(me){restoreDeveloper99()',si);
   if(ei<0)throw new Error('v99 fast-path end marker not found');
   js=js.slice(0,si)+`/* v6.21: obsolete v99 member attendance fast-path removed. */\n`+js.slice(ei);
   removedV99FastPath=1;
@@ -99,7 +99,7 @@ latest.version=61;
 latest.label=BUILD;
 latest.semanticVersion=VERSION;
 latest.build=BUILD;
-latest.updatedAt='2026-09-02T09:50:00+09:00';
+latest.updatedAt='2026-09-02T10:06:00+09:00';
 latest.note='v6.21 단일본 통합 · 런타임 JS/CSS 각 1개 · v99 충돌 상태변경 코드 및 구버전 launch 죽은코드 제거';
 fs.writeFileSync('latest-version.json',JSON.stringify(latest,null,2)+'\n');
 
