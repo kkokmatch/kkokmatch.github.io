@@ -1,0 +1,49 @@
+name: Build v6.21 single runtime
+
+on:
+  push:
+    paths:
+      - 'scripts/build-v621-single.mjs'
+      - '.github/workflows/build-v621-single.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  consolidate:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Build single runtime
+        run: node scripts/build-v621-single.mjs
+      - name: Syntax check
+        run: node --check app-v6.21.js
+      - name: Standalone runtime check
+        run: node scripts/validate-standalone-runtime.mjs
+      - name: Verify canonical cleanup
+        shell: bash
+        run: |
+          test "$(grep -o '/app-v6.21.js' index.html | wc -l)" -eq 1
+          test "$(grep -o '/app-v6.21.css' index.html | wc -l)" -eq 1
+          ! grep -q 'Member attendance fast path: preserve scroll' app-v6.21.js
+          ! grep -q "location.pathname.startsWith('/launch/v" app-v6.21.js
+          grep -q '__kokmatchThreeButtonRoster621' app-v6.21.js
+          grep -q '__kokmatchMemberApiHotfixV621' app-v6.21.js
+      - name: Commit consolidated runtime
+        shell: bash
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add app-v6.21.js app-v6.21.css index.html latest-version.json scripts/v621-consolidation-report.json
+          if git diff --cached --quiet; then
+            echo 'No generated changes.'
+            exit 0
+          fi
+          git commit -m 'Consolidate KokMatch v6.21 into single runtime'
+          git push
