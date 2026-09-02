@@ -1,0 +1,76 @@
+name: Cleanup legacy workflows once
+
+on:
+  push:
+    paths:
+      - '.github/workflows/cleanup-legacy-workflows-once.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Remove version-locked legacy workflows
+        shell: bash
+        run: |
+          files=(
+            '.github/workflows/qa-profile-click-diag.yml'
+            '.github/workflows/qa-profile-isolation.yml'
+            '.github/workflows/qa-profile-switch-v20.yml'
+            '.github/workflows/qa-profile-v21-webkit.yml'
+            '.github/workflows/qa-roster-page2.yml'
+            '.github/workflows/qa-v54-entry-login.yml'
+            '.github/workflows/qa-v54-feedback16.yml'
+            '.github/workflows/qa-v54-group-stats12.yml'
+            '.github/workflows/qa-v54-hotfix3.yml'
+            '.github/workflows/qa-v54-interactions-v23.yml'
+            '.github/workflows/qa-v54-interactions-v24.yml'
+            '.github/workflows/qa-v54-ios-all-member-v31.yml'
+            '.github/workflows/qa-v54-ios-direct-touch-v26.yml'
+            '.github/workflows/qa-v54-ios-immediate-v29.yml'
+            '.github/workflows/qa-v54-ios-member-slot-v27.yml'
+            '.github/workflows/qa-v54-ios-modal-cancel-v28.yml'
+            '.github/workflows/qa-v54-ios-touch-v25.yml'
+            '.github/workflows/qa-v54-member-profile13.yml'
+            '.github/workflows/qa-v54-stats-photo.yml'
+            '.github/workflows/qa-v54-stats-photo2.yml'
+            '.github/workflows/qa-v54-stats-usability15.yml'
+            '.github/workflows/qa-v54-stats.yml'
+            '.github/workflows/qa-v54-switch-layout.yml'
+            '.github/workflows/qa-v55-stability.yml'
+            '.github/workflows/qa-v56-fix4-ios.yml'
+            '.github/workflows/qa-v56-ios-interactions.yml'
+            '.github/workflows/qa-v56-profile-version.yml'
+            '.github/workflows/qa-v56-switch-profile-bridge.yml'
+            '.github/workflows/qa-v56-switch-profile-fast.yml'
+            '.github/workflows/qa-v56-syntax.yml'
+            '.github/workflows/validate-v35.yml'
+            '.github/workflows/validate-v41.yml'
+            '.github/workflows/validate-v45.yml'
+            '.github/workflows/validate-v46.yml'
+            '.github/workflows/validate-v47.yml'
+            '.github/workflows/validate-v48.yml'
+            '.github/workflows/validate-v49.yml'
+          )
+          removed=0
+          for f in "${files[@]}"; do
+            if [[ -e "$f" ]]; then
+              git rm "$f"
+              removed=$((removed+1))
+            fi
+          done
+          git rm '.github/workflows/cleanup-legacy-workflows-once.yml'
+          echo "Removed legacy workflows: $removed"
+      - name: Commit workflow cleanup
+        shell: bash
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'Remove version-locked legacy QA workflows'
+          git pull --rebase origin main
+          git push
