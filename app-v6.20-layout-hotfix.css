@@ -46,6 +46,7 @@
 #members .memberActions48,
 #members .v6MemberActions,
 #members .memberActions60,
+#members .memberActions64,
 #members .memberActions65{
   position:static!important;
   inset:auto!important;
@@ -57,7 +58,10 @@
   justify-self:end!important;
   overflow:visible!important;
 }
+#members .memberActions64::before{display:none!important}
 #members .memberBtns,
+#members .memberBtns61,
+#members .memberBtns64,
 #members .memberBtns65{
   position:static!important;
   inset:auto!important;
@@ -67,13 +71,34 @@
   max-width:108px!important;
   display:grid!important;
   grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  grid-template-areas:"enter watch" "leave edit"!important;
   grid-auto-flow:row!important;
   gap:4px!important;
   align-items:stretch!important;
   justify-content:stretch!important;
   overflow:visible!important;
 }
+#members .memberBtn-enter61{grid-area:enter!important}
+#members .memberBtn-watch61{grid-area:watch!important}
+#members .memberBtn-leave61{grid-area:leave!important}
+#members .memberBtn-edit61{grid-area:edit!important}
+#members .memberBtnSlot61,
+#members .memberBtnPlaceholder61{
+  width:100%!important;
+  min-width:0!important;
+  max-width:none!important;
+  height:30px!important;
+  min-height:30px!important;
+  margin:0!important;
+}
+#members .memberBtnSlot61{
+  display:flex!important;
+  align-items:stretch!important;
+  justify-content:stretch!important;
+}
 #members .memberBtns .btn,
+#members .memberBtns61 .btn,
+#members .memberBtns64 .btn,
 #members .memberBtns65 .btn{
   position:static!important;
   inset:auto!important;
@@ -92,15 +117,15 @@
   overflow:visible!important;
   text-overflow:clip!important;
   line-height:1!important;
-}
-/* 수정은 항상 마지막 전체폭 행에 고정 */
-#members .memberBtns .btn:last-child,
-#members .memberBtns65 .btn:last-child{
-  grid-column:1 / -1!important;
+  font-size:9.5px!important;
 }
 #members .memberBtns .btn:active,
+#members .memberBtns61 .btn:active,
+#members .memberBtns64 .btn:active,
 #members .memberBtns65 .btn:active,
 #members .memberBtns .btn.v615Pressed,
+#members .memberBtns61 .btn.v615Pressed,
+#members .memberBtns64 .btn.v615Pressed,
 #members .memberBtns65 .btn.v615Pressed{
   transform:none!important;
 }
@@ -198,17 +223,29 @@
   #members .memberActions48,
   #members .v6MemberActions,
   #members .memberActions60,
+  #members .memberActions64,
   #members .memberActions65,
   #members .memberBtns,
+  #members .memberBtns61,
+  #members .memberBtns64,
   #members .memberBtns65{
     width:102px!important;
     min-width:102px!important;
     max-width:102px!important;
   }
+  #members .memberBtnSlot61,
+  #members .memberBtnPlaceholder61,
   #members .memberBtns .btn,
+  #members .memberBtns61 .btn,
+  #members .memberBtns64 .btn,
   #members .memberBtns65 .btn{
     height:29px!important;
     min-height:29px!important;
+  }
+  #members .memberBtns .btn,
+  #members .memberBtns61 .btn,
+  #members .memberBtns64 .btn,
+  #members .memberBtns65 .btn{
     font-size:9.3px!important;
   }
 }
@@ -229,8 +266,11 @@
   #members .memberActions48,
   #members .v6MemberActions,
   #members .memberActions60,
+  #members .memberActions64,
   #members .memberActions65,
   #members .memberBtns,
+  #members .memberBtns61,
+  #members .memberBtns64,
   #members .memberBtns65{
     width:96px!important;
     min-width:96px!important;
