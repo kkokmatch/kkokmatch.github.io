@@ -75,7 +75,7 @@ try{
   // Poll: visible -> attend -> attendee list -> cancel attendance.
   await page.evaluate(()=>goView('stats'));
   await page.waitForSelector('.pollCard21');
-  const openCard=page.locator('.pollCard21').filter({hasText:'QA 운동 참석 투표'});
+  const openCard=page.locator('.pollCard21').filter({hasText:'QA 코트 운동'});
   if(await openCard.count()!==1)throw new Error('open poll card not rendered');
   await openCard.getByRole('button',{name:'참석',exact:true}).click();
   await page.waitForTimeout(120);
@@ -87,7 +87,7 @@ try{
   await page.waitForTimeout(120);
   if((await openCard.textContent()).includes('참석중'))throw new Error('poll attendance toggle OFF failed');
 
-  // Poll create -> edit -> delete.
+  // Poll create -> edit -> delete. UI main title follows location; internal title is checked in state.
   await page.getByRole('button',{name:'+ 투표 만들기'}).click();
   await page.fill('#pollLocation19','신규 QA 코트');
   await page.fill('#pollTitle19','신규 QA 투표');
@@ -95,21 +95,26 @@ try{
   await page.fill('#pollGuestLimit19','6');
   await page.locator('#modalSheet').getByRole('button',{name:'투표 시작'}).click();
   await page.waitForSelector('.pollCard21');
-  let created=page.locator('.pollCard21').filter({hasText:'신규 QA 투표'});
+  let created=page.locator('.pollCard21').filter({hasText:'신규 QA 코트 운동'});
   if(await created.count()!==1)throw new Error('poll create failed');
+  let stored=await page.evaluate(()=>S.attendancePolls.find(x=>x.id==='poll-created'));
+  if(!stored||stored.title!=='신규 QA 투표'||Number(stored.totalLimit)!==16||Number(stored.guestLimit)!==6)throw new Error('poll create values not stored: '+JSON.stringify(stored));
   await created.getByRole('button',{name:'수정',exact:true}).click();
+  await page.fill('#pollLocation19','수정 QA 코트');
   await page.fill('#pollTitle19','수정된 QA 투표');
   await page.locator('#modalSheet').getByRole('button',{name:'수정 저장'}).click();
-  created=page.locator('.pollCard21').filter({hasText:'수정된 QA 투표'});
-  if(await created.count()!==1)throw new Error('poll edit failed');
+  created=page.locator('.pollCard21').filter({hasText:'수정 QA 코트 운동'});
+  if(await created.count()!==1)throw new Error('poll edit render failed');
+  stored=await page.evaluate(()=>S.attendancePolls.find(x=>x.id==='poll-created'));
+  if(!stored||stored.title!=='수정된 QA 투표'||stored.location!=='수정 QA 코트')throw new Error('poll edit values not stored: '+JSON.stringify(stored));
   page.once('dialog',d=>d.accept());
   await created.getByRole('button',{name:'삭제',exact:true}).click();
   await page.waitForTimeout(120);
-  if(await page.locator('.pollCard21').filter({hasText:'수정된 QA 투표'}).count())throw new Error('poll delete failed');
+  if(await page.locator('.pollCard21').filter({hasText:'수정 QA 코트 운동'}).count())throw new Error('poll delete failed');
 
   // Ended poll: select yesterday and verify read-only lock.
   await page.evaluate(d=>window.selectPollDate22(d),yesterday);
-  const ended=page.locator('.pollCard21').filter({hasText:'종료된 QA 투표'});
+  const ended=page.locator('.pollCard21').filter({hasText:'지난 코트 운동'});
   if(await ended.count()!==1)throw new Error('ended poll not rendered');
   const endedText=await ended.textContent();
   if(!endedText.includes('종료')||!endedText.includes('조회만 가능'))throw new Error('ended poll is not read-only: '+endedText);
@@ -118,6 +123,6 @@ try{
   console.log(`PASS focused QA v${VERSION}`);
   console.log('PASS partner search / duplicate-name identity / select / save');
   console.log('PASS poll render / attend / attendee list / cancel');
-  console.log('PASS poll create / edit / delete');
+  console.log('PASS poll create / edit / delete / stored values');
   console.log('PASS ended poll read-only lock');
 }finally{await browser.close();}
