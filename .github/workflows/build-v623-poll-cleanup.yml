@@ -19,24 +19,34 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Build v6.23 single runtime
+      - name: Prepare cleanup builder and canonical poll fix
         run: |
           node <<'NODE'
-          const fs=require('fs'),p='scripts/build-v623-poll-cleanup.mjs';
-          let s=fs.readFileSync(p,'utf8');
+          const fs=require('fs');
+          const bp='scripts/build-v623-poll-cleanup.mjs';
+          let s=fs.readFileSync(bp,'utf8');
           const needle="editMigrationBlock('app-v72.js'";
           if(!s.includes("editMigrationBlock('app-v2.8.js'")){
             s=s.replace(needle,`editMigrationBlock('app-v2.8.js',b=>{\n  b=replaceOnce(b,'let statsDecorating28=false,statsRaf28=0;\\n','');\n  b=cutBetween(b,'function todayParts28(){','function renameStatsNav28(){');\n  b=replaceOnce(b,\"if(me&&currentView==='stats')decorateStats28();\",'');\n  return b;\n});\n\n${needle}`);
-            fs.writeFileSync(p,s);
+            fs.writeFileSync(bp,s);
           }
+          const pp='scripts/poll-v623-canonical.js';
+          let p=fs.readFileSync(pp,'utf8');
+          const old="const date=p?.date||Math.max(selectedDate623,today623())";
+          const fixed="const date=p?.date||(selectedDate623>=today623()?selectedDate623:today623())";
+          if(!p.includes(old)&&!p.includes(fixed))throw new Error('canonical date expression not found');
+          p=p.replace(old,fixed);
+          fs.writeFileSync(pp,p);
           NODE
-          node scripts/build-v623-poll-cleanup.mjs
+      - name: Build v6.23 single runtime
+        run: node scripts/build-v623-poll-cleanup.mjs
       - name: Validate canonical runtime structure
         run: |
           ! grep -Eq 'kokmatch-v(18|19|74|76|90)-api' app-v6.23.js
           ! grep -Eq 'migrated into v6.0: app-v(76|90|1\.9|2\.0|2\.1|2\.2)\.js' app-v6.23.js
           ! grep -Eq 'openPollEdit90|openPollCreate72|createPoll72|savePollEdit90|selectPollDate22|movePollMonth22|togglePollVote22|openPollAttendees18|patchPollCounts18|decoratePollCards33|decoratePollNow51' app-v6.23.js
           ! grep -Eq 'new MutationObserver\((scheduleStats33|scheduleStats28)\)' app-v6.23.js
+          ! grep -q 'Math.max(selectedDate623,today623())' app-v6.23.js
           grep -q 'KokMatch v6.23 canonical exercise attendance poll runtime' app-v6.23.js
           grep -q 'kokmatch-v21-api' app-v6.23.js
           grep -q 'kokmatch-v72-api' app-v6.23.js
@@ -58,22 +68,7 @@ jobs:
       - name: Mobile roster stability QA
         run: node scripts/qa-current-runtime.mjs
       - name: Canonical partner and poll QA
-        run: |
-          cp scripts/qa-partner-poll-current.mjs /tmp/qa-partner-poll-current.mjs
-          node <<'NODE'
-          const fs=require('fs'),p='scripts/qa-partner-poll-current.mjs';let s=fs.readFileSync(p,'utf8');
-          s=s.replace('const pageErrors=[],pollApiPaths=[];','const pageErrors=[],pollApiPaths=[],pollBodies=[];');
-          s=s.replace("if(url.pathname.endsWith('/kokmatch-v21-api')){","if(url.pathname.endsWith('/kokmatch-v21-api')){\n    pollBodies.push(JSON.parse(JSON.stringify(body))); ");
-          const old="await page.getByRole('button',{name:'투표 시작',exact:true}).click();await page.waitForFunction(()=>S.attendancePolls?.some(x=>x.id==='poll-created'));";
-          const neu="await page.getByRole('button',{name:'투표 시작',exact:true}).click();await page.waitForTimeout(700);const createDiag=await page.evaluate(()=>({polls:(S.attendancePolls||[]).map(x=>({id:x.id,date:x.date,location:x.location,title:x.title})),modal:document.getElementById('modalSheet')?.textContent||'',form:{date:document.getElementById('pollDate19')?.value,start:document.getElementById('pollStart19')?.value,end:document.getElementById('pollEnd19')?.value,location:document.getElementById('pollLocation19')?.value,title:document.getElementById('pollTitle19')?.value}}));console.log('CREATE_DIAG',JSON.stringify({pollBodies,nodePolls:state.attendancePolls.map(x=>({id:x.id,date:x.date,location:x.location,title:x.title})),browser:createDiag,errors:pageErrors}));await page.waitForFunction(()=>S.attendancePolls?.some(x=>x.id==='poll-created'),null,{timeout:5000});";
-          if(!s.includes(old))throw new Error('create QA needle missing');s=s.replace(old,neu);fs.writeFileSync(p,s);
-          NODE
-          node --check scripts/qa-partner-poll-current.mjs
-          set +e
-          node scripts/qa-partner-poll-current.mjs
-          status=$?
-          mv /tmp/qa-partner-poll-current.mjs scripts/qa-partner-poll-current.mjs
-          exit "$status"
+        run: node scripts/qa-partner-poll-current.mjs
       - name: Commit generated runtime and remove one-time tooling
         run: |
           git config user.name 'kkokmatch'
