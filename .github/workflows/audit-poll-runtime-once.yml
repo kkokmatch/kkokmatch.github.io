@@ -4,6 +4,7 @@ on:
     paths:
       - '.github/workflows/audit-poll-runtime-once.yml'
       - 'scripts/debug-roster-v623.mjs'
+      - 'scripts/roster-v623-final.js'
   workflow_dispatch:
 permissions:
   contents: read
@@ -15,7 +16,11 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - run: node scripts/build-v623-poll-cleanup.mjs
+      - run: |
+          node scripts/build-v623-poll-cleanup.mjs
+          printf '\n\n' >> app-v6.23.js
+          cat scripts/roster-v623-final.js >> app-v6.23.js
+          node --check app-v6.23.js
       - run: |
           npm install --no-save playwright@1.55.0
           npx playwright install chromium
