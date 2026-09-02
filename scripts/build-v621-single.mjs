@@ -21,11 +21,23 @@ const layoutHotfix=fs.readFileSync(layoutHotfixPath,'utf8');
 const before={jsBytes:Buffer.byteLength(js),cssBytes:Buffer.byteLength(css)};
 let removedLegacyLaunch=0;
 let removedV99FastPath=0;
+let removedLegacyFixLoader=0;
 
-// 1) 과거 /launch/vXX 전용 리다이렉트는 현재 단일 운영 경로에서 도달하지 않는 죽은 코드다.
+// 1) v5.4 fix21~26은 이미 본체에 직접 이관되어 있으므로, 다시 외부 파일을 불러오는 bridge는 죽은/중복 로더다.
+const bridgeStart='(()=>{\nif(window.__kokmatchV54FinalProfileBridge4)return;';
+const bridgeEnd='/* migrated into v6.0: app-v5.4-fix5.js */';
+const bi=js.indexOf(bridgeStart);
+if(bi>=0){
+  const be=js.indexOf(bridgeEnd,bi);
+  if(be<0)throw new Error('legacy v5.4 bridge end marker not found');
+  js=js.slice(0,bi)+'/* v6.21: obsolete v5.4 fix21~26 dynamic bridge removed; code is already consolidated below. */\n\n'+js.slice(be);
+  removedLegacyFixLoader=1;
+}
+
+// 2) 과거 /launch/vXX 전용 리다이렉트는 현재 단일 운영 경로에서 도달하지 않는 죽은 코드다.
 js=js.replace(/^\s*if\(location\.pathname\.startsWith\(['"]\/launch\/v[^'"]+['"]\)\)history\.replaceState\([^\n]*\);?\s*$/gm,()=>{removedLegacyLaunch++;return''});
 
-// 2) v99 회원 상태변경 fast-path는 v6.21 canonical 3버튼 핸들러와 직접 충돌하므로 제거한다.
+// 3) v99 회원 상태변경 fast-path는 v6.21 canonical 3버튼 핸들러와 직접 충돌하므로 제거한다.
 const fastStart='/* Member attendance fast path: preserve scroll, avoid full roster repaint/flicker. */';
 const si=js.indexOf(fastStart);
 if(si>=0){
@@ -36,20 +48,22 @@ if(si>=0){
   removedV99FastPath=1;
 }
 
-// 3) 독립 운영본 버전 마커를 v6.21로 고정한다.
+// 4) 독립 운영본 버전 마커를 v6.21로 고정한다.
 js=js
  .replace(/window\.__kokmatchStandalone='6\.0'/g,`window.__kokmatchStandalone='${VERSION}'`)
  .replace(/window\.__kokmatchVersionLock='6\.0'/g,`window.__kokmatchVersionLock='${VERSION}'`)
  .replace(/sessionStorage\.setItem\('kokmatch_runtime_version','6\.0'\)/g,`sessionStorage.setItem('kokmatch_runtime_version','${VERSION}')`)
  .replace(/document\.documentElement\.dataset\.kokmatchVersion='6\.0'/g,`document.documentElement.dataset.kokmatchVersion='${VERSION}'`);
 
-// 4) 현재 최종 회원저장/권한/3버튼 구현을 별도 런타임 파일이 아닌 본체에 직접 이관한다.
+// 5) 현재 최종 회원저장/권한/3버튼 구현을 별도 런타임 파일이 아닌 본체에 직접 이관한다.
 js += `\n\n/* ===== v6.21 canonical member/save/roster implementation ===== */\n${memberHotfix}\n`;
 
-// 5) CSS도 현재 본체 + 최종 레이아웃만 합쳐 하나의 파일로 만든다.
+// 6) CSS도 현재 본체 + 최종 레이아웃만 합쳐 하나의 파일로 만든다.
 css += `\n\n/* ===== v6.21 canonical layout ===== */\n${layoutHotfix}\n`;
 
-// 핫픽스 파일명을 런타임에서 다시 참조하는 실수를 빌드 단계에서 차단한다.
+// 외부 app-v*.js/css 또는 핫픽스 파일을 런타임이 다시 참조하지 못하게 빌드 단계에서 차단한다.
+const crossVersionRefs=[...js.matchAll(/["'](\/app-v[^"'?]+\.(?:js|css))(?:\?[^"']*)?["']/g)].map(m=>m[1]).filter(x=>x!==`/${outJs}`&&x!==`/${outCss}`);
+if(crossVersionRefs.length)throw new Error(`Cross-version app refs remain: ${[...new Set(crossVersionRefs)].join(', ')}`);
 for(const [name,text] of [['JS',js],['CSS',css]]){
   if(/app-v6\.20-(?:member|layout)-hotfix\.(?:js|css)/.test(text))throw new Error(`${name} still references a hotfix asset`);
 }
@@ -99,15 +113,15 @@ latest.version=61;
 latest.label=BUILD;
 latest.semanticVersion=VERSION;
 latest.build=BUILD;
-latest.updatedAt='2026-09-02T10:06:00+09:00';
-latest.note='v6.21 단일본 통합 · 런타임 JS/CSS 각 1개 · v99 충돌 상태변경 코드 및 구버전 launch 죽은코드 제거';
+latest.updatedAt='2026-09-02T10:12:00+09:00';
+latest.note='v6.21 단일본 통합 · 런타임 JS/CSS 각 1개 · v5.4 외부 fix 로더/v99 충돌 상태변경/구버전 launch 죽은코드 제거';
 fs.writeFileSync('latest-version.json',JSON.stringify(latest,null,2)+'\n');
 
 const report={
   version:VERSION,
   sources:[baseJsPath,baseCssPath,memberHotfixPath,layoutHotfixPath],
   outputs:[outJs,outCss,'index.html'],
-  removed:{legacyLaunchRedirects:removedLegacyLaunch,v99AttendanceFastPath:removedV99FastPath},
+  removed:{legacyFixLoader:removedLegacyFixLoader,legacyLaunchRedirects:removedLegacyLaunch,v99AttendanceFastPath:removedV99FastPath},
   bytes:{before,after:{jsBytes:Buffer.byteLength(js),cssBytes:Buffer.byteLength(css)}}
 };
 fs.writeFileSync('scripts/v621-consolidation-report.json',JSON.stringify(report,null,2)+'\n');
