@@ -7,6 +7,7 @@ on:
       - 'latest-version.json'
       - 'app-v*.js'
       - 'app-v*.css'
+      - 'scripts/qa-boot-diagnostic.mjs'
       - 'scripts/qa-current-runtime.mjs'
       - 'scripts/qa-partner-poll-current.mjs'
       - '.github/workflows/qa-current-runtime.yml'
@@ -36,6 +37,8 @@ jobs:
           for i in {1..20}; do curl -fsS http://127.0.0.1:4173/ >/dev/null && exit 0; sleep 0.25; done
           cat /tmp/kokmatch-http.log
           exit 1
+      - name: Current runtime boot diagnostic
+        run: node scripts/qa-boot-diagnostic.mjs
       - name: Mobile roster smoke QA
         run: node scripts/qa-current-runtime.mjs
       - name: Partner and exercise poll QA
