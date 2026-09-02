@@ -1,8 +1,8 @@
 {
-  "version": 63,
-  "label": "v6.23",
-  "semanticVersion": "6.23",
-  "build": "v6.23",
-  "updatedAt": "2026-09-02T15:00:00+09:00",
-  "note": "v6.23 운동참석투표 canonical 단일화 · v21 API 통합 · 중복 투표 런타임/Observer 제거 · 안정화 QA"
+  "version": 64,
+  "label": "v6.24",
+  "semanticVersion": "6.24",
+  "build": "v6.24",
+  "updatedAt": "2026-09-02T15:43:00+09:00",
+  "note": "v6.24 과거 투표 코드 의존성 제거 · canonical 단일 런타임 · v21 투표 API 단일화 · 회귀 안정화"
 }
