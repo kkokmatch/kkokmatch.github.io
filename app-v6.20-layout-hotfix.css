@@ -1,7 +1,7 @@
 /* 콕매치 v6.20 layout hotfix · 2026-09-02
    - 회원명부 이름 글리프 잘림 방지
-   - v50 원본 급수 배지 색상 복원
-   - 입장/관람/퇴장/수정 액션열 고정
+   - 게임대기 화면과 동일한 급수 배지 적용
+   - 입장/관람/퇴장/수정 액션열 4칸 일렬 고정
    - 모바일 상단 모임명/사용자 정보 영역 확장
 */
 
@@ -31,16 +31,30 @@
   text-overflow:clip!important;
 }
 
-/* 2) v50에서 사용하던 급수 배지 원색을 최종 우선값으로 복원 */
-.gradeBadge50.grade-a50,.grade-a50{background:#A60093!important;color:#fff!important;border-color:transparent!important}
-.gradeBadge50.grade-b50,.grade-b50{background:#00CFC6!important;color:#073937!important;border-color:transparent!important}
-.gradeBadge50.grade-c50,.grade-c50{background:#10D400!important;color:#063b00!important;border-color:transparent!important}
-.gradeBadge50.grade-d50,.grade-d50{background:#DE9999!important;color:#4b2020!important;border-color:transparent!important}
-.gradeBadge50.grade-e50,.grade-e50{background:#EBE202!important;color:#3b3800!important;border-color:transparent!important}
+/* 2) 회원명부 급수 배지를 게임대기 급수배지(v50)와 완전히 동일하게 */
+#members .memberMainLine45 .tag[class*="grade-"],
+#members .memberCard .tag[class*="grade-"]{
+  font-weight:900!important;
+  border:0!important;
+  letter-spacing:.01em!important;
+  box-shadow:inset 0 0 0 1px rgba(0,0,0,.08)!important;
+  white-space:nowrap!important;
+}
+#members .memberCard[data-grade-v6="A"] .grade-a50,
+#members .grade-a50{background:#A60093!important;color:#fff!important;border-color:transparent!important}
+#members .memberCard[data-grade-v6="B"] .grade-b50,
+#members .grade-b50{background:#00CFC6!important;color:#073937!important;border-color:transparent!important}
+#members .memberCard[data-grade-v6="C"] .grade-c50,
+#members .grade-c50{background:#10D400!important;color:#063b00!important;border-color:transparent!important}
+#members .memberCard[data-grade-v6="D"] .grade-d50,
+#members .grade-d50{background:#DE9999!important;color:#4b2020!important;border-color:transparent!important}
+#members .memberCard[data-grade-v6="E"] .grade-e50,
+#members .grade-e50{background:#EBE202!important;color:#3b3800!important;border-color:transparent!important}
 
-/* 3) 회원 액션열은 상태가 바뀌어도 같은 위치/크기를 유지 */
+/* 3) 액션 버튼은 상태와 관계없이 4개의 고정 열을 사용한다.
+      운동=1열 / 관람=2열 / 퇴장=3열 / 수정=4열 */
 #members .memberCard{
-  grid-template-columns:46px minmax(0,1fr) 108px!important;
+  grid-template-columns:46px minmax(0,1fr) 126px!important;
   column-gap:6px!important;
 }
 #members .memberActions48,
@@ -51,14 +65,26 @@
   position:static!important;
   inset:auto!important;
   transform:none!important;
-  width:108px!important;
-  min-width:108px!important;
-  max-width:108px!important;
+  width:126px!important;
+  min-width:126px!important;
+  max-width:126px!important;
   align-self:center!important;
   justify-self:end!important;
+  margin-left:auto!important;
   overflow:visible!important;
 }
 #members .memberActions64::before{display:none!important}
+#members .memberActions48 .status,
+#members .v6MemberActions .status,
+#members .memberActions60 .status,
+#members .memberActions64 .status,
+#members .memberActions65 .status{
+  width:126px!important;
+  min-width:126px!important;
+  max-width:126px!important;
+  margin:0 0 4px!important;
+  text-align:right!important;
+}
 #members .memberBtns,
 #members .memberBtns61,
 #members .memberBtns64,
@@ -66,27 +92,46 @@
   position:static!important;
   inset:auto!important;
   transform:none!important;
-  width:108px!important;
-  min-width:108px!important;
-  max-width:108px!important;
   display:grid!important;
-  grid-template-columns:repeat(2,minmax(0,1fr))!important;
-  grid-template-areas:"enter watch" "leave edit"!important;
-  grid-auto-flow:row!important;
-  gap:4px!important;
+  grid-template-columns:repeat(4,30px)!important;
+  grid-template-rows:30px!important;
+  grid-auto-flow:column!important;
+  gap:2px!important;
+  width:126px!important;
+  min-width:126px!important;
+  max-width:126px!important;
+  height:30px!important;
+  min-height:30px!important;
   align-items:stretch!important;
-  justify-content:stretch!important;
+  justify-content:start!important;
   overflow:visible!important;
 }
-#members .memberBtn-enter61{grid-area:enter!important}
-#members .memberBtn-watch61{grid-area:watch!important}
-#members .memberBtn-leave61{grid-area:leave!important}
-#members .memberBtn-edit61{grid-area:edit!important}
+/* 버튼이 빠져도 나머지 버튼은 자기 고정 열에서 움직이지 않는다. */
+#members .memberBtns>.enter,
+#members .memberBtns61>.enter,
+#members .memberBtns64>.enter,
+#members .memberBtns65>.enter{grid-column:1!important;grid-row:1!important}
+#members .memberBtns>.watch,
+#members .memberBtns61>.watch,
+#members .memberBtns64>.watch,
+#members .memberBtns65>.watch{grid-column:2!important;grid-row:1!important}
+#members .memberBtns>.danger,
+#members .memberBtns61>.danger,
+#members .memberBtns64>.danger,
+#members .memberBtns65>.danger{grid-column:3!important;grid-row:1!important}
+#members .memberBtns>.ghost,
+#members .memberBtns61>.ghost,
+#members .memberBtns64>.ghost,
+#members .memberBtns65>.ghost{grid-column:4!important;grid-row:1!important}
+#members .memberBtn-enter61{grid-column:1!important;grid-row:1!important}
+#members .memberBtn-watch61{grid-column:2!important;grid-row:1!important}
+#members .memberBtn-leave61{grid-column:3!important;grid-row:1!important}
+#members .memberBtn-edit61{grid-column:4!important;grid-row:1!important}
 #members .memberBtnSlot61,
 #members .memberBtnPlaceholder61{
-  width:100%!important;
-  min-width:0!important;
-  max-width:none!important;
+  width:30px!important;
+  min-width:30px!important;
+  max-width:30px!important;
   height:30px!important;
   min-height:30px!important;
   margin:0!important;
@@ -99,25 +144,27 @@
 #members .memberBtns .btn,
 #members .memberBtns61 .btn,
 #members .memberBtns64 .btn,
-#members .memberBtns65 .btn{
+#members .memberBtns65 .btn,
+#members .memberBtnSlot61 .btn{
   position:static!important;
   inset:auto!important;
   transform:none!important;
-  width:100%!important;
-  min-width:0!important;
-  max-width:none!important;
+  width:30px!important;
+  min-width:30px!important;
+  max-width:30px!important;
   height:30px!important;
   min-height:30px!important;
   margin:0!important;
-  padding:0 3px!important;
+  padding:0!important;
   display:flex!important;
   align-items:center!important;
   justify-content:center!important;
   white-space:nowrap!important;
-  overflow:visible!important;
+  overflow:hidden!important;
   text-overflow:clip!important;
   line-height:1!important;
-  font-size:9.5px!important;
+  font-size:8.5px!important;
+  border-radius:8px!important;
 }
 #members .memberBtns .btn:active,
 #members .memberBtns61 .btn:active,
@@ -128,6 +175,7 @@
 #members .memberBtns64 .btn.v615Pressed,
 #members .memberBtns65 .btn.v615Pressed{
   transform:none!important;
+  filter:none!important;
 }
 
 /* 4~5) 상단: 액션버튼은 우상단에 두고 모임/사용자 줄에는 화면 전체 폭을 배정 */
@@ -155,12 +203,8 @@
     margin:0!important;
     z-index:320!important;
   }
-  #currentVersionV6{
-    display:none!important;
-  }
-  #headerRefreshV6{
-    max-width:108px!important;
-  }
+  #currentVersionV6{display:none!important}
+  #headerRefreshV6{max-width:108px!important}
   #logoutV6{
     flex:0 0 54px!important;
     width:54px!important;
@@ -215,7 +259,7 @@
 
 @media(max-width:430px){
   #members .memberCard{
-    grid-template-columns:42px minmax(0,1fr) 102px!important;
+    grid-template-columns:42px minmax(0,1fr) 118px!important;
     column-gap:5px!important;
     padding-left:7px!important;
     padding-right:4px!important;
@@ -225,28 +269,41 @@
   #members .memberActions60,
   #members .memberActions64,
   #members .memberActions65,
+  #members .memberActions48 .status,
+  #members .v6MemberActions .status,
+  #members .memberActions60 .status,
+  #members .memberActions64 .status,
+  #members .memberActions65 .status,
   #members .memberBtns,
   #members .memberBtns61,
   #members .memberBtns64,
   #members .memberBtns65{
-    width:102px!important;
-    min-width:102px!important;
-    max-width:102px!important;
+    width:118px!important;
+    min-width:118px!important;
+    max-width:118px!important;
+  }
+  #members .memberBtns,
+  #members .memberBtns61,
+  #members .memberBtns64,
+  #members .memberBtns65{
+    grid-template-columns:repeat(4,28px)!important;
+    grid-template-rows:29px!important;
+    height:29px!important;
+    min-height:29px!important;
   }
   #members .memberBtnSlot61,
   #members .memberBtnPlaceholder61,
   #members .memberBtns .btn,
   #members .memberBtns61 .btn,
   #members .memberBtns64 .btn,
-  #members .memberBtns65 .btn{
+  #members .memberBtns65 .btn,
+  #members .memberBtnSlot61 .btn{
+    width:28px!important;
+    min-width:28px!important;
+    max-width:28px!important;
     height:29px!important;
     min-height:29px!important;
-  }
-  #members .memberBtns .btn,
-  #members .memberBtns61 .btn,
-  #members .memberBtns64 .btn,
-  #members .memberBtns65 .btn{
-    font-size:9.3px!important;
+    font-size:8px!important;
   }
 }
 
@@ -258,7 +315,7 @@
   .groupLine .groupBtn{font-size:10px!important;padding:6px!important}
   .groupLine .who,.groupLine .whoInline85{font-size:9.5px!important;padding:5px 6px!important}
   #members .memberCard{
-    grid-template-columns:39px minmax(0,1fr) 96px!important;
+    grid-template-columns:39px minmax(0,1fr) 110px!important;
     column-gap:4px!important;
     padding-left:6px!important;
     padding-right:3px!important;
@@ -268,12 +325,40 @@
   #members .memberActions60,
   #members .memberActions64,
   #members .memberActions65,
+  #members .memberActions48 .status,
+  #members .v6MemberActions .status,
+  #members .memberActions60 .status,
+  #members .memberActions64 .status,
+  #members .memberActions65 .status,
   #members .memberBtns,
   #members .memberBtns61,
   #members .memberBtns64,
   #members .memberBtns65{
-    width:96px!important;
-    min-width:96px!important;
-    max-width:96px!important;
+    width:110px!important;
+    min-width:110px!important;
+    max-width:110px!important;
+  }
+  #members .memberBtns,
+  #members .memberBtns61,
+  #members .memberBtns64,
+  #members .memberBtns65{
+    grid-template-columns:repeat(4,26px)!important;
+    grid-template-rows:28px!important;
+    height:28px!important;
+    min-height:28px!important;
+  }
+  #members .memberBtnSlot61,
+  #members .memberBtnPlaceholder61,
+  #members .memberBtns .btn,
+  #members .memberBtns61 .btn,
+  #members .memberBtns64 .btn,
+  #members .memberBtns65 .btn,
+  #members .memberBtnSlot61 .btn{
+    width:26px!important;
+    min-width:26px!important;
+    max-width:26px!important;
+    height:28px!important;
+    min-height:28px!important;
+    font-size:7.5px!important;
   }
 }
