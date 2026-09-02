@@ -3,6 +3,7 @@ on:
   push:
     paths:
       - '.github/workflows/audit-poll-runtime-once.yml'
+      - 'scripts/debug-roster-v623.mjs'
   workflow_dispatch:
 permissions:
   contents: read
