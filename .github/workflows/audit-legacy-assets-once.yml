@@ -4,52 +4,53 @@ on:
   push:
     paths:
       - '.github/workflows/audit-legacy-assets-once.yml'
+  workflow_dispatch:
 
 permissions:
   contents: read
 
 jobs:
   audit:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
       - name: Current runtime guard
         run: node scripts/validate-standalone-runtime.mjs
-      - name: Audit legacy root app assets
+      - name: Audit legacy root app assets from live files only
         shell: bash
         run: |
-          set -u
-          current_js="app-v6.21.js"
-          current_css="app-v6.21.css"
+          set -euo pipefail
+          current_js='app-v6.23.js'
+          current_css='app-v6.23.css'
           mapfile -t assets < <(find . -maxdepth 1 -type f \( -name 'app-v*.js' -o -name 'app-v*.css' \) -printf '%f\n' | sort -V)
-          echo "TOTAL_APP_ASSETS=${#assets[@]}"
-          live=0
-          dead=0
+          printf 'TOTAL_APP_ASSETS=%s\n' "${#assets[@]}"
+          referenced=0
+          unreferenced=0
           for f in "${assets[@]}"; do
             [[ "$f" == "$current_js" || "$f" == "$current_css" ]] && continue
-            refs=$(grep -RIlF --exclude="$f" --exclude-dir=.git --exclude-dir=node_modules -- "$f" . 2>/dev/null || true)
+            refs=$(find . -type f \
+              ! -path './.git/*' ! -path './node_modules/*' \
+              ! -name 'app-v*.js' ! -name 'app-v*.css' \
+              -print0 | xargs -0 grep -IlF -- "$f" 2>/dev/null || true)
             if [[ -n "$refs" ]]; then
-              live=$((live+1))
-              echo "REFERENCED $f"
+              referenced=$((referenced+1))
+              echo "LIVE_REFERENCE $f"
               while IFS= read -r ref; do echo "  <- $ref"; done <<< "$refs"
             else
-              dead=$((dead+1))
-              echo "UNREFERENCED $f"
+              unreferenced=$((unreferenced+1))
+              echo "DEAD_ASSET $f"
             fi
           done
-          echo "REFERENCED_LEGACY=$live"
-          echo "UNREFERENCED_LEGACY=$dead"
-      - name: Audit current JS for loaders and cache APIs
-        shell: bash
+          echo "REFERENCED_LEGACY=$referenced"
+          echo "UNREFERENCED_LEGACY=$unreferenced"
+      - name: Audit non-current runtime references
         run: |
-          echo '--- app-v6.21 runtime loader/cache references ---'
-          grep -nE 'serviceWorker|caches\.|createElement\(.script|createElement\(.link|app-v[^ ]+\.(js|css)|/launch/v' app-v6.21.js || true
-          echo '--- auxiliary HTML / manifest / worker candidates ---'
-          find . -maxdepth 3 -type f \( -name '*.html' -o -name '*.webmanifest' -o -iname '*worker*' -o -name 'sw.js' \) -print | sort
-      - name: Audit legacy tests
-        shell: bash
+          echo '--- references from live non-legacy files ---'
+          find . -type f ! -path './.git/*' ! -path './node_modules/*' ! -name 'app-v*.js' ! -name 'app-v*.css' -print0 \
+            | xargs -0 grep -nE 'app-v[0-9]+([.][0-9]+)?[.](js|css)|/launch/v|hotfix|fix[0-9]+' || true
+      - name: Audit temporary QA/build files
         run: |
-          echo '--- files under .github/tests ---'
-          find .github/tests -maxdepth 1 -type f -print 2>/dev/null | sort || true
-          echo '--- remaining workflow references to .github/tests ---'
-          grep -RInF '.github/tests' .github/workflows || true
+          find .github/workflows scripts -maxdepth 2 -type f | sort | grep -E 'audit|once|focused|debug|build-v623|poll-v623|roster-v623' || true
