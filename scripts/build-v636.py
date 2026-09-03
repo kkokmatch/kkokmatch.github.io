@@ -14,6 +14,16 @@ for old,new in repls:
     if old not in js:
         raise SystemExit(f'missing JS patch target: {old}')
     js=js.replace(old,new,1)
+
+old_paint="""  const cur=card.querySelector(':scope > .kmRosterActions621,:scope > .v6MemberActions,:scope > .memberActions48,:scope > .memberActions60,:scope > .memberActions65');
+  if(cur)cur.replaceWith(next);else card.appendChild(next);"""
+new_paint="""  const rails632=[...card.querySelectorAll(':scope > .kmRosterActions621,:scope > .v6MemberActions,:scope > .memberActions48,:scope > .memberActions60,:scope > .memberActions65')];
+  const cur=rails632.shift();
+  if(cur)cur.replaceWith(next);else card.appendChild(next);
+  for(const extra of rails632)extra.remove();"""
+if old_paint not in js:
+    raise SystemExit('missing canonical roster paint target')
+js=js.replace(old_paint,new_paint,1)
 Path('app-v6.36.js').write_text(js,encoding='utf-8')
 
 css=Path('app-v6.35.css').read_text(encoding='utf-8')
@@ -115,7 +125,7 @@ latest={
   'semanticVersion':'6.36',
   'build':'v6.36',
   'updatedAt':'2026-09-03T14:35:00+09:00',
-  'note':'v6.36 안드로이드 태블릿 회원명부 입장·퇴장·관람·수정 버튼 3칸 고정 정렬 · 아이폰 레이아웃 유지'
+  'note':'v6.36 안드로이드 태블릿 회원명부 입장·퇴장·관람·수정 버튼 3칸 고정 정렬 · 상태변경 중복버튼 방지 · 아이폰 레이아웃 유지'
 }
 Path('latest-version.json').write_text(json.dumps(latest,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
 
