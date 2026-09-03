@@ -50,16 +50,27 @@ if(window.__kokmatchLoginStable630)return;
 window.__kokmatchLoginStable630=true;
 const sleep630=ms=>new Promise(r=>setTimeout(r,ms));
 const token630=()=>{try{return String(T||localStorage.getItem('kokmatch_token')||'')}catch{return String(T||'')}};
+const ready630=()=>{try{return !!(T&&me&&group&&currentGroupId)}catch{return false}};
 const baseLoadState630=loadState;
 loadState=async function(...args){
  const fresh=Date.now()<Number(window.__kokmatchFreshLoginUntil630||0);
  if(!fresh)return baseLoadState630.apply(this,args);
  let last=null;
- for(const wait of [0,220,520,950,1500]){
+ for(const wait of [0,180,360,700,1200,1800]){
   if(wait)await sleep630(wait);
   try{
    const r=await baseLoadState630.apply(this,args);
-   if(T&&me&&group){window.__kokmatchFreshLoginUntil630=0;try{sessionStorage.setItem('kokmatch_login_stable630','1')}catch{}}
+   if(ready630()){
+    window.__kokmatchFreshLoginUntil630=0;
+    try{sessionStorage.setItem('kokmatch_login_stable630','1')}catch{}
+    return r;
+   }
+   // Some migrated legacy wrappers intentionally swallow an auth error and return
+   // undefined. A fresh token without me/group is not a successful login yet.
+   if(token630()){
+    last=new Error('로그인 상태를 불러오는 중입니다.');
+    continue;
+   }
    return r;
   }catch(e){
    last=e;
@@ -73,12 +84,16 @@ try{window.loadState=loadState}catch{}
 const baseSubmitLogin630=submitLogin;
 submitLogin=async function(...args){
  const before=token630();
- window.__kokmatchFreshLoginUntil630=Date.now()+10000;
+ window.__kokmatchFreshLoginUntil630=Date.now()+15000;
  try{
   const r=await baseSubmitLogin630.apply(this,args);
   const after=token630();
-  if(after&&me&&group){window.__kokmatchFreshLoginUntil630=0;try{sessionStorage.setItem('kokmatch_login_stable630','1')}catch{}}
-  else if(!after||after===before)window.__kokmatchFreshLoginUntil630=0;
+  if(after&&ready630()){
+   window.__kokmatchFreshLoginUntil630=0;
+   try{sessionStorage.setItem('kokmatch_login_stable630','1')}catch{}
+  }else if(!after||after===before){
+   window.__kokmatchFreshLoginUntil630=0;
+  }
   return r;
  }catch(e){
   if(!token630()||token630()===before)window.__kokmatchFreshLoginUntil630=0;
@@ -119,7 +134,7 @@ latest={
   'label':'v6.30',
   'semanticVersion':'6.30',
   'build':'v6.30',
-  'updatedAt':'2026-09-03T09:30:00+09:00',
+  'updatedAt':'2026-09-03T09:40:00+09:00',
   'note':'v6.30 큰 PWA 설치안내 · iOS/Android 단계별 설치가이드 · 첫 로그인 세션 401 재시도 · 초기 로그인 유지 안정화'
 }
 write('latest-version.json',json.dumps(latest,ensure_ascii=False,indent=2)+'\n')
