@@ -3,6 +3,7 @@ on:
   push:
     paths:
       - '.github/workflows/build-v630-once.yml'
+      - 'scripts/build-v630.py'
       - 'scripts/qa-v630-first-login.mjs'
   workflow_dispatch:
 permissions:
@@ -40,7 +41,7 @@ jobs:
           const fs=require('fs');
           const js=fs.readFileSync('app-v6.30.js','utf8');
           const css=fs.readFileSync('app-v6.30.css','utf8');
-          for(const s of ['window.__kokmatchLoginStable630','__kokmatchFreshLoginUntil630','pwaInstallSteps630','지금 설치'])if(!js.includes(s))throw new Error('missing v6.30 marker: '+s);
+          for(const s of ['window.__kokmatchLoginStable630','__kokmatchFreshLoginUntil630','pwaInstallSteps630','지금 설치','ready630'])if(!js.includes(s))throw new Error('missing v6.30 marker: '+s);
           if(js.includes("if(resumeOnce54(last?.message||'loadState'))return new Promise(()=>{})"))throw new Error('legacy forced login resume remains');
           if(!css.includes('.pwaInstallSteps630')||!css.includes('min-height:min(70vh,620px)'))throw new Error('large install guide CSS missing');
           console.log('PASS v6.30 static install/login checks');
