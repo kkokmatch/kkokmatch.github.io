@@ -27,7 +27,7 @@ jobs:
           const js=fs.readFileSync('app-v6.33.js','utf8');
           const idx=fs.readFileSync('index.html','utf8');
           const sw=fs.readFileSync('kokmatch-sw.js','utf8');
-          for(const x of ['__kokmatchUpdateGuard633','__kokmatchCheckVersion633','__kokmatchHardReload633','CURRENT633','patchVersion633']){
+          for(const x of ['__kokmatchUpdateGuard633','__kokmatchCheckVersion633','__kokmatchHardReload633','CURRENT633','patchVersion633','__kokmatchPaintRosterCanonical633']){
             if(!js.includes(x))throw new Error('missing '+x);
           }
           if(js.includes("serviceWorker.register('/kokmatch-sw.js?v="))throw new Error('versioned SW registration remains');
