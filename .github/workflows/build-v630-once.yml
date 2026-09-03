@@ -3,6 +3,7 @@ on:
   push:
     paths:
       - '.github/workflows/build-v630-once.yml'
+      - 'scripts/qa-v630-first-login.mjs'
   workflow_dispatch:
 permissions:
   contents: write
