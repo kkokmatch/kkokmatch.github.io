@@ -19,20 +19,42 @@ Path('app-v6.36.js').write_text(js,encoding='utf-8')
 css=Path('app-v6.35.css').read_text(encoding='utf-8')
 css += r'''
 
-/* v6.36: Android tablet canonical roster controls stay in one fixed 3-slot row. */
+/* v6.36: Android tablet canonical roster controls stay inside card in one fixed 3-slot row. */
 @media(min-width:600px) and (max-width:1199px){
+  #members .memberCard{
+    grid-template-columns:50px minmax(0,1fr) 140px!important;
+    column-gap:10px!important;
+    align-items:center!important;
+  }
+  #members .memberCard .avatar{
+    grid-column:1!important;
+    grid-row:1!important;
+    justify-self:center!important;
+    align-self:center!important;
+  }
+  #members .memberCard .memberInfo48{
+    grid-column:2!important;
+    grid-row:1!important;
+    min-width:0!important;
+    width:calc(100% - .5cm)!important;
+    max-width:calc(100% - .5cm)!important;
+    justify-self:stretch!important;
+  }
   #members .memberCard .kmRosterActions621{
+    grid-column:3!important;
+    grid-row:1!important;
     box-sizing:border-box!important;
-    width:148px!important;
-    min-width:148px!important;
-    max-width:148px!important;
+    width:140px!important;
+    min-width:140px!important;
+    max-width:140px!important;
     justify-self:end!important;
     align-self:center!important;
     margin:0!important;
+    padding:0!important;
   }
   #members .memberCard .kmRosterActions621 .status{
     width:140px!important;
-    margin:0 0 5px auto!important;
+    margin:0 0 5px 0!important;
     text-align:center!important;
     white-space:nowrap!important;
   }
@@ -46,7 +68,7 @@ css += r'''
     width:140px!important;
     min-width:140px!important;
     max-width:140px!important;
-    margin:0 0 0 auto!important;
+    margin:0!important;
     flex-wrap:nowrap!important;
     overflow:visible!important;
   }
