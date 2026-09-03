@@ -25,6 +25,7 @@ jobs:
           node scripts/validate-standalone-runtime.mjs
           grep -q '__kokmatchNoFlashResume638' app-v6.38.js
           grep -q '__kokmatchResumeNoRailReplaceUntil638' app-v6.38.js
+          grep -q '__kokmatchArmNoRail638' app-v6.38.js
           grep -q 'app-v6.38.js?v=6.38' index.html
           grep -q 'kokmatch-sw.js?v=6.38' sw.js
       - name: Install Playwright
@@ -69,4 +70,4 @@ jobs:
           git diff --cached --quiet && exit 0
           git commit -m 'Release v6.38 no-flash member resume'
           git push origin HEAD:main
-# retry: legacy rail suppression
+# retry: prearmed resume guard
