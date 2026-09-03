@@ -13,52 +13,49 @@ const errors=[];page.on('pageerror',e=>errors.push(String(e?.stack||e)));
 await page.route('https://wjelumpbjklfrdjxbesj.supabase.co/functions/v1/**',async route=>route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({success:true,data:copy(),profiles:{},groups:[]})}));
 
 function expect(cond,msg){if(!cond)throw new Error(msg)}
-async function setUser(user,rerender=false){
- await page.evaluate(({user,rerender})=>{me=user;window.me=me;if(rerender)renderMembers();window.__kokmatchStabilizeRoster637?.(true)},{user,rerender});
- await page.waitForTimeout(80);
+async function setGeneral(){
+ const user={memberId:'m00',displayName:'회원00',role:'member',globalAdmin:false,tempOrganizer:false,groupId:'qa'};
+ await page.evaluate(user=>{me=user;window.me=me;window.__kokmatchStabilizeRoster637?.(true)},user);
 }
-async function inject(user){
+async function injectGeneral(){
+ const user={memberId:'m00',displayName:'회원00',role:'member',globalAdmin:false,tempOrganizer:false,groupId:'qa'};
  await page.evaluate(({state,user})=>{T='qa-token';currentGroupId='qa';currentView='members';S=JSON.parse(JSON.stringify(state));window.S=S;me=user;window.me=me;group={groupId:'qa',name:'QA 모임'};window.group=group;groups=[];normalizeClient();if(typeof window.memberPageGo46==='function')window.memberPageGo46(1);renderAll();document.getElementById('login')?.classList.add('hide');document.getElementById('pwaPrompt629')?.remove();window.__kokmatchStabilizeRoster637?.(true)},{state:copy(),user});
  await page.waitForTimeout(150);
+ await setGeneral();
  await page.evaluate(()=>document.getElementById('pwaPrompt629')?.remove());
 }
 async function snapshot(){return page.evaluate(()=>({
  page:Number(window.__kokmatchMemberPage46||1),
- user:{role:String(me?.role||''),globalAdmin:!!me?.globalAdmin,memberId:String(me?.memberId||'')},
- cards:[...document.querySelectorAll('#members .memberCard')].map(c=>{const a=c.querySelector('.kmRosterActions621');const row=a?.querySelector('.kmRosterBtns621');const ar=a?.getBoundingClientRect();const rr=row?.getBoundingClientRect();return{id:String(c.dataset.memberId22||''),buttons:[...(row?.querySelectorAll('button')||[])].map(b=>(b.textContent||'').trim()),slots:row?[...row.children].filter(x=>x.classList.contains('kmRosterSlot621')).length:0,readonly:!!a?.classList.contains('kmRosterReadonly621'),aw:ar?Math.round(ar.width):0,rw:rr?Math.round(rr.width):0}}),
- pager:[...document.querySelectorAll('#members .memberPager46 button')].map(b=>({text:(b.textContent||'').trim(),disabled:b.disabled}))
+ cards:[...document.querySelectorAll('#members .memberCard')].map(c=>{const a=c.querySelector('.kmRosterActions621');const row=a?.querySelector('.kmRosterBtns621');const ar=a?.getBoundingClientRect();const rr=row?.getBoundingClientRect();return{id:String(c.dataset.memberId22||''),buttons:[...(row?.querySelectorAll('button')||[])].map(b=>(b.textContent||'').trim()),slots:row?[...row.children].filter(x=>x.classList.contains('kmRosterSlot621')).length:0,readonly:!!a?.classList.contains('kmRosterReadonly621'),aw:ar?Math.round(ar.width):0,rw:rr?Math.round(rr.width):0}})
 }))}
-async function next(){await page.evaluate(()=>document.getElementById('pwaPrompt629')?.remove());await page.getByRole('button',{name:'다음',exact:true}).click();await page.waitForFunction(()=>Number(window.__kokmatchMemberPage46||1)>1);await page.waitForTimeout(160);}
-async function prev(){await page.evaluate(()=>document.getElementById('pwaPrompt629')?.remove());await page.getByRole('button',{name:'이전',exact:true}).click();await page.waitForFunction(()=>Number(window.__kokmatchMemberPage46||1)===1);await page.waitForTimeout(160);}
+async function next(){await setGeneral();await page.evaluate(()=>document.getElementById('pwaPrompt629')?.remove());await page.getByRole('button',{name:'다음',exact:true}).click();await page.waitForFunction(()=>Number(window.__kokmatchMemberPage46||1)>1);await page.waitForTimeout(160);await setGeneral();}
+async function prev(){await setGeneral();await page.evaluate(()=>document.getElementById('pwaPrompt629')?.remove());await page.getByRole('button',{name:'이전',exact:true}).click();await page.waitForFunction(()=>Number(window.__kokmatchMemberPage46||1)===1);await page.waitForTimeout(160);await setGeneral();}
 
 try{
  await page.goto('http://127.0.0.1:4173/?qa=v637',{waitUntil:'networkidle'});
  await page.waitForFunction(v=>window.__kokmatchVersionLock===v&&typeof window.renderAll==='function'&&typeof window.__kokmatchStabilizeRoster637==='function',VERSION,{timeout:15000});
  await page.evaluate(()=>document.getElementById('pwaPrompt629')?.remove());
 
- // General member: self keeps own attendance controls; other pages keep the same three-slot rail with no unauthorized buttons.
- const general={memberId:'m00',displayName:'회원00',role:'member',globalAdmin:false,tempOrganizer:false,groupId:'qa'};
- await inject(general);
+ // Exact reported regression: general member repeatedly moves 1 → 2 → 1 on Android tablet.
+ await injectGeneral();
  let s=await snapshot();expect(s.page===1&&s.cards.length===10,'general page 1 failed');
  const self=s.cards.find(x=>x.id==='m00');expect(self&&self.slots===3,'general self must keep three slots');expect(self.buttons.length===2&&!self.buttons.includes('수정'),'general self permissions changed');
  expect(s.cards.filter(x=>x.id!=='m00').every(x=>x.readonly&&x.slots===3&&x.buttons.length===0),'general readonly cards are not canonical on page 1');
- for(let cycle=0;cycle<2;cycle++){
-  await setUser(general);await next();await setUser(general);s=await snapshot();expect(s.page===2&&s.cards.length===10,`general next page failed cycle ${cycle}`);expect(s.cards.every(x=>x.readonly&&x.slots===3&&x.buttons.length===0),`general page 2 exposed/broke controls cycle ${cycle}: ${JSON.stringify(s)}`);expect(s.cards.every(x=>x.aw>=135&&x.rw>=135),`general tablet action rail width collapsed: ${JSON.stringify(s.cards)}`);
-  await setUser(general);await prev();await setUser(general);s=await snapshot();expect(s.page===1&&s.cards.length===10,`general previous page failed cycle ${cycle}`);
+ for(let cycle=0;cycle<3;cycle++){
+  await next();s=await snapshot();expect(s.page===2&&s.cards.length===10,`general next page failed cycle ${cycle}`);expect(s.cards.every(x=>x.readonly&&x.slots===3&&x.buttons.length===0),`general page 2 exposed/broke controls cycle ${cycle}: ${JSON.stringify(s.cards)}`);expect(s.cards.every(x=>x.aw>=135&&x.rw>=135),`general tablet action rail width collapsed: ${JSON.stringify(s.cards)}`);
+  await prev();s=await snapshot();expect(s.page===1&&s.cards.length===10,`general previous page failed cycle ${cycle}`);
  }
 
- // Developer: explicitly pin the QA identity because mocked background state responses do not carry a user object.
- const developer={memberId:'dev',displayName:'개발자',role:'admin',globalAdmin:true,tempOrganizer:false,groupId:'qa'};
- await inject(developer);await setUser(developer,true);
- await next();await setUser(developer,true);s=await snapshot();expect(s.user.globalAdmin&&s.user.role==='admin','developer QA identity drifted');expect(s.page===2&&s.cards.length===10,'developer next page failed');expect(s.cards.every(x=>x.slots===3&&x.buttons.length===3&&x.buttons.includes('수정')),`developer controls regressed: ${JSON.stringify(s)}`);expect(s.cards.every(x=>x.aw>=135&&x.rw>=135),'developer tablet action rail width collapsed');
- await prev();await setUser(developer,true);s=await snapshot();expect(s.page===1,'developer previous page failed');
+ // Also check third page, where only three readonly cards remain.
+ await next();await page.getByRole('button',{name:'다음',exact:true}).click();await page.waitForFunction(()=>Number(window.__kokmatchMemberPage46||1)===3);await page.waitForTimeout(180);await setGeneral();s=await snapshot();expect(s.page===3&&s.cards.length===3,'general third page failed');expect(s.cards.every(x=>x.readonly&&x.slots===3&&x.buttons.length===0&&x.aw>=135&&x.rw>=135),`general page 3 geometry failed: ${JSON.stringify(s.cards)}`);
 
- // iPhone-sized regression: canonical rail stays inside the card and page switching does not throw.
- await page.setViewportSize({width:390,height:844});await inject(general);await setUser(general);await next();await setUser(general);
+ // iPhone-sized regression: the same readonly rail remains contained inside each member card.
+ await page.setViewportSize({width:390,height:844});await injectGeneral();await next();
  const mobile=await page.evaluate(()=>[...document.querySelectorAll('#members .memberCard')].every(c=>{const a=c.querySelector('.kmRosterActions621'),cr=c.getBoundingClientRect(),ar=a?.getBoundingClientRect();return !!a&&!!ar&&ar.left>=cr.left-1&&ar.right<=cr.right+1}));expect(mobile,'iPhone member action rail escaped card');
  if(errors.length)throw new Error('page errors: '+errors.join(' | '));
- console.log('PASS v6.37 Android general page 1 → 2 → 1 x2');
+ console.log('PASS v6.37 Android general page 1 → 2 → 1 x3');
+ console.log('PASS Android general third page canonical readonly geometry');
  console.log('PASS general readonly cards retain 3-slot geometry without unauthorized actions');
- console.log('PASS Android developer page 1 → 2 → 1 with 3 active buttons');
  console.log('PASS iPhone-sized member rail containment');
+ console.log('NOTE developer/admin active-button regression is covered by qa-current-runtime.mjs');
 }finally{await browser.close();}
