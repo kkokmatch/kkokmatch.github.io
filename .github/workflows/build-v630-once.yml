@@ -18,6 +18,19 @@ jobs:
           node-version: 22
       - name: Build v6.30 candidate
         run: python3 scripts/build-v630.py
+      - name: Remove duplicate legacy forced-login resume fallback
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('app-v6.30.js')
+          s=p.read_text()
+          needle="if(resumeOnce54(last?.message||'loadState'))return new Promise(()=>{});"
+          count=s.count(needle)
+          if count:
+              s=s.replace(needle,'')
+              p.write_text(s)
+          print('removed legacy resume fallbacks:',count)
+          PY
       - name: Syntax and standalone checks
         run: |
           node --check app-v6.30.js
