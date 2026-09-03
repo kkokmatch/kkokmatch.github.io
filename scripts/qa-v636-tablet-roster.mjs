@@ -31,14 +31,22 @@ async function selfGeometry(page){
   return page.evaluate(()=>{
     const card=[...document.querySelectorAll('#members .memberCard')].find(c=>String(c.dataset.memberId22||c.dataset.memberId||'')==='self');
     if(!card)return {missing:'card'};
+    const avatar=card.querySelector(':scope > .avatar');
+    const info=card.querySelector(':scope > .memberInfo48');
     const actions=card.querySelector('.kmRosterActions621');
     const row=card.querySelector('.kmRosterBtns621');
     const slots=[...card.querySelectorAll('.kmRosterSlot621')];
     const buttons=[...card.querySelectorAll('.kmRosterAction621')].map(b=>({text:b.textContent.trim(),rect:b.getBoundingClientRect().toJSON()}));
     const cr=card.getBoundingClientRect(),ar=actions?.getBoundingClientRect(),rr=row?.getBoundingClientRect();
     const sr=slots.map(s=>s.getBoundingClientRect().toJSON());
-    const cs=row?getComputedStyle(row):null;
-    return {card:cr.toJSON(),actions:ar?.toJSON(),row:rr?.toJSON(),slots:sr,buttons,display:cs?.display,cols:cs?.gridTemplateColumns,gap:cs?.columnGap,scrollWidth:card.scrollWidth,clientWidth:card.clientWidth};
+    const cs=row?getComputedStyle(row):null,cc=getComputedStyle(card),ac=actions?getComputedStyle(actions):null;
+    return {
+      card:cr.toJSON(),avatar:avatar?.getBoundingClientRect().toJSON(),info:info?.getBoundingClientRect().toJSON(),actions:ar?.toJSON(),row:rr?.toJSON(),slots:sr,buttons,
+      display:cs?.display,cols:cs?.gridTemplateColumns,gap:cs?.columnGap,
+      cardDisplay:cc.display,cardCols:cc.gridTemplateColumns,cardGap:cc.columnGap,
+      actionWidth:ac?.width,actionMinWidth:ac?.minWidth,actionMaxWidth:ac?.maxWidth,actionGridColumn:ac?.gridColumn,
+      scrollWidth:card.scrollWidth,clientWidth:card.clientWidth
+    };
   });
 }
 
@@ -55,19 +63,18 @@ function assertTabletGeometry(g,label,expectedTexts){
   const xs=g.slots.map(r=>Math.round(r.x));
   const d1=xs[1]-xs[0],d2=xs[2]-xs[1];
   if(Math.abs(d1-d2)>1)throw new Error(`${label}: unequal slot spacing ${xs.join(',')}`);
-  if(g.actions.x<g.card.x-1||g.actions.x+g.actions.width>g.card.x+g.card.width+1)throw new Error(`${label}: action rail outside card`);
-  if(g.scrollWidth>g.clientWidth+1)throw new Error(`${label}: card horizontal overflow ${g.scrollWidth}/${g.clientWidth}`);
+  if(g.actions.x<g.card.x-1||g.actions.x+g.actions.width>g.card.x+g.card.width+1)throw new Error(`${label}: action rail outside card; geometry=${JSON.stringify(g)}`);
+  if(g.scrollWidth>g.clientWidth+1)throw new Error(`${label}: card horizontal overflow ${g.scrollWidth}/${g.clientWidth}; geometry=${JSON.stringify(g)}`);
   for(const b of g.buttons){
     if(Math.abs(b.rect.height-32)>1||Math.abs(b.rect.width-44)>1)throw new Error(`${label}: button ${b.text} geometry ${b.rect.width}x${b.rect.height}`);
   }
 }
 
 try{
-  // Lenovo Y700-like portrait CSS viewport.
   {
     const {context,page,errors}=await setupPage({width:800,height:1280},'member');
     try{
-      let g=await selfGeometry(page);assertTabletGeometry(g,'tablet-out',['입장','관람']);
+      let g=await selfGeometry(page);console.log('V636_TABLET_OUT',JSON.stringify(g));assertTabletGeometry(g,'tablet-out',['입장','관람']);
       const xOut=g.slots.map(r=>Math.round(r.x));
       await page.evaluate(()=>{const m=S.members.find(x=>x.id==='self');m.state='waiting';S.queue=['self'];window.__kokmatchPaintRosterControls632?.()});
       await page.waitForTimeout(30);g=await selfGeometry(page);assertTabletGeometry(g,'tablet-waiting',['퇴장','관람']);
@@ -81,21 +88,19 @@ try{
     }finally{await context.close();}
   }
 
-  // Tablet manager row has all 3 actions visible and aligned.
   {
     const {context,page,errors}=await setupPage({width:800,height:1280},'manager');
     try{
-      const g=await selfGeometry(page);assertTabletGeometry(g,'tablet-manager',['입장','관람','수정']);
+      const g=await selfGeometry(page);console.log('V636_TABLET_MANAGER',JSON.stringify(g));assertTabletGeometry(g,'tablet-manager',['입장','관람','수정']);
       if(errors.length)throw new Error('manager page errors: '+errors.join(' | '));
       console.log('PASS Android tablet manager: 입장/관람/수정 all fixed and aligned');
     }finally{await context.close();}
   }
 
-  // iPhone portrait remains overflow-free; v6.36 tablet media rule must not disturb it.
   {
     const {context,page,errors}=await setupPage({width:390,height:844},'member');
     try{
-      const g=await selfGeometry(page);
+      const g=await selfGeometry(page);console.log('V636_IPHONE',JSON.stringify(g));
       if(g.missing)throw new Error('iPhone missing roster card');
       if(g.buttons.map(b=>b.text).join('/')!=='입장/관람')throw new Error('iPhone labels changed: '+g.buttons.map(b=>b.text).join('/'));
       const ys=g.buttons.map(b=>Math.round(b.rect.y));if(ys.length>1&&Math.max(...ys)-Math.min(...ys)>1)throw new Error('iPhone buttons no longer one row');
