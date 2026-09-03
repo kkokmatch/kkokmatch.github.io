@@ -1,8 +1,8 @@
 {
-  "version": 72,
-  "label": "v6.32",
-  "semanticVersion": "6.32",
-  "build": "v6.32",
-  "updatedAt": "2026-09-03T10:31:00+09:00",
-  "note": "v6.32 iPhone 카카오톡 백그라운드 복귀 회원명부 버튼 복원 · 복귀 상태 직접 동기화 · 입장/관람/퇴장/수정 레이아웃 고정"
+  "version": 73,
+  "label": "v6.33",
+  "semanticVersion": "6.33",
+  "build": "v6.33",
+  "updatedAt": "2026-09-03T11:05:00+09:00",
+  "note": "v6.33 Android PWA 업데이트 복구 · 구형 버전표시 제거 · 최초 로그인 1회 안정화 · 태블릿 회원버튼 최신 3버튼 고정"
 }

@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="ko" data-kokmatch-version="6.32" data-kokmatch-build="v6.32">
+<html lang="ko" data-kokmatch-version="6.33" data-kokmatch-build="v6.33">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
@@ -10,18 +10,21 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <title>콕매치 v6.32</title>
-  <link rel="manifest" href="/manifest.webmanifest?v=6.32">
-  <link rel="apple-touch-icon" sizes="180x180" href="/icons/kokmatch-180.png?v=6.32">
+  <title>콕매치 v6.33</title>
+  <link rel="manifest" href="/manifest.webmanifest?v=6.33">
+  <link rel="apple-touch-icon" sizes="180x180" href="/icons/kokmatch-180.png?v=6.33">
   <meta name="application-name" content="콕매치">
   <meta name="mobile-web-app-capable" content="yes">
-  <link rel="stylesheet" href="/app-v6.32.css?v=6.32">
+  <link rel="stylesheet" href="/app-v6.33.css?v=6.33">
   <script>
   (()=>{
     'use strict';
-    window.__kokmatchStandalone='6.32';
-    window.__kokmatchVersionLock='6.32';
-    window.__kokmatchBuild='v6.32';
+    window.__kokmatchStandalone='6.33';
+    window.__kokmatchVersionLock='6.33';
+    window.__kokmatchBuild='v6.33';
+    if('serviceWorker' in navigator){
+      navigator.serviceWorker.register('/kokmatch-sw.js',{scope:'/',updateViaCache:'none'}).then(async r=>{try{await r.update()}catch{};try{r.waiting?.postMessage({type:'SKIP_WAITING'})}catch{}}).catch(()=>{});
+    }
     document.documentElement.dataset.kokmatchEntry='single-v628';
     let hiddenAt=0;
     document.addEventListener('visibilitychange',()=>{
@@ -31,7 +34,7 @@
     addEventListener('pageshow',e=>{if(e.persisted){const u=new URL(location.href);u.searchParams.set('_km',Date.now().toString(36));location.replace(u.pathname+u.search+u.hash)}});
   })();
   </script>
-  <script defer src="/app-v6.32.js?v=6.32"></script>
+  <script defer src="/app-v6.33.js?v=6.33"></script>
 </head>
 <body></body>
 </html>
