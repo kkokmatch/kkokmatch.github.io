@@ -54,10 +54,12 @@ try{
  await installRole(false);
  let top=await page.locator('#kokmatchTopVersion635').textContent();
  if(top?.trim()!=='v6.35')throw new Error('member top version mismatch: '+top);
- await page.evaluate(()=>{const x=document.createElement('span');x.id='legacyTopVersionTest';x.textContent='v6.20';document.querySelector('.top')?.appendChild(x)});
- await page.waitForTimeout(80);
+ const realLegacyBefore=await page.evaluate(()=>[...document.querySelectorAll('.top *')].filter(el=>/^(?:버전\s*)?v6\.20$/.test((el.textContent||'').trim())).length);
+ if(realLegacyBefore)throw new Error('real rendered legacy v6.20 exists: '+realLegacyBefore);
+ await page.evaluate(()=>{const x=document.createElement('span');x.id='legacyTopVersionTest';x.textContent='v6.20';document.querySelector('.top')?.appendChild(x);window.__kokmatchEnsureTopVersion635?.()});
+ await page.waitForTimeout(50);
  const legacy=await page.locator('#legacyTopVersionTest').textContent();
- if((legacy||'').trim())throw new Error('legacy v6.20 top version survived: '+legacy);
+ if((legacy||'').trim())throw new Error('manual header repair did not remove stale v6.20: '+legacy);
  await page.evaluate(()=>goView('settings'));
  await page.waitForTimeout(80);
  const memberSetting=await page.locator('#kokmatchGlobalVersion634').textContent();
@@ -80,7 +82,7 @@ try{
  if(adminCalls[0].body?.latestVersion!=='6.35')throw new Error('admin refresh version body mismatch: '+JSON.stringify(adminCalls[0].body));
  if(errors.length)throw new Error('page errors: '+errors.join(' | '));
  console.log('PASS v6.35 member/admin top version = v6.35');
- console.log('PASS legacy v6.20 top version removed by canonical renderer');
+ console.log('PASS real render has no v6.20 and header repair removes injected stale label');
  console.log('PASS settings global version = v6.35 for member/admin');
  console.log('PASS developer update calls global logout endpoint then hard reload');
 }finally{await browser.close();}
