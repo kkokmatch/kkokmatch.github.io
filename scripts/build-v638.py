@@ -27,17 +27,18 @@ patch=r'''
 if(window.__kokmatchNoFlashResume638)return;
 window.__kokmatchNoFlashResume638=true;
 window.__kokmatchResumeDebug638={silentCalls:0,baseCalls:0,structuralCount:0,lastStructural:null,lastClean:null};
-let resumePromise638=null,lastResumeAt638=0;
+let resumePromise638=null,lastResumeAt638=0,backgrounded638=false;
 function armNoRail638(ms=1800){
  const until=Date.now()+Math.max(200,Number(ms)||1800),old=Number(window.__kokmatchResumeNoRailReplaceUntil638||0);
  if(until>old)window.__kokmatchResumeNoRailReplaceUntil638=until;
 }
+function markBackground638(){backgrounded638=true;armNoRail638(60000)}
+function markReturn638(){if(!backgrounded638)return false;armNoRail638(1800);setTimeout(()=>{backgrounded638=false},1900);return true}
 window.__kokmatchArmNoRail638=armNoRail638;
-/* Arm while leaving the app, so legacy resume listeners are already blocked before they fire on return. */
-window.addEventListener('pagehide',()=>armNoRail638(60000),true);
-document.addEventListener('visibilitychange',()=>armNoRail638(document.hidden?60000:1800),true);
-window.addEventListener('focus',()=>armNoRail638(1800),true);
-window.addEventListener('pageshow',()=>armNoRail638(1800),true);
+window.addEventListener('pagehide',markBackground638,true);
+document.addEventListener('visibilitychange',()=>{if(document.hidden)markBackground638();else markReturn638()},true);
+window.addEventListener('focus',()=>markReturn638(),true);
+window.addEventListener('pageshow',e=>{if(e?.persisted)backgrounded638=true;markReturn638()},true);
 const token638=()=>{try{return String(T||localStorage.getItem(TOKEN_KEY)||'').trim()}catch{return String(T||'').trim()}};
 function staticSig638(list){try{return JSON.stringify((Array.isArray(list)?list:[]).map(m=>[m?.id,m?.name,m?.year,m?.gender,m?.age,m?.cls,m?.type,m?.role,m?.memberSince,m?.inviter]))}catch{return''}}
 function userSig638(u){try{return JSON.stringify([u?.memberId,u?.displayName,u?.role,!!u?.globalAdmin,!!u?.tempOrganizer,u?.groupId])}catch{return''}}
