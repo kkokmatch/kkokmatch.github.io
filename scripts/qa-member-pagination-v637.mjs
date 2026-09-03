@@ -14,20 +14,22 @@ await page.route('https://wjelumpbjklfrdjxbesj.supabase.co/functions/v1/**',asyn
 
 function expect(cond,msg){if(!cond)throw new Error(msg)}
 async function inject(user){
- await page.evaluate(({state,user})=>{T='qa-token';currentGroupId='qa';currentView='members';S=JSON.parse(JSON.stringify(state));window.S=S;me=user;window.me=me;group={groupId:'qa',name:'QA 모임'};window.group=group;groups=[];normalizeClient();if(typeof window.memberPageGo46==='function')window.memberPageGo46(1);renderAll();document.getElementById('login')?.classList.add('hide');window.__kokmatchStabilizeRoster637?.(true)},{state:copy(),user});
+ await page.evaluate(({state,user})=>{T='qa-token';currentGroupId='qa';currentView='members';S=JSON.parse(JSON.stringify(state));window.S=S;me=user;window.me=me;group={groupId:'qa',name:'QA 모임'};window.group=group;groups=[];normalizeClient();if(typeof window.memberPageGo46==='function')window.memberPageGo46(1);renderAll();document.getElementById('login')?.classList.add('hide');document.getElementById('pwaPrompt629')?.remove();window.__kokmatchStabilizeRoster637?.(true)},{state:copy(),user});
  await page.waitForTimeout(150);
+ await page.evaluate(()=>document.getElementById('pwaPrompt629')?.remove());
 }
 async function snapshot(){return page.evaluate(()=>({
  page:Number(window.__kokmatchMemberPage46||1),
  cards:[...document.querySelectorAll('#members .memberCard')].map(c=>{const a=c.querySelector('.kmRosterActions621');const row=a?.querySelector('.kmRosterBtns621');const ar=a?.getBoundingClientRect();const rr=row?.getBoundingClientRect();return{id:String(c.dataset.memberId22||''),buttons:[...(row?.querySelectorAll('button')||[])].map(b=>(b.textContent||'').trim()),slots:row?[...row.children].filter(x=>x.classList.contains('kmRosterSlot621')).length:0,readonly:!!a?.classList.contains('kmRosterReadonly621'),aw:ar?Math.round(ar.width):0,rw:rr?Math.round(rr.width):0}}),
  pager:[...document.querySelectorAll('#members .memberPager46 button')].map(b=>({text:(b.textContent||'').trim(),disabled:b.disabled}))
 }))}
-async function next(){await page.getByRole('button',{name:'다음',exact:true}).click();await page.waitForFunction(()=>Number(window.__kokmatchMemberPage46||1)>1);await page.waitForTimeout(160);}
-async function prev(){await page.getByRole('button',{name:'이전',exact:true}).click();await page.waitForFunction(()=>Number(window.__kokmatchMemberPage46||1)===1);await page.waitForTimeout(160);}
+async function next(){await page.evaluate(()=>document.getElementById('pwaPrompt629')?.remove());await page.getByRole('button',{name:'다음',exact:true}).click();await page.waitForFunction(()=>Number(window.__kokmatchMemberPage46||1)>1);await page.waitForTimeout(160);}
+async function prev(){await page.evaluate(()=>document.getElementById('pwaPrompt629')?.remove());await page.getByRole('button',{name:'이전',exact:true}).click();await page.waitForFunction(()=>Number(window.__kokmatchMemberPage46||1)===1);await page.waitForTimeout(160);}
 
 try{
  await page.goto('http://127.0.0.1:4173/?qa=v637',{waitUntil:'networkidle'});
  await page.waitForFunction(v=>window.__kokmatchVersionLock===v&&typeof window.renderAll==='function'&&typeof window.__kokmatchStabilizeRoster637==='function',VERSION,{timeout:15000});
+ await page.evaluate(()=>document.getElementById('pwaPrompt629')?.remove());
 
  // General member: self keeps own attendance controls; other pages keep the same three-slot rail with no unauthorized buttons.
  await inject({memberId:'m00',displayName:'회원00',role:'member',globalAdmin:false,tempOrganizer:false,groupId:'qa'});
