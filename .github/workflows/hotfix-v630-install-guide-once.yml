@@ -1,0 +1,44 @@
+name: Hotfix v6.30 install guide once
+on:
+  push:
+    paths:
+      - '.github/workflows/hotfix-v630-install-guide-once.yml'
+permissions:
+  contents: write
+jobs:
+  patch-test-commit:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Reset only install-guide suppression keys for v6.30
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('app-v6.30.js')
+          s=p.read_text()
+          pairs={
+            'kokmatch_ios_install_guide629':'kokmatch_ios_install_guide630',
+            'kokmatch_install_later629':'kokmatch_install_later630'
+          }
+          for old,new in pairs.items():
+            if old not in s: raise SystemExit(f'missing {old}')
+            s=s.replace(old,new)
+          p.write_text(s)
+          PY
+          node --check app-v6.30.js
+          node scripts/validate-standalone-runtime.mjs
+          grep -q 'kokmatch_ios_install_guide630' app-v6.30.js
+          grep -q 'kokmatch_install_later630' app-v6.30.js
+      - name: Commit hotfix
+        run: |
+          git config user.name 'kkokmatch'
+          git config user.email 'hanarin0201@gmail.com'
+          rm -f .github/workflows/hotfix-v630-install-guide-once.yml
+          git add app-v6.30.js .github/workflows/hotfix-v630-install-guide-once.yml
+          git commit -m 'v6.30 show enlarged install guide after upgrade'
+          git push
