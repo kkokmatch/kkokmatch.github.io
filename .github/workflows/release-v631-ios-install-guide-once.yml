@@ -1,0 +1,66 @@
+name: Release v6.31 iPhone install guide once
+on:
+  push:
+    paths:
+      - '.github/workflows/release-v631-ios-install-guide-once.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  patch-test-commit:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Build v6.31 from v6.30
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import json
+          js=Path('app-v6.30.js').read_text(encoding='utf-8')
+          css=Path('app-v6.30.css').read_text(encoding='utf-8')
+          old="modal629('콕매치를 홈 화면에 설치해주세요',`<div class=\"pwaInstallLead630\">한 번만 추가하면 다음부터는 <b>일반 앱처럼 아이콘을 눌러 바로 실행</b>할 수 있습니다.</div><div class=\"pwaInstallSteps630\"><div><b>1</b><span>카카오톡에서 열었다면 우측 메뉴에서 <strong>Safari로 열기</strong></span></div><div><b>2</b><span>Safari 아래쪽의 <strong>공유 버튼</strong> 누르기</span></div><div><b>3</b><span><strong>홈 화면에 추가</strong> → 추가</span></div></div><div class=\"pwaInstallFoot630\">설치 후 홈 화면의 콕매치 아이콘으로 실행하면 푸시 알림도 받을 수 있습니다.</div>`,'확인했어요','나중에',()=>closePrompt629(),()=>{});"
+          new="modal629('콕매치를 홈 화면에 설치해주세요',`<div class=\"pwaInstallLead630\">한 번만 추가하면 다음부터는 <b>일반 앱처럼 아이콘을 눌러 바로 실행</b>할 수 있습니다.</div><div class=\"pwaInstallSteps630\"><div><b>1</b><span>카카오톡에서 열었다면 <strong>우측 하단 메뉴</strong> 클릭 후 <strong>Safari로 열기</strong></span></div><div><b>2</b><span>Safari <strong>우측 하단의 메뉴</strong> 클릭 후 <strong>공유 버튼</strong> 누르기</span></div><div><b>3</b><span>우측 하단의 <strong>더보기</strong>를 누르거나 화면을 아래로 내려 <strong>홈 화면에 추가</strong> 버튼 누르기</span></div><div><b>4</b><span><strong>앱 실행하기</strong></span></div></div><div class=\"pwaInstallFoot630\">설치가 끝나면 홈 화면의 콕매치 아이콘을 눌러 실행하면 됩니다.</div>`,'확인했어요','나중에',()=>closePrompt629(),()=>{});"
+          if old not in js:
+              raise SystemExit('current iOS install guide block not found')
+          js=js.replace(old,new,1)
+          reset="""/* v6.31: show the revised iPhone install guide once after upgrade */\n(()=>{try{if(localStorage.getItem('kokmatch_install_guide631_seen')!=='1'){localStorage.removeItem('kokmatch_install_dismissed629');sessionStorage.removeItem('kokmatch_install_later629');localStorage.setItem('kokmatch_install_guide631_seen','1')}}catch{}})();\n"""
+          js=reset+js
+          js=js.replace('6.30','6.31')
+          css=css.replace('6.30','6.31')
+          Path('app-v6.31.js').write_text(js,encoding='utf-8')
+          Path('app-v6.31.css').write_text(css,encoding='utf-8')
+          index=Path('index.html').read_text(encoding='utf-8').replace('6.30','6.31')
+          if '/app-v6.31.js' not in index or '/app-v6.31.css' not in index:
+              raise SystemExit('index version switch failed')
+          Path('index.html').write_text(index,encoding='utf-8')
+          sw=Path('kokmatch-sw.js').read_text(encoding='utf-8').replace("KOKMATCH_SW_VERSION='6.30'","KOKMATCH_SW_VERSION='6.31'")
+          Path('kokmatch-sw.js').write_text(sw,encoding='utf-8')
+          Path('sw.js').write_text("/* Compatibility entry for older KokMatch clients. */\nimportScripts('/kokmatch-sw.js?v=6.31');\n",encoding='utf-8')
+          latest={'version':71,'label':'v6.31','semanticVersion':'6.31','build':'v6.31','updatedAt':'2026-09-03T10:12:00+09:00','note':'v6.31 iPhone PWA 설치안내 4단계 문구 개선 · 우측 하단 메뉴/공유/더보기/홈 화면 추가 안내'}
+          Path('latest-version.json').write_text(json.dumps(latest,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+          PY
+      - name: Static regression checks
+        run: |
+          node --check app-v6.31.js
+          node scripts/validate-standalone-runtime.mjs
+          node - <<'NODE'
+          const fs=require('fs');
+          const js=fs.readFileSync('app-v6.31.js','utf8');
+          const checks=['우측 하단 메뉴','Safari <strong>우측 하단의 메뉴</strong>','<strong>더보기</strong>','<strong>홈 화면에 추가</strong>','<strong>앱 실행하기</strong>','kokmatch_install_guide631_seen'];
+          for(const s of checks) if(!js.includes(s)) throw new Error('missing iOS guide marker: '+s);
+          if(js.includes('Safari 아래쪽의 <strong>공유 버튼</strong> 누르기')) throw new Error('old iOS wording remains');
+          console.log('PASS v6.31 iPhone install guide checks');
+          NODE
+      - name: Commit release
+        run: |
+          git config user.name 'kkokmatch'
+          git config user.email 'hanarin0201@gmail.com'
+          rm -f .github/workflows/release-v631-ios-install-guide-once.yml
+          git add app-v6.31.js app-v6.31.css index.html latest-version.json kokmatch-sw.js sw.js .github/workflows/release-v631-ios-install-guide-once.yml
+          git commit -m 'v6.31 revise iPhone PWA install guide'
+          git push
