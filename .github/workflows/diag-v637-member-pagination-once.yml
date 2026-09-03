@@ -1,0 +1,47 @@
+name: Diagnose v6.37 member pagination once
+on:
+  push:
+    paths:
+      - '.github/workflows/diag-v637-member-pagination-once.yml'
+permissions:
+  contents: read
+jobs:
+  diagnose:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Inspect member pagination render paths
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          p=Path('app-v6.36.js')
+          s=p.read_text(encoding='utf-8')
+          pats=[
+            r'renderMembers',r'memberPage',r'membersPage',r'pageSize',r'pageIndex',r'currentPage',
+            r'pagination',r'pager',r'nextPage',r'prevPage',r'pageMembers',r'member.*page',r'page.*member',
+            r'kmRoster',r'renderMember'
+          ]
+          seen=[]
+          for pat in pats:
+            print('\n===== PATTERN',pat,'=====')
+            n=0
+            for m in re.finditer(pat,s,re.I):
+              a=max(0,m.start()-900);b=min(len(s),m.end()+1300)
+              key=(a,b)
+              if key in seen: continue
+              seen.append(key);n+=1
+              print(f'--- hit {n} at {m.start()} ---')
+              print(s[a:b].replace('\x00',''))
+              if n>=12: break
+            if n==0: print('NO HITS')
+          css=Path('app-v6.36.css').read_text(encoding='utf-8')
+          for pat in [r'member.*page',r'page.*member',r'pager',r'pagination',r'kmRoster']:
+            print('\n===== CSS',pat,'=====')
+            n=0
+            for m in re.finditer(pat,css,re.I):
+              n+=1; a=max(0,m.start()-500);b=min(len(css),m.end()+900)
+              print(css[a:b])
+              if n>=8: break
+            if n==0: print('NO HITS')
+          PY
