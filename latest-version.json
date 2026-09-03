@@ -1,8 +1,8 @@
 {
-  "version": 71,
-  "label": "v6.31",
-  "semanticVersion": "6.31",
-  "build": "v6.31",
-  "updatedAt": "2026-09-03T10:12:00+09:00",
-  "note": "v6.31 iPhone PWA 설치안내 4단계 문구 개선 · 우측 하단 메뉴/공유/더보기/홈 화면 추가 안내"
+  "version": 72,
+  "label": "v6.32",
+  "semanticVersion": "6.32",
+  "build": "v6.32",
+  "updatedAt": "2026-09-03T10:31:00+09:00",
+  "note": "v6.32 iPhone 카카오톡 백그라운드 복귀 회원명부 버튼 복원 · 복귀 상태 직접 동기화 · 입장/관람/퇴장/수정 레이아웃 고정"
 }
