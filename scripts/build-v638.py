@@ -27,6 +27,16 @@ if(window.__kokmatchNoFlashResume638)return;
 window.__kokmatchNoFlashResume638=true;
 window.__kokmatchResumeDebug638={silentCalls:0,baseCalls:0,structuralCount:0,lastStructural:null,lastClean:null};
 let resumePromise638=null,lastResumeAt638=0;
+function armNoRail638(ms=1800){
+ const until=Date.now()+Math.max(200,Number(ms)||1800),old=Number(window.__kokmatchResumeNoRailReplaceUntil638||0);
+ if(until>old)window.__kokmatchResumeNoRailReplaceUntil638=until;
+}
+window.__kokmatchArmNoRail638=armNoRail638;
+/* Arm while leaving the app, so legacy resume listeners are already blocked before they fire on return. */
+window.addEventListener('pagehide',()=>armNoRail638(60000),true);
+document.addEventListener('visibilitychange',()=>armNoRail638(document.hidden?60000:1800),true);
+window.addEventListener('focus',()=>armNoRail638(1800),true);
+window.addEventListener('pageshow',()=>armNoRail638(1800),true);
 const token638=()=>{try{return String(T||localStorage.getItem(TOKEN_KEY)||'').trim()}catch{return String(T||'').trim()}};
 function staticSig638(list){try{return JSON.stringify((Array.isArray(list)?list:[]).map(m=>[m?.id,m?.name,m?.year,m?.gender,m?.age,m?.cls,m?.type,m?.role,m?.memberSince,m?.inviter]))}catch{return''}}
 function userSig638(u){try{return JSON.stringify([u?.memberId,u?.displayName,u?.role,!!u?.globalAdmin,!!u?.tempOrganizer,u?.groupId])}catch{return''}}
@@ -48,7 +58,7 @@ function patchCard638(card,m){
 function preservePage638(page,y){try{if(typeof window.memberPageGo46==='function'&&Number(page)>1)window.memberPageGo46(Number(page))}catch{}requestAnimationFrame(()=>{try{scrollTo(0,Math.max(0,Number(y)||0))}catch{}})}
 async function silentResume638(){
  const gid=String(currentGroupId||''),oldS=S,oldUser=me,page=Number(window.__kokmatchMemberPage46||1),y=Math.max(0,scrollY||0),oldStatic=staticSig638(S?.members),oldUserSig=userSig638(me);
- window.__kokmatchResumeNoRailReplaceUntil638=Date.now()+1300;
+ armNoRail638(1800);
  const x=await request('state','GET',null,{groupId:gid});if(!x?.data)return x;
  const nextGroup=x.group||group,nextStatic=staticSig638(x.data?.members),nextUserSig=userSig638(x.user||oldUser);
  const structural=oldStatic!==nextStatic||oldUserSig!==nextUserSig||(gid&&String(nextGroup?.groupId||gid)!==gid);
@@ -88,7 +98,7 @@ sw=(root/'sw.js').read_text(encoding='utf-8');sw=re.sub(r"kokmatch-sw\.js\?v=\d+
 latest={'version':78,'label':'v6.38','semanticVersion':'6.38','build':'v6.38','updatedAt':'2026-09-03T15:55:00+09:00','note':'v6.38 홈화면 복귀 시 회원명부 전체 재렌더 제거 · 기존 카드/버튼 레일 유지 · 상태 슬롯만 1회 동기화'}
 (root/'latest-version.json').write_text(json.dumps(latest,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
 assert '__kokmatchNoFlashResume638' in js
-assert '__kokmatchResumeNoRailReplaceUntil638' in js
+assert '__kokmatchResumeNoRailReplaceUntil638' in js and '__kokmatchArmNoRail638' in js
 assert f'/app-v{NEW}.js?v={NEW}' in index and f'/app-v{NEW}.css?v={NEW}' in index
 assert f'kmv={NEW}' in manifest and f"KOKMATCH_SW_VERSION='{NEW}'" in ksw and f'kokmatch-sw.js?v={NEW}' in sw
 print('built v6.38')
