@@ -1,5 +1,5 @@
 name: Release v6.36 tablet roster once
-# diagnostic pass 2
+# corrected grid pass 3
 on:
   push:
     paths:
@@ -31,6 +31,7 @@ jobs:
             'runtime 6.36': "window.__kokmatchVersionLock='6.36'" in js,
             'standalone 6.36': "window.__kokmatchStandalone='6.36'" in js,
             'canonical tablet rule': '.kmRosterBtns621' in css and 'grid-template-columns:repeat(3,44px)' in css,
+            'tablet card grid': 'grid-template-columns:50px minmax(0,1fr) 140px' in css and 'grid-column:3!important' in css,
             'tablet media only': '@media(min-width:600px) and (max-width:1199px)' in css,
             'index 6.36': 'app-v6.36.js?v=6.36' in idx and 'app-v6.36.css?v=6.36' in idx,
             'latest 6.36': latest.get('semanticVersion')=='6.36'
