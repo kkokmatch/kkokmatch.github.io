@@ -1,5 +1,5 @@
 name: Release v6.35 global update once
-# release pass 7 - no header mutation observer
+# release pass 8 - observer disabled safely
 on:
   push:
     paths:
@@ -19,19 +19,16 @@ jobs:
           python3 scripts/build-v635.py
           python3 - <<'PY'
           from pathlib import Path
+          import re
           p=Path('app-v6.35.js')
           s=p.read_text(encoding='utf-8')
           old="  badge.textContent='v'+BUILD635;"
           new="  if(badge.textContent!=='v'+BUILD635)badge.textContent='v'+BUILD635;"
           if old not in s: raise SystemExit('missing top badge assignment')
           s=s.replace(old,new,1)
-          old_arm="""function armTop635(){
- const top=document.querySelector('.top');if(!top||top.__kokmatchTopObserver635)return;
- const mo=new MutationObserver(()=>{if(!topSync635)queueMicrotask(ensureTopVersion635)});
- mo.observe(top,{subtree:true,childList:true,characterData:true});top.__kokmatchTopObserver635=mo;
-}"""
-          if old_arm not in s: raise SystemExit('missing header observer block')
-          s=s.replace(old_arm,"function armTop635(){}",1)
+          pat=r"function armTop635\(\)\{\n const top=.*?top\.__kokmatchTopObserver635=mo;\n\}"
+          s,n=re.subn(pat,"function armTop635(){}",s,count=1,flags=re.S)
+          if n!=1: raise SystemExit('missing header observer block')
           p.write_text(s,encoding='utf-8')
           PY
       - name: Static and standalone QA
