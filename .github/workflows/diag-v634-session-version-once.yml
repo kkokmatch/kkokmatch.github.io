@@ -1,0 +1,28 @@
+name: Diagnose v6.34 session and version once
+on:
+  push:
+    paths:
+      - '.github/workflows/diag-v634-session-version-once.yml'
+permissions:
+  contents: read
+jobs:
+  inspect:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Inspect runtime hotspots
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('app-v6.33.js')
+          lines=p.read_text(encoding='utf-8').splitlines()
+          pats=['function renderAll','renderAll=','function renderSettings','renderSettings=','function submitLogin','submitLogin=','pageshow','visibilitychange','classList.add(\'hide\')','classList.remove(\'hide\')','v6.20','v5.0','forceUpdateApp','restore','sessionStorage','localStorage']
+          hits=[]
+          for i,l in enumerate(lines,1):
+            if any(x in l for x in pats): hits.append(i)
+          print('LINECOUNT',len(lines),'HITS',len(hits))
+          for i in sorted(set(hits)):
+            a=max(1,i-3);b=min(len(lines),i+5)
+            print(f'\n--- {a}:{b} ---')
+            for j in range(a,b+1): print(f'{j}: {lines[j-1][:1200]}')
+          PY
