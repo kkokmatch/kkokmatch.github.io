@@ -23,6 +23,7 @@ jobs:
         run: |
           node --check app-v6.38.js
           node scripts/validate-standalone-runtime.mjs
+          grep -q '__kokmatchResumeEarly638' app-v6.38.js
           grep -q '__kokmatchNoFlashResume638' app-v6.38.js
           grep -q '__kokmatchResumeNoRailReplaceUntil638' app-v6.38.js
           grep -q '__kokmatchArmNoRail638' app-v6.38.js
@@ -70,4 +71,4 @@ jobs:
           git diff --cached --quiet && exit 0
           git commit -m 'Release v6.38 no-flash member resume'
           git push origin HEAD:main
-# retry: guard only true background resume
+# retry: earliest resume guard before legacy listeners
