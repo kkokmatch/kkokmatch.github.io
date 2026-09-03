@@ -6633,14 +6633,14 @@ async function install629(){
 function showInstall629(){
  if(standalone629()||promptOpen629)return false;
  if(isIOS629()){
-   let last=0;try{last=Number(localStorage.getItem('kokmatch_ios_install_guide629')||0)}catch{}
+   let last=0;try{last=Number(localStorage.getItem('kokmatch_ios_install_guide630')||0)}catch{}
    if(Date.now()-last<7*DAY629)return false;
-   try{localStorage.setItem('kokmatch_ios_install_guide629',String(Date.now()))}catch{}
+   try{localStorage.setItem('kokmatch_ios_install_guide630',String(Date.now()))}catch{}
    modal629('콕매치를 홈 화면에 설치해주세요',`<div class="pwaInstallLead630">한 번만 추가하면 다음부터는 <b>일반 앱처럼 아이콘을 눌러 바로 실행</b>할 수 있습니다.</div><div class="pwaInstallSteps630"><div><b>1</b><span>카카오톡에서 열었다면 우측 메뉴에서 <strong>Safari로 열기</strong></span></div><div><b>2</b><span>Safari 아래쪽의 <strong>공유 버튼</strong> 누르기</span></div><div><b>3</b><span><strong>홈 화면에 추가</strong> → 추가</span></div></div><div class="pwaInstallFoot630">설치 후 홈 화면의 콕매치 아이콘으로 실행하면 푸시 알림도 받을 수 있습니다.</div>`,'확인했어요','나중에',()=>closePrompt629(),()=>{});
    return true;
  }
  if(deferredInstall629){
-   modal629('콕매치를 앱처럼 설치해주세요',`<div class="pwaInstallLead630">설치하면 홈 화면의 <b>콕매치 아이콘</b>으로 바로 실행됩니다.</div><div class="pwaInstallSteps630"><div><b>1</b><span>아래 <strong>지금 설치</strong> 누르기</span></div><div><b>2</b><span>휴대폰 설치창에서 <strong>설치</strong> 확인</span></div><div><b>3</b><span>다음부터 홈 화면에서 콕매치 실행</span></div></div><div class="pwaInstallFoot630">앱스토어가 필요 없고, 새 버전도 다시 설치할 필요 없이 자동 적용됩니다.</div>`,'지금 설치','나중에',install629,()=>{try{sessionStorage.setItem('kokmatch_install_later629','1')}catch{}});
+   modal629('콕매치를 앱처럼 설치해주세요',`<div class="pwaInstallLead630">설치하면 홈 화면의 <b>콕매치 아이콘</b>으로 바로 실행됩니다.</div><div class="pwaInstallSteps630"><div><b>1</b><span>아래 <strong>지금 설치</strong> 누르기</span></div><div><b>2</b><span>휴대폰 설치창에서 <strong>설치</strong> 확인</span></div><div><b>3</b><span>다음부터 홈 화면에서 콕매치 실행</span></div></div><div class="pwaInstallFoot630">앱스토어가 필요 없고, 새 버전도 다시 설치할 필요 없이 자동 적용됩니다.</div>`,'지금 설치','나중에',install629,()=>{try{sessionStorage.setItem('kokmatch_install_later630','1')}catch{}});
    return true;
  }
  return false;
@@ -6664,7 +6664,7 @@ function showPush629(){
 }
 function maybePrompt629(){
  if(promptOpen629)return;
- try{if(sessionStorage.getItem('kokmatch_install_later629')==='1'&&!standalone629()){}else if(!standalone629()&&showInstall629())return}catch{if(!standalone629()&&showInstall629())return}
+ try{if(sessionStorage.getItem('kokmatch_install_later630')==='1'&&!standalone629()){}else if(!standalone629()&&showInstall629())return}catch{if(!standalone629()&&showInstall629())return}
  showPush629();
 }
 window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredInstall629=e;setTimeout(maybePrompt629,500)});
