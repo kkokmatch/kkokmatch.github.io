@@ -40,19 +40,21 @@ try{
 
   await page.goto('http://127.0.0.1:4173/?qa=first-login',{waitUntil:'networkidle'});
   await page.waitForFunction(v=>window.__kokmatchVersionLock===v&&typeof window.submitLogin==='function',VERSION,{timeout:15000});
+  // The install guide is intentionally modal in production. Dismiss only for this login QA.
+  await page.locator('#pwaSecondary629').click({timeout:1500}).catch(()=>{});
   await page.fill('#loginName','관리자');
   await page.getByRole('button',{name:'다음',exact:true}).click();
   await page.waitForSelector('#loginPin');
   await page.fill('#loginPin','1234');
   await page.getByRole('button',{name:/로그인/}).click();
-  await page.waitForFunction(()=>document.getElementById('login')?.classList.contains('hide')&&window.me?.memberId==='mgr'&&window.group?.groupId==='qa',{timeout:12000});
+  await page.waitForFunction(()=>{try{return document.getElementById('login')?.classList.contains('hide')&&me?.memberId==='mgr'&&group?.groupId==='qa'}catch{return false}},{},{timeout:12000});
 
   const result=await page.evaluate(()=>({
     token:localStorage.getItem('kokmatch_token'),
     groupId:localStorage.getItem('kokmatch_group_id'),
     loginHidden:document.getElementById('login')?.classList.contains('hide'),
-    me:window.me?.memberId||'',
-    group:window.group?.groupId||'',
+    me:(typeof me!=='undefined'&&me?.memberId)||'',
+    group:(typeof group!=='undefined'&&group?.groupId)||'',
     freshUntil:Number(window.__kokmatchFreshLoginUntil630||0)
   }));
   if(loginCalls!==1)throw new Error(`login endpoint called ${loginCalls} times; expected one login attempt`);
