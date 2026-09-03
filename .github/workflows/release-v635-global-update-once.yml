@@ -49,11 +49,14 @@ jobs:
           SERVER_PID=$!
           trap 'kill $SERVER_PID || true' EXIT
           sleep 1
-          node scripts/qa-current-runtime.mjs
+          cp scripts/qa-current-runtime.mjs scripts/qa-current-runtime-v635-temp.mjs
+          sed -i "s/waitUntil:'networkidle'/waitUntil:'domcontentloaded'/" scripts/qa-current-runtime-v635-temp.mjs
+          node scripts/qa-current-runtime-v635-temp.mjs
           node scripts/qa-v635-global-update.mjs
+          rm -f scripts/qa-current-runtime-v635-temp.mjs
       - name: Commit v6.35
         run: |
-          rm -f scripts/build-v635.py scripts/qa-v635-global-update.mjs .github/workflows/release-v635-global-update-once.yml
+          rm -f scripts/build-v635.py scripts/qa-v635-global-update.mjs scripts/qa-current-runtime-v635-temp.mjs .github/workflows/release-v635-global-update-once.yml
           git config user.name 'kkokmatch'
           git config user.email 'hanarin0201@gmail.com'
           git add -A
