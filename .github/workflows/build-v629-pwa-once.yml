@@ -37,21 +37,28 @@ jobs:
           exit 1
       - name: Existing boot QA
         run: node scripts/qa-boot-diagnostic.mjs
-      - name: Existing roster QA with PWA prompt dismissed
+      - name: Adapt existing QA scripts for intentional PWA modal
         run: |
           cp scripts/qa-current-runtime.mjs /tmp/qa-current-runtime.mjs.bak
+          cp scripts/qa-partner-poll-current.mjs /tmp/qa-partner-poll-current.mjs.bak
           python3 - <<'PY'
           from pathlib import Path
           p=Path('scripts/qa-current-runtime.mjs')
           s=p.read_text()
           needle='  await page.waitForTimeout(350);'
           repl="  await page.waitForTimeout(350);\n  await page.locator('#pwaSecondary629').click({timeout:1500}).catch(()=>{});"
-          if needle not in s:
-              raise SystemExit('QA insertion point not found')
+          if needle not in s: raise SystemExit('roster QA insertion point not found')
+          p.write_text(s.replace(needle,repl,1))
+
+          p=Path('scripts/qa-partner-poll-current.mjs')
+          s=p.read_text()
+          needle="\n  await page.evaluate(()=>window.openPartner66('mgr'));"
+          repl="\n  await page.waitForTimeout(900);\n  await page.locator('#pwaSecondary629').click({timeout:1500}).catch(()=>{});\n  await page.evaluate(()=>window.openPartner66('mgr'));"
+          if needle not in s: raise SystemExit('focused QA insertion point not found')
           p.write_text(s.replace(needle,repl,1))
           PY
-          node scripts/qa-current-runtime.mjs
-          cp /tmp/qa-current-runtime.mjs.bak scripts/qa-current-runtime.mjs
+      - name: Existing roster QA
+        run: node scripts/qa-current-runtime.mjs
       - name: Existing partner and polling QA
         run: node scripts/qa-partner-poll-current.mjs
       - name: PWA browser smoke QA
@@ -60,7 +67,8 @@ jobs:
         run: |
           git config user.name 'kkokmatch'
           git config user.email 'hanarin0201@gmail.com'
-          git restore scripts/qa-current-runtime.mjs || true
+          cp /tmp/qa-current-runtime.mjs.bak scripts/qa-current-runtime.mjs
+          cp /tmp/qa-partner-poll-current.mjs.bak scripts/qa-partner-poll-current.mjs
           rm -f .github/workflows/build-v629-pwa-once.yml scripts/build-v629-pwa.py scripts/qa-v629-pwa.mjs
           git add app-v6.29.js app-v6.29.css index.html latest-version.json manifest.webmanifest kokmatch-sw.js sw.js icons .github/workflows/build-v629-pwa-once.yml scripts/build-v629-pwa.py scripts/qa-v629-pwa.mjs
           git commit -m 'v6.29 add installable PWA and notification guidance'
