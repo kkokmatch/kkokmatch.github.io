@@ -3,8 +3,10 @@ import { chromium } from 'playwright';
 const browser=await chromium.launch({headless:true});
 const context=await browser.newContext({viewport:{width:800,height:1280},serviceWorkers:'block'});
 const page=await context.newPage();
-const errors=[];let adminCalls=[];
+const errors=[];const failed=[];const appResponses=[];let adminCalls=[];
 page.on('pageerror',e=>errors.push(String(e?.stack||e)));
+page.on('requestfailed',r=>failed.push({url:r.url(),failure:r.failure()?.errorText||''}));
+page.on('response',r=>{try{const u=new URL(r.url());if(u.pathname.includes('app-v6.35')||u.pathname==='/index.html'||u.pathname==='/')appResponses.push({url:r.url(),status:r.status()})}catch{}});
 await page.route('https://wjelumpbjklfrdjxbesj.supabase.co/functions/v1/**',async route=>{
   const req=route.request(),url=new URL(req.url());
   if(url.pathname.endsWith('/kokmatch-admin-refresh')){
@@ -23,7 +25,22 @@ const state={courtCount:8,courtNames:Array.from({length:8},(_,i)=>`${i+1}코트`
 
 try{
  await page.goto('http://127.0.0.1:4173/?qa=v635',{waitUntil:'domcontentloaded'});
- await page.waitForFunction(()=>window.__kokmatchVersionLock==='6.35'&&typeof window.renderAll==='function',{timeout:15000});
+ await page.waitForTimeout(800);
+ const boot=await page.evaluate(()=>({
+   lock:window.__kokmatchVersionLock,
+   standalone:window.__kokmatchStandalone,
+   renderAll:typeof window.renderAll,
+   globalUpdate:!!window.__kokmatchGlobalUpdate635,
+   title:document.title,
+   ready:document.readyState,
+   scripts:[...document.scripts].map(s=>s.src).filter(Boolean),
+   body:(document.body?.innerText||'').slice(0,300)
+ }));
+ console.log('V635_BOOT',JSON.stringify(boot));
+ console.log('V635_APP_RESPONSES',JSON.stringify(appResponses));
+ if(failed.length)console.log('V635_REQUEST_FAILED',JSON.stringify(failed));
+ if(errors.length)console.log('V635_PAGE_ERRORS_EARLY',JSON.stringify(errors));
+ if(boot.lock!=='6.35'||boot.renderAll!=='function'||!boot.globalUpdate)throw new Error('v6.35 runtime did not initialize: '+JSON.stringify(boot));
 
  async function installRole(globalAdmin){
   await page.evaluate(({state,globalAdmin})=>{
@@ -55,7 +72,7 @@ try{
  if(adminSetting?.trim()!=='콕매치 v6.35 · 최신 운영본')throw new Error('admin settings version mismatch: '+adminSetting);
  await page.evaluate(()=>{window.confirm=()=>true;window.__v635Reload=null;window.__kokmatchHardReload633=async(target,reason)=>{window.__v635Reload={target,reason}}});
  await page.evaluate(()=>forceUpdateApp());
- await page.waitForFunction(()=>!!window.__v635Reload,{timeout:5000});
+ await page.waitForFunction(()=>!!window.__v635Reload,null,{timeout:5000});
  const reload=await page.evaluate(()=>window.__v635Reload);
  if(reload?.target!=='6.35'||reload?.reason!=='admin-global-refresh')throw new Error('admin reload mismatch: '+JSON.stringify(reload));
  if(adminCalls.length!==1)throw new Error('admin refresh call count: '+adminCalls.length);
