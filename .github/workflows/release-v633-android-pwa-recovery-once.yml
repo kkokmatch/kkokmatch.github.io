@@ -22,7 +22,19 @@ jobs:
         run: |
           node --check app-v6.33.js
           node scripts/validate-standalone-runtime.mjs
-          node -e "const fs=require('fs');const js=fs.readFileSync('app-v6.33.js','utf8'),idx=fs.readFileSync('index.html','utf8'),sw=fs.readFileSync('kokmatch-sw.js','utf8');for(const x of ['__kokmatchUpdateGuard633','__kokmatchCheckVersion633','__kokmatchHardReload633','CURRENT633','콕매치 v6.33 · 최신 운영본'])if(!js.includes(x))throw new Error('missing '+x);if(/serviceWorker\.register\(['\"]\/kokmatch-sw\.js\?v=/.test(js))throw new Error('versioned SW registration remains');if(!idx.includes("register('/kokmatch-sw.js'"))throw new Error('index stable SW bootstrap missing');if(!sw.includes("KOKMATCH_SW_VERSION='6.33'"))throw new Error('sw version missing');console.log('PASS v6.33 static update recovery markers')"
+          node <<'NODE'
+          const fs=require('fs');
+          const js=fs.readFileSync('app-v6.33.js','utf8');
+          const idx=fs.readFileSync('index.html','utf8');
+          const sw=fs.readFileSync('kokmatch-sw.js','utf8');
+          for(const x of ['__kokmatchUpdateGuard633','__kokmatchCheckVersion633','__kokmatchHardReload633','CURRENT633','콕매치 v6.33 · 최신 운영본']){
+            if(!js.includes(x))throw new Error('missing '+x);
+          }
+          if(js.includes("serviceWorker.register('/kokmatch-sw.js?v="))throw new Error('versioned SW registration remains');
+          if(!idx.includes("register('/kokmatch-sw.js'"))throw new Error('index stable SW bootstrap missing');
+          if(!sw.includes("KOKMATCH_SW_VERSION='6.33'"))throw new Error('sw version missing');
+          console.log('PASS v6.33 static update recovery markers');
+          NODE
       - name: Install Playwright
         run: |
           npm install --no-save playwright@1.55.0
