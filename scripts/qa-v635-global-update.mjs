@@ -1,7 +1,8 @@
 import { chromium } from 'playwright';
 
 const browser=await chromium.launch({headless:true});
-const page=await browser.newPage({viewport:{width:800,height:1280}});
+const context=await browser.newContext({viewport:{width:800,height:1280},serviceWorkers:'block'});
+const page=await context.newPage();
 const errors=[];let adminCalls=[];
 page.on('pageerror',e=>errors.push(String(e?.stack||e)));
 await page.route('https://wjelumpbjklfrdjxbesj.supabase.co/functions/v1/**',async route=>{
