@@ -21,7 +21,7 @@ const members=[
 const state={courtCount:8,courtNames:Array.from({length:8},(_,i)=>`${i+1}코트`),members,queue:[],pendingGames:[],games:[],history:[],pairCounts:{}};
 
 try{
- await page.goto('http://127.0.0.1:4173/?qa=v635',{waitUntil:'networkidle'});
+ await page.goto('http://127.0.0.1:4173/?qa=v635',{waitUntil:'domcontentloaded'});
  await page.waitForFunction(()=>window.__kokmatchVersionLock==='6.35'&&typeof window.renderAll==='function',{timeout:15000});
 
  async function installRole(globalAdmin){
