@@ -19,6 +19,8 @@ jobs:
           node-version: 22
       - name: Build v6.38
         run: python3 scripts/build-v638.py
+      - name: Patch legacy v6 repair guard
+        run: python3 scripts/patch-v638-repair-guard.py
       - name: Syntax and standalone validation
         run: |
           node --check app-v6.38.js
@@ -27,6 +29,7 @@ jobs:
           grep -q '__kokmatchNoFlashResume638' app-v6.38.js
           grep -q '__kokmatchResumeNoRailReplaceUntil638' app-v6.38.js
           grep -q '__kokmatchArmNoRail638' app-v6.38.js
+          grep -q 'function repairMemberControlsV6()' app-v6.38.js
           grep -q 'app-v6.38.js?v=6.38' index.html
           grep -q 'kokmatch-sw.js?v=6.38' sw.js
       - name: Install Playwright
@@ -66,9 +69,9 @@ jobs:
           git config user.name 'kkokmatch-release-bot'
           git config user.email 'actions@users.noreply.github.com'
           git add app-v6.38.js app-v6.38.css index.html manifest.webmanifest kokmatch-sw.js sw.js latest-version.json
-          git rm -f --ignore-unmatch scripts/build-v638.py scripts/qa-resume-v638.mjs .github/workflows/release-v638-once.yml
+          git rm -f --ignore-unmatch scripts/build-v638.py scripts/patch-v638-repair-guard.py scripts/qa-resume-v638.mjs .github/workflows/release-v638-once.yml
           git rm -f --ignore-unmatch scripts/build-v637.py scripts/qa-member-pagination-v637.mjs .github/workflows/release-v637-once.yml .github/workflows/diag-v637-member-pagination-once.yml
           git diff --cached --quiet && exit 0
           git commit -m 'Release v6.38 no-flash member resume'
           git push origin HEAD:main
-# retry: earliest resume guard before legacy listeners
+# retry: guard repairMemberControlsV6 during resume
