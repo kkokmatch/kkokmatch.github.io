@@ -1,0 +1,61 @@
+name: Release v6.35 global update once
+on:
+  push:
+    paths:
+      - '.github/workflows/release-v635-global-update-once.yml'
+permissions:
+  contents: write
+jobs:
+  release:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Build v6.35
+        run: python3 scripts/build-v635.py
+      - name: Static QA
+        run: |
+          node --check app-v6.35.js
+          node scripts/validate-standalone-runtime.mjs
+          python3 - <<'PY'
+          from pathlib import Path
+          import json
+          js=Path('app-v6.35.js').read_text(encoding='utf-8')
+          idx=Path('index.html').read_text(encoding='utf-8')
+          latest=json.loads(Path('latest-version.json').read_text(encoding='utf-8'))
+          checks={
+            'runtime 6.35': "window.__kokmatchVersionLock='6.35'" in js,
+            'top canonical badge': 'kokmatchTopVersion635' in js and "badge.textContent='v'+BUILD635" in js,
+            'legacy top scrub': "(?:버전\\s*)?v\\d+\\.\\d+" in js,
+            'global admin endpoint': 'kokmatch-admin-refresh' in js and 'globalRefresh635' in js,
+            'developer global logout': "me?.globalAdmin" in js and 'admin-global-refresh' in js,
+            'index 6.35': 'app-v6.35.js?v=6.35' in idx and 'app-v6.35.css?v=6.35' in idx,
+            'latest 6.35': latest.get('semanticVersion')=='6.35'
+          }
+          bad=[k for k,v in checks.items() if not v]
+          print(checks)
+          if bad: raise SystemExit('FAIL '+', '.join(bad))
+          print('PASS v6.35 static global update checks')
+          PY
+      - name: Install browser QA runtime
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install --with-deps chromium
+      - name: Browser QA
+        run: |
+          python3 -m http.server 4173 >/tmp/km635-http.log 2>&1 &
+          SERVER_PID=$!
+          trap 'kill $SERVER_PID || true' EXIT
+          sleep 1
+          node scripts/qa-current-runtime.mjs
+          node scripts/qa-v635-global-update.mjs
+      - name: Commit v6.35
+        run: |
+          rm -f scripts/build-v635.py scripts/qa-v635-global-update.mjs .github/workflows/release-v635-global-update-once.yml
+          git config user.name 'kkokmatch'
+          git config user.email 'hanarin0201@gmail.com'
+          git add -A
+          git commit -m 'v6.35 global logout update and top version'
+          git push
