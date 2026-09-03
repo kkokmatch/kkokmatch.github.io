@@ -1,5 +1,5 @@
 name: Release v6.35 global update once
-# release pass 12 - isolated member/developer sessions
+# release pass 13 - real developer identity rule
 on:
   push:
     paths:
