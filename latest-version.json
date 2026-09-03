@@ -1,8 +1,8 @@
 {
-  "version": 68,
-  "label": "v6.28",
-  "semanticVersion": "6.28",
-  "build": "v6.28",
-  "updatedAt": "2026-09-02T16:51:00+09:00",
-  "note": "v6.28 통계 전용 날짜선택 · 평균 게임대기 · 월간표 한화면 최적화 · 월 선택 간격 개선"
+  "version": 69,
+  "label": "v6.29",
+  "semanticVersion": "6.29",
+  "build": "v6.29",
+  "updatedAt": "2026-09-03T09:00:00+09:00",
+  "note": "v6.29 PWA 설치형 전환 · iOS/Android 홈화면 앱 · 알림 권한 안내 · 푸시 서비스워커 통합 · 네트워크 우선 최신화"
 }

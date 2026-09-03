@@ -1,46 +1,8 @@
+const KOKMATCH_SW_VERSION='6.29';
+const KOKMATCH_CACHE_PREFIX='kokmatch-';
 self.addEventListener('install',event=>{event.waitUntil(self.skipWaiting())});
-self.addEventListener('activate',event=>{event.waitUntil(self.clients.claim())});
+self.addEventListener('activate',event=>{event.waitUntil((async()=>{try{const keys=await caches.keys();await Promise.all(keys.filter(k=>k.startsWith(KOKMATCH_CACHE_PREFIX)).map(k=>caches.delete(k)))}catch{}await self.clients.claim()})())});
 self.addEventListener('message',event=>{if(event.data?.type==='SKIP_WAITING')self.skipWaiting()});
-
-self.addEventListener('push',event=>{
-  let payload={};
-  try{payload=event.data?event.data.json():{}}catch{try{payload={body:event.data?.text?.()||''}}catch{payload={}}}
-  const declared=payload.notification&&typeof payload.notification==='object'?payload.notification:{};
-  const title=payload.title||declared.title||'콕매치';
-  const body=payload.body||declared.body||'게임 알림이 도착했습니다.';
-  const data=payload.data||{};
-  const options={
-    body,
-    tag:payload.tag||('kokmatch-'+Date.now()),
-    renotify:true,
-    requireInteraction:true,
-    silent:false,
-    data,
-    timestamp:Date.now()
-  };
-  event.waitUntil((async()=>{
-    const clients=await self.clients.matchAll({type:'window',includeUncontrolled:true});
-    for(const client of clients){try{client.postMessage({type:'KOKMATCH_PUSH_RECEIVED',payload:{title,body,tag:options.tag,data}})}catch{}}
-    await self.registration.showNotification(title,options);
-  })());
-});
-
-self.addEventListener('notificationclick',event=>{
-  event.notification.close();
-  const data=event.notification.data||{};
-  const view=data.view||'';
-  const clubId=data.clubId||'';
-  event.waitUntil((async()=>{
-    const list=await self.clients.matchAll({type:'window',includeUncontrolled:true});
-    if(list.length){
-      const client=list[0];
-      try{await client.focus()}catch{}
-      try{client.postMessage({type:'KOKMATCH_PUSH_CLICK',view,data})}catch{}
-      return;
-    }
-    const p=new URLSearchParams();
-    if(view)p.set('pushView',view);
-    if(clubId)p.set('pushClub',clubId);
-    await self.clients.openWindow('/'+(p.toString()?'?'+p.toString():''));
-  })());
-});
+self.addEventListener('fetch',event=>{const req=event.request;if(req.method!=='GET')return;let url;try{url=new URL(req.url)}catch{return}if(url.origin!==self.location.origin)return;event.respondWith((async()=>{try{return await fetch(req,{cache:'no-store'})}catch(e){if(req.mode==='navigate')return new Response('<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>콕매치</title><body style="font-family:system-ui;padding:32px;text-align:center"><h2>네트워크 연결을 확인해주세요.</h2><p>연결 후 콕매치를 다시 실행해주세요.</p></body>',{headers:{'content-type':'text/html; charset=utf-8'}});throw e}})())});
+self.addEventListener('push',event=>{let payload={};try{payload=event.data?event.data.json():{}}catch{try{payload={body:event.data?.text?.()||''}}catch{payload={}}}const declared=payload.notification&&typeof payload.notification==='object'?payload.notification:{};const title=payload.title||declared.title||'콕매치';const body=payload.body||declared.body||'게임 알림이 도착했습니다.';const data=payload.data||{};const options={body,icon:'/icons/kokmatch-192.png',badge:'/icons/kokmatch-192.png',tag:payload.tag||('kokmatch-'+Date.now()),renotify:true,requireInteraction:true,silent:false,data,timestamp:Date.now()};event.waitUntil((async()=>{const clients=await self.clients.matchAll({type:'window',includeUncontrolled:true});for(const client of clients){try{client.postMessage({type:'KOKMATCH_PUSH_RECEIVED',payload:{title,body,tag:options.tag,data}})}catch{}}await self.registration.showNotification(title,options)})())});
+self.addEventListener('notificationclick',event=>{event.notification.close();const data=event.notification.data||{};const view=data.view||'';const clubId=data.clubId||'';event.waitUntil((async()=>{const list=await self.clients.matchAll({type:'window',includeUncontrolled:true});if(list.length){const client=list[0];try{await client.focus()}catch{}try{client.postMessage({type:'KOKMATCH_PUSH_CLICK',view,data})}catch{}return}const p=new URLSearchParams();if(view)p.set('pushView',view);if(clubId)p.set('pushClub',clubId);await self.clients.openWindow('/'+(p.toString()?'?'+p.toString():''))})())});
