@@ -1,0 +1,61 @@
+name: Release v6.36 tablet roster once
+on:
+  push:
+    paths:
+      - '.github/workflows/release-v636-tablet-roster-once.yml'
+permissions:
+  contents: write
+jobs:
+  release:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Build v6.36
+        run: python3 scripts/build-v636.py
+      - name: Static and standalone QA
+        run: |
+          node --check app-v6.36.js
+          node scripts/validate-standalone-runtime.mjs
+          python3 - <<'PY'
+          from pathlib import Path
+          import json
+          js=Path('app-v6.36.js').read_text(encoding='utf-8')
+          css=Path('app-v6.36.css').read_text(encoding='utf-8')
+          idx=Path('index.html').read_text(encoding='utf-8')
+          latest=json.loads(Path('latest-version.json').read_text(encoding='utf-8'))
+          checks={
+            'runtime 6.36': "window.__kokmatchVersionLock='6.36'" in js,
+            'standalone 6.36': "window.__kokmatchStandalone='6.36'" in js,
+            'canonical tablet rule': '.kmRosterBtns621' in css and 'grid-template-columns:repeat(3,44px)' in css,
+            'tablet media only': '@media(min-width:600px) and (max-width:1199px)' in css,
+            'index 6.36': 'app-v6.36.js?v=6.36' in idx and 'app-v6.36.css?v=6.36' in idx,
+            'latest 6.36': latest.get('semanticVersion')=='6.36'
+          }
+          print(checks)
+          bad=[k for k,v in checks.items() if not v]
+          if bad: raise SystemExit('FAIL '+', '.join(bad))
+          print('PASS v6.36 static tablet roster checks')
+          PY
+      - name: Install browser QA runtime
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install --with-deps chromium
+      - name: Android tablet and iPhone geometry QA
+        timeout-minutes: 2
+        run: |
+          python3 -m http.server 4173 >/tmp/km636-http.log 2>&1 &
+          SERVER_PID=$!
+          trap 'kill $SERVER_PID || true' EXIT
+          sleep 1
+          node scripts/qa-v636-tablet-roster.mjs
+      - name: Commit v6.36
+        run: |
+          rm -f scripts/build-v636.py scripts/qa-v636-tablet-roster.mjs .github/workflows/release-v636-tablet-roster-once.yml
+          git config user.name 'kkokmatch'
+          git config user.email 'hanarin0201@gmail.com'
+          git add -A
+          git commit -m 'v6.36 fix Android tablet roster button alignment'
+          git push
