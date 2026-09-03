@@ -1,0 +1,182 @@
+name: Release v6.32 iOS roster resume repair once
+on:
+  push:
+    paths:
+      - '.github/workflows/release-v632-ios-resume-roster-once.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  build-test-commit:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Build v6.32 candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp app-v6.31.js app-v6.32.js
+          cp app-v6.31.css app-v6.32.css
+          python3 - <<'PY'
+          from pathlib import Path
+          import json
+
+          p=Path('app-v6.32.js')
+          s=p.read_text(encoding='utf-8').replace('6.31','6.32')
+          fix=r'''
+
+/* KokMatch v6.32: restore roster controls after iOS/Kakao background resume */
+(()=>{
+'use strict';
+if(window.__kokmatchResumeRoster632)return;
+window.__kokmatchResumeRoster632=true;
+let backgrounded632=false,busy632=false,timer632=0,lastRepair632=0;
+const sleep632=ms=>new Promise(r=>setTimeout(r,ms));
+function cardId632(card){return String(card?.dataset?.memberId22||card?.dataset?.memberId||card?.dataset?.memberId46||card?.dataset?.memberId80||'')}
+function actor632(){try{return me?.globalAdmin?'admin':me?.tempOrganizer?'temp':String(me?.role||'member')}catch{return'member'}}
+function memberRole632(m){try{return typeof roleOf==='function'?roleOf(m):String(m?.role||'member')}catch{return String(m?.role||'member')}}
+function self632(m){if(!m)return false;try{if(me?.memberId)return String(me.memberId)===String(m.id)}catch{}try{return String(me?.displayName||'').trim()===String(m.name||'').trim()}catch{return false}}
+function attendance632(m){return ['admin','manager','organizer','temp'].includes(actor632())||self632(m)}
+function editable632(m){return ['admin','manager','organizer'].includes(actor632())&&(memberRole632(m)!=='admin'||!!me?.globalAdmin)}
+function esc632(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function slot632(name,html){return `<span class="kmRosterSlot621 kmRosterSlot-${name}621">${html||'<span class="kmRosterPlaceholder621" aria-hidden="true"></span>'}</span>`}
+function btn632(cls,label){return `<button class="btn ${cls} kmRosterAction621" type="button">${label}</button>`}
+function controls632(m){
+ const state=String(m?.state||'out'),attendance=attendance632(m)&&!['playing','matched'].includes(state),editable=editable632(m);
+ let first='',second='';
+ if(attendance){first=state==='waiting'?btn632('danger','퇴장'):btn632('enter','입장');second=state==='spectator'?btn632('danger','퇴장'):btn632('watch','관람')}
+ const edit=editable?btn632('ghost','수정'):'';
+ if(!attendance&&!editable)return `<div class="memberActions48 v6MemberActions kmRosterActions621 kmRosterReadonly621"><div class="status">${esc632(typeof stateLabel==='function'?stateLabel(state):state)}</div></div>`;
+ return `<div class="memberActions48 v6MemberActions kmRosterActions621"><div class="status">${esc632(typeof stateLabel==='function'?stateLabel(state):state)}</div><div class="memberBtns kmRosterBtns621">${slot632('first',first)}${slot632('second',second)}${slot632('edit',edit)}</div></div>`;
+}
+function paint632(){
+ if(currentView!=='members'||!Array.isArray(S?.members))return;
+ const box=document.getElementById('members');if(!box)return;
+ const map=new Map(S.members.map(m=>[String(m?.id||''),m]));
+ for(const card of box.querySelectorAll('.memberCard')){
+  const id=cardId632(card),m=map.get(id);if(!id||!m)continue;
+  const t=document.createElement('div');t.innerHTML=controls632(m);const next=t.firstElementChild;if(!next)continue;
+  const cur=card.querySelector(':scope > .kmRosterActions621,:scope > .v6MemberActions,:scope > .memberActions48,:scope > .memberActions60,:scope > .memberActions65');
+  if(cur)cur.replaceWith(next);else card.appendChild(next);
+ }
+}
+async function state632(){
+ let last=null;
+ for(const wait of [0,180,500]){
+  if(wait)await sleep632(wait);
+  try{
+   const u=new URL(API);u.searchParams.set('api','state');if(currentGroupId)u.searchParams.set('groupId',currentGroupId);u.searchParams.set('resume632',Date.now());
+   const r=await fetch(u,{headers:{'content-type':'application/json',...(T?{authorization:'Bearer '+T}:{})},cache:'no-store'});
+   const x=await r.json().catch(()=>({}));if(!r.ok)throw new Error(x.error||('상태 조회 '+r.status));
+   return x;
+  }catch(e){last=e}
+ }
+ throw last||new Error('복귀 상태를 불러오지 못했습니다.');
+}
+async function repair632(reason='resume'){
+ if(busy632||document.hidden||!T||currentView!=='members')return false;
+ if(Date.now()-lastRepair632<250)return false;
+ busy632=true;
+ try{
+  const gid=String(currentGroupId||''),oldMembers=Array.isArray(S?.members)?S.members:[];
+  const x=await state632();
+  if(gid&&String(currentGroupId||'')!==gid)return false;
+  if(x?.data){const d=x.data||{};const incoming=Array.isArray(d.members)?d.members:[];S={...d,members:incoming.length?incoming:oldMembers};window.S=S;me=x.user||me;group=x.group||group;groups=x.groups||groups;if(group?.groupId){currentGroupId=String(group.groupId);localStorage.setItem(GROUP_KEY,currentGroupId)};try{normalizeClient()}catch{}}
+  try{renderHeader()}catch{}try{renderNav()}catch{}try{renderMembers()}catch{}
+  paint632();requestAnimationFrame(paint632);setTimeout(paint632,60);setTimeout(paint632,180);setTimeout(paint632,360);
+  lastRepair632=Date.now();backgrounded632=false;return true;
+ }catch(e){
+  console.warn('KokMatch v6.32 roster resume repair',reason,e);
+  try{renderMembers();paint632();requestAnimationFrame(paint632)}catch{}
+  return false;
+ }finally{busy632=false}
+}
+function schedule632(reason,delay=90){clearTimeout(timer632);timer632=setTimeout(()=>repair632(reason),delay)}
+window.addEventListener('pagehide',()=>{backgrounded632=true},{passive:true});
+window.addEventListener('pageshow',e=>{if(e.persisted||backgrounded632)schedule632('pageshow',70)},{passive:true});
+document.addEventListener('visibilitychange',()=>{if(document.hidden){backgrounded632=true;return}if(backgrounded632)schedule632('visibility',90)},{passive:true});
+window.addEventListener('focus',()=>{if(backgrounded632)schedule632('focus',120)},{passive:true});
+window.__kokmatchRepairRosterResume632=repair632;
+window.__kokmatchPaintRosterControls632=paint632;
+})();
+'''
+          s+=fix
+          p.write_text(s,encoding='utf-8')
+
+          index=Path('index.html').read_text(encoding='utf-8').replace('6.31','6.32')
+          if '/app-v6.32.js' not in index or '/app-v6.32.css' not in index: raise SystemExit('index v6.32 switch failed')
+          Path('index.html').write_text(index,encoding='utf-8')
+
+          sw=Path('kokmatch-sw.js').read_text(encoding='utf-8').replace("KOKMATCH_SW_VERSION='6.31'","KOKMATCH_SW_VERSION='6.32'")
+          Path('kokmatch-sw.js').write_text(sw,encoding='utf-8')
+          Path('sw.js').write_text("/* Compatibility entry for older KokMatch clients. */\nimportScripts('/kokmatch-sw.js?v=6.32');\n",encoding='utf-8')
+          latest={'version':72,'label':'v6.32','semanticVersion':'6.32','build':'v6.32','updatedAt':'2026-09-03T10:20:00+09:00','note':'v6.32 iPhone 카카오톡 백그라운드 복귀 회원명부 버튼 복원 · 복귀 상태 직접 동기화 · 입장/관람/퇴장/수정 레이아웃 고정'}
+          Path('latest-version.json').write_text(json.dumps(latest,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+          PY
+      - name: Static checks
+        run: |
+          node --check app-v6.32.js
+          node scripts/validate-standalone-runtime.mjs
+          node - <<'NODE'
+          const fs=require('fs');const s=fs.readFileSync('app-v6.32.js','utf8');
+          for(const x of ['__kokmatchResumeRoster632','__kokmatchRepairRosterResume632','pagehide','pageshow','visibilitychange','resume632','kmRosterBtns621'])if(!s.includes(x))throw new Error('missing v6.32 marker '+x);
+          console.log('PASS v6.32 static resume markers');
+          NODE
+      - name: Install Playwright
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install --with-deps chromium
+      - name: Start local server
+        run: |
+          python3 -m http.server 4173 >/tmp/kokmatch-http.log 2>&1 &
+          for i in {1..30}; do if curl -fsS http://127.0.0.1:4173/ >/dev/null; then exit 0; fi; sleep .25; done
+          cat /tmp/kokmatch-http.log; exit 1
+      - name: Existing runtime QA
+        run: node scripts/qa-current-runtime.mjs
+      - name: Existing focused QA
+        run: node scripts/qa-partner-poll-current.mjs
+      - name: iOS-style background resume QA
+        shell: bash
+        run: |
+          cp scripts/qa-current-runtime.mjs /tmp/qa-resume632.mjs
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('/tmp/qa-resume632.mjs');s=p.read_text()
+          needle="  const uniqueAssets=[...new Set(appAssets)]"
+          insert=r'''  await page.evaluate(()=>{
+    for(const card of document.querySelectorAll('#members .memberCard')){
+      const cur=card.querySelector(':scope > .kmRosterActions621,:scope > .v6MemberActions,:scope > .memberActions48,:scope > .memberActions60,:scope > .memberActions65');
+      if(!cur)continue;
+      const id=String(card.dataset.memberId22||'');
+      cur.outerHTML=`<div class="memberActions60"><div class="status">복귀오류</div><div class="memberBtns"><button class="btn ghost" type="button">수정</button></div></div>`;
+    }
+    window.dispatchEvent(new Event('pagehide'));
+    window.dispatchEvent(new Event('pageshow'));
+  });
+  await page.waitForTimeout(900);
+  expect(await labels('out1'),['입장','관람','수정'],'resume-out');
+  expect(await labels('wait1'),['퇴장','관람','수정'],'resume-waiting');
+  expect(await labels('spec1'),['입장','퇴장','수정'],'resume-spectator');
+  console.log('PASS v6.32 background resume restores roster buttons');
+
+'''
+          if needle not in s: raise SystemExit('QA insertion point missing')
+          p.write_text(s.replace(needle,insert+needle,1))
+          PY
+          cd /home/runner/work/kkokmatch.github.io/kkokmatch.github.io
+          cp /tmp/qa-resume632.mjs scripts/qa-resume632-temp.mjs
+          node scripts/qa-resume632-temp.mjs
+          rm scripts/qa-resume632-temp.mjs
+      - name: Commit only after green QA
+        run: |
+          git config user.name 'kkokmatch'
+          git config user.email 'hanarin0201@gmail.com'
+          rm -f .github/workflows/release-v632-ios-resume-roster-once.yml
+          git add app-v6.32.js app-v6.32.css index.html latest-version.json kokmatch-sw.js sw.js .github/workflows/release-v632-ios-resume-roster-once.yml
+          git commit -m 'v6.32 stabilize roster buttons after iOS resume'
+          git push
