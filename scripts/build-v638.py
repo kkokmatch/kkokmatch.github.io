@@ -4,11 +4,10 @@ import json,re
 OLD='6.37'
 NEW='6.38'
 root=Path('.')
-js=(root/f'app-v{OLD}.js').read_text(encoding='utf-8').replace(OLD,NEW)
+base=(root/f'app-v{OLD}.js').read_text(encoding='utf-8').replace(OLD,NEW)
 
-# During an ordinary app resume v6.38 patches the existing three slots in place.
-# Old compatibility painters used to replace the whole action rail a moment later,
-# which was visible as a flash. Guard only that short resume window.
+# During a true app resume v6.38 patches the existing three slots in place.
+# Prevent older compatibility painters from replacing the whole action rail.
 repls=[
  ("function applyControls(){\n", "function applyControls(){\n if(Date.now()<Number(window.__kokmatchResumeNoRailReplaceUntil638||0))return;\n"),
  ("function paint632(){\n", "function paint632(){\n if(Date.now()<Number(window.__kokmatchResumeNoRailReplaceUntil638||0))return;\n"),
@@ -16,8 +15,34 @@ repls=[
  ("function stabilize637(force=false){\n", "function stabilize637(force=false){\n if(Date.now()<Number(window.__kokmatchResumeNoRailReplaceUntil638||0)&&!needs637())return;\n"),
 ]
 for old,new in repls:
-    if old not in js: raise SystemExit('v6.38 guard insertion point missing: '+old.strip())
-    js=js.replace(old,new,1)
+    if old not in base: raise SystemExit('v6.38 guard insertion point missing: '+old.strip())
+    base=base.replace(old,new,1)
+
+early=r'''/* KokMatch v6.38 early resume guard: must run before legacy listeners. */
+(()=>{
+'use strict';
+if(window.__kokmatchResumeEarly638)return;
+window.__kokmatchResumeEarly638=true;
+function arm(ms=1800){
+ const until=Date.now()+Math.max(200,Number(ms)||1800),old=Number(window.__kokmatchResumeNoRailReplaceUntil638||0);
+ if(until>old)window.__kokmatchResumeNoRailReplaceUntil638=until;
+}
+function background(){window.__kokmatchResumeBackgrounded638=true;arm(60000)}
+function returning(){
+ if(!window.__kokmatchResumeBackgrounded638)return false;
+ arm(1800);
+ clearTimeout(window.__kokmatchResumeResetTimer638);
+ window.__kokmatchResumeResetTimer638=setTimeout(()=>{window.__kokmatchResumeBackgrounded638=false},1900);
+ return true;
+}
+window.__kokmatchArmNoRailEarly638=arm;
+window.addEventListener('pagehide',background,true);
+document.addEventListener('visibilitychange',()=>{if(document.hidden)background();else returning()},true);
+window.addEventListener('focus',returning,true);
+window.addEventListener('pageshow',e=>{if(e?.persisted)window.__kokmatchResumeBackgrounded638=true;returning()},true);
+})();
+'''
+js=early+base
 
 patch=r'''
 
@@ -27,18 +52,13 @@ patch=r'''
 if(window.__kokmatchNoFlashResume638)return;
 window.__kokmatchNoFlashResume638=true;
 window.__kokmatchResumeDebug638={silentCalls:0,baseCalls:0,structuralCount:0,lastStructural:null,lastClean:null};
-let resumePromise638=null,lastResumeAt638=0,backgrounded638=false;
+let resumePromise638=null,lastResumeAt638=0;
 function armNoRail638(ms=1800){
+ if(typeof window.__kokmatchArmNoRailEarly638==='function')return window.__kokmatchArmNoRailEarly638(ms);
  const until=Date.now()+Math.max(200,Number(ms)||1800),old=Number(window.__kokmatchResumeNoRailReplaceUntil638||0);
  if(until>old)window.__kokmatchResumeNoRailReplaceUntil638=until;
 }
-function markBackground638(){backgrounded638=true;armNoRail638(60000)}
-function markReturn638(){if(!backgrounded638)return false;armNoRail638(1800);setTimeout(()=>{backgrounded638=false},1900);return true}
 window.__kokmatchArmNoRail638=armNoRail638;
-window.addEventListener('pagehide',markBackground638,true);
-document.addEventListener('visibilitychange',()=>{if(document.hidden)markBackground638();else markReturn638()},true);
-window.addEventListener('focus',()=>markReturn638(),true);
-window.addEventListener('pageshow',e=>{if(e?.persisted)backgrounded638=true;markReturn638()},true);
 const token638=()=>{try{return String(T||localStorage.getItem(TOKEN_KEY)||'').trim()}catch{return String(T||'').trim()}};
 function staticSig638(list){try{return JSON.stringify((Array.isArray(list)?list:[]).map(m=>[m?.id,m?.name,m?.year,m?.gender,m?.age,m?.cls,m?.type,m?.role,m?.memberSince,m?.inviter]))}catch{return''}}
 function userSig638(u){try{return JSON.stringify([u?.memberId,u?.displayName,u?.role,!!u?.globalAdmin,!!u?.tempOrganizer,u?.groupId])}catch{return''}}
@@ -99,6 +119,7 @@ ksw=(root/'kokmatch-sw.js').read_text(encoding='utf-8').replace(OLD,NEW);(root/'
 sw=(root/'sw.js').read_text(encoding='utf-8');sw=re.sub(r"kokmatch-sw\.js\?v=\d+(?:\.\d+)+",f"kokmatch-sw.js?v={NEW}",sw);(root/'sw.js').write_text(sw,encoding='utf-8')
 latest={'version':78,'label':'v6.38','semanticVersion':'6.38','build':'v6.38','updatedAt':'2026-09-03T15:55:00+09:00','note':'v6.38 홈화면 복귀 시 회원명부 전체 재렌더 제거 · 기존 카드/버튼 레일 유지 · 상태 슬롯만 1회 동기화'}
 (root/'latest-version.json').write_text(json.dumps(latest,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+assert '__kokmatchResumeEarly638' in js and js.index('__kokmatchResumeEarly638')<js.index('function applyControls()')
 assert '__kokmatchNoFlashResume638' in js
 assert '__kokmatchResumeNoRailReplaceUntil638' in js and '__kokmatchArmNoRail638' in js
 assert f'/app-v{NEW}.js?v={NEW}' in index and f'/app-v{NEW}.css?v={NEW}' in index
