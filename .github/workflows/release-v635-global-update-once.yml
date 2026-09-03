@@ -1,5 +1,5 @@
 name: Release v6.35 global update once
-# diagnostic pass 5
+# diagnostic pass 6 - observer loop fixed
 on:
   push:
     paths:
@@ -15,7 +15,17 @@ jobs:
         with:
           node-version: 22
       - name: Build v6.35
-        run: python3 scripts/build-v635.py
+        run: |
+          python3 scripts/build-v635.py
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('app-v6.35.js')
+          s=p.read_text(encoding='utf-8')
+          old="  badge.textContent='v'+BUILD635;"
+          new="  if(badge.textContent!=='v'+BUILD635)badge.textContent='v'+BUILD635;"
+          if old not in s: raise SystemExit('missing top badge assignment')
+          p.write_text(s.replace(old,new,1),encoding='utf-8')
+          PY
       - name: Static and standalone QA
         run: |
           node --check app-v6.35.js
@@ -28,7 +38,7 @@ jobs:
           latest=json.loads(Path('latest-version.json').read_text(encoding='utf-8'))
           checks={
             'runtime 6.35': "window.__kokmatchVersionLock='6.35'" in js,
-            'top canonical badge': 'kokmatchTopVersion635' in js and "badge.textContent='v'+BUILD635" in js,
+            'top canonical badge': 'kokmatchTopVersion635' in js and "if(badge.textContent!=='v'+BUILD635)badge.textContent='v'+BUILD635" in js,
             'legacy top scrub': "(?:버전\\s*)?v\\d+\\.\\d+" in js,
             'global admin endpoint': 'kokmatch-admin-refresh' in js and 'globalRefresh635' in js,
             'developer global logout': "me?.globalAdmin" in js and 'admin-global-refresh' in js,
