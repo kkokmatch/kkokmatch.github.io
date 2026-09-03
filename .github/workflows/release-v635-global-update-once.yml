@@ -1,5 +1,5 @@
 name: Release v6.35 global update once
-# release pass 9 - event-driven header repair QA
+# release pass 10 - snapshot developer intent across async refresh
 on:
   push:
     paths:
@@ -15,22 +15,7 @@ jobs:
         with:
           node-version: 22
       - name: Build v6.35
-        run: |
-          python3 scripts/build-v635.py
-          python3 - <<'PY'
-          from pathlib import Path
-          import re
-          p=Path('app-v6.35.js')
-          s=p.read_text(encoding='utf-8')
-          old="  badge.textContent='v'+BUILD635;"
-          new="  if(badge.textContent!=='v'+BUILD635)badge.textContent='v'+BUILD635;"
-          if old not in s: raise SystemExit('missing top badge assignment')
-          s=s.replace(old,new,1)
-          pat=r"function armTop635\(\)\{\n const top=.*?top\.__kokmatchTopObserver635=mo;\n\}"
-          s,n=re.subn(pat,"function armTop635(){}",s,count=1,flags=re.S)
-          if n!=1: raise SystemExit('missing header observer block')
-          p.write_text(s,encoding='utf-8')
-          PY
+        run: python3 scripts/build-v635.py
       - name: Static and standalone QA
         run: |
           node --check app-v6.35.js
@@ -47,7 +32,8 @@ jobs:
             'no header observer': 'new MutationObserver(()=>{if(!topSync635)' not in js,
             'legacy top scrub': "(?:버전\\s*)?v\\d+\\.\\d+" in js,
             'global admin endpoint': 'kokmatch-admin-refresh' in js and 'globalRefresh635' in js,
-            'developer global logout': "me?.globalAdmin" in js and 'admin-global-refresh' in js,
+            'developer intent snapshot': "const isGlobalAdmin=!!me?.globalAdmin" in js and "isGlobalAdmin?'admin-global-refresh':'manual-refresh'" in js,
+            'caller token snapshot': "const callerToken=String(T||'')" in js and 'globalRefresh635(target,callerToken)' in js,
             'index 6.35': 'app-v6.35.js?v=6.35' in idx and 'app-v6.35.css?v=6.35' in idx,
             'latest 6.35': latest.get('semanticVersion')=='6.35'
           }
