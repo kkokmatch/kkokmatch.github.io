@@ -1,0 +1,284 @@
+name: Release v6.34 session render once
+on:
+  push:
+    paths:
+      - '.github/workflows/release-v634-session-render-once.yml'
+permissions:
+  contents: write
+jobs:
+  release:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Build v6.34
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import json,re,shutil
+
+          src=Path('app-v6.33.js').read_text(encoding='utf-8')
+          js=src
+          # Runtime version source of truth.
+          js=js.replace('/* v6.33: show the revised iPhone install guide once after upgrade */','/* v6.34: ordered session restore + global version renderer */',1)
+          for old,new in [
+            ("window.__kokmatchStandalone='6.33';","window.__kokmatchStandalone='6.34';"),
+            ("window.__kokmatchVersionLock='6.33';","window.__kokmatchVersionLock='6.34';"),
+            ("sessionStorage.setItem('kokmatch_runtime_version','6.33')","sessionStorage.setItem('kokmatch_runtime_version','6.34')"),
+            ("const CURRENT633='6.33';","const CURRENT633='6.34';")
+          ]:
+            assert old in js, old
+            js=js.replace(old,new,1)
+
+          # Do not create/focus the login form while a saved token is being restored.
+          old=';renderLoginName();renderNav()}'
+          assert js.count(old)>=1
+          js=js.replace(old,';if(!T)renderLoginName();renderNav()}',1)
+
+          # Keep the shell available for legacy modules, but defer session loading until every
+          # migrated loadState/renderSettings wrapper has been registered.
+          old='setInterval(backgroundStatePollV617,10000);boot();'
+          new="""setInterval(backgroundStatePollV617,10000);
+renderShell();
+try{if(T)$('login')?.classList.add('hide');else $('login')?.classList.remove('hide')}catch{}
+if('serviceWorker'in navigator)navigator.serviceWorker.register('/kokmatch-sw.js',{scope:'/',updateViaCache:'none'}).catch(()=>{});
+window.__kokmatchShellReady634=true;"""
+          assert old in js
+          js=js.replace(old,new,1)
+
+          # v6.34 owns visibility/session refresh. Keep v6.32's canonical roster painter, but
+          # remove its separate direct state-fetch resume listeners so resume state is not raced.
+          old="""window.addEventListener('pagehide',()=>{backgrounded632=true},{passive:true});
+window.addEventListener('pageshow',e=>{if(e.persisted||backgrounded632)schedule632('pageshow',70)},{passive:true});
+document.addEventListener('visibilitychange',()=>{if(document.hidden){backgrounded632=true;return}if(backgrounded632)schedule632('visibility',90)},{passive:true});
+window.addEventListener('focus',()=>{if(backgrounded632)schedule632('focus',120)},{passive:true});"""
+          assert old in js
+          js=js.replace(old,"/* v6.34: background session refresh is centralized below; painter632 remains available. */",1)
+
+          # Remove the old state refresh listener that competed with resume rendering.
+          old="document.addEventListener('visibilitychange',()=>{if(!document.hidden&&T){lastPoll46[currentView]=0;if(currentView==='members'&&memberSessionReady46()){if(typeof window.enterMembers42==='function')window.enterMembers42(false);return}loadState(true).catch(()=>{})}});"
+          assert old in js
+          js=js.replace(old,"/* v6.34: visibility state refresh is handled by the final session coordinator. */",1)
+
+          # Preserve v6.33 update/roster guard, but make its version-patch hook delegate to the
+          # one global v6.34 renderer instead of creating its own role-dependent badge.
+          pat=r"function patchVersion633\(\)\{.*?\n\}\nfunction rosterNeedsCanonical633"
+          repl="function patchVersion633(){try{window.__kokmatchRenderGlobalVersion634?.()}catch{}}\nfunction rosterNeedsCanonical633"
+          js,n=re.subn(pat,repl,js,count=1,flags=re.S)
+          assert n==1, n
+
+          coordinator=r'''
+
+/* KokMatch v6.34: one global version renderer + ordered session coordinator */
+(()=>{
+'use strict';
+if(window.__kokmatchSessionCoordinator634)return;
+window.__kokmatchSessionCoordinator634=true;
+const BUILD634=Object.freeze({version:'6.34',label:'콕매치 v6.34 · 최신 운영본'});
+window.__kokmatchBuildInfo=BUILD634;
+window.__kokmatchGlobalVersion=BUILD634.version;
+try{document.documentElement.dataset.kokmatchVersion=BUILD634.version;document.documentElement.dataset.kokmatchBuild='v'+BUILD634.version}catch{}
+let versionSync634=false,sessionBusy634=false,resumeTimer634=0,startupRetry634=0,inflight634=null;
+const sleep634=ms=>new Promise(r=>setTimeout(r,ms));
+function token634(){try{return String(T||localStorage.getItem(TOKEN_KEY)||localStorage.getItem('kokmatch_token')||'').trim()}catch{return String(T||'').trim()}}
+function ready634(){try{return !!(token634()&&me&&group&&currentGroupId)}catch{return false}}
+function hideLogin634(){try{$('login')?.classList.add('hide')}catch{}}
+function showLogin634(){try{const el=$('login');if(!el)return;el.classList.remove('hide');if(!$('loginName')&&!$('loginPin'))renderLoginName()}catch{}}
+function findVersionCards634(box){return [...box.querySelectorAll(':scope > .card')].filter(c=>{const t=String(c.textContent||'');return t.includes('프로그램 버전')||!!c.querySelector('#forceUpdateBtn,#kokmatchGlobalVersion634,#kokmatchRuntimeVersion633')})}
+function renderGlobalVersion634(){
+ if(versionSync634)return;
+ versionSync634=true;
+ try{
+  window.__kokmatchStandalone=BUILD634.version;window.__kokmatchVersionLock=BUILD634.version;window.__kokmatchBuild='v'+BUILD634.version;
+  const oldBadge=document.getElementById('kokmatchRuntimeVersion633');if(oldBadge)oldBadge.remove();
+  const box=$('settings');if(!box)return;
+  let cards=findVersionCards634(box),card=cards.shift()||null;
+  for(const extra of cards)extra.remove();
+  if(!card){
+   card=document.createElement('div');card.className='card kmGlobalVersionCard634';
+   card.innerHTML='<div class="between"><div><b>프로그램 버전</b><div id="kokmatchGlobalVersion634" class="meta"></div></div><span class="tag">운영본</span></div><button id="forceUpdateBtn" class="btn pri" style="width:100%;margin-top:10px" onclick="forceUpdateApp()">↻ 최신 버전으로 새로고침</button>';
+   const home=[...box.querySelectorAll(':scope > .card')].find(c=>String(c.textContent||'').includes('홈 화면에 추가'));
+   if(home)box.insertBefore(card,home);else box.appendChild(card);
+  }
+  card.classList.add('kmGlobalVersionCard634');
+  let meta=card.querySelector('#kokmatchGlobalVersion634')||card.querySelector('.meta');
+  if(!meta){meta=document.createElement('div');meta.className='meta';const holder=[...card.querySelectorAll('div')].find(d=>[...d.children].some(x=>x.tagName==='B'&&String(x.textContent||'').includes('프로그램 버전')))||card;holder.appendChild(meta)}
+  meta.id='kokmatchGlobalVersion634';
+  if(meta.textContent!==BUILD634.label)meta.textContent=BUILD634.label;
+  if(!card.querySelector('#forceUpdateBtn')){const b=document.createElement('button');b.id='forceUpdateBtn';b.className='btn pri';b.style.cssText='width:100%;margin-top:10px';b.textContent='↻ 최신 버전으로 새로고침';b.onclick=()=>forceUpdateApp();card.appendChild(b)}
+  for(const el of document.querySelectorAll('.meta')){if(el===meta)continue;const t=String(el.textContent||'').trim();if(/^콕매치\s+v\d+(?:\.\d+)+/.test(t))el.remove()}
+ }catch(e){console.warn('KokMatch v6.34 global version render',e)}finally{versionSync634=false}
+}
+window.__kokmatchRenderGlobalVersion634=renderGlobalVersion634;
+function armVersionObserver634(){
+ const box=$('settings');if(!box||box.__kokmatchVersionObserver634)return;
+ const mo=new MutationObserver(()=>{if(!versionSync634)queueMicrotask(renderGlobalVersion634)});
+ mo.observe(box,{subtree:true,childList:true,characterData:true});box.__kokmatchVersionObserver634=mo;
+}
+try{const baseSettings634=renderSettings;renderSettings=function(...args){const r=baseSettings634.apply(this,args);renderGlobalVersion634();armVersionObserver634();return r};window.renderSettings=renderSettings}catch{}
+try{const baseAll634=renderAll;renderAll=function(...args){const r=baseAll634.apply(this,args);renderGlobalVersion634();armVersionObserver634();return r};window.renderAll=renderAll}catch{}
+try{const baseGoView634=goView;goView=function(...args){const r=baseGoView634.apply(this,args);if(args[0]==='settings')renderGlobalVersion634();return r};window.goView=goView}catch{}
+
+/* Serialize same-token/same-group state loads so legacy visibility hooks cannot race render order. */
+try{
+ const baseLoadState634=loadState;
+ loadState=async function(...args){
+  const key=token634()+'|'+String(currentGroupId||'');
+  if(inflight634&&inflight634.key===key)return inflight634.promise;
+  const p=(async()=>{const r=await baseLoadState634.apply(this,args);if(ready634())hideLogin634();renderGlobalVersion634();return r})();
+  inflight634={key,promise:p};
+  try{return await p}finally{if(inflight634?.promise===p)inflight634=null}
+ };
+ window.loadState=loadState;
+}catch{}
+
+async function syncSession634(reason='startup'){
+ if(sessionBusy634)return false;
+ if(!token634()){if(reason==='startup')showLogin634();return false}
+ hideLogin634();sessionBusy634=true;
+ try{
+  let last=null;const waits=reason==='startup'?[0,220,650]:[0];
+  for(const wait of waits){
+   if(wait)await sleep634(wait);
+   try{await loadState(true);if(ready634()){hideLogin634();renderGlobalVersion634();startupRetry634=0;return true}}catch(e){last=e;if(!token634())break}
+  }
+  if(!token634()){if(!reloginBusy)showLogin634();return false}
+  if(ready634()){hideLogin634();renderGlobalVersion634();return true}
+  if(reason==='startup'&&startupRetry634<2){startupRetry634++;setTimeout(()=>syncSession634('startup'),700*startupRetry634)}
+  if(last)console.warn('KokMatch v6.34 session restore pending',reason,last);
+  return false;
+ }finally{sessionBusy634=false}
+}
+function scheduleSession634(reason,delay=120){clearTimeout(resumeTimer634);resumeTimer634=setTimeout(()=>{if(document.hidden)return;if(token634()){hideLogin634();syncSession634(reason)}},delay)}
+try{const baseSubmit634=submitLogin;submitLogin=async function(...args){const r=await baseSubmit634.apply(this,args);if(token634())hideLogin634();if(ready634())renderGlobalVersion634();return r};window.submitLogin=submitLogin}catch{}
+window.addEventListener('pageshow',()=>scheduleSession634('pageshow',100),{passive:true});
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)scheduleSession634('visible',120)},{passive:true});
+window.addEventListener('focus',()=>{if(!document.hidden)scheduleSession634('focus',160)},{passive:true});
+window.__kokmatchSyncSession634=syncSession634;
+armVersionObserver634();
+queueMicrotask(()=>syncSession634('startup'));
+})();
+'''
+          js += coordinator
+          Path('app-v6.34.js').write_text(js,encoding='utf-8')
+
+          css=Path('app-v6.33.css').read_text(encoding='utf-8')
+          Path('app-v6.34.css').write_text(css+'\n/* v6.34 uses the existing settings card styles for its global version renderer. */\n',encoding='utf-8')
+
+          idx=Path('index.html').read_text(encoding='utf-8')
+          idx=idx.replace('6.33','6.34').replace('app-v6.33.css','app-v6.34.css').replace('app-v6.33.js','app-v6.34.js')
+          old="""    let hiddenAt=0;
+    document.addEventListener('visibilitychange',()=>{
+      if(document.hidden){hiddenAt=Date.now();return;}
+      if(hiddenAt&&Date.now()-hiddenAt>30000){const u=new URL(location.href);u.searchParams.set('_km',Date.now().toString(36));location.replace(u.pathname+u.search+u.hash)}
+    });
+    addEventListener('pageshow',e=>{if(e.persisted){const u=new URL(location.href);u.searchParams.set('_km',Date.now().toString(36));location.replace(u.pathname+u.search+u.hash)}});"""
+          assert old in idx
+          idx=idx.replace(old,"    window.__kokmatchEntryResumeMode='session-coordinator-v634';",1)
+          Path('index.html').write_text(idx,encoding='utf-8')
+
+          latest={
+            'version':74,'label':'v6.34','semanticVersion':'6.34','build':'v6.34',
+            'updatedAt':'2026-09-03T11:55:00+09:00',
+            'note':'v6.34 전역 버전표시 단일화 · 초기 세션복원 최종 렌더러 이후 실행 · 앱 복귀 강제 새로고침 제거 · 상태 렌더 직렬화'
+          }
+          Path('latest-version.json').write_text(json.dumps(latest,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+
+          mf=Path('manifest.webmanifest').read_text(encoding='utf-8').replace('kmv=6.33','kmv=6.34')
+          Path('manifest.webmanifest').write_text(mf,encoding='utf-8')
+          sw=Path('kokmatch-sw.js').read_text(encoding='utf-8').replace("KOKMATCH_SW_VERSION='6.33'","KOKMATCH_SW_VERSION='6.34'",1)
+          Path('kokmatch-sw.js').write_text(sw,encoding='utf-8')
+          Path('sw.js').write_text("/* Stable compatibility entry for older KokMatch installations. */\nimportScripts('/kokmatch-sw.js?v=6.34');\n",encoding='utf-8')
+          Path('diag-v634.txt').unlink(missing_ok=True)
+          PY
+      - name: Static QA
+        run: |
+          node --check app-v6.34.js
+          node scripts/validate-standalone-runtime.mjs
+          python3 - <<'PY'
+          from pathlib import Path
+          js=Path('app-v6.34.js').read_text(encoding='utf-8')
+          idx=Path('index.html').read_text(encoding='utf-8')
+          latest=Path('latest-version.json').read_text(encoding='utf-8')
+          checks={
+            'v634 lock':"window.__kokmatchVersionLock='6.34'" in js,
+            'early boot removed':'setInterval(backgroundStatePollV617,10000);boot();' not in js,
+            'shell first':'window.__kokmatchShellReady634=true' in js,
+            'final coordinator':'window.__kokmatchSessionCoordinator634=true' in js,
+            'global version renderer':'kokmatchGlobalVersion634' in js and '콕매치 v6.34 · 최신 운영본' in js,
+            'serialized state':'inflight634&&inflight634.key===key' in js,
+            'load args kept':'baseLoadState634.apply(this,args)' in js,
+            'old resume direct fetch listeners removed':"schedule632('pageshow'" not in js and "schedule632('visibility'" not in js,
+            'index no forced resume reload':'let hiddenAt=0' not in idx and "location.replace(u.pathname+u.search+u.hash)" not in idx,
+            'index v634':'app-v6.34.js?v=6.34' in idx and 'app-v6.34.css?v=6.34' in idx,
+            'latest v634':'"semanticVersion": "6.34"' in latest,
+          }
+          bad=[k for k,v in checks.items() if not v]
+          print(checks)
+          if bad: raise SystemExit('QA failed: '+', '.join(bad))
+          assert js.find('window.__kokmatchShellReady634=true') < js.find('window.__kokmatchSessionCoordinator634=true')
+          assert js.rfind("queueMicrotask(()=>syncSession634('startup'))") > js.find('window.__kokmatchSessionCoordinator634=true')
+          PY
+      - name: Browser QA for roles and session restore
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install --with-deps webkit
+          python3 -m http.server 4173 >/tmp/kokmatch-v634-http.log 2>&1 &
+          cat > /tmp/qa-v634.mjs <<'EOF'
+          import { webkit } from 'playwright';
+          const browser=await webkit.launch({headless:true});
+          const stateFor=(role)=>({
+            data:{courtCount:4,courtNames:['1코트','2코트','3코트','4코트'],members:[{id:'m1',name:'테스트',year:1989,age:'30',gender:'남',cls:'C',type:'member',role:role==='admin'?'admin':role,state:'waiting',totalGames:0}],queue:[],pendingGames:[],games:[],history:[],pairCounts:{}},
+            user:{memberId:'m1',displayName:'테스트',role:role==='admin'?'admin':role,globalAdmin:role==='admin',tempOrganizer:false},
+            group:{groupId:'g1',name:'테스트모임'},groups:[]
+          });
+          async function runRole(role){
+            const ctx=await browser.newContext({viewport:{width:390,height:844},serviceWorkers:'block',userAgent:'Mozilla/5.0 (iPhone; CPU iPhone OS 18_6 like Mac OS X) AppleWebKit/605.1.15 Version/18.6 Mobile/15E148 Safari/604.1'});
+            await ctx.addInitScript(()=>{localStorage.clear();sessionStorage.clear();localStorage.setItem('kokmatch_token','qa-token');localStorage.setItem('kokmatch_group_id','g1');localStorage.setItem('kokmatch_v1_6_reset_once','done')});
+            const p=await ctx.newPage();let active=0,maxActive=0,stateCalls=0;const nav=[];const errors=[];
+            p.on('framenavigated',f=>{if(f===p.mainFrame())nav.push(f.url())});p.on('pageerror',e=>errors.push(String(e)));
+            await p.route('**/functions/v1/**',async route=>{
+              const u=new URL(route.request().url());
+              if(u.pathname.includes('kokmatch-multi-api')&&u.searchParams.get('api')==='state'){
+                stateCalls++;active++;maxActive=Math.max(maxActive,active);await new Promise(r=>setTimeout(r,role==='member'&&stateCalls===1?500:120));active--;
+                return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify(stateFor(role))});
+              }
+              return route.fulfill({status:200,contentType:'application/json',body:'{}'});
+            });
+            await p.goto('http://127.0.0.1:4173/?qa='+role,{waitUntil:'domcontentloaded'});
+            const early=await p.evaluate(()=>({loginHidden:document.getElementById('login')?.classList.contains('hide'),loginName:!!document.getElementById('loginName'),token:localStorage.getItem('kokmatch_token')}));
+            if(!early.loginHidden)throw new Error(role+' saved session exposed login before restore');
+            if(early.loginName)throw new Error(role+' hidden login form was unnecessarily rendered');
+            await p.waitForFunction(()=>document.getElementById('who')?.textContent.includes('테스트'),null,{timeout:12000});
+            await p.evaluate(()=>goView('settings'));
+            await p.waitForFunction(()=>document.getElementById('kokmatchGlobalVersion634')?.textContent==='콕매치 v6.34 · 최신 운영본');
+            const ver=await p.evaluate(()=>({texts:[...document.querySelectorAll('.meta')].map(e=>(e.textContent||'').trim()).filter(t=>/^콕매치\s+v\d/.test(t)),cards:[...document.querySelectorAll('#settings > .card')].filter(c=>(c.textContent||'').includes('프로그램 버전')).length,loginHidden:document.getElementById('login')?.classList.contains('hide'),token:localStorage.getItem('kokmatch_token')}));
+            if(ver.texts.length!==1||ver.texts[0]!=='콕매치 v6.34 · 최신 운영본')throw new Error(role+' version mismatch '+JSON.stringify(ver));
+            if(ver.cards!==1)throw new Error(role+' version card count '+ver.cards);
+            const before=p.url();
+            await p.evaluate(()=>{window.dispatchEvent(new PageTransitionEvent('pageshow',{persisted:true}));window.dispatchEvent(new Event('focus'));});
+            await p.waitForTimeout(700);
+            if(p.url()!==before)throw new Error(role+' resumed with forced navigation: '+p.url());
+            const after=await p.evaluate(()=>({token:localStorage.getItem('kokmatch_token'),hidden:document.getElementById('login')?.classList.contains('hide'),version:document.getElementById('kokmatchGlobalVersion634')?.textContent}));
+            if(after.token!=='qa-token'||!after.hidden||after.version!=='콕매치 v6.34 · 최신 운영본')throw new Error(role+' resume lost session '+JSON.stringify(after));
+            if(maxActive>1)throw new Error(role+' concurrent state render detected '+maxActive);
+            if(errors.length)throw new Error(role+' page errors '+errors.join(' | '));
+            console.log('ROLE_QA',role,JSON.stringify({early,ver,after,stateCalls,maxActive,nav}));
+            await ctx.close();
+          }
+          for(const role of ['member','manager','organizer','admin'])await runRole(role);
+          const clean=await browser.newContext({serviceWorkers:'block'});const p=await clean.newPage();await p.goto('http://127.0.0.1:4173/?qa=clean',{waitUntil:'domcontentloaded'});await p.waitForSelector('#loginName',{state:'visible'});const before=p.url();await p.evaluate(()=>window.dispatchEvent(new PageTransitionEvent('pageshow',{persisted:true})));await p.waitForTimeout(400);if(p.url()!==before)throw new Error('logged-out pageshow forced navigation');console.log('CLEAN_LOGIN_QA',before);await clean.close();
+          await browser.close();
+          EOF
+          node /tmp/qa-v634.mjs
+      - name: Commit release and remove workflow
+        run: |
+          git config user.name 'kkokmatch'
+          git config user.email 'hanarin0201@gmail.com'
+          git add app-v6.34.js app-v6.34.css index.html latest-version.json manifest.webmanifest kokmatch-sw.js sw.js
+          git add -u diag-v634.txt || true
+          git rm .github/workflows/release-v634-session-render-once.yml
+          git commit -m 'v6.34 unify version and session rendering'
+          git push
