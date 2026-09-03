@@ -27,7 +27,7 @@ function memberRole632(m){try{return typeof roleOf==='function'?roleOf(m):String
 function self632(m){if(!m)return false;try{if(me?.memberId)return String(me.memberId)===String(m.id)}catch{}try{return String(me?.displayName||'').trim()===String(m.name||'').trim()}catch{return false}}
 function attendance632(m){return ['admin','manager','organizer','temp'].includes(actor632())||self632(m)}
 function editable632(m){return ['admin','manager','organizer'].includes(actor632())&&(memberRole632(m)!=='admin'||!!me?.globalAdmin)}
-function esc632(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[c]))}
+function esc632(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function slot632(name,html){return `<span class="kmRosterSlot621 kmRosterSlot-${name}621">${html||'<span class="kmRosterPlaceholder621" aria-hidden="true"></span>'}</span>`}
 function btn632(cls,label){return `<button class="btn ${cls} kmRosterAction621" type="button">${label}</button>`}
 function controls632(m){
