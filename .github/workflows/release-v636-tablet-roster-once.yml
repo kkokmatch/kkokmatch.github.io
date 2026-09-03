@@ -1,5 +1,5 @@
 name: Release v6.36 tablet roster once
-# corrected grid pass 3
+# dedupe pass 4
 on:
   push:
     paths:
@@ -32,6 +32,7 @@ jobs:
             'standalone 6.36': "window.__kokmatchStandalone='6.36'" in js,
             'canonical tablet rule': '.kmRosterBtns621' in css and 'grid-template-columns:repeat(3,44px)' in css,
             'tablet card grid': 'grid-template-columns:50px minmax(0,1fr) 140px' in css and 'grid-column:3!important' in css,
+            'canonical rail dedupe': 'const rails632=[...card.querySelectorAll' in js and 'for(const extra of rails632)extra.remove()' in js,
             'tablet media only': '@media(min-width:600px) and (max-width:1199px)' in css,
             'index 6.36': 'app-v6.36.js?v=6.36' in idx and 'app-v6.36.css?v=6.36' in idx,
             'latest 6.36': latest.get('semanticVersion')=='6.36'
