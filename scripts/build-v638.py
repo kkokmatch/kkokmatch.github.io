@@ -12,6 +12,7 @@ patch=r'''
 'use strict';
 if(window.__kokmatchNoFlashResume638)return;
 window.__kokmatchNoFlashResume638=true;
+window.__kokmatchResumeDebug638={silentCalls:0,baseCalls:0,structuralCount:0,lastStructural:null,lastClean:null};
 let resumePromise638=null,lastResumeAt638=0;
 const token638=()=>{try{return String(T||localStorage.getItem(TOKEN_KEY)||'').trim()}catch{return String(T||'').trim()}};
 function staticSig638(list){
@@ -19,50 +20,33 @@ function staticSig638(list){
 }
 function userSig638(u){try{return JSON.stringify([u?.memberId,u?.displayName,u?.role,!!u?.globalAdmin,!!u?.tempOrganizer,u?.groupId])}catch{return''}}
 function cardId638(card){return String(card?.dataset?.memberId22||card?.dataset?.memberId||card?.dataset?.memberId46||card?.dataset?.memberId80||'')}
-function copySlot638(cur,next){
- if(!cur||!next)return false;
- if(cur.innerHTML!==next.innerHTML)cur.innerHTML=next.innerHTML;
- return true;
-}
+function copySlot638(cur,next){if(!cur||!next)return false;if(cur.innerHTML!==next.innerHTML)cur.innerHTML=next.innerHTML;return true}
 function patchCard638(card,m){
  if(!card||!m||typeof memberControls!=='function')return false;
  const cur=card.querySelector(':scope > .kmRosterActions621');
  const probe=document.createElement('div');probe.innerHTML=memberControls(m);const next=probe.firstElementChild;
  if(!cur||!next||!next.classList.contains('kmRosterActions621'))return false;
  if(cur.className!==next.className)cur.className=next.className;
- const cs=cur.querySelector(':scope > .status'),ns=next.querySelector(':scope > .status');
- if(cs&&ns&&cs.textContent!==ns.textContent)cs.textContent=ns.textContent;
- const cr=cur.querySelector(':scope > .kmRosterBtns621'),nr=next.querySelector(':scope > .kmRosterBtns621');
- if(!cr||!nr)return false;
- const hidden=nr.getAttribute('aria-hidden');
- if(hidden===null){if(cr.hasAttribute('aria-hidden'))cr.removeAttribute('aria-hidden')}else if(cr.getAttribute('aria-hidden')!==hidden)cr.setAttribute('aria-hidden',hidden);
- for(const key of ['first','second','edit']){
-  const c=cr.querySelector(`:scope > .kmRosterSlot-${key}621`),n=nr.querySelector(`:scope > .kmRosterSlot-${key}621`);
-  if(!copySlot638(c,n))return false;
- }
+ const cs=cur.querySelector(':scope > .status'),ns=next.querySelector(':scope > .status');if(cs&&ns&&cs.textContent!==ns.textContent)cs.textContent=ns.textContent;
+ const cr=cur.querySelector(':scope > .kmRosterBtns621'),nr=next.querySelector(':scope > .kmRosterBtns621');if(!cr||!nr)return false;
+ const hidden=nr.getAttribute('aria-hidden');if(hidden===null){if(cr.hasAttribute('aria-hidden'))cr.removeAttribute('aria-hidden')}else if(cr.getAttribute('aria-hidden')!==hidden)cr.setAttribute('aria-hidden',hidden);
+ for(const key of ['first','second','edit']){const c=cr.querySelector(`:scope > .kmRosterSlot-${key}621`),n=nr.querySelector(`:scope > .kmRosterSlot-${key}621`);if(!copySlot638(c,n))return false}
  const gc=card.querySelector('.gamecnt');if(gc){const t=`총 게임 ${Number(m?.totalGames)||0}회`;if(gc.textContent!==t)gc.textContent=t}
  return true;
 }
-function preservePage638(page,y){
- try{if(typeof window.memberPageGo46==='function'&&Number(page)>1)window.memberPageGo46(Number(page))}catch{}
- requestAnimationFrame(()=>{try{scrollTo(0,Math.max(0,Number(y)||0))}catch{}});
-}
+function preservePage638(page,y){try{if(typeof window.memberPageGo46==='function'&&Number(page)>1)window.memberPageGo46(Number(page))}catch{}requestAnimationFrame(()=>{try{scrollTo(0,Math.max(0,Number(y)||0))}catch{}})}
 async function silentResume638(){
- const gid=String(currentGroupId||''),oldS=S,oldUser=me,page=Number(window.__kokmatchMemberPage46||1),y=Math.max(0,scrollY||0);
- const x=await request('state','GET',null,{groupId:gid});
- if(!x?.data)return x;
- const nextGroup=x.group||group;
- const structural=staticSig638(oldS?.members)!==staticSig638(x.data?.members)||userSig638(oldUser)!==userSig638(x.user||oldUser)||(gid&&String(nextGroup?.groupId||gid)!==gid);
- S=x.data;window.S=S;me=x.user||me;group=nextGroup;groups=x.groups||groups;
- if(group?.groupId){currentGroupId=String(group.groupId);try{localStorage.setItem(GROUP_KEY,currentGroupId)}catch{}}
- try{normalizeClient()}catch{}
- if(structural){
-  renderAll();preservePage638(page,y);lastResumeAt638=Date.now();return x;
- }
+ const gid=String(currentGroupId||''),oldS=S,oldUser=me,page=Number(window.__kokmatchMemberPage46||1),y=Math.max(0,scrollY||0),oldStatic=staticSig638(S?.members),oldUserSig=userSig638(me);
+ const x=await request('state','GET',null,{groupId:gid});if(!x?.data)return x;
+ const nextGroup=x.group||group,nextStatic=staticSig638(x.data?.members),nextUserSig=userSig638(x.user||oldUser);
+ const structural=oldStatic!==nextStatic||oldUserSig!==nextUserSig||(gid&&String(nextGroup?.groupId||gid)!==gid);
+ window.__kokmatchResumeDebug638.lastStructural={structural,oldStaticLen:oldStatic.length,nextStaticLen:nextStatic.length,oldUserSig,nextUserSig,gid,nextGid:String(nextGroup?.groupId||'')};
+ S=x.data;window.S=S;me=x.user||me;group=nextGroup;groups=x.groups||groups;if(group?.groupId){currentGroupId=String(group.groupId);try{localStorage.setItem(GROUP_KEY,currentGroupId)}catch{}}try{normalizeClient()}catch{}
+ if(structural){window.__kokmatchResumeDebug638.structuralCount++;renderAll();preservePage638(page,y);lastResumeAt638=Date.now();return x}
  try{renderHeader()}catch{}
- const box=document.getElementById('members'),map=new Map((Array.isArray(S?.members)?S.members:[]).map(m=>[String(m?.id||''),m]));
- let clean=!!box;
+ const box=document.getElementById('members'),map=new Map((Array.isArray(S?.members)?S.members:[]).map(m=>[String(m?.id||''),m]));let clean=!!box;
  if(box){for(const card of box.querySelectorAll('.memberCard')){const m=map.get(cardId638(card));if(!m||!patchCard638(card,m)){clean=false;break}}}
+ window.__kokmatchResumeDebug638.lastClean=clean;
  if(!clean){try{window.__kokmatchStabilizeRoster637?.(true)}catch{}}
  try{window.__kokmatchRenderGlobalVersion634?.()}catch{}
  lastResumeAt638=Date.now();return x;
@@ -70,38 +54,24 @@ async function silentResume638(){
 const baseLoadState638=loadState;
 loadState=async function(...args){
  const silent=args[0]===true&&!!(token638()&&me&&group&&currentGroupId)&&currentView==='members'&&!document.hidden&&Date.now()>=Number(window.__kokmatchFreshLoginUntil630||0);
- if(!silent)return baseLoadState638.apply(this,args);
- if(resumePromise638)return resumePromise638;
- if(Date.now()-lastResumeAt638<650)return true;
- resumePromise638=silentResume638();
- try{return await resumePromise638}finally{resumePromise638=null}
+ if(!silent){window.__kokmatchResumeDebug638.baseCalls++;return baseLoadState638.apply(this,args)}
+ window.__kokmatchResumeDebug638.silentCalls++;
+ if(resumePromise638)return resumePromise638;if(Date.now()-lastResumeAt638<650)return true;
+ resumePromise638=silentResume638();try{return await resumePromise638}finally{resumePromise638=null}
 };
-window.loadState=loadState;
-window.__kokmatchSilentResume638=silentResume638;
+window.loadState=loadState;window.__kokmatchSilentResume638=silentResume638;
 })();
 '''
 js+=patch
 (root/f'app-v{NEW}.js').write_text(js,encoding='utf-8')
 (root/f'app-v{NEW}.css').write_text((root/f'app-v{OLD}.css').read_text(encoding='utf-8'),encoding='utf-8')
-
-index=(root/'index.html').read_text(encoding='utf-8').replace(OLD,NEW)
-(root/'index.html').write_text(index,encoding='utf-8')
-manifest=(root/'manifest.webmanifest').read_text(encoding='utf-8').replace(OLD,NEW)
-(root/'manifest.webmanifest').write_text(manifest,encoding='utf-8')
-ksw=(root/'kokmatch-sw.js').read_text(encoding='utf-8').replace(OLD,NEW)
-(root/'kokmatch-sw.js').write_text(ksw,encoding='utf-8')
-sw=(root/'sw.js').read_text(encoding='utf-8')
-sw=re.sub(r"kokmatch-sw\.js\?v=\d+(?:\.\d+)+",f"kokmatch-sw.js?v={NEW}",sw)
-(root/'sw.js').write_text(sw,encoding='utf-8')
-latest={
- 'version':78,'label':'v6.38','semanticVersion':'6.38','build':'v6.38',
- 'updatedAt':'2026-09-03T15:55:00+09:00',
- 'note':'v6.38 홈화면 복귀 시 회원명부 전체 재렌더 제거 · 기존 카드 유지 상태 동기화 · 버튼 번쩍임 최소화'
-}
+index=(root/'index.html').read_text(encoding='utf-8').replace(OLD,NEW);(root/'index.html').write_text(index,encoding='utf-8')
+manifest=(root/'manifest.webmanifest').read_text(encoding='utf-8').replace(OLD,NEW);(root/'manifest.webmanifest').write_text(manifest,encoding='utf-8')
+ksw=(root/'kokmatch-sw.js').read_text(encoding='utf-8').replace(OLD,NEW);(root/'kokmatch-sw.js').write_text(ksw,encoding='utf-8')
+sw=(root/'sw.js').read_text(encoding='utf-8');sw=re.sub(r"kokmatch-sw\.js\?v=\d+(?:\.\d+)+",f"kokmatch-sw.js?v={NEW}",sw);(root/'sw.js').write_text(sw,encoding='utf-8')
+latest={'version':78,'label':'v6.38','semanticVersion':'6.38','build':'v6.38','updatedAt':'2026-09-03T15:55:00+09:00','note':'v6.38 홈화면 복귀 시 회원명부 전체 재렌더 제거 · 기존 카드 유지 상태 동기화 · 버튼 번쩍임 최소화'}
 (root/'latest-version.json').write_text(json.dumps(latest,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
 assert '__kokmatchNoFlashResume638' in js
 assert f'/app-v{NEW}.js?v={NEW}' in index and f'/app-v{NEW}.css?v={NEW}' in index
-assert f'kmv={NEW}' in manifest
-assert f"KOKMATCH_SW_VERSION='{NEW}'" in ksw
-assert f'kokmatch-sw.js?v={NEW}' in sw
+assert f'kmv={NEW}' in manifest and f"KOKMATCH_SW_VERSION='{NEW}'" in ksw and f'kokmatch-sw.js?v={NEW}' in sw
 print('built v6.38')
