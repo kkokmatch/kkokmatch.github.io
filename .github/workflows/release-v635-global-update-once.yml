@@ -1,5 +1,5 @@
 name: Release v6.35 global update once
-# diagnostic pass 6 - observer loop fixed
+# release pass 7 - no header mutation observer
 on:
   push:
     paths:
@@ -24,7 +24,15 @@ jobs:
           old="  badge.textContent='v'+BUILD635;"
           new="  if(badge.textContent!=='v'+BUILD635)badge.textContent='v'+BUILD635;"
           if old not in s: raise SystemExit('missing top badge assignment')
-          p.write_text(s.replace(old,new,1),encoding='utf-8')
+          s=s.replace(old,new,1)
+          old_arm="""function armTop635(){
+ const top=document.querySelector('.top');if(!top||top.__kokmatchTopObserver635)return;
+ const mo=new MutationObserver(()=>{if(!topSync635)queueMicrotask(ensureTopVersion635)});
+ mo.observe(top,{subtree:true,childList:true,characterData:true});top.__kokmatchTopObserver635=mo;
+}"""
+          if old_arm not in s: raise SystemExit('missing header observer block')
+          s=s.replace(old_arm,"function armTop635(){}",1)
+          p.write_text(s,encoding='utf-8')
           PY
       - name: Static and standalone QA
         run: |
@@ -39,6 +47,7 @@ jobs:
           checks={
             'runtime 6.35': "window.__kokmatchVersionLock='6.35'" in js,
             'top canonical badge': 'kokmatchTopVersion635' in js and "if(badge.textContent!=='v'+BUILD635)badge.textContent='v'+BUILD635" in js,
+            'no header observer': 'new MutationObserver(()=>{if(!topSync635)' not in js,
             'legacy top scrub': "(?:버전\\s*)?v\\d+\\.\\d+" in js,
             'global admin endpoint': 'kokmatch-admin-refresh' in js and 'globalRefresh635' in js,
             'developer global logout': "me?.globalAdmin" in js and 'admin-global-refresh' in js,
