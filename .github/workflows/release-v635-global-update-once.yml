@@ -1,5 +1,5 @@
 name: Release v6.35 global update once
-# release pass 8 - observer disabled safely
+# release pass 9 - event-driven header repair QA
 on:
   push:
     paths:
