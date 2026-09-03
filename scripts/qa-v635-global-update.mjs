@@ -7,21 +7,26 @@ const errors=[];const failed=[];const appResponses=[];let adminCalls=[];
 page.on('pageerror',e=>errors.push(String(e?.stack||e)));
 page.on('requestfailed',r=>failed.push({url:r.url(),failure:r.failure()?.errorText||''}));
 page.on('response',r=>{try{const u=new URL(r.url());if(u.pathname.includes('app-v6.35')||u.pathname==='/index.html'||u.pathname==='/')appResponses.push({url:r.url(),status:r.status()})}catch{}});
-await page.route('https://wjelumpbjklfrdjxbesj.supabase.co/functions/v1/**',async route=>{
-  const req=route.request(),url=new URL(req.url());
-  if(url.pathname.endsWith('/kokmatch-admin-refresh')){
-    let body={};try{body=JSON.parse(req.postData()||'{}')}catch{}
-    adminCalls.push({auth:req.headers()['authorization']||'',body});
-    return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({success:true,loggedOutSessions:4,latestVersion:body.latestVersion,scope:'all_groups_except_caller'})});
-  }
-  return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({success:true,data:{courtCount:8,courtNames:[],members:[],queue:[],pendingGames:[],games:[],history:[],pairCounts:{}},groups:[]})});
-});
 
 const members=[
  {id:'dev',name:'개발자',year:1989,gender:'남',age:'30',cls:'C',type:'member',role:'admin',totalGames:0,state:'out'},
  {id:'mem',name:'일반회원',year:1990,gender:'여',age:'30',cls:'D',type:'member',role:'member',totalGames:0,state:'out'}
 ];
 const state={courtCount:8,courtNames:Array.from({length:8},(_,i)=>`${i+1}코트`),members,queue:[],pendingGames:[],games:[],history:[],pairCounts:{}};
+const emptyState={courtCount:8,courtNames:[],members:[],queue:[],pendingGames:[],games:[],history:[],pairCounts:{}};
+
+await page.route('https://wjelumpbjklfrdjxbesj.supabase.co/functions/v1/**',async route=>{
+  const req=route.request(),url=new URL(req.url()),auth=req.headers()['authorization']||'';
+  if(url.pathname.endsWith('/kokmatch-admin-refresh')){
+    let body={};try{body=JSON.parse(req.postData()||'{}')}catch{}
+    adminCalls.push({auth,body});
+    return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({success:true,loggedOutSessions:4,latestVersion:body.latestVersion,scope:'all_groups_except_caller'})});
+  }
+  const isAdmin=auth==='Bearer qa-admin',isMember=auth==='Bearer qa-member';
+  const user=isAdmin?{memberId:'dev',displayName:'개발자',role:'admin',globalAdmin:true,tempOrganizer:false,groupId:'qa'}:isMember?{memberId:'mem',displayName:'일반회원',role:'member',globalAdmin:false,tempOrganizer:false,groupId:'qa'}:null;
+  const payload={success:true,data:user?state:emptyState,user,group:user?{groupId:'qa',name:'QA 모임'}:null,groups:[]};
+  return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify(payload)});
+});
 
 try{
  await page.goto('http://127.0.0.1:4173/?qa=v635',{waitUntil:'domcontentloaded'});
@@ -72,6 +77,8 @@ try{
  await page.waitForTimeout(80);
  const adminSetting=await page.locator('#kokmatchGlobalVersion634').textContent();
  if(adminSetting?.trim()!=='콕매치 v6.35 · 최신 운영본')throw new Error('admin settings version mismatch: '+adminSetting);
+ const adminSession=await page.evaluate(()=>({globalAdmin:!!me?.globalAdmin,role:me?.role||'',token:T}));
+ if(!adminSession.globalAdmin||adminSession.token!=='qa-admin')throw new Error('developer QA session lost before refresh: '+JSON.stringify(adminSession));
  await page.evaluate(()=>{window.confirm=()=>true;window.__v635Reload=null;window.__kokmatchHardReload633=async(target,reason)=>{window.__v635Reload={target,reason}}});
  await page.evaluate(()=>forceUpdateApp());
  await page.waitForFunction(()=>!!window.__v635Reload,null,{timeout:5000});
