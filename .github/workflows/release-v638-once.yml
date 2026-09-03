@@ -70,4 +70,4 @@ jobs:
           git diff --cached --quiet && exit 0
           git commit -m 'Release v6.38 no-flash member resume'
           git push origin HEAD:main
-# retry: v6.21 applyControls rail guard
+# retry: guard only true background resume
