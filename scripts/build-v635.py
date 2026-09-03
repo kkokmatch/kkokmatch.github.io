@@ -34,7 +34,7 @@ function ensureTopVersion635(){
   if(!brand)return;
   let badge=top.querySelector('#kokmatchTopVersion635');
   if(!badge){badge=document.createElement('span');badge.id='kokmatchTopVersion635';badge.className='kmTopVersion635';brand.appendChild(badge)}
-  badge.textContent='v'+BUILD635;
+  if(badge.textContent!=='v'+BUILD635)badge.textContent='v'+BUILD635;
   const walker=document.createTreeWalker(top,NodeFilter.SHOW_TEXT);const stale=[];let n=null;
   while((n=walker.nextNode())){
    if(badge.contains(n))continue;
@@ -45,35 +45,35 @@ function ensureTopVersion635(){
  }catch(e){console.warn('KokMatch v6.35 top version',e)}finally{topSync635=false}
 }
 window.__kokmatchEnsureTopVersion635=ensureTopVersion635;
-function armTop635(){
- const top=document.querySelector('.top');if(!top||top.__kokmatchTopObserver635)return;
- const mo=new MutationObserver(()=>{if(!topSync635)queueMicrotask(ensureTopVersion635)});
- mo.observe(top,{subtree:true,childList:true,characterData:true});top.__kokmatchTopObserver635=mo;
-}
-try{const baseHeader635=renderHeader;renderHeader=function(...args){const r=baseHeader635.apply(this,args);ensureTopVersion635();armTop635();return r};window.renderHeader=renderHeader}catch{}
-try{const baseAll635=renderAll;renderAll=function(...args){const r=baseAll635.apply(this,args);ensureTopVersion635();armTop635();return r};window.renderAll=renderAll}catch{}
+function armTop635(){}
+try{const baseHeader635=renderHeader;renderHeader=function(...args){const r=baseHeader635.apply(this,args);ensureTopVersion635();return r};window.renderHeader=renderHeader}catch{}
+try{const baseAll635=renderAll;renderAll=function(...args){const r=baseAll635.apply(this,args);ensureTopVersion635();return r};window.renderAll=renderAll}catch{}
 
 async function latest635(){
  try{const r=await fetch('/latest-version.json?km635='+Date.now(),{cache:'no-store',headers:{'cache-control':'no-cache'}});if(!r.ok)throw new Error('version '+r.status);const x=await r.json();return String(x?.semanticVersion||x?.label||BUILD635).replace(/^v/i,'')||BUILD635}catch{return BUILD635}
 }
-async function globalRefresh635(target){
- const r=await fetch(ADMIN_REFRESH635,{method:'POST',headers:{'content-type':'application/json','authorization':'Bearer '+T},body:JSON.stringify({latestVersion:target}),cache:'no-store'});
+async function globalRefresh635(target,callerToken){
+ const token=String(callerToken||T||'');
+ const r=await fetch(ADMIN_REFRESH635,{method:'POST',headers:{'content-type':'application/json','authorization':'Bearer '+token},body:JSON.stringify({latestVersion:target}),cache:'no-store'});
  const x=await r.json().catch(()=>({}));
  if(!r.ok)throw new Error(x.error||'전체 이용자 최신화에 실패했습니다.');
  return x;
 }
 forceUpdateApp=async function(){
  const b=document.getElementById('forceUpdateBtn');
- if(b){b.disabled=true;b.textContent=me?.globalAdmin?'전체 이용자 로그아웃·최신화 중...':'최신 운영본 확인 중...'}
+ const isGlobalAdmin=!!me?.globalAdmin;
+ const callerToken=String(T||'');
+ if(b){b.disabled=true;b.textContent=isGlobalAdmin?'전체 이용자 로그아웃·최신화 중...':'최신 운영본 확인 중...'}
  try{
   const target=await latest635();
   let result=null;
-  if(me?.globalAdmin){
+  if(isGlobalAdmin){
+   if(!callerToken)throw new Error('개발자 로그인 세션을 확인할 수 없습니다. 다시 로그인해주세요.');
    if(!confirm('접속 중인 다른 모든 이용자를 로그아웃하고 최신 앱 버전으로 다시 접속시키겠습니까?')){if(b){b.disabled=false;b.textContent='↻ 최신 버전으로 새로고침'};return}
-   result=await globalRefresh635(target);
+   result=await globalRefresh635(target,callerToken);
    try{sessionStorage.setItem('kokmatch_last_global_refresh635',JSON.stringify({at:Date.now(),count:Number(result?.loggedOutSessions)||0,target}))}catch{}
   }
-  if(typeof window.__kokmatchHardReload633==='function')return window.__kokmatchHardReload633(target,me?.globalAdmin?'admin-global-refresh':'manual-refresh');
+  if(typeof window.__kokmatchHardReload633==='function')return window.__kokmatchHardReload633(target,isGlobalAdmin?'admin-global-refresh':'manual-refresh');
   location.replace('/?kmv='+encodeURIComponent(target)+'&r='+Date.now().toString(36));
  }catch(e){
   if(b){b.disabled=false;b.textContent='↻ 최신 버전으로 새로고침'}
@@ -82,10 +82,10 @@ forceUpdateApp=async function(){
 };
 window.forceUpdateApp=forceUpdateApp;
 
-queueMicrotask(()=>{ensureTopVersion635();armTop635()});
-window.addEventListener('pageshow',()=>setTimeout(()=>{ensureTopVersion635();armTop635()},80),{passive:true});
-document.addEventListener('visibilitychange',()=>{if(!document.hidden)setTimeout(()=>{ensureTopVersion635();armTop635()},100)},{passive:true});
-setTimeout(()=>{ensureTopVersion635();armTop635()},400);
+queueMicrotask(()=>ensureTopVersion635());
+window.addEventListener('pageshow',()=>setTimeout(ensureTopVersion635,80),{passive:true});
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)setTimeout(ensureTopVersion635,100)},{passive:true});
+setTimeout(ensureTopVersion635,400);
 })();
 '''
 Path('app-v6.35.js').write_text(js,encoding='utf-8')
@@ -100,7 +100,7 @@ Path('index.html').write_text(idx,encoding='utf-8')
 
 latest={
  'version':75,'label':'v6.35','semanticVersion':'6.35','build':'v6.35',
- 'updatedAt':'2026-09-03T12:35:00+09:00',
+ 'updatedAt':'2026-09-03T13:10:00+09:00',
  'note':'v6.35 개발자 전체 세션 강제종료 최신화 · 전 역할 최상단 버전 단일표시 · 구형 v6.20 상단표시 제거'
 }
 Path('latest-version.json').write_text(json.dumps(latest,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
