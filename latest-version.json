@@ -1,8 +1,8 @@
 {
-  "version": 70,
-  "label": "v6.30",
-  "semanticVersion": "6.30",
-  "build": "v6.30",
-  "updatedAt": "2026-09-03T09:45:00+09:00",
-  "note": "v6.30 큰 PWA 설치안내 · iOS/Android 단계별 설치가이드 · 첫 로그인 강제상태조회 유지 · 초기 로그인 세션 안정화"
+  "version": 71,
+  "label": "v6.31",
+  "semanticVersion": "6.31",
+  "build": "v6.31",
+  "updatedAt": "2026-09-03T10:12:00+09:00",
+  "note": "v6.31 iPhone PWA 설치안내 4단계 문구 개선 · 우측 하단 메뉴/공유/더보기/홈 화면 추가 안내"
 }
