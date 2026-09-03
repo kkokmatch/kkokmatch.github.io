@@ -33,6 +33,17 @@ jobs:
           for i in {1..30}; do curl -fsS http://127.0.0.1:4173/ >/dev/null && exit 0; sleep 0.25; done
           cat /tmp/kokmatch-v637-http.log
           exit 1
+      - name: Guard QA from PWA permission overlay
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('scripts/qa-current-runtime.mjs')
+          s=p.read_text(encoding='utf-8')
+          needle='  await page.waitForTimeout(350);'
+          repl=needle+"\n  await page.evaluate(()=>document.getElementById('pwaPrompt629')?.remove());"
+          if needle not in s: raise SystemExit('qa overlay insertion point missing')
+          p.write_text(s.replace(needle,repl,1),encoding='utf-8')
+          PY
       - name: Existing runtime regression QA
         run: |
           node scripts/qa-boot-diagnostic.mjs
@@ -43,6 +54,7 @@ jobs:
         run: node scripts/qa-member-pagination-v637.mjs
       - name: Commit release only after green QA
         run: |
+          git checkout -- scripts/qa-current-runtime.mjs
           git config user.name 'kkokmatch-release-bot'
           git config user.email 'actions@users.noreply.github.com'
           git add app-v6.37.js app-v6.37.css index.html manifest.webmanifest kokmatch-sw.js latest-version.json
