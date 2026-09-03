@@ -1,39 +1,20 @@
 import fs from 'node:fs';
 import { chromium } from 'playwright';
-
-const latest=JSON.parse(fs.readFileSync('latest-version.json','utf8'));
-const VERSION=String(latest.semanticVersion||'').replace(/^v/,'');
-if(VERSION!=='6.38')throw new Error(`expected v6.38, got ${VERSION}`);
+const latest=JSON.parse(fs.readFileSync('latest-version.json','utf8'));const VERSION=String(latest.semanticVersion||'').replace(/^v/,'');if(VERSION!=='6.38')throw new Error(`expected v6.38, got ${VERSION}`);
 const members=Array.from({length:23},(_,i)=>({id:`m${String(i).padStart(2,'0')}`,name:`회원${String(i).padStart(2,'0')}`,year:1990+i%10,gender:i%2?'여':'남',age:'30',cls:'C',type:'member',role:'member',totalGames:i,state:i%3===0?'waiting':i%3===1?'spectator':'out',joinedAt:Date.now()-60000}));
-let serverState={courtCount:8,courtNames:Array.from({length:8},(_,i)=>`${i+1}코트`),members,queue:members.filter(m=>m.state==='waiting').map(m=>m.id),pendingGames:[],games:[],history:[],pairCounts:{}};
-const copy=()=>JSON.parse(JSON.stringify(serverState));
-const user={memberId:'m00',displayName:'회원00',role:'member',globalAdmin:false,tempOrganizer:false,groupId:'qa'};
-const browser=await chromium.launch({headless:true});
-const page=await browser.newPage({viewport:{width:800,height:1280},isMobile:true,hasTouch:true,userAgent:'Mozilla/5.0 (Linux; Android 14; SM-X710) AppleWebKit/537.36 Chrome/152 Mobile Safari/537.36'});
-const errors=[];page.on('pageerror',e=>errors.push(String(e?.stack||e)));
+let serverState={courtCount:8,courtNames:Array.from({length:8},(_,i)=>`${i+1}코트`),members,queue:members.filter(m=>m.state==='waiting').map(m=>m.id),pendingGames:[],games:[],history:[],pairCounts:{}};const copy=()=>JSON.parse(JSON.stringify(serverState));const user={memberId:'m00',displayName:'회원00',role:'member',globalAdmin:false,tempOrganizer:false,groupId:'qa'};
+const browser=await chromium.launch({headless:true});const page=await browser.newPage({viewport:{width:800,height:1280},isMobile:true,hasTouch:true,userAgent:'Mozilla/5.0 (Linux; Android 14; SM-X710) AppleWebKit/537.36 Chrome/152 Mobile Safari/537.36'});const errors=[];page.on('pageerror',e=>errors.push(String(e?.stack||e)));
 await page.route('https://wjelumpbjklfrdjxbesj.supabase.co/functions/v1/**',async route=>route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({success:true,data:copy(),user,group:{groupId:'qa',name:'QA 모임'},groups:[],profiles:{}})}));
 function expect(cond,msg){if(!cond)throw new Error(msg)}
 async function inject(){await page.evaluate(({state,user})=>{T='qa-token';localStorage.setItem('kokmatch_token',T);currentGroupId='qa';localStorage.setItem('kokmatch_group_id','qa');currentView='members';S=JSON.parse(JSON.stringify(state));window.S=S;me=user;window.me=me;group={groupId:'qa',name:'QA 모임'};window.group=group;groups=[];normalizeClient();renderAll();document.getElementById('login')?.classList.add('hide')},{state:copy(),user});await page.waitForTimeout(800)}
 async function watchStart(){return page.evaluate(()=>{window.__qaResumeMut638={cardRemoved:0,railRemoved:0,records:0};const box=document.getElementById('members');window.__qaResumeObs638?.disconnect?.();window.__qaResumeObs638=new MutationObserver(ms=>{for(const m of ms){if(m.type!=='childList')continue;window.__qaResumeMut638.records++;for(const n of m.removedNodes){if(!(n instanceof Element))continue;if(n.matches?.('.memberCard')||n.querySelector?.('.memberCard'))window.__qaResumeMut638.cardRemoved++;if(n.matches?.('.kmRosterActions621')||n.querySelector?.('.kmRosterActions621'))window.__qaResumeMut638.railRemoved++}}});window.__qaResumeObs638.observe(box,{childList:true,subtree:true});window.__qaResumeRefs638=[...box.querySelectorAll('.memberCard')].map(c=>({id:String(c.dataset.memberId22||''),card:c,rail:c.querySelector(':scope > .kmRosterActions621')}));return window.__qaResumeRefs638.map(x=>x.id)})}
-async function watchResult(){return page.evaluate(()=>{const refs=window.__qaResumeRefs638||[];return{mut:window.__qaResumeMut638,stable:refs.every(x=>{const now=[...document.querySelectorAll('#members .memberCard')].find(c=>String(c.dataset.memberId22||'')===x.id);return !!now&&now===x.card&&now.querySelector(':scope > .kmRosterActions621')===x.rail}),page:Number(window.__kokmatchMemberPage46||1)}})}
+async function watchResult(){return page.evaluate(()=>{const refs=window.__qaResumeRefs638||[];const changed=[];for(const x of refs){const now=[...document.querySelectorAll('#members .memberCard')].find(c=>String(c.dataset.memberId22||'')===x.id);if(!now||now!==x.card||now.querySelector(':scope > .kmRosterActions621')!==x.rail)changed.push({id:x.id,cardSame:!!now&&now===x.card,railSame:!!now&&now.querySelector(':scope > .kmRosterActions621')===x.rail})}return{mut:window.__qaResumeMut638,stable:changed.length===0,changed,page:Number(window.__kokmatchMemberPage46||1),debug:window.__kokmatchResumeDebug638}})}
 async function triggerResume(){await page.evaluate(()=>{document.dispatchEvent(new Event('visibilitychange'));window.dispatchEvent(new Event('focus'));window.dispatchEvent(new Event('pageshow'))});await page.waitForTimeout(900)}
 try{
- await page.goto('http://127.0.0.1:4173/?qa=resume638',{waitUntil:'networkidle'});
- await page.waitForFunction(v=>window.__kokmatchVersionLock===v&&typeof window.__kokmatchSilentResume638==='function',VERSION,{timeout:15000});
- await inject();
- await page.evaluate(()=>window.memberPageGo46?.(2));await page.waitForTimeout(800);
- let ids=await watchStart();expect(ids.length===10,'page 2 did not render 10 cards');
- await triggerResume();let r=await watchResult();expect(r.page===2,'resume changed member page');expect(r.stable,'unchanged resume replaced member card/action rail nodes');expect(r.mut.cardRemoved===0&&r.mut.railRemoved===0,'unchanged resume removed member cards/rails: '+JSON.stringify(r.mut));
-
- await page.evaluate(()=>window.memberPageGo46?.(1));await page.waitForTimeout(800);await watchStart();
- serverState.members.find(m=>m.id==='m00').state='spectator';serverState.queue=serverState.queue.filter(id=>id!=='m00');
- await triggerResume();r=await watchResult();expect(r.page===1,'state-change resume changed page');expect(r.stable,'state-change resume replaced card/action rail');expect(r.mut.cardRemoved===0&&r.mut.railRemoved===0,'state-change resume removed card/rail: '+JSON.stringify(r.mut));
+ await page.goto('http://127.0.0.1:4173/?qa=resume638',{waitUntil:'networkidle'});await page.waitForFunction(v=>window.__kokmatchVersionLock===v&&typeof window.__kokmatchSilentResume638==='function',VERSION,{timeout:15000});await inject();
+ await page.evaluate(()=>window.memberPageGo46?.(2));await page.waitForTimeout(800);let ids=await watchStart();expect(ids.length===10,'page 2 did not render 10 cards');await triggerResume();let r=await watchResult();expect(r.page===2,'resume changed member page: '+JSON.stringify(r));expect(r.stable,'unchanged resume replaced nodes: '+JSON.stringify(r));expect(r.mut.cardRemoved===0&&r.mut.railRemoved===0,'unchanged resume removed cards/rails: '+JSON.stringify(r));
+ await page.evaluate(()=>window.memberPageGo46?.(1));await page.waitForTimeout(800);await watchStart();serverState.members.find(m=>m.id==='m00').state='spectator';serverState.queue=serverState.queue.filter(id=>id!=='m00');await triggerResume();r=await watchResult();expect(r.page===1,'state-change resume changed page: '+JSON.stringify(r));expect(r.stable,'state-change resume replaced nodes: '+JSON.stringify(r));expect(r.mut.cardRemoved===0&&r.mut.railRemoved===0,'state-change resume removed card/rail: '+JSON.stringify(r));
  const self=await page.evaluate(()=>{const c=document.querySelector('#members .memberCard[data-member-id22="m00"]');return{buttons:[...c.querySelectorAll('.kmRosterBtns621 button')].map(b=>(b.textContent||'').trim()),status:(c.querySelector('.status')?.textContent||'').trim()}});expect(JSON.stringify(self.buttons)===JSON.stringify(['입장','퇴장']),'self resume buttons not updated: '+JSON.stringify(self));expect(self.status==='관람','self resume status not updated: '+JSON.stringify(self));
-
- await page.setViewportSize({width:390,height:844});await page.waitForTimeout(150);const contained=await page.evaluate(()=>[...document.querySelectorAll('#members .memberCard')].every(c=>{const a=c.querySelector(':scope > .kmRosterActions621'),cr=c.getBoundingClientRect(),ar=a?.getBoundingClientRect();return !!a&&!!ar&&ar.left>=cr.left-1&&ar.right<=cr.right+1}));expect(contained,'iPhone-sized action rail escaped card');
- if(errors.length)throw new Error('page errors: '+errors.join(' | '));
- console.log('PASS v6.38 unchanged resume keeps member cards and action rails intact');
- console.log('PASS v6.38 changed attendance updates slots in place without rail replacement');
- console.log('PASS v6.38 member page preserved across resume');
- console.log('PASS v6.38 iPhone-sized containment');
+ await page.setViewportSize({width:390,height:844});await page.waitForTimeout(150);const contained=await page.evaluate(()=>[...document.querySelectorAll('#members .memberCard')].every(c=>{const a=c.querySelector(':scope > .kmRosterActions621'),cr=c.getBoundingClientRect(),ar=a?.getBoundingClientRect();return !!a&&!!ar&&ar.left>=cr.left-1&&ar.right<=cr.right+1}));expect(contained,'iPhone-sized action rail escaped card');if(errors.length)throw new Error('page errors: '+errors.join(' | '));
+ console.log('PASS v6.38 unchanged resume keeps member cards and action rails intact');console.log('PASS v6.38 changed attendance updates slots in place without rail replacement');console.log('PASS v6.38 member page preserved across resume');console.log('PASS v6.38 iPhone-sized containment');
 }finally{await browser.close()}
