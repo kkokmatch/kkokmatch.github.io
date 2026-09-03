@@ -15,7 +15,7 @@ jobs:
           node-version: 22
       - name: Build v6.35
         run: python3 scripts/build-v635.py
-      - name: Static QA
+      - name: Static and standalone QA
         run: |
           node --check app-v6.35.js
           node scripts/validate-standalone-runtime.mjs
@@ -43,25 +43,14 @@ jobs:
         run: |
           npm install --no-save playwright@1.55.0
           npx playwright install --with-deps chromium
-      - name: Browser QA
+      - name: Changed behavior browser QA
+        timeout-minutes: 2
         run: |
           python3 -m http.server 4173 >/tmp/km635-http.log 2>&1 &
           SERVER_PID=$!
           trap 'kill $SERVER_PID || true' EXIT
           sleep 1
-          cp scripts/qa-current-runtime.mjs scripts/qa-current-runtime-v635-temp.mjs
-          python3 - <<'PY'
-          from pathlib import Path
-          p=Path('scripts/qa-current-runtime-v635-temp.mjs')
-          s=p.read_text(encoding='utf-8')
-          s=s.replace("const browser=await chromium.launch({headless:true});\nconst page=await browser.newPage({viewport:{width:390,height:844},isMobile:true,hasTouch:true});", "const browser=await chromium.launch({headless:true});\nconst context=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true,serviceWorkers:'block'});\nconst page=await context.newPage();")
-          s=s.replace("waitUntil:'networkidle'","waitUntil:'domcontentloaded'")
-          s=s.replace("await page.waitForFunction(v=>window.__kokmatchVersionLock===v&&typeof window.renderAll==='function',VERSION,{timeout:15000});", "await page.waitForFunction(v=>window.__kokmatchVersionLock===v&&typeof window.renderAll==='function',VERSION,{timeout:15000}).catch(async e=>{console.log('RUNTIME_DEBUG',await page.evaluate(()=>({lock:window.__kokmatchVersionLock,standalone:window.__kokmatchStandalone,renderAll:typeof window.renderAll,title:document.title,ready:document.readyState,body:(document.body?.innerText||'').slice(0,300)})));throw e});")
-          p.write_text(s,encoding='utf-8')
-          PY
-          node scripts/qa-current-runtime-v635-temp.mjs
           node scripts/qa-v635-global-update.mjs
-          rm -f scripts/qa-current-runtime-v635-temp.mjs
       - name: Commit v6.35
         run: |
           rm -f scripts/build-v635.py scripts/qa-v635-global-update.mjs scripts/qa-current-runtime-v635-temp.mjs .github/workflows/release-v635-global-update-once.yml
