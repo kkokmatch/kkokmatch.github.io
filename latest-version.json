@@ -1,8 +1,8 @@
 {
-  "version": 69,
-  "label": "v6.29",
-  "semanticVersion": "6.29",
-  "build": "v6.29",
-  "updatedAt": "2026-09-03T09:00:00+09:00",
-  "note": "v6.29 PWA 설치형 전환 · iOS/Android 홈화면 앱 · 알림 권한 안내 · 푸시 서비스워커 통합 · 네트워크 우선 최신화"
+  "version": 70,
+  "label": "v6.30",
+  "semanticVersion": "6.30",
+  "build": "v6.30",
+  "updatedAt": "2026-09-03T09:45:00+09:00",
+  "note": "v6.30 큰 PWA 설치안내 · iOS/Android 단계별 설치가이드 · 첫 로그인 강제상태조회 유지 · 초기 로그인 세션 안정화"
 }
