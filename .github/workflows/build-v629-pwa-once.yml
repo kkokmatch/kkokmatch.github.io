@@ -37,8 +37,21 @@ jobs:
           exit 1
       - name: Existing boot QA
         run: node scripts/qa-boot-diagnostic.mjs
-      - name: Existing roster QA
-        run: node scripts/qa-current-runtime.mjs
+      - name: Existing roster QA with PWA prompt dismissed
+        run: |
+          cp scripts/qa-current-runtime.mjs /tmp/qa-current-runtime.mjs.bak
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('scripts/qa-current-runtime.mjs')
+          s=p.read_text()
+          needle='  await page.waitForTimeout(350);'
+          repl="  await page.waitForTimeout(350);\n  await page.locator('#pwaSecondary629').click({timeout:1500}).catch(()=>{});"
+          if needle not in s:
+              raise SystemExit('QA insertion point not found')
+          p.write_text(s.replace(needle,repl,1))
+          PY
+          node scripts/qa-current-runtime.mjs
+          cp /tmp/qa-current-runtime.mjs.bak scripts/qa-current-runtime.mjs
       - name: Existing partner and polling QA
         run: node scripts/qa-partner-poll-current.mjs
       - name: PWA browser smoke QA
@@ -47,6 +60,7 @@ jobs:
         run: |
           git config user.name 'kkokmatch'
           git config user.email 'hanarin0201@gmail.com'
+          git restore scripts/qa-current-runtime.mjs || true
           rm -f .github/workflows/build-v629-pwa-once.yml scripts/build-v629-pwa.py scripts/qa-v629-pwa.mjs
           git add app-v6.29.js app-v6.29.css index.html latest-version.json manifest.webmanifest kokmatch-sw.js sw.js icons .github/workflows/build-v629-pwa-once.yml scripts/build-v629-pwa.py scripts/qa-v629-pwa.mjs
           git commit -m 'v6.29 add installable PWA and notification guidance'
