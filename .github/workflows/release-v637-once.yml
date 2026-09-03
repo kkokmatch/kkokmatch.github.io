@@ -1,4 +1,4 @@
-# v6.37 source-render retry
+# v6.37 final pagination regression
 name: Release v6.37 once
 
 on:
