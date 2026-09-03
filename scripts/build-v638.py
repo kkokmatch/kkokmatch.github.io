@@ -10,6 +10,7 @@ js=(root/f'app-v{OLD}.js').read_text(encoding='utf-8').replace(OLD,NEW)
 # Old compatibility painters used to replace the whole action rail a moment later,
 # which was visible as a flash. Guard only that short resume window.
 repls=[
+ ("function applyControls(){\n", "function applyControls(){\n if(Date.now()<Number(window.__kokmatchResumeNoRailReplaceUntil638||0))return;\n"),
  ("function paint632(){\n", "function paint632(){\n if(Date.now()<Number(window.__kokmatchResumeNoRailReplaceUntil638||0))return;\n"),
  ("function replaceControls22(card,m){\n", "function replaceControls22(card,m){\n if(Date.now()<Number(window.__kokmatchResumeNoRailReplaceUntil638||0)&&card?.querySelector?.(':scope > .kmRosterActions621'))return;\n"),
  ("function stabilize637(force=false){\n", "function stabilize637(force=false){\n if(Date.now()<Number(window.__kokmatchResumeNoRailReplaceUntil638||0)&&!needs637())return;\n"),
