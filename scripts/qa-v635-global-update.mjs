@@ -3,7 +3,7 @@ import { chromium } from 'playwright';
 const browser=await chromium.launch({headless:true});
 const errors=[];let adminCalls=[];
 const members=[
- {id:'dev',name:'개발자',year:1989,gender:'남',age:'30',cls:'C',type:'member',role:'admin',totalGames:0,state:'out'},
+ {id:'dev',name:'박태영',year:1989,gender:'남',age:'30',cls:'C',type:'member',role:'admin',totalGames:0,state:'out'},
  {id:'mem',name:'일반회원',year:1990,gender:'여',age:'30',cls:'D',type:'member',role:'member',totalGames:0,state:'out'}
 ];
 const state={courtCount:8,courtNames:Array.from({length:8},(_,i)=>`${i+1}코트`),members,queue:[],pendingGames:[],games:[],history:[],pairCounts:{}};
@@ -21,7 +21,7 @@ async function makePage(role){
      return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({success:true,loggedOutSessions:4,latestVersion:body.latestVersion,scope:'all_groups_except_caller'})});
    }
    const isAdmin=auth==='Bearer qa-admin',isMember=auth==='Bearer qa-member';
-   const user=isAdmin?{memberId:'dev',displayName:'개발자',role:'admin',globalAdmin:true,tempOrganizer:false,groupId:'qa'}:isMember?{memberId:'mem',displayName:'일반회원',role:'member',globalAdmin:false,tempOrganizer:false,groupId:'qa'}:null;
+   const user=isAdmin?{memberId:'dev',displayName:'박태영',role:'admin',globalAdmin:true,tempOrganizer:false,groupId:'qa'}:isMember?{memberId:'mem',displayName:'일반회원',role:'member',globalAdmin:false,tempOrganizer:false,groupId:'qa'}:null;
    return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({success:true,data:user?state:emptyState,user,group:user?{groupId:'qa',name:'QA 모임'}:null,groups:[]})});
  });
  await page.goto('http://127.0.0.1:4173/?qa=v635-'+role,{waitUntil:'domcontentloaded'});
@@ -35,7 +35,7 @@ async function makePage(role){
 async function installRole(page,globalAdmin){
  await page.evaluate(({state,globalAdmin})=>{
    T=globalAdmin?'qa-admin':'qa-member';localStorage.setItem('kokmatch_token',T);currentGroupId='qa';localStorage.setItem('kokmatch_group_id','qa');currentView='members';S=JSON.parse(JSON.stringify(state));window.S=S;
-   me=globalAdmin?{memberId:'dev',displayName:'개발자',role:'admin',globalAdmin:true,tempOrganizer:false,groupId:'qa'}:{memberId:'mem',displayName:'일반회원',role:'member',globalAdmin:false,tempOrganizer:false,groupId:'qa'};
+   me=globalAdmin?{memberId:'dev',displayName:'박태영',role:'admin',globalAdmin:true,tempOrganizer:false,groupId:'qa'}:{memberId:'mem',displayName:'일반회원',role:'member',globalAdmin:false,tempOrganizer:false,groupId:'qa'};
    group={groupId:'qa',name:'QA 모임'};groups=[];normalizeClient();renderAll();document.getElementById('login')?.classList.add('hide');
  },{state,globalAdmin});
  await page.waitForTimeout(100);
@@ -64,8 +64,8 @@ try{
  await adminRun.page.evaluate(()=>goView('settings'));
  const adminSetting=await adminRun.page.locator('#kokmatchGlobalVersion634').textContent();
  if(adminSetting?.trim()!=='콕매치 v6.35 · 최신 운영본')throw new Error('admin settings version mismatch: '+adminSetting);
- const adminSession=await adminRun.page.evaluate(()=>({globalAdmin:!!me?.globalAdmin,role:me?.role||'',token:T}));
- if(!adminSession.globalAdmin||adminSession.token!=='qa-admin')throw new Error('developer session invalid before refresh: '+JSON.stringify(adminSession));
+ const adminSession=await adminRun.page.evaluate(()=>({globalAdmin:!!me?.globalAdmin,role:me?.role||'',name:me?.displayName||'',token:T}));
+ if(!adminSession.globalAdmin||adminSession.token!=='qa-admin'||adminSession.name!=='박태영')throw new Error('developer session invalid before refresh: '+JSON.stringify(adminSession));
  await adminRun.page.evaluate(()=>{window.confirm=()=>true;window.__v635Reload=null;window.__kokmatchHardReload633=async(target,reason)=>{window.__v635Reload={target,reason}}});
  await adminRun.page.evaluate(()=>forceUpdateApp());
  await adminRun.page.waitForFunction(()=>!!window.__v635Reload,null,{timeout:5000});
