@@ -36,6 +36,23 @@ jobs:
           done
           cat /tmp/kokmatch-http.log
           exit 1
+      - name: Adapt legacy QA for intentional PWA modal
+        run: |
+          cp scripts/qa-current-runtime.mjs /tmp/qa-current-runtime.mjs.bak
+          cp scripts/qa-partner-poll-current.mjs /tmp/qa-partner-poll-current.mjs.bak
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('scripts/qa-current-runtime.mjs');s=p.read_text()
+          needle='  await page.waitForTimeout(350);'
+          repl="  await page.waitForTimeout(350);\n  await page.locator('#pwaSecondary629').click({timeout:1500}).catch(()=>{});"
+          if needle not in s: raise SystemExit('runtime QA insertion point missing')
+          p.write_text(s.replace(needle,repl,1))
+          p=Path('scripts/qa-partner-poll-current.mjs');s=p.read_text()
+          needle="\n  await page.evaluate(()=>window.openPartner66('mgr'));"
+          repl="\n  await page.waitForTimeout(900);\n  await page.locator('#pwaSecondary629').click({timeout:1500}).catch(()=>{});\n  await page.evaluate(()=>window.openPartner66('mgr'));"
+          if needle not in s: raise SystemExit('focused QA insertion point missing')
+          p.write_text(s.replace(needle,repl,1))
+          PY
       - name: Existing runtime QA
         run: node scripts/qa-current-runtime.mjs
       - name: Existing focused QA
@@ -50,7 +67,9 @@ jobs:
         run: |
           git config user.name 'kkokmatch'
           git config user.email 'hanarin0201@gmail.com'
+          cp /tmp/qa-current-runtime.mjs.bak scripts/qa-current-runtime.mjs
+          cp /tmp/qa-partner-poll-current.mjs.bak scripts/qa-partner-poll-current.mjs
           rm -f .github/workflows/release-v632-ios-resume-roster-once.yml scripts/build-v632.py
-          git add app-v6.32.js app-v6.32.css index.html latest-version.json kokmatch-sw.js sw.js .github/workflows/release-v632-ios-resume-roster-once.yml scripts/build-v632.py
+          git add app-v6.32.js app-v6.32.css index.html latest-version.json kokmatch-sw.js sw.js .github/workflows/release-v632-ios-resume-roster-once.yml scripts/build-v632.py scripts/qa-current-runtime.mjs scripts/qa-partner-poll-current.mjs
           git commit -m 'v6.32 stabilize roster buttons after iOS resume'
           git push
