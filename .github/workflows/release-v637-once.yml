@@ -1,4 +1,4 @@
-# v6.37 final pagination regression
+# v6.37 focused general-member pagination release QA
 name: Release v6.37 once
 
 on:
