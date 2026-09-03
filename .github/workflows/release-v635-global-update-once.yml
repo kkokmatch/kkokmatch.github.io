@@ -1,5 +1,5 @@
 name: Release v6.35 global update once
-# release pass 11 - QA mirrors real state user/group response
+# release pass 12 - isolated member/developer sessions
 on:
   push:
     paths:
