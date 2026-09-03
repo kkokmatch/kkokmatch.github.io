@@ -28,6 +28,20 @@ if old_resume not in js:
     raise SystemExit('v5.4 forced resume fallback not found')
 js=js.replace(old_resume,"throw last||new Error('로그인 후 화면을 불러오지 못했습니다.')")
 
+# Two legacy decorators dropped loadState(true)'s force argument. On the members view
+# that turns the first attempt into an infinite polling throttle, so fresh-login retry
+# never reaches the network. Preserve ...args through those decorators.
+legacy_state_wrappers=[
+ ("const loadState70=loadState;\nloadState=async function(){const x=await loadState70();armDailyReset71();return x};",
+  "const loadState70=loadState;\nloadState=async function(...args){const x=await loadState70(...args);armDailyReset71();return x};"),
+ ("const oldLoadState99=loadState;loadState=async function(){await oldLoadState99();restoreDeveloper99();saveDeveloperProof99();if(currentView==='members')setTimeout(ensureFullDeveloperRoster99,0)};",
+  "const oldLoadState99=loadState;loadState=async function(...args){await oldLoadState99(...args);restoreDeveloper99();saveDeveloperProof99();if(currentView==='members')setTimeout(ensureFullDeveloperRoster99,0)};")
+]
+for old_wrap,new_wrap in legacy_state_wrappers:
+    if old_wrap not in js:
+        raise SystemExit('legacy loadState force-dropping wrapper not found')
+    js=js.replace(old_wrap,new_wrap,1)
+
 # Enlarge and clarify the installation guide while preserving the current PWA logic.
 ios_old="modal629('콕매치를 앱처럼 설치하세요','Safari로 열기 → 공유 버튼 → <b>홈 화면에 추가</b>를 선택하면 콕매치가 일반 앱처럼 실행됩니다. 설치 후 홈 화면 아이콘으로 실행하면 게임 푸시 알림도 받을 수 있습니다.','확인','나중에',()=>closePrompt629(),()=>{});"
 ios_new="modal629('콕매치를 홈 화면에 설치해주세요',`<div class=\"pwaInstallLead630\">한 번만 추가하면 다음부터는 <b>일반 앱처럼 아이콘을 눌러 바로 실행</b>할 수 있습니다.</div><div class=\"pwaInstallSteps630\"><div><b>1</b><span>카카오톡에서 열었다면 우측 메뉴에서 <strong>Safari로 열기</strong></span></div><div><b>2</b><span>Safari 아래쪽의 <strong>공유 버튼</strong> 누르기</span></div><div><b>3</b><span><strong>홈 화면에 추가</strong> → 추가</span></div></div><div class=\"pwaInstallFoot630\">설치 후 홈 화면의 콕매치 아이콘으로 실행하면 푸시 알림도 받을 수 있습니다.</div>`,'확인했어요','나중에',()=>closePrompt629(),()=>{});"
@@ -134,8 +148,8 @@ latest={
   'label':'v6.30',
   'semanticVersion':'6.30',
   'build':'v6.30',
-  'updatedAt':'2026-09-03T09:40:00+09:00',
-  'note':'v6.30 큰 PWA 설치안내 · iOS/Android 단계별 설치가이드 · 첫 로그인 세션 401 재시도 · 초기 로그인 유지 안정화'
+  'updatedAt':'2026-09-03T09:45:00+09:00',
+  'note':'v6.30 큰 PWA 설치안내 · iOS/Android 단계별 설치가이드 · 첫 로그인 강제상태조회 유지 · 초기 로그인 세션 안정화'
 }
 write('latest-version.json',json.dumps(latest,ensure_ascii=False,indent=2)+'\n')
 print('Built KokMatch v6.30 candidate')
