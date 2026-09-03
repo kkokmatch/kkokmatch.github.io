@@ -1,4 +1,5 @@
 name: Release v6.35 global update once
+# diagnostic pass 5
 on:
   push:
     paths:
