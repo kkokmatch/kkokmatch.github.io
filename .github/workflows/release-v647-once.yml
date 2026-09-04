@@ -24,7 +24,7 @@ jobs:
         run: |
           node --check app-v6.47.js
           node scripts/validate-standalone-runtime.mjs
-          grep -F 'data-queue-watermark647' app-v6.47.js >/dev/null
+          grep -F 'queueWatermark647' app-v6.47.js >/dev/null
           grep -F '/^(?:S|[A-E])$/' app-v6.47.js >/dev/null
           grep -F 'data-queue-watermark647="S"' app-v6.47.css >/dev/null
           grep -F 'linear-gradient(110deg' app-v6.47.css >/dev/null
