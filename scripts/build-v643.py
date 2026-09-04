@@ -17,7 +17,7 @@ arch_idx=idx42.replace('/app-v6.42.css?v=6.42','./app-v6.42.css?v=6.42').replace
 (archive/'index.html').write_text(arch_idx,encoding='utf-8')
 
 # Start from the current single runtime.
-js43=js42.replace('v6.42 early resume guard','v6.43 early resume guard').replace("window.__kokmatchStandalone='6.42'","window.__kokmatchStandalone='6.43'").replace("window.__kokmatchVersionLock='6.42'","window.__kokmatchVersionLock='6.43'").replace("sessionStorage.setItem('kokmatch_runtime_version','6.42')","sessionStorage.setItem('kokmatch_runtime_version','6.43')")
+js43=js42
 
 old='''/* KokMatch v6.42: white member/queue cards + right-side queue grade stripe. */
 (()=>{
@@ -95,6 +95,8 @@ try{if(me)decorateGradeCards643()}catch{}
 if old not in js43:
     raise SystemExit('v6.42 grade decorator block not found')
 js43=js43.replace(old,new,1)
+# v6.43 is a full single runtime: update every dotted release-version string in the copied JS.
+js43=js43.replace('6.42','6.43')
 (root/'app-v6.43.js').write_text(js43,encoding='utf-8')
 
 # Remove the old v6.42 card-style tail and replace it with one canonical v6.43 block.
