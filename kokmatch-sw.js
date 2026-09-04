@@ -1,4 +1,4 @@
-const KOKMATCH_SW_VERSION='6.40';
+const KOKMATCH_SW_VERSION='6.41';
 const KOKMATCH_CACHE_PREFIX='kokmatch-';
 self.addEventListener('install',event=>{event.waitUntil(self.skipWaiting())});
 self.addEventListener('activate',event=>{event.waitUntil((async()=>{try{const keys=await caches.keys();await Promise.all(keys.filter(k=>k.startsWith(KOKMATCH_CACHE_PREFIX)||/kkokmatch/i.test(k)).map(k=>caches.delete(k)))}catch{}await self.clients.claim()})())});
