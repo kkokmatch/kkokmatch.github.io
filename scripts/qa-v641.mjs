@@ -1,0 +1,13 @@
+import fs from 'node:fs';
+const js=fs.readFileSync('app-v6.41.js','utf8');
+const must=(c,m)=>{if(!c)throw new Error(m)};
+must(js.includes("window.__kokmatchStandalone='6.41'"),'v6.41 runtime marker missing');
+must(js.includes('kokmatch-create-v641'),'v6.41 create endpoint missing');
+must(js.includes("p.warning==='selection_conflict'"),'selection conflict handling missing');
+must(js.includes('blocked=new Set'),'conflict member filtering missing');
+must(js.includes('snapshot.draft.map'),'draft preservation missing');
+must(js.includes('최신 대기명단으로 반영했습니다'),'conflict notice missing');
+must(js.includes("registerBusy641=false"),'single-device register lock missing');
+must(js.includes("draft=[null,null,null,null];renderHeader();renderMembers();renderQueue()"),'optimistic registration behavior missing');
+must(js.includes("S=p.data;normalizeClient()"),'latest server state sync missing');
+console.log('v6.41 conflict QA passed');
