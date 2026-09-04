@@ -110,7 +110,7 @@ latest={
 }
 (ROOT/'latest-version.json').write_text(json.dumps(latest,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
 
-assert 'data-queue-watermark647' in js
+assert 'queueWatermark647' in js
 assert '/^(?:S|[A-E])$/' in js
 assert 'data-queue-watermark647="S"' in css
 assert 'linear-gradient(110deg' in css
