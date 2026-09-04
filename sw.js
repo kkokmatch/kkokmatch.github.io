@@ -1,2 +1,2 @@
 /* Stable compatibility entry for older KokMatch installations. */
-importScripts('/kokmatch-sw.js?v=6.49');
+importScripts('/kokmatch-sw.js?v=6.50');

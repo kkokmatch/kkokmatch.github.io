@@ -1,8 +1,8 @@
 {
-  "version": 89,
-  "label": "v6.49",
-  "semanticVersion": "6.49",
-  "build": "v6.49",
-  "updatedAt": "2026-09-04T13:42:00+09:00",
-  "note": "v6.49 S급 무지개띠를 A~E와 동일한 5px 테두리 형태로 통일 · 레이아웃/권한 유지"
+  "version": 90,
+  "label": "v6.50",
+  "semanticVersion": "6.50",
+  "build": "v6.50",
+  "updatedAt": "2026-09-04T14:10:14+09:00",
+  "note": "v6.50 S급 무지개띠 실제 표시 수정 · A~E와 동일한 5px 테두리 영역 사용 · 레이아웃/권한 유지"
 }
