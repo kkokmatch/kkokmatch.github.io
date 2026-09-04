@@ -1,4 +1,5 @@
 name: Release v6.40 once
+# retry after session QA correction
 
 on:
   push:
