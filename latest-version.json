@@ -1,8 +1,8 @@
 {
-  "version": 86,
-  "label": "v6.46",
-  "semanticVersion": "6.46",
-  "build": "v6.46",
-  "updatedAt": "2026-09-04T12:00:00+09:00",
-  "note": "v6.46 S급 추가 · 회원 등록/수정 및 일괄등록 S/A/B/C/D/E 지원 · S 급수배지 무지개 그라데이션"
+  "version": 87,
+  "label": "v6.47",
+  "semanticVersion": "6.47",
+  "build": "v6.47",
+  "updatedAt": "2026-09-04T13:29:00+09:00",
+  "note": "v6.47 개인게임대기 회원카드 A/B/C/D/E/S 굵은 급수색 워터마크 추가 · 카드 레이아웃/구조 유지"
 }
