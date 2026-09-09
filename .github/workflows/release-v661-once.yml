@@ -18,7 +18,9 @@ jobs:
           node-version: 22
 
       - name: Build v6.61 from current live runtime
-        run: python3 scripts/build-v661.py
+        run: |
+          python3 scripts/build-v661.py
+          sed -i 's/dev-challenger-frame-v660.webp/dev-challenger-frame-v661.webp/g' scripts/qa-v661-frame.mjs
 
       - name: Syntax and standalone runtime invariants
         run: |
@@ -27,12 +29,15 @@ jobs:
           grep -F "window.__kokmatchVersionLock='6.61'" app-v6.61.js >/dev/null
           grep -F "window.__kokmatchDevFrame661='6.61'" app-v6.61.js >/dev/null
           grep -F 'img.devFrame661' app-v6.61.css >/dev/null
-          grep -F 'dev-challenger-frame-v660.webp?v=6.61' app-v6.61.css >/dev/null
+          grep -F 'dev-challenger-frame-v661.webp?v=6.61' app-v6.61.css >/dev/null
           grep -F 'app-v6.61.js?v=6.61' index.html >/dev/null
           grep -F 'app-v6.61.css?v=6.61' index.html >/dev/null
           ! grep -F 'app-v6.60.js' index.html
           ! grep -F 'app-v6.60.css' index.html
-          test -s assets/dev-challenger-frame-v660.webp
+          test -s assets/dev-challenger-frame-v661.webp
+          test "$(stat -c%s assets/dev-challenger-frame-v661.webp)" = '33324'
+          echo 'a9c885e2363d1aff35c40c2f5beabb618e670091ef3ab3b5a93c0ca84c5b7129  assets/dev-challenger-frame-v661.webp' | sha256sum -c -
+          file assets/dev-challenger-frame-v661.webp | grep -F 'Web/P image' >/dev/null
 
       - name: Install Playwright browsers
         run: |
@@ -81,10 +86,9 @@ jobs:
         run: |
           git config user.name 'kkokmatch-release-bot'
           git config user.email 'actions@users.noreply.github.com'
-          git rm scripts/build-v661.py scripts/qa-v661-frame.mjs .github/workflows/release-v661-once.yml
-          git add app-v6.61.js app-v6.61.css index.html latest-version.json manifest.webmanifest kokmatch-sw.js sw.js versions/v6.60
+          git rm scripts/build-v661.py scripts/qa-v661-frame.mjs scripts/frame-v661-part*.b64 .github/workflows/release-v661-once.yml
+          git add app-v6.61.js app-v6.61.css assets/dev-challenger-frame-v661.webp index.html latest-version.json manifest.webmanifest kokmatch-sw.js sw.js versions/v6.60
           git commit -m 'Release v6.61 fix developer profile frame visibility'
           git push
 
-# retry: role-data-driven real DOM frame, decoded-image visibility QA
-# retry diagnostics: inspect settings DOM, asset HTTP response, and browser image decode
+# retry: reconstruct exact locally-verified WebP bytes on Actions runner, then require real browser decode in Chromium and WebKit
