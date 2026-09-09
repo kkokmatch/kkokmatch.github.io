@@ -27,6 +27,7 @@ jobs:
           grep -F 'compact-preserve-full-roster-v655' app-v6.55.js >/dev/null
           grep -F 'localFullRoster:true' app-v6.55.js >/dev/null
           grep -F "needRoster42=target==='members'&&prev!=='members'&&!hasFullRoster42()" app-v6.55.js >/dev/null
+          grep -F 'V6_ROSTER_REENTRY_LOCAL_V655=true' app-v6.55.js >/dev/null
           grep -F 'opsDashboard652' app-v6.55.js >/dev/null
           grep -F 'app-v6.55.js?v=6.55' index.html >/dev/null
           grep -F 'app-v6.55.css?v=6.55' index.html >/dev/null
@@ -80,4 +81,4 @@ jobs:
           git commit -m 'Release v6.55 fix dashboard roster state conflict'
           git push
 
-# retry: measure only incremental roster requests caused by stats -> members navigation
+# retry: V6_ROSTER_REENTRY repair may fetch only when canonical roster is incomplete
