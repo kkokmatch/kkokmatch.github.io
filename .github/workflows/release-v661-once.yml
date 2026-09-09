@@ -85,3 +85,5 @@ jobs:
           git add app-v6.61.js app-v6.61.css index.html latest-version.json manifest.webmanifest kokmatch-sw.js sw.js versions/v6.60
           git commit -m 'Release v6.61 fix developer profile frame visibility'
           git push
+
+# retry: role-data-driven real DOM frame, decoded-image visibility QA
