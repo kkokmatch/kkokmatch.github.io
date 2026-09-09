@@ -94,3 +94,5 @@ jobs:
           git add app-v6.62.js app-v6.62.css assets/dev-prism-frame-v662.webp index.html latest-version.json manifest.webmanifest kokmatch-sw.js sw.js versions/v6.61
           git commit -m 'Release v6.62 prism developer profile styling'
           git push
+
+# retry after restoring missing prism asset chunk 2
