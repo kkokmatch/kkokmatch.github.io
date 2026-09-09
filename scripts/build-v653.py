@@ -128,7 +128,7 @@ assert 'kokmatch-roster-v653' in js
 assert 'fullStateFallback653' in js
 assert 'restoreRoster653' in js
 assert 'setTimeout(()=>ctl.abort(),2800)' in js
-assert 'memberCountGroup46' in js
+assert 'MemberCountGroup46' in js
 assert '회원명단 응답이 지연되고 있습니다. 다시 시도해주세요.' not in js
 assert f'app-v{NEW}.js?v={NEW}' in idx and f'app-v{NEW}.css?v={NEW}' in idx
 print('v6.53 roster resilience build OK')
