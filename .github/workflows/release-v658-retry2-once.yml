@@ -85,3 +85,5 @@ jobs:
           git add app-v6.58.js app-v6.58.css index.html latest-version.json manifest.webmanifest kokmatch-sw.js sw.js versions/v6.57
           git commit -m 'Release v6.58 refine waiting controls and profile UI'
           git push
+
+# retry: developer self-profile frame persists through async profile card redraws
