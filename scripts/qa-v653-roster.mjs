@@ -33,16 +33,15 @@ async function run(engine,label){
  });
  try{
   await page.goto('http://127.0.0.1:4173/?qa=v653-roster',{waitUntil:'domcontentloaded'});
-  await page.waitForFunction(v=>window.__kokmatchVersionLock===v&&typeof window.enterMembers42==='function',VERSION,{timeout:15000});
+  await page.waitForFunction(v=>window.__kokmatchVersionLock===v&&typeof enterMembers42==='function',VERSION,{timeout:15000});
   await page.evaluate(({compactState})=>{
     T='qa-token';localStorage.setItem('kokmatch_token',T);currentGroupId='qa';currentView='members';S=JSON.parse(JSON.stringify(compactState));window.S=S;me={memberId:'m1',displayName:'관리자',role:'manager',globalAdmin:false,tempOrganizer:false,groupId:'qa'};group={groupId:'qa',name:'QA 모임'};groups=[];window.__kokmatchMemberCount46=4;window.__kokmatchMemberCountGroup46='qa';normalizeClient();document.getElementById('login')?.classList.add('hide');
   },{compactState});
-  await page.evaluate(()=>window.enterMembers42(true));
+  await page.evaluate(()=>enterMembers42(true));
   await page.waitForFunction(()=>document.querySelectorAll('#members .memberCard').length===4,{timeout:7000});
   const text1=await page.locator('#members').innerText();if(/응답이 지연|불러오지 못/.test(text1))throw new Error(label+' fallback surfaced roster error');
   if(rosterHits<1||fallbackHits<1)throw new Error(label+' fallback path not exercised '+JSON.stringify({rosterHits,fallbackHits}));
 
-  // After one successful full load, a compact-view transition must restore the cached roster immediately even if network disappears.
   await page.evaluate(()=>{goView('queue');S.members=[S.members[0]];window.S=S;window.__kokmatchMemberCount46=4;window.__kokmatchMemberCountGroup46='qa';normalizeClient();});
   hardOffline=true;
   await page.evaluate(()=>goView('members'));
