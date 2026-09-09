@@ -81,7 +81,7 @@ if(typeof renderSettings==='function'){
  renderSettings=function(...args){
   const r=settingsLast658.apply(this,args);
   const fix=()=>{try{frame658()}catch{}};
-  queueMicrotask(fix);requestAnimationFrame(fix);setTimeout(fix,40);setTimeout(fix,180);
+  fix();queueMicrotask(fix);requestAnimationFrame(fix);setTimeout(fix,40);setTimeout(fix,180);
   return r;
  };
 }
@@ -105,4 +105,4 @@ html.kokmatchDeveloper658 #profileCard53 .profilePreview53{
 @media (prefers-reduced-motion:reduce){html.kokmatchDeveloper658 #profileCard53 .profilePreview53{animation:none}}
 '''
 css.write_text(c,encoding='utf-8')
-print('v6.58 final idempotent badge, developer frame and queue metadata guards appended')
+print('v6.58 final synchronous/idempotent badge, developer frame and queue metadata guards appended')
