@@ -25,6 +25,8 @@ jobs:
           node --check app-v6.55.js
           node scripts/validate-standalone-runtime.mjs
           grep -F 'compact-preserve-full-roster-v655' app-v6.55.js >/dev/null
+          grep -F 'localFullRoster:true' app-v6.55.js >/dev/null
+          grep -F "needRoster42=target==='members'&&prev!=='members'&&!hasFullRoster42()" app-v6.55.js >/dev/null
           grep -F 'opsDashboard652' app-v6.55.js >/dev/null
           grep -F 'app-v6.55.js?v=6.55' index.html >/dev/null
           grep -F 'app-v6.55.css?v=6.55' index.html >/dev/null
@@ -77,3 +79,5 @@ jobs:
           git add app-v6.55.js app-v6.55.css index.html latest-version.json manifest.webmanifest kokmatch-sw.js sw.js versions/v6.54
           git commit -m 'Release v6.55 fix dashboard roster state conflict'
           git push
+
+# retry: complete roster tab entry must perform zero roster-network requests
