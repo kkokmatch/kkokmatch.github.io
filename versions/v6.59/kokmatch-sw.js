@@ -1,12 +1,11 @@
-const KOKMATCH_SW_VERSION='6.60';
+const KOKMATCH_SW_VERSION='6.59';
 const KOKMATCH_CACHE_PREFIX='kokmatch-static-';
 const KOKMATCH_STATIC_CACHE=KOKMATCH_CACHE_PREFIX+KOKMATCH_SW_VERSION;
 const KOKMATCH_CORE=[
-  '/assets/dev-challenger-frame-v660.webp?v=6.60',
-  '/app-v6.60.css?v=6.60',
-  '/app-v6.60.js?v=6.60',
-  '/manifest.webmanifest?v=6.60',
-  '/icons/kokmatch-180.png?v=6.60',
+  '/app-v6.59.css?v=6.59',
+  '/app-v6.59.js?v=6.59',
+  '/manifest.webmanifest?v=6.59',
+  '/icons/kokmatch-180.png?v=6.59',
   '/icons/kokmatch-192.png'
 ];
 self.addEventListener('install',event=>{event.waitUntil((async()=>{const c=await caches.open(KOKMATCH_STATIC_CACHE);await Promise.allSettled(KOKMATCH_CORE.map(async u=>{const r=await fetch(u,{cache:'no-store'});if(r.ok)await c.put(u,r)}));await self.skipWaiting()})())});
@@ -23,7 +22,7 @@ self.addEventListener('fetch',event=>{
  const req=event.request;if(req.method!=='GET')return;let url;try{url=new URL(req.url)}catch{return}if(url.origin!==self.location.origin)return;
  if(req.mode==='navigate'){event.waitUntil(self.registration.update().catch(()=>{}));event.respondWith(networkFirstNavigation(req));return}
  if(url.pathname==='/latest-version.json'||url.pathname==='/index.html'||url.pathname==='/kokmatch-sw.js'||url.pathname==='/sw.js'){event.respondWith(fetch(req,{cache:'no-store'}));return}
- const currentAsset=url.pathname===`/app-v${KOKMATCH_SW_VERSION}.js`||url.pathname===`/app-v${KOKMATCH_SW_VERSION}.css`||url.pathname==='/manifest.webmanifest'||url.pathname==='/assets/dev-challenger-frame-v660.webp'||url.pathname.startsWith('/icons/');
+ const currentAsset=url.pathname===`/app-v${KOKMATCH_SW_VERSION}.js`||url.pathname===`/app-v${KOKMATCH_SW_VERSION}.css`||url.pathname==='/manifest.webmanifest'||url.pathname.startsWith('/icons/');
  if(currentAsset){event.respondWith(cachedStatic(req));return}
  event.respondWith(fetch(req,{cache:'no-store'}));
 });
