@@ -1,11 +1,11 @@
-const KOKMATCH_SW_VERSION='6.56';
+const KOKMATCH_SW_VERSION='6.55';
 const KOKMATCH_CACHE_PREFIX='kokmatch-static-';
 const KOKMATCH_STATIC_CACHE=KOKMATCH_CACHE_PREFIX+KOKMATCH_SW_VERSION;
 const KOKMATCH_CORE=[
-  '/app-v6.56.css?v=6.56',
-  '/app-v6.56.js?v=6.56',
-  '/manifest.webmanifest?v=6.56',
-  '/icons/kokmatch-180.png?v=6.56',
+  '/app-v6.55.css?v=6.55',
+  '/app-v6.55.js?v=6.55',
+  '/manifest.webmanifest?v=6.55',
+  '/icons/kokmatch-180.png?v=6.55',
   '/icons/kokmatch-192.png'
 ];
 self.addEventListener('install',event=>{event.waitUntil((async()=>{const c=await caches.open(KOKMATCH_STATIC_CACHE);await Promise.allSettled(KOKMATCH_CORE.map(async u=>{const r=await fetch(u,{cache:'no-store'});if(r.ok)await c.put(u,r)}));await self.skipWaiting()})())});

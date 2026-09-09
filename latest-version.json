@@ -1,8 +1,8 @@
 {
-  "version": 95,
-  "label": "v6.55",
-  "semanticVersion": "6.55",
-  "build": "v6.55",
-  "updatedAt": "2026-09-09T10:49:50+09:00",
-  "note": "v6.55 실시간 운영현황-회원명부 충돌 제거 · 경량 상태조회 전체명단 보존 · 중복 reentry 강제조회 제거"
+  "version": 96,
+  "label": "v6.56",
+  "semanticVersion": "6.56",
+  "build": "v6.56",
+  "updatedAt": "2026-09-09T11:31:24+09:00",
+  "note": "v6.56 실시간 운영현황 제거 · 자동게임편성 ON/OFF · AI 자동최적화 편성 · 대기조 기존 편성자 표시"
 }
