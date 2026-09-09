@@ -34,6 +34,8 @@ function queueMeta658(){
 }
 function frame658(){
  try{
+  const isDev=me?.globalAdmin===true;
+  document.documentElement.classList.toggle('kokmatchDeveloper658',isDev);
   document.querySelectorAll('#members .devChallenger658,#queue .devChallenger658,#playing .devChallenger658').forEach(el=>{
    const host=el.closest('.memberCard,.queueCard,.pendingSlot,.playingPlayer53,.p,.slot,.card');
    if(host&&!host.querySelector('.roleBadge.role-global'))el.classList.remove('devChallenger658');
@@ -43,7 +45,7 @@ function frame658(){
    const av=host.querySelector(':scope > .profileIdentity21,:scope > .avatar,.profileIdentity21,.profileAvatar53,.profilePreview53,.avatar');
    if(av)av.classList.add('devChallenger658');
   });
-  if(me?.globalAdmin===true){const mine=document.querySelector('#profileCard53 .profilePreview53');if(mine)mine.classList.add('devChallenger658')}
+  if(isDev){const mine=document.querySelector('#profileCard53 .profilePreview53');if(mine)mine.classList.add('devChallenger658')}
  }catch{}
 }
 function purge658(){
@@ -65,10 +67,35 @@ function schedule658(){if(queued)return;queued=true;queueMicrotask(purge658)}
 function arm658(){
  purge658();
  const root=document.body||document.documentElement;
- if(root)new MutationObserver(schedule658).observe(root,{childList:true,subtree:true});
+ if(root)new MutationObserver(schedule658).observe(root,{childList:true,subtree:true,attributes:true,attributeFilter:['class']});
+}
+if(typeof renderSettings==='function'){
+ const settingsLast658=renderSettings;
+ renderSettings=function(...args){
+  const r=settingsLast658.apply(this,args);
+  const fix=()=>{try{frame658()}catch{}};
+  queueMicrotask(fix);requestAnimationFrame(fix);setTimeout(fix,40);setTimeout(fix,180);
+  return r;
+ };
 }
 if(document.body)arm658();else addEventListener('DOMContentLoaded',arm658,{once:true});
 })();
 '''
 p.write_text(s,encoding='utf-8')
+
+css=Path('app-v6.58.css')
+c=css.read_text(encoding='utf-8')
+c += r'''
+
+/* v6.58 render-proof developer self-profile frame. */
+html.kokmatchDeveloper658 #profileCard53 .profilePreview53{
+ border:2px solid #f1d06b!important;
+ outline:2px solid #3e3279!important;
+ outline-offset:1px!important;
+ box-shadow:0 0 0 4px rgba(79,64,153,.18),0 0 13px rgba(91,207,255,.70),0 0 22px rgba(234,190,71,.36),inset 0 0 7px rgba(255,232,153,.52)!important;
+ animation:devChallengerPulse658 2.8s ease-in-out infinite;
+}
+@media (prefers-reduced-motion:reduce){html.kokmatchDeveloper658 #profileCard53 .profilePreview53{animation:none}}
+'''
+css.write_text(c,encoding='utf-8')
 print('v6.58 final badge, developer frame and queue metadata guards appended')
