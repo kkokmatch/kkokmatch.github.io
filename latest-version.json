@@ -1,8 +1,8 @@
 {
-  "version": 101,
-  "label": "v6.61",
-  "semanticVersion": "6.61",
-  "build": "v6.61",
-  "updatedAt": "2026-09-09T13:28:00+09:00",
-  "note": "v6.61 개발자 실제 role 기반 판정 · 검증된 프레임 바이너리 재구성 · 실DOM 이미지 표시 수정"
+  "version": 102,
+  "label": "v6.62",
+  "semanticVersion": "6.62",
+  "build": "v6.62",
+  "updatedAt": "2026-09-09T14:51:00+09:00",
+  "note": "v6.62 개발자 프리즘 오라 프로필 프레임 · 블루 크리스털 개발자 배지"
 }
