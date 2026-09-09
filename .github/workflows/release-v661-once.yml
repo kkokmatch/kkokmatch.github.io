@@ -94,4 +94,4 @@ jobs:
           git commit -m 'Release v6.61 fix developer profile frame visibility'
           git push
 
-# diagnostic retry: verify each base64 chunk exactly before reconstructing binary
+# retry: exact frame chunks verified before binary reconstruction
