@@ -80,4 +80,4 @@ jobs:
           git commit -m 'Release v6.53 fix delayed roster responses'
           git push
 
-# retry with deterministic cross-browser polling and diagnostics
+# retry with service-worker-blocked browser-context routing for WebKit fallback QA
