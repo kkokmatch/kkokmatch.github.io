@@ -18,6 +18,7 @@ async function run(engine,label){
  const browser=await engine.launch({headless:true});
  const context=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true,serviceWorkers:'block'});
  const page=await context.newPage();
+ const pageErrors=[]; page.on('pageerror',e=>pageErrors.push(String(e?.message||e)));
  await page.addInitScript(()=>{try{localStorage.setItem('kokmatch_push_denied_notice629',String(Date.now()));localStorage.setItem('kokmatch_install_guide631_seen','1');sessionStorage.setItem('kokmatch_install_later630','1')}catch{}});
  await context.route('https://wjelumpbjklfrdjxbesj.supabase.co/functions/v1/**',async route=>{
   const headers={'access-control-allow-origin':'*','access-control-allow-headers':'*'};
@@ -30,26 +31,35 @@ async function run(engine,label){
    window.__kokmatchMemberCount46=S.members.length;window.__kokmatchMemberCountGroup46='qa';normalizeClient();document.getElementById('login')?.classList.add('hide');renderAll();
  },{s:base,user,group});
 
- // Settings/self-profile first: does not depend on member-roster card timing.
+ // Settings/self-profile first: inspect actual DOM and actual asset decode.
  await page.evaluate(()=>{goView('settings');renderSettings();window.__kokmatchSyncDevFrame661?.()});
- await page.waitForFunction(()=>{const f=document.querySelector('#profileCard53 .profilePreview53.devChallenger659 > img.devFrame661');return !!f&&f.complete&&f.naturalWidth>0},{timeout:8000});
+ await page.waitForTimeout(350);
+ const diag=await page.evaluate(async()=>{
+   const card=document.querySelector('#profileCard53'),preview=document.querySelector('#profileCard53 .profilePreview53'),frame=document.querySelector('#profileCard53 .profilePreview53 > img.devFrame661');
+   let asset={};try{const r=await fetch('/assets/dev-challenger-frame-v660.webp?v=6.61',{cache:'no-store'});const b=await r.blob();asset={status:r.status,ok:r.ok,type:r.headers.get('content-type'),size:b.size}}catch(e){asset={error:String(e)}}
+   const direct=await new Promise(resolve=>{const im=new Image();const done=()=>resolve({complete:im.complete,naturalWidth:im.naturalWidth,naturalHeight:im.naturalHeight});im.onload=done;im.onerror=done;im.src='/assets/dev-challenger-frame-v660.webp?v=6.61&t='+Date.now()});
+   return {marker:window.__kokmatchDevFrame661,syncType:typeof window.__kokmatchSyncDevFrame661,me:{role:me?.role,globalAdmin:me?.globalAdmin,memberId:me?.memberId},linked:typeof linkedDev659==='function'?linkedDev659():null,actualRole:typeof M==='function'?M('dev')?.role:null,currentView,card:!!card,preview:!!preview,previewClass:preview?.className||'',frame:!!frame,frameComplete:frame?.complete||false,frameNaturalWidth:frame?.naturalWidth||0,children:preview?[...preview.children].map(x=>({tag:x.tagName,cls:x.className,src:x.getAttribute?.('src')||''})):[],asset,direct,settingsText:(document.querySelector('#settings')?.innerText||'').slice(0,300)};
+ });
+ console.log(label+' FRAME DIAG '+JSON.stringify(diag));
+ if(pageErrors.length)console.log(label+' PAGE ERRORS '+JSON.stringify(pageErrors));
+ if(!diag.card||!diag.preview||!diag.frame||diag.frameNaturalWidth<=0||!diag.asset?.ok||diag.direct?.naturalWidth<=0)throw new Error(label+' settings frame diagnostic failed '+JSON.stringify(diag));
  const settings=await page.evaluate(()=>{
    const frame=document.querySelector('#profileCard53 .profilePreview53.devChallenger659 > img.devFrame661'),host=frame?.parentElement;
    if(!frame||!host)return null;const fr=frame.getBoundingClientRect(),hr=host.getBoundingClientRect();return {naturalWidth:frame.naturalWidth,fw:fr.width,fh:fr.height,hw:hr.width,hh:hr.height,overflow:getComputedStyle(host).overflow,display:getComputedStyle(frame).display,opacity:getComputedStyle(frame).opacity};
  });
  if(!settings||settings.naturalWidth<100||settings.fw<settings.hw*1.5||settings.overflow!=='visible'||settings.display==='none'||Number(settings.opacity)<=0)throw new Error(label+' settings profile frame not visible '+JSON.stringify(settings));
 
- // Member list: deliberately keep developer badge hidden and require role-based frame detection.
+ // Member list: badge hidden, role-based frame required.
  await page.evaluate(()=>{goView('members');renderMembers();window.__kokmatchSyncDevFrame661?.()});
- await page.waitForFunction(()=>{const f=document.querySelector('#members [data-member-id="dev"].devChallenger659 > img.devFrame661,#members .devChallenger659 > img.devFrame661');return !!f&&f.complete&&f.naturalWidth>0},{timeout:8000});
+ await page.waitForTimeout(350);
  const member=await page.evaluate(()=>{
    const frame=document.querySelector('#members [data-member-id="dev"].devChallenger659 > img.devFrame661,#members .devChallenger659 > img.devFrame661');
    const host=frame?.parentElement,card=frame?.closest('.memberCard');
-   if(!frame||!host||!card)return null;
+   if(!frame||!host||!card)return {missing:true,html:(document.querySelector('#members')?.innerHTML||'').slice(0,1200)};
    const fr=frame.getBoundingClientRect(),hr=host.getBoundingClientRect(),cs=getComputedStyle(frame),pseudo=getComputedStyle(host,'::after'),cc=getComputedStyle(card);
    return {naturalWidth:frame.naturalWidth,naturalHeight:frame.naturalHeight,fw:fr.width,fh:fr.height,hw:hr.width,hh:hr.height,display:cs.display,visibility:cs.visibility,opacity:cs.opacity,z:cs.zIndex,pseudo:pseudo.content,borders:[cc.borderTopWidth,cc.borderRightWidth,cc.borderBottomWidth,cc.borderLeftWidth],developerBadge:!!card.querySelector('.roleBadge.role-global')};
  });
- if(!member||member.naturalWidth<100)throw new Error(label+' member frame asset not decoded '+JSON.stringify(member));
+ if(member.missing||member.naturalWidth<100)throw new Error(label+' member frame asset not decoded '+JSON.stringify(member));
  if(member.fw<member.hw*1.5||member.fh<member.hh*1.5)throw new Error(label+' member frame not visibly larger than avatar '+JSON.stringify(member));
  if(member.display==='none'||member.visibility==='hidden'||Number(member.opacity)<=0)throw new Error(label+' member frame hidden '+JSON.stringify(member));
  if(member.pseudo!=='none'&&member.pseudo!=='normal')throw new Error(label+' legacy pseudo frame still active '+JSON.stringify(member));
