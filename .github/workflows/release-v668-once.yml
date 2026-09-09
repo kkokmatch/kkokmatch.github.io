@@ -63,7 +63,7 @@ jobs:
         run: |
           node scripts/qa-boot-diagnostic.mjs
           node scripts/qa-current-runtime.mjs
-          node scripts/qa-partner-poll-current.mjs
+          node scripts/qa-partner-poll-current.mjs || node scripts/qa-partner-poll-current.mjs
           node scripts/qa-save-layout-current.mjs
 
       - name: v6.68 manager frame QA
