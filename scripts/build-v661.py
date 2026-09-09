@@ -1,7 +1,21 @@
 from pathlib import Path
-import json, shutil, re
+import json, shutil, re, base64, hashlib
 
 OLD='6.60'; NEW='6.61'
+
+# Reconstruct the exact locally-verified 256px transparent WebP on the Actions runner.
+parts=sorted(Path('scripts').glob('frame-v661-part*.b64'))
+if len(parts)!=6: raise SystemExit(f'expected 6 frame chunks, got {len(parts)}')
+encoded=''.join(p.read_text(encoding='utf-8').strip() for p in parts)
+frame_bytes=base64.b64decode(encoded,validate=True)
+expected_size=33324
+expected_sha='a9c885e2363d1aff35c40c2f5beabb618e670091ef3ab3b5a93c0ca84c5b7129'
+actual_sha=hashlib.sha256(frame_bytes).hexdigest()
+if len(frame_bytes)!=expected_size or actual_sha!=expected_sha:
+    raise SystemExit(f'frame binary mismatch size={len(frame_bytes)} sha={actual_sha}')
+Path('assets').mkdir(exist_ok=True)
+Path('assets/dev-challenger-frame-v661.webp').write_bytes(frame_bytes)
+
 archive=Path('versions/v6.60'); archive.mkdir(parents=True, exist_ok=True)
 for name in ['app-v6.60.js','app-v6.60.css','index.html','latest-version.json','manifest.webmanifest','kokmatch-sw.js','sw.js']:
     src=Path(name)
@@ -20,7 +34,7 @@ replacement=r'''function ensureDevFrame661(target){
   frame.setAttribute('aria-hidden','true');
   frame.draggable=false;
   frame.decoding='async';
-  frame.src='/assets/dev-challenger-frame-v660.webp?v=6.61';
+  frame.src='/assets/dev-challenger-frame-v661.webp?v=6.61';
   target.appendChild(frame);
  }
 }
@@ -33,7 +47,8 @@ function hostMemberId661(host,target){
 function applyChallenger659(){
  frameQueued659=false;
  try{
-  const isDev=linkedDev659();
+  const linked=me?.memberId&&typeof M==='function'?M(String(me.memberId)):null;
+  const isDev=me?.globalAdmin===true||String(me?.role||'')==='admin'||String(linked?.role||'')==='admin';
   document.documentElement.classList.toggle('kokmatchDeveloper659',isDev);
   document.querySelectorAll('.devChallenger659').forEach(el=>el.classList.remove('devChallenger659'));
   const hosts=document.querySelectorAll('.memberCard,.queueCard,.pendingSlot,.playingPlayer53,.p,.slot');
@@ -63,6 +78,7 @@ if n!=1: raise SystemExit(f'applyChallenger659 replacement count={n}')
 Path('app-v6.61.js').write_text(js2,encoding='utf-8')
 
 css=Path('app-v6.60.css').read_text(encoding='utf-8').replace(OLD,NEW)
+css=css.replace('/assets/dev-challenger-frame-v660.webp','/assets/dev-challenger-frame-v661.webp')
 css += r'''
 
 /* v6.61 real DOM developer profile frame. */
@@ -119,9 +135,11 @@ Path('index.html').write_text(idx,encoding='utf-8')
 latest={
  'version':101,'label':'v6.61','semanticVersion':'6.61','build':'v6.61',
  'updatedAt':'2026-09-09T13:28:00+09:00',
- 'note':'v6.61 개발자 실제 role 기반 프레임 판정 · 실DOM 이미지 적용 · 실기기 미표시 수정'
+ 'note':'v6.61 개발자 실제 role 기반 판정 · 검증된 프레임 바이너리 재구성 · 실DOM 이미지 표시 수정'
 }
 Path('latest-version.json').write_text(json.dumps(latest,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
 for name in ['manifest.webmanifest','kokmatch-sw.js','sw.js']:
-    p=Path(name); p.write_text(p.read_text(encoding='utf-8').replace(OLD,NEW),encoding='utf-8')
-print('v6.61 role-based real frame build prepared')
+    p=Path(name)
+    text=p.read_text(encoding='utf-8').replace(OLD,NEW).replace('/assets/dev-challenger-frame-v660.webp','/assets/dev-challenger-frame-v661.webp')
+    p.write_text(text,encoding='utf-8')
+print(f'v6.61 verified frame build prepared: {len(frame_bytes)} bytes sha256={actual_sha}')
