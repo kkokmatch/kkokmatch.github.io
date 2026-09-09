@@ -80,4 +80,4 @@ jobs:
           git commit -m 'Release v6.55 fix dashboard roster state conflict'
           git push
 
-# retry: complete roster tab entry must perform zero roster-network requests
+# retry: measure only incremental roster requests caused by stats -> members navigation
