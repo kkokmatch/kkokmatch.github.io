@@ -43,7 +43,7 @@ jobs:
           cat /tmp/kokmatch-http.log
           exit 1
 
-      - name: Guard existing regression QA from PWA overlays
+      - name: Guard existing regression QA from PWA overlays and current member endpoint
         run: |
           python3 - <<'PY'
           from pathlib import Path
@@ -54,6 +54,10 @@ jobs:
             p=Path(f);s=p.read_text();m=re.search(r"const page=await browser\.newPage\([^;]+\);",s)
             if m and guard not in s:s=s[:m.end()]+'\n'+guard+s[m.end():]
             p.write_text(s)
+          p=Path('scripts/qa-save-layout-current.mjs')
+          s=p.read_text()
+          s=s.replace("if(url.pathname.endsWith('/kokmatch-v60-api')){if(body.op==='member_save')", "if(url.pathname.endsWith('/kokmatch-v60-api')||url.pathname.endsWith('/kokmatch-member-v646')){if(body.op==='member_save')")
+          p.write_text(s)
           PY
 
       - name: Existing functional regression QA
