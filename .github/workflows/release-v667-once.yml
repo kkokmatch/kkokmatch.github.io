@@ -67,3 +67,4 @@ jobs:
           git add app-v6.67.js app-v6.67.css index.html latest-version.json manifest.webmanifest kokmatch-sw.js sw.js versions/v6.66
           git commit -m 'Release v6.67 improve manager badge text contrast'
           git push
+# rerun after CSS newline fix
