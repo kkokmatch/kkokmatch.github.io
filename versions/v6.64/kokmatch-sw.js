@@ -1,13 +1,12 @@
-const KOKMATCH_SW_VERSION='6.65';
+const KOKMATCH_SW_VERSION='6.64';
 const KOKMATCH_CACHE_PREFIX='kokmatch-static-';
 const KOKMATCH_STATIC_CACHE=KOKMATCH_CACHE_PREFIX+KOKMATCH_SW_VERSION;
 const KOKMATCH_CORE=[
-  '/assets/dev-prism-frame-v662.webp?v=6.65',
-  '/assets/organizer-silver-aura-v665.webp?v=6.65',
-  '/app-v6.65.css?v=6.65',
-  '/app-v6.65.js?v=6.65',
-  '/manifest.webmanifest?v=6.65',
-  '/icons/kokmatch-180.png?v=6.65',
+  '/assets/dev-prism-frame-v662.webp?v=6.64',
+  '/app-v6.64.css?v=6.64',
+  '/app-v6.64.js?v=6.64',
+  '/manifest.webmanifest?v=6.64',
+  '/icons/kokmatch-180.png?v=6.64',
   '/icons/kokmatch-192.png'
 ];
 self.addEventListener('install',event=>{event.waitUntil((async()=>{const c=await caches.open(KOKMATCH_STATIC_CACHE);await Promise.allSettled(KOKMATCH_CORE.map(async u=>{const r=await fetch(u,{cache:'no-store'});if(r.ok)await c.put(u,r)}));await self.skipWaiting()})())});
@@ -24,7 +23,7 @@ self.addEventListener('fetch',event=>{
  const req=event.request;if(req.method!=='GET')return;let url;try{url=new URL(req.url)}catch{return}if(url.origin!==self.location.origin)return;
  if(req.mode==='navigate'){event.waitUntil(self.registration.update().catch(()=>{}));event.respondWith(networkFirstNavigation(req));return}
  if(url.pathname==='/latest-version.json'||url.pathname==='/index.html'||url.pathname==='/kokmatch-sw.js'||url.pathname==='/sw.js'){event.respondWith(fetch(req,{cache:'no-store'}));return}
- const currentAsset=url.pathname===`/app-v${KOKMATCH_SW_VERSION}.js`||url.pathname===`/app-v${KOKMATCH_SW_VERSION}.css`||url.pathname==='/manifest.webmanifest'||url.pathname==='/assets/dev-prism-frame-v662.webp'||url.pathname==='/assets/organizer-silver-aura-v665.webp'||url.pathname.startsWith('/icons/');
+ const currentAsset=url.pathname===`/app-v${KOKMATCH_SW_VERSION}.js`||url.pathname===`/app-v${KOKMATCH_SW_VERSION}.css`||url.pathname==='/manifest.webmanifest'||url.pathname==='/assets/dev-prism-frame-v662.webp'||url.pathname.startsWith('/icons/');
  if(currentAsset){event.respondWith(cachedStatic(req));return}
  event.respondWith(fetch(req,{cache:'no-store'}));
 });
