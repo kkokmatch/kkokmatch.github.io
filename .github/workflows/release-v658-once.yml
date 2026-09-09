@@ -18,13 +18,47 @@ jobs:
           node-version: 22
 
       - name: Build v6.58 and archive v6.57
-        run: python3 scripts/build-v658.py
+        run: |
+          python3 scripts/build-v658.py
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('app-v6.58.js')
+          s=p.read_text()
+          s += r'''
+
+/* v6.58 final ordinary-badge guard: older post-render layers may reinsert it. */
+(()=>{
+'use strict';
+if(window.__kokmatchNoGeneralBadge658)return;
+window.__kokmatchNoGeneralBadge658=true;
+let queued=false;
+function purge658(){
+ queued=false;
+ try{
+  document.querySelectorAll('.roleBadge.role-member44').forEach(b=>{
+   const host=b.closest('.memberCard,.queueCard,.pendingSlot,.playingPlayer53,.p,.slot,.card');
+   b.remove();
+   if(host&&!host.querySelector('.roleBadge.role-global')){
+    host.classList.remove('devChallenger658');
+    host.querySelectorAll('.devChallenger658').forEach(x=>x.classList.remove('devChallenger658'));
+   }
+  });
+ }catch{}
+}
+function schedule658(){if(queued)return;queued=true;queueMicrotask(purge658)}
+const arm=()=>{purge658();const root=document.body||document.documentElement;if(root)new MutationObserver(schedule658).observe(root,{childList:true,subtree:true})};
+if(document.body)arm();else addEventListener('DOMContentLoaded',arm,{once:true});
+})();
+'''
+          p.write_text(s)
+          PY
 
       - name: Syntax and runtime invariants
         run: |
           node --check app-v6.58.js
           node scripts/validate-standalone-runtime.mjs
           grep -F "window.__kokmatchUiRefine658='6.58'" app-v6.58.js >/dev/null
+          grep -F 'window.__kokmatchNoGeneralBadge658=true' app-v6.58.js >/dev/null
           grep -F 'autoGameQueue658' app-v6.58.js >/dev/null
           grep -F 'queueGameCount658' app-v6.58.js >/dev/null
           grep -F 'devChallenger658' app-v6.58.js >/dev/null
