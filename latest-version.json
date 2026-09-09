@@ -1,8 +1,8 @@
 {
-  "version": 100,
-  "label": "v6.60",
-  "semanticVersion": "6.60",
-  "build": "v6.60",
-  "updatedAt": "2026-09-09T13:16:00+09:00",
-  "note": "v6.60 개발자 프로필 프레임 이미지 적용 · CSS 크레스트 제거 · 33KB WebP 캐시 최적화"
+  "version": 101,
+  "label": "v6.61",
+  "semanticVersion": "6.61",
+  "build": "v6.61",
+  "updatedAt": "2026-09-09T13:28:00+09:00",
+  "note": "v6.61 개발자 실제 role 기반 판정 · 검증된 프레임 바이너리 재구성 · 실DOM 이미지 표시 수정"
 }
