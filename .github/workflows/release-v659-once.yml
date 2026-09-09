@@ -89,4 +89,4 @@ jobs:
           git commit -m 'Release v6.59 compact auto controls and Challenger profile crest'
           git push
 
-# retry: lock the v6.59 gold/cyan center ring above legacy v6.58 developer profile rules
+# retry: WebKit now enters each real app view through goView before visual assertions
