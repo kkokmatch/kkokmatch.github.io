@@ -79,3 +79,5 @@ jobs:
           git add app-v6.53.js app-v6.53.css index.html latest-version.json manifest.webmanifest kokmatch-sw.js sw.js versions/v6.52
           git commit -m 'Release v6.53 fix delayed roster responses'
           git push
+
+# retry after builder assertion correction
