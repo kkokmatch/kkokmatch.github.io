@@ -40,15 +40,29 @@ async function run(engine,label){
   await waitEval(page,()=>Array.isArray(S?.members)&&S.members.length===20&&document.getElementById('opsDashboard652'),5000,label+' compact preservation');
   const merged=await page.evaluate(()=>({len:S.members.length,state:S.members.find(m=>m.id==='m1')?.state,queue:S.queue.length}));
   if(merged.len!==20||merged.state!=='waiting'||merged.queue!==1)throw new Error(label+' compact merge failed '+JSON.stringify(merged));
+
+  // Let any work scheduled by the stats render settle, then measure only requests caused by
+  // switching from Stats to Members. A startup/prefetch request is not a tab-transition regression.
+  await page.waitForTimeout(450);
+  const rosterBeforeMembers=rosterHits;
+  await page.evaluate(()=>{
+   window.__qaRosterStacks655=[];
+   const originalFetch=window.fetch.bind(window);
+   window.fetch=(input,init)=>{
+    try{const url=typeof input==='string'?input:input?.url||String(input);if(String(url).includes('/kokmatch-roster-v654'))window.__qaRosterStacks655.push(String(new Error('roster fetch').stack||''))}catch{}
+    return originalFetch(input,init);
+   };
+  });
   await page.evaluate(()=>goView('members'));
   await page.waitForTimeout(1200);
-  const after=await page.evaluate(()=>({len:S.members.length,cards:document.querySelectorAll('#members .memberCard').length,text:document.querySelector('#members')?.innerText||''}));
+  const after=await page.evaluate(()=>({len:S.members.length,cards:document.querySelectorAll('#members .memberCard').length,text:document.querySelector('#members')?.innerText||'',stacks:window.__qaRosterStacks655||[]}));
+  const rosterDelta=rosterHits-rosterBeforeMembers;
   if(after.len!==20)throw new Error(label+' full roster was lost after returning to members '+JSON.stringify(after));
   if(/응답이 지연|보조 조회|불러오지 못/.test(after.text))throw new Error(label+' roster delay text surfaced');
-  if(rosterHits!==0)throw new Error(label+` unnecessary roster request after stats -> members: ${rosterHits}`);
+  if(rosterDelta!==0)throw new Error(label+` stats -> members triggered ${rosterDelta} roster request(s); stacks=${JSON.stringify(after.stacks)}`);
   if(compactHits<1)throw new Error(label+' compact state path was not exercised');
   if(errors.length)throw new Error(label+' page errors '+errors.join(' | '));
-  console.log(`PASS ${label} stats compact state preserved 20-member roster; rosterHits=${rosterHits}; compactHits=${compactHits}; fullStateHits=${fullStateHits}`);
+  console.log(`PASS ${label} stats compact state preserved 20-member roster; startupRosterHits=${rosterBeforeMembers}; transitionRosterHits=${rosterDelta}; compactHits=${compactHits}; fullStateHits=${fullStateHits}`);
  } finally {await browser.close()}
 }
 
