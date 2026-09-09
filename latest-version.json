@@ -1,8 +1,8 @@
 {
-  "version": 107,
-  "label": "v6.67",
-  "semanticVersion": "6.67",
-  "build": "v6.67",
-  "updatedAt": "2026-09-09T20:00:00+09:00",
-  "note": "v6.67 모임장 골드 배지 글씨 대비 개선 · 짙은 브라운 골드 텍스트"
+  "version": 108,
+  "label": "v6.68",
+  "semanticVersion": "6.68",
+  "build": "v6.68",
+  "updatedAt": "2026-09-09T20:04:00+09:00",
+  "note": "v6.68 모임장 프로필 테두리만 진한 골드/노란색으로 강화"
 }
