@@ -24,18 +24,28 @@ replacement=r'''function ensureDevFrame661(target){
   target.appendChild(frame);
  }
 }
+function devMember661(id){
+ try{const m=typeof M==='function'?M(String(id||'')):null;return !!m&&String(m.role||'')==='admin'}catch{return false}
+}
+function hostMemberId661(host,target){
+ return String(target?.getAttribute?.('data-member-id')||host?.getAttribute?.('data-member-id')||host?.getAttribute?.('data-member-id22')||host?.getAttribute?.('data-member-id46')||'');
+}
 function applyChallenger659(){
  frameQueued659=false;
  try{
   const isDev=linkedDev659();
   document.documentElement.classList.toggle('kokmatchDeveloper659',isDev);
-  document.querySelectorAll('.devChallenger659').forEach(el=>{
-   const host=el.closest('.memberCard,.queueCard,.pendingSlot,.playingPlayer53,.p,.slot,.card');
-   if(host&&!host.querySelector('.roleBadge.role-global')&&!el.matches('#profileCard53 .profilePreview53'))el.classList.remove('devChallenger659');
+  document.querySelectorAll('.devChallenger659').forEach(el=>el.classList.remove('devChallenger659'));
+  const hosts=document.querySelectorAll('.memberCard,.queueCard,.pendingSlot,.playingPlayer53,.p,.slot');
+  hosts.forEach(host=>{
+   const target=profileTarget659(host);if(!target)return;
+   const id=hostMemberId661(host,target);
+   const byRole=id&&devMember661(id);
+   const byBadge=!!host.querySelector('.roleBadge.role-global');
+   if(byRole||byBadge)target.classList.add('devChallenger659');
   });
-  document.querySelectorAll('.roleBadge.role-global').forEach(b=>{
-   const host=b.closest('.memberCard,.queueCard,.pendingSlot,.playingPlayer53,.p,.slot,.card');
-   const target=profileTarget659(host);if(target)target.classList.add('devChallenger659');
+  document.querySelectorAll('.profileIdentity21[data-member-id],.profileAvatar53[data-member-id],.avatar[data-member-id]').forEach(target=>{
+   if(devMember661(target.getAttribute('data-member-id')))target.classList.add('devChallenger659');
   });
   const mine=document.querySelector('#profileCard53 .profilePreview53');
   if(mine)mine.classList.toggle('devChallenger659',isDev);
@@ -109,9 +119,9 @@ Path('index.html').write_text(idx,encoding='utf-8')
 latest={
  'version':101,'label':'v6.61','semanticVersion':'6.61','build':'v6.61',
  'updatedAt':'2026-09-09T13:28:00+09:00',
- 'note':'v6.61 개발자 프로필 프레임 실DOM 이미지 적용 · 실기기 미표시 수정 · 이미지 로드/크기 QA 강화'
+ 'note':'v6.61 개발자 실제 role 기반 프레임 판정 · 실DOM 이미지 적용 · 실기기 미표시 수정'
 }
 Path('latest-version.json').write_text(json.dumps(latest,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
 for name in ['manifest.webmanifest','kokmatch-sw.js','sw.js']:
     p=Path(name); p.write_text(p.read_text(encoding='utf-8').replace(OLD,NEW),encoding='utf-8')
-print('v6.61 canonical frame build prepared')
+print('v6.61 role-based real frame build prepared')
