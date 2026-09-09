@@ -7,7 +7,15 @@ for name in ['app-v6.66.js','app-v6.66.css','index.html','latest-version.json','
     if p.exists(): shutil.copy2(p,archive/p.name)
 Path('app-v6.67.js').write_text(Path('app-v6.66.js').read_text(encoding='utf-8').replace(OLD,NEW),encoding='utf-8')
 css=Path('app-v6.66.css').read_text(encoding='utf-8').replace(OLD,NEW)
-css += r'''\n\n/* v6.67: improve manager badge text contrast on bright gold crystal surface. */\n.roleBadge.role-manager{\n --km-manager-text-v667:1;\n color:#5a3600!important;\n text-shadow:0 1px 0 rgba(255,255,255,.55)!important;\n}\n'''
+css += '''
+
+/* v6.67: improve manager badge text contrast on bright gold crystal surface. */
+.roleBadge.role-manager{
+ --km-manager-text-v667:1;
+ color:#5a3600!important;
+ text-shadow:0 1px 0 rgba(255,255,255,.55)!important;
+}
+'''
 Path('app-v6.67.css').write_text(css,encoding='utf-8')
 idx=Path('index.html').read_text(encoding='utf-8').replace(OLD,NEW).replace('single-v666','single-v667').replace('session-coordinator-v666','session-coordinator-v667')
 Path('index.html').write_text(idx,encoding='utf-8')
