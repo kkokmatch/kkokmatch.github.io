@@ -83,3 +83,5 @@ jobs:
           git add app-v6.59.js app-v6.59.css index.html latest-version.json manifest.webmanifest kokmatch-sw.js sw.js versions/v6.58
           git commit -m 'Release v6.59 compact auto controls and Challenger profile crest'
           git push
+
+# retry: v6.59 final renderer owns the compact waiting card after legacy polish layers
