@@ -41,7 +41,8 @@ function queueMeta658(){
 }
 function frame658(){
  try{
-  const isDev=me?.globalAdmin===true,root=document.documentElement;
+  let linked=null;try{linked=me?.memberId&&typeof M==='function'?M(String(me.memberId)):null}catch{}
+  const isDev=me?.globalAdmin===true||String(linked?.role||'')==='admin',root=document.documentElement;
   if(root.classList.contains('kokmatchDeveloper658')!==isDev)root.classList.toggle('kokmatchDeveloper658',isDev);
   document.querySelectorAll('#members .devChallenger658,#queue .devChallenger658,#playing .devChallenger658').forEach(el=>{
    const host=el.closest('.memberCard,.queueCard,.pendingSlot,.playingPlayer53,.p,.slot,.card');
@@ -105,4 +106,4 @@ html.kokmatchDeveloper658 #profileCard53 .profilePreview53{
 @media (prefers-reduced-motion:reduce){html.kokmatchDeveloper658 #profileCard53 .profilePreview53{animation:none}}
 '''
 css.write_text(c,encoding='utf-8')
-print('v6.58 final synchronous/idempotent badge, developer frame and queue metadata guards appended')
+print('v6.58 final member-role anchored developer frame and queue metadata guards appended')
