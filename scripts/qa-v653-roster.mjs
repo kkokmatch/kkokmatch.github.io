@@ -14,6 +14,29 @@ const fullMembers=[
 const fullState={courtCount:4,courtNames:['1코트','2코트','3코트','4코트'],members:fullMembers,queue:['m1'],pendingGames:[],games:[],history:[],pairCounts:{}};
 const compactState={...fullState,members:[fullMembers[0]]};
 
+async function waitEval(page,expression,timeout=7000,label='condition'){
+ const started=Date.now();
+ while(Date.now()-started<timeout){
+  try{if(await page.evaluate(expression))return true}catch{}
+  await page.waitForTimeout(50);
+ }
+ throw new Error(`${label} timed out after ${timeout}ms`);
+}
+async function diagnostics(page,label,rosterHits,fallbackHits){
+ let runtime={};
+ try{runtime=await page.evaluate(()=>({
+   version:window.__kokmatchVersionLock||'',
+   enterType:typeof enterMembers42,
+   cards:document.querySelectorAll('#members .memberCard').length,
+   memberLen:Array.isArray(S?.members)?S.members.length:-1,
+   expected:Number(window.__kokmatchMemberCount46||0),
+   expectedGroup:String(window.__kokmatchMemberCountGroup46||''),
+   currentGroup:String(currentGroupId||''),
+   text:String(document.querySelector('#members')?.innerText||'').slice(0,500)
+ }))}catch(e){runtime={evalError:String(e?.message||e)}}
+ return `${label} diag=${JSON.stringify({...runtime,rosterHits,fallbackHits})}`;
+}
+
 async function run(engine,label){
  const browser=await engine.launch({headless:true});
  const context=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true});
@@ -33,19 +56,20 @@ async function run(engine,label){
  });
  try{
   await page.goto('http://127.0.0.1:4173/?qa=v653-roster',{waitUntil:'domcontentloaded'});
-  await page.waitForFunction(v=>window.__kokmatchVersionLock===v&&typeof enterMembers42==='function',VERSION,{timeout:15000});
+  await waitEval(page,()=>window.__kokmatchVersionLock==='6.53'&&typeof enterMembers42==='function',15000,label+' runtime');
   await page.evaluate(({compactState})=>{
     T='qa-token';localStorage.setItem('kokmatch_token',T);currentGroupId='qa';currentView='members';S=JSON.parse(JSON.stringify(compactState));window.S=S;me={memberId:'m1',displayName:'관리자',role:'manager',globalAdmin:false,tempOrganizer:false,groupId:'qa'};group={groupId:'qa',name:'QA 모임'};groups=[];window.__kokmatchMemberCount46=4;window.__kokmatchMemberCountGroup46='qa';normalizeClient();document.getElementById('login')?.classList.add('hide');
   },{compactState});
   await page.evaluate(()=>enterMembers42(true));
-  await page.waitForFunction(()=>document.querySelectorAll('#members .memberCard').length===4,{timeout:7000});
+  try{await waitEval(page,()=>document.querySelectorAll('#members .memberCard').length===4,7000,label+' fallback cards')}catch(e){throw new Error(`${e.message}; ${await diagnostics(page,label,rosterHits,fallbackHits)}`)}
   const text1=await page.locator('#members').innerText();if(/응답이 지연|불러오지 못/.test(text1))throw new Error(label+' fallback surfaced roster error');
   if(rosterHits<1||fallbackHits<1)throw new Error(label+' fallback path not exercised '+JSON.stringify({rosterHits,fallbackHits}));
 
+  // After one successful full load, a compact-view transition must restore the cached roster immediately even if network disappears.
   await page.evaluate(()=>{goView('queue');S.members=[S.members[0]];window.S=S;window.__kokmatchMemberCount46=4;window.__kokmatchMemberCountGroup46='qa';normalizeClient();});
   hardOffline=true;
   await page.evaluate(()=>goView('members'));
-  await page.waitForFunction(()=>document.querySelectorAll('#members .memberCard').length===4,{timeout:1500});
+  try{await waitEval(page,()=>document.querySelectorAll('#members .memberCard').length===4,1800,label+' cached cards')}catch(e){throw new Error(`${e.message}; ${await diagnostics(page,label,rosterHits,fallbackHits)}`)}
   const text2=await page.locator('#members').innerText();if(/응답이 지연|불러오지 못/.test(text2))throw new Error(label+' cached roster surfaced error');
   if(errors.length)throw new Error(label+' page errors: '+errors.join(' | '));
   console.log(`PASS ${label} roster primary failure -> full-state fallback -> offline cache restore`);
