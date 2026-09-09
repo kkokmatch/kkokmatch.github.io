@@ -87,3 +87,4 @@ jobs:
           git push
 
 # retry: role-data-driven real DOM frame, decoded-image visibility QA
+# retry diagnostics: inspect settings DOM, asset HTTP response, and browser image decode
