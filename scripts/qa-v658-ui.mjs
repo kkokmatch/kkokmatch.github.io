@@ -38,7 +38,6 @@ async function run(engine,label){
  await page.waitForFunction(v=>window.__kokmatchVersionLock===v&&window.__kokmatchUiRefine658===v,VERSION,{timeout:15000});
  await page.evaluate(({s,user,group})=>{T='qa-token';currentGroupId='qa';S=JSON.parse(JSON.stringify(s));window.S=S;me=user;window.me=me;window.group=group;groups=[];normalizeClient();document.getElementById('login')?.classList.add('hide');currentView='queue';renderAll()},{s:state(false),user:manager,group});
 
- // 1) auto controls live on waiting screen, not settings.
  if(await page.locator('#queue .autoGameQueue658').count()!==1)throw new Error(label+' auto controls missing from queue');
  const autoText=await page.locator('#queue .autoGameQueue658').innerText();
  if(!autoText.includes('자동게임편성')||!autoText.includes('OFF')||!autoText.includes('자동게임설정 보기'))throw new Error(label+' queue auto card text wrong: '+autoText);
@@ -49,24 +48,20 @@ async function run(engine,label){
  await page.waitForFunction(()=>S?.autoGame?.enabled===true,{timeout:4000});
  if(!(await page.locator('#queue .autoToggle656').innerText()).includes('ON'))throw new Error(label+' auto toggle did not switch ON');
 
- // 2) ordinary member badges disappear while staff badges remain.
  await page.evaluate(()=>{currentView='members';renderMembers()});
  if(await page.locator('#members .roleBadge.role-member44').count())throw new Error(label+' ordinary member badge still exists');
  if(await page.locator('#members .roleBadge.role-manager').count()<1)throw new Error(label+' manager badge disappeared');
  if(await page.locator('#members .roleBadge.role-organizer').count()<1)throw new Error(label+' organizer badge disappeared');
 
- // 3) game count is immediately to the right of waiting time in personal queue.
  await page.evaluate(()=>{currentView='queue';renderQueue()});
  const meta=page.locator('#queue .queueCard').first().locator('.queueWaitMeta658');
  if(await meta.count()!==1)throw new Error(label+' waiting meta row missing');
  if(await meta.locator('.queueGameCount658').count()!==1)throw new Error(label+' game count not moved beside wait time');
  const mt=await meta.innerText();if(!mt.includes('대기')||!mt.includes('게임'))throw new Error(label+' queue meta missing wait/game: '+mt);
 
- // Normal users cannot see auto controls.
  await page.evaluate(({s,user})=>{S=JSON.parse(JSON.stringify(s));window.S=S;me=user;window.me=me;normalizeClient();currentView='queue';renderAll()},{s:state(true),user:normal});
  if(await page.locator('#queue .autoGameQueue658').count())throw new Error(label+' normal member can see auto controls');
 
- // 4) developer gets challenger-style profile frame, but no ordinary badge leaks.
  const devMember={id:'dev',name:'개발자',year:1989,gender:'남',age:'30',cls:'B',type:'member',role:'admin',state:'waiting',joinedAt:now-12*60000,totalGames:3};
  const devState={...state(false),members:[devMember,...members],queue:['dev',...members.map(x=>x.id)],adminBadgeVisibility:'all'};
  const devUser={memberId:'dev',displayName:'개발자',role:'admin',globalAdmin:true,tempOrganizer:false,groupId:'qa'};
@@ -74,7 +69,24 @@ async function run(engine,label){
  if(await page.locator('#members .roleBadge.role-global').count()<1)throw new Error(label+' developer badge missing');
  if(await page.locator('#members .devChallenger658').count()<1)throw new Error(label+' developer member frame missing');
  await page.evaluate(()=>{currentView='settings';renderSettings()});
- if(await page.locator('#profileCard53 .profilePreview53.devChallenger658').count()!==1)throw new Error(label+' developer settings profile frame missing');
+ const devDiag=await page.evaluate(()=>{
+   const card=document.querySelector('#profileCard53'),preview=card?.querySelector('.profilePreview53');
+   const style=preview?getComputedStyle(preview):null;
+   return {
+     htmlClass:document.documentElement.className,
+     me:{memberId:me?.memberId,role:me?.role,globalAdmin:me?.globalAdmin},
+     cardExists:!!card,
+     previewExists:!!preview,
+     previewClass:preview?.className||'',
+     previewStyle:style?{border:style.border,outline:style.outline,boxShadow:style.boxShadow}:null,
+     cardHtml:card?.outerHTML?.slice(0,1800)||'',
+     settingsHtml:document.querySelector('#settings')?.innerHTML?.slice(0,2400)||''
+   };
+ });
+ console.log('DEV_PROFILE_DIAG '+label+' '+JSON.stringify(devDiag));
+ if(!devDiag.previewExists)throw new Error(label+' developer settings profile preview missing');
+ const visualOk=/rgb\(241, 208, 107\)|#f1d06b/i.test(String(devDiag.previewStyle?.border||''))||String(devDiag.previewStyle?.boxShadow||'').includes('91, 207, 255');
+ if(!visualOk)throw new Error(label+' developer settings challenger visual missing: '+JSON.stringify(devDiag));
 
  const geom=await page.evaluate(()=>({scroll:document.documentElement.scrollWidth,inner:innerWidth}));
  if(geom.scroll>geom.inner+2)throw new Error(label+' horizontal overflow '+JSON.stringify(geom));
