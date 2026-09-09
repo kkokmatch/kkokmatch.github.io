@@ -4,7 +4,7 @@ p=Path('app-v6.58.js')
 s=p.read_text(encoding='utf-8')
 s += r'''
 
-/* v6.58 final ordinary-badge + personal queue metadata guard. */
+/* v6.58 final ordinary-badge, developer-frame and personal queue metadata guard. */
 (()=>{
 'use strict';
 if(window.__kokmatchNoGeneralBadge658)return;
@@ -25,12 +25,25 @@ function queueMeta658(){
     count=document.createElement('span');count.className='gamecnt';count.textContent=`게임 ${n}회`;
    }
    count.classList.add('queueGameCount658');
-   if(count.parentElement!==meta){
-    meta.querySelectorAll('.queueMetaSep658').forEach(x=>x.remove());
-    const sep=document.createElement('span');sep.className='queueMetaSep658';sep.textContent='·';
-    meta.append(sep,count);
-   }
+   meta.querySelectorAll('.queueMetaSep658').forEach(x=>x.remove());
+   const sep=document.createElement('span');sep.className='queueMetaSep658';sep.textContent='·';
+   const waitSep=meta.querySelector('.waitSep70');
+   if(waitSep){waitSep.before(sep,count)}else if(count.parentElement!==meta){meta.append(sep,count)}
   });
+ }catch{}
+}
+function frame658(){
+ try{
+  document.querySelectorAll('#members .devChallenger658,#queue .devChallenger658,#playing .devChallenger658').forEach(el=>{
+   const host=el.closest('.memberCard,.queueCard,.pendingSlot,.playingPlayer53,.p,.slot,.card');
+   if(host&&!host.querySelector('.roleBadge.role-global'))el.classList.remove('devChallenger658');
+  });
+  document.querySelectorAll('.roleBadge.role-global').forEach(b=>{
+   const host=b.closest('.memberCard,.queueCard,.pendingSlot,.playingPlayer53,.p,.slot,.card');if(!host)return;
+   const av=host.querySelector(':scope > .profileIdentity21,:scope > .avatar,.profileIdentity21,.profileAvatar53,.profilePreview53,.avatar');
+   if(av)av.classList.add('devChallenger658');
+  });
+  if(me?.globalAdmin===true){const mine=document.querySelector('#profileCard53 .profilePreview53');if(mine)mine.classList.add('devChallenger658')}
  }catch{}
 }
 function purge658(){
@@ -46,6 +59,7 @@ function purge658(){
   });
  }catch{}
  queueMeta658();
+ frame658();
 }
 function schedule658(){if(queued)return;queued=true;queueMicrotask(purge658)}
 function arm658(){
@@ -57,4 +71,4 @@ if(document.body)arm658();else addEventListener('DOMContentLoaded',arm658,{once:
 })();
 '''
 p.write_text(s,encoding='utf-8')
-print('v6.58 final badge and queue metadata guards appended')
+print('v6.58 final badge, developer frame and queue metadata guards appended')
