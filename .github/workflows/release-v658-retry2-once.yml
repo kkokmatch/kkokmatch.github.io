@@ -86,4 +86,4 @@ jobs:
           git commit -m 'Release v6.58 refine waiting controls and profile UI'
           git push
 
-# retry: developer self-profile frame persists through async redraws; DOM observer is idempotent
+# retry: developer profile frame applies synchronously and survives async redraws
