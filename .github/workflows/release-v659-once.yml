@@ -31,6 +31,7 @@ jobs:
           grep -F 'devChallenger659' app-v6.59.js >/dev/null
           grep -F 'roles.some' app-v6.59.js >/dev/null
           grep -F '__kokmatchCleanRosterCards659' app-v6.59.js >/dev/null
+          grep -F 'Challenger crest specificity lock' app-v6.59.css >/dev/null
           grep -F 'app-v6.59.js?v=6.59' index.html >/dev/null
           grep -F 'app-v6.59.css?v=6.59' index.html >/dev/null
           ! grep -F 'app-v6.58.js' index.html
@@ -88,4 +89,4 @@ jobs:
           git commit -m 'Release v6.59 compact auto controls and Challenger profile crest'
           git push
 
-# retry: remove legacy 5px member-card accent border and shadow completely
+# retry: lock the v6.59 gold/cyan center ring above legacy v6.58 developer profile rules
