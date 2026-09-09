@@ -35,11 +35,12 @@ async function run(engine,label){
  });
  await page.goto('http://127.0.0.1:4173/?qa=v659',{waitUntil:'domcontentloaded'});
  await page.waitForFunction(v=>window.__kokmatchVersionLock===v&&window.__kokmatchUiRefine659===v,VERSION,{timeout:15000});
- await page.evaluate(({s,user,group})=>{T='qa-token';currentGroupId='qa';S=JSON.parse(JSON.stringify(s));window.S=S;me=user;window.me=me;window.group=group;groups=[];normalizeClient();document.getElementById('login')?.classList.add('hide');currentView='queue';renderAll();window.__kokmatchPaintCompactAuto659?.();window.__kokmatchApplyChallenger659?.()},{s:state(false),user:managerUser,group});
+ await page.evaluate(({s,user,group})=>{T='qa-token';currentGroupId='qa';S=JSON.parse(JSON.stringify(s));window.S=S;me=user;window.me=me;window.group=group;groups=[];normalizeClient();document.getElementById('login')?.classList.add('hide');renderAll();goView('queue');window.__kokmatchPaintCompactAuto659?.();window.__kokmatchApplyChallenger659?.()},{s:state(false),user:managerUser,group});
 
- // 1) Automatic assignment card is a compact button-first single row.
+ // 1) Automatic assignment card is a compact button-first single row and is actually visible in the real queue view.
  const auto=page.locator('#queue .autoGameQueue658.compactAuto659');
  if(await auto.count()!==1)throw new Error(label+' compact auto card missing');
+ await auto.waitFor({state:'visible',timeout:3000});
  const autoText=await auto.innerText();
  for(const required of ['자동게임편성','설정','OFF'])if(!autoText.includes(required))throw new Error(label+' compact auto card missing '+required+': '+autoText);
  for(const removed of ['AI 자동 최적화','게임대기 운영','현재 대기상황','직접 편성 모드','마지막 설정'])if(autoText.includes(removed))throw new Error(label+' redundant auto text remains: '+removed);
@@ -47,11 +48,11 @@ async function run(engine,label){
  await page.evaluate(()=>toggleAutoGame656());
  await page.waitForFunction(()=>S?.autoGame?.enabled===true,{timeout:4000});
  if(!(await page.locator('#queue .autoToggle656').innerText()).includes('ON'))throw new Error(label+' auto toggle failed');
- await page.evaluate(()=>{currentView='settings';renderSettings()});
+ await page.evaluate(()=>{goView('settings');renderSettings()});
  if(await page.locator('#settings .autoGameCard656').count())throw new Error(label+' auto card leaked back into settings');
 
  // 2) Member roster rectangular cards have no border, while the developer frame lands only on the profile image/avatar.
- await page.evaluate(()=>{currentView='members';renderMembers();window.__kokmatchApplyChallenger659?.()});
+ await page.evaluate(()=>{goView('members');renderMembers();window.__kokmatchCleanRosterCards659?.();window.__kokmatchApplyChallenger659?.()});
  const border=await page.locator('#members .memberCard').first().evaluate(el=>{const s=getComputedStyle(el);return {t:s.borderTopWidth,r:s.borderRightWidth,b:s.borderBottomWidth,l:s.borderLeftWidth,shadow:s.boxShadow}});
  if([border.t,border.r,border.b,border.l].some(x=>x!=='0px'))throw new Error(label+' member card border remains: '+JSON.stringify(border));
  if(await page.locator('#members .memberCard.devChallenger659').count())throw new Error(label+' challenger frame applied to rectangular member card');
@@ -59,13 +60,14 @@ async function run(engine,label){
  if(await devHost.count()!==1)throw new Error(label+' developer member card missing');
  if(await devHost.locator('.devChallenger659').count()<1)throw new Error(label+' developer profile-photo frame missing in member list');
 
- // 3) Switch to a real developer session and verify the self-profile winged gold/cyan crest.
+ // 3) Switch to a real developer session and verify the self-profile winged gold/cyan crest in the visible Settings view.
  actor=devUser;
- await page.evaluate(({s,user})=>{S=JSON.parse(JSON.stringify(s));window.S=S;me=user;window.me=me;normalizeClient();currentView='settings';renderAll();renderSettings();window.__kokmatchApplyChallenger659?.()},{s:state(true),user:devUser});
+ await page.evaluate(({s,user})=>{S=JSON.parse(JSON.stringify(s));window.S=S;me=user;window.me=me;normalizeClient();renderAll();goView('settings');renderSettings();window.__kokmatchApplyChallenger659?.()},{s:state(true),user:devUser});
  await page.waitForTimeout(80);
  await page.evaluate(()=>window.__kokmatchApplyChallenger659?.());
  const preview=page.locator('#profileCard53 .profilePreview53.devChallenger659');
  if(await preview.count()!==1)throw new Error(label+' developer settings profile frame missing');
+ await preview.waitFor({state:'visible',timeout:3000});
  const visual=await preview.evaluate(el=>{
    const s=getComputedStyle(el),b=getComputedStyle(el,'::before'),a=getComputedStyle(el,'::after');
    return {border:s.borderTopWidth,outline:s.outlineStyle,shadow:s.boxShadow,bContent:b.content,bClip:b.clipPath,bBg:b.backgroundImage,aContent:a.content,aClip:a.clipPath,aBg:a.backgroundImage,overflow:s.overflow};
