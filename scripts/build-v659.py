@@ -14,15 +14,16 @@ for src,name in [
     p=root/src
     if p.exists() and not (arc/name).exists(): shutil.copy2(p,arc/name)
 
-# Copy the current single runtime, then bump only the visible/runtime version literals.
+# Copy the current single runtime, then bump only visible/runtime version literals.
 js=(root/'app-v6.58.js').read_text(encoding='utf-8').replace(OLD,NEW)
 css=(root/'app-v6.58.css').read_text(encoding='utf-8').replace(OLD,NEW)
 
-# Replace the game-waiting automatic assignment card with a compact, button-first single row.
+# Replace the first native waiting-card renderer too, while the final v6.59 renderer below
+# guarantees that late v6.58 polish layers can no longer restore the verbose card.
 start=js.find('function autoQueueHtml658(){')
 end=js.find('\nfunction paintAutoQueue658(){',start)
 if start<0 or end<0: raise SystemExit('autoQueueHtml658 block not found')
-compact=r'''function autoQueueHtml658(){
+compact_native=r'''function autoQueueHtml658(){
  const c=cfg658(),on=c.enabled;
  return `<div class="card autoGameCard656 autoGameQueue658 compactAuto659 ${on?'on':'off'}">
    <div class="autoGameCompact659">
@@ -34,9 +35,8 @@ compact=r'''function autoQueueHtml658(){
    </div>
   </div>`;
 }'''
-js=js[:start]+compact+js[end:]
+js=js[:start]+compact_native+js[end:]
 
-# Add a new, isolated Challenger-inspired profile-only frame layer.
 js += r'''
 
 /* v6.59 compact auto control + Challenger crest profile frame. */
@@ -44,6 +44,29 @@ js += r'''
 'use strict';
 window.__kokmatchUiRefine659='6.59';
 let frameQueued659=false;
+
+function canAuto659(){return !!me&&(me.globalAdmin===true||me.role==='manager'||me.role==='organizer')}
+function compactAutoHtml659(){
+ const on=S?.autoGame?.enabled===true;
+ return `<div class="card autoGameCard656 autoGameQueue658 compactAuto659 ${on?'on':'off'}">
+  <div class="autoGameCompact659">
+   <b class="autoGameLabel659">자동게임편성</b>
+   <div class="autoGameActions659">
+    <button type="button" class="btn ghost autoSettingsBtn656 autoSettingsBtn659" onclick="openAutoGameSettings656()">설정</button>
+    <button type="button" class="autoToggle656 ${on?'on':''}" onclick="toggleAutoGame656()" aria-label="자동게임편성 ${on?'켜짐':'꺼짐'}"><span>${on?'ON':'OFF'}</span><i></i></button>
+   </div>
+  </div>
+ </div>`;
+}
+function paintCompactAuto659(){
+ try{
+  const box=document.getElementById('queue');if(!box)return;
+  box.querySelectorAll('.autoGameQueue658').forEach(x=>x.remove());
+  if(!canAuto659())return;
+  const h=document.createElement('div');h.innerHTML=compactAutoHtml659();const card=h.firstElementChild;if(!card)return;
+  const title=box.querySelector(':scope > .title');if(title)title.insertAdjacentElement('afterend',card);else box.prepend(card);
+ }catch{}
+}
 function linkedDev659(){
  try{
   const linked=me?.memberId&&typeof M==='function'?M(String(me.memberId)):null;
@@ -72,17 +95,31 @@ function applyChallenger659(){
   if(mine)mine.classList.toggle('devChallenger659',isDev);
  }catch{}
 }
+function finalUi659(){paintCompactAuto659();applyChallenger659()}
 function queueFrame659(){if(frameQueued659)return;frameQueued659=true;queueMicrotask(applyChallenger659)}
 window.__kokmatchApplyChallenger659=applyChallenger659;
+window.__kokmatchPaintCompactAuto659=paintCompactAuto659;
+
 for(const name of ['renderMembers','renderQueue','renderPlaying','renderSettings']){
  try{
   const prev=eval(name);if(typeof prev!=='function')continue;
-  const wrapped=function(...args){const r=prev.apply(this,args);queueFrame659();return r};
+  const wrapped=function(...args){const r=prev.apply(this,args);if(name==='renderQueue')paintCompactAuto659();queueFrame659();return r};
   eval(name+'=wrapped');
  }catch{}
 }
-try{paintAutoQueue658()}catch{}
-applyChallenger659();
+try{
+ const prevAll=renderAll;
+ renderAll=function(...args){const r=prevAll.apply(this,args);finalUi659();return r};
+}catch{}
+try{
+ const prevGo=goView;
+ goView=function(id,...args){const r=prevGo.call(this,id,...args);if(id==='queue')queueMicrotask(paintCompactAuto659);return r};
+}catch{}
+if(typeof window.toggleAutoGame656==='function'){
+ const prevToggle=window.toggleAutoGame656;
+ window.toggleAutoGame656=async function(...args){const r=await prevToggle.apply(this,args);if(currentView==='queue')paintCompactAuto659();return r};
+}
+finalUi659();
 const root=document.body||document.documentElement;
 if(root)new MutationObserver(queueFrame659).observe(root,{childList:true,subtree:true});
 })();
@@ -111,7 +148,10 @@ css += r'''
 html.kokmatchDeveloper658 #profileCard53 .profilePreview53{outline:0!important;box-shadow:none!important;animation:none!important}
 
 /* v6.59 Challenger-inspired profile crest: gold ring + cyan/blue crystalline wings. */
-.devChallenger659,#profileCard53 .profilePreview53.devChallenger659{
+html .profileIdentity21.devChallenger659,
+html .profileAvatar53.devChallenger659,
+html .avatar.devChallenger659,
+#profileCard53 .profilePreview53.devChallenger659{
  position:relative!important;
  overflow:visible!important;
  isolation:isolate!important;
@@ -139,6 +179,7 @@ html.kokmatchDeveloper658 #profileCard53 .profilePreview53{outline:0!important;b
 .devChallenger659::before{left:-42%!important;transform:rotate(-4deg)!important;transform-origin:100% 55%!important}
 .devChallenger659::after{right:-42%!important;transform:scaleX(-1) rotate(-4deg)!important;transform-origin:0 55%!important}
 .devChallenger659>img,.devChallenger659>.profileFallback21,.devChallenger659>.genderPersonIcon21{position:relative!important;z-index:3!important;border-radius:50%!important}
+#members .profileIdentity21.devChallenger659{margin-left:5px!important}
 @keyframes challengerRing659{0%,100%{box-shadow:0 0 0 1px rgba(8,40,73,.95),0 0 7px rgba(55,215,255,.58),0 0 13px rgba(38,112,231,.34),inset 0 0 4px rgba(255,235,153,.30)}50%{box-shadow:0 0 0 1px rgba(8,40,73,.95),0 0 11px rgba(78,230,255,.88),0 0 19px rgba(46,126,242,.52),inset 0 0 7px rgba(255,239,168,.46)}}
 @keyframes challengerWing659{0%,100%{filter:drop-shadow(0 0 2px rgba(80,230,255,.82)) drop-shadow(0 0 4px rgba(31,104,222,.42))}50%{filter:drop-shadow(0 0 4px rgba(103,240,255,1)) drop-shadow(0 0 8px rgba(38,116,239,.68))}}
 @media(prefers-reduced-motion:reduce){.devChallenger659,.devChallenger659::before,.devChallenger659::after{animation:none!important}}
@@ -147,7 +188,7 @@ html.kokmatchDeveloper658 #profileCard53 .profilePreview53{outline:0!important;b
 (root/'app-v6.59.js').write_text(js,encoding='utf-8')
 (root/'app-v6.59.css').write_text(css,encoding='utf-8')
 
-# Update the standalone entry, PWA metadata and both service-worker entries.
+# Update standalone entry, PWA metadata and both service-worker entries.
 idx=(root/'index.html').read_text(encoding='utf-8').replace('6.58','6.59').replace('v658','v659')
 (root/'index.html').write_text(idx,encoding='utf-8')
 for name in ['manifest.webmanifest','kokmatch-sw.js','sw.js']:
