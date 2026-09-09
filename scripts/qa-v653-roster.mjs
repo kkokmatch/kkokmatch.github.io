@@ -39,20 +39,22 @@ async function diagnostics(page,label,rosterHits,fallbackHits){
 
 async function run(engine,label){
  const browser=await engine.launch({headless:true});
- const context=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true});
+ // Blocking SW is intentional in this focused network-fallback QA: Playwright WebKit can otherwise
+ // route external fetches outside page interception. The production SW itself does not proxy Supabase.
+ const context=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true,serviceWorkers:'block'});
  const page=await context.newPage();
  let hardOffline=false,rosterHits=0,fallbackHits=0;
  const errors=[];page.on('pageerror',e=>errors.push(String(e?.message||e)));
  await page.addInitScript(()=>{try{localStorage.setItem('kokmatch_push_denied_notice629',String(Date.now()));localStorage.setItem('kokmatch_install_guide631_seen','1');sessionStorage.setItem('kokmatch_install_later630','1')}catch{}});
- await page.route('https://wjelumpbjklfrdjxbesj.supabase.co/functions/v1/**',async route=>{
+ await context.route('https://wjelumpbjklfrdjxbesj.supabase.co/functions/v1/**',async route=>{
    const req=route.request(),u=new URL(req.url());
    if(hardOffline)return route.abort('failed');
    if(u.pathname.endsWith('/kokmatch-roster-v653')){rosterHits++;return route.abort('failed');}
    if(u.pathname.endsWith('/kokmatch-multi-api')&&u.searchParams.get('api')==='state'){
-     fallbackHits++;return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({data:fullState,user:{memberId:'m1',displayName:'관리자',role:'manager',globalAdmin:false,tempOrganizer:false,groupId:'qa'},group:{groupId:'qa',name:'QA 모임'},groups:[]})});
+     fallbackHits++;return route.fulfill({status:200,contentType:'application/json',headers:{'access-control-allow-origin':'*','access-control-allow-headers':'*'},body:JSON.stringify({data:fullState,user:{memberId:'m1',displayName:'관리자',role:'manager',globalAdmin:false,tempOrganizer:false,groupId:'qa'},group:{groupId:'qa',name:'QA 모임'},groups:[]})});
    }
-   if(u.pathname.endsWith('/kokmatch-state-v46'))return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({data:compactState,memberCount:4,user:{memberId:'m1',displayName:'관리자',role:'manager',globalAdmin:false,tempOrganizer:false,groupId:'qa'},group:{groupId:'qa',name:'QA 모임'},groups:[]})});
-   return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({success:true,data:fullState,profiles:{},user:{memberId:'m1',displayName:'관리자',role:'manager',globalAdmin:false,tempOrganizer:false,groupId:'qa'},group:{groupId:'qa',name:'QA 모임'},groups:[]})});
+   if(u.pathname.endsWith('/kokmatch-state-v46'))return route.fulfill({status:200,contentType:'application/json',headers:{'access-control-allow-origin':'*','access-control-allow-headers':'*'},body:JSON.stringify({data:compactState,memberCount:4,user:{memberId:'m1',displayName:'관리자',role:'manager',globalAdmin:false,tempOrganizer:false,groupId:'qa'},group:{groupId:'qa',name:'QA 모임'},groups:[]})});
+   return route.fulfill({status:200,contentType:'application/json',headers:{'access-control-allow-origin':'*','access-control-allow-headers':'*'},body:JSON.stringify({success:true,data:fullState,profiles:{},user:{memberId:'m1',displayName:'관리자',role:'manager',globalAdmin:false,tempOrganizer:false,groupId:'qa'},group:{groupId:'qa',name:'QA 모임'},groups:[]})});
  });
  try{
   await page.goto('http://127.0.0.1:4173/?qa=v653-roster',{waitUntil:'domcontentloaded'});
@@ -65,7 +67,6 @@ async function run(engine,label){
   const text1=await page.locator('#members').innerText();if(/응답이 지연|불러오지 못/.test(text1))throw new Error(label+' fallback surfaced roster error');
   if(rosterHits<1||fallbackHits<1)throw new Error(label+' fallback path not exercised '+JSON.stringify({rosterHits,fallbackHits}));
 
-  // After one successful full load, a compact-view transition must restore the cached roster immediately even if network disappears.
   await page.evaluate(()=>{goView('queue');S.members=[S.members[0]];window.S=S;window.__kokmatchMemberCount46=4;window.__kokmatchMemberCountGroup46='qa';normalizeClient();});
   hardOffline=true;
   await page.evaluate(()=>goView('members'));
