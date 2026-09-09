@@ -39,19 +39,19 @@ async function boot(engine,label){
  await page.goto('http://127.0.0.1:4173/?qa=v656-auto',{waitUntil:'domcontentloaded'});
  await page.waitForFunction(v=>window.__kokmatchVersionLock===v&&window.__kokmatchAutoGame656===v&&typeof window.toggleAutoGame656==='function'&&typeof window.__kokmatchRunAuto656==='function',VERSION,{timeout:15000});
  await page.evaluate(({s,user,group})=>{T='qa-token';currentGroupId='qa';S=JSON.parse(JSON.stringify(s));window.S=S;me=user;window.me=me;window.group=group;groups=[];normalizeClient();document.getElementById('login')?.classList.add('hide');currentView='stats';renderAll()},{s:state(false),user,group});
- return {browser,page,getHits:()=>({autoSetHits,autoTickHits}),getServer:()=>clone(server)};
+ return {browser,page,getHits:()=>({autoSetHits,autoTickHits})};
 }
 
 async function managerFlow(engine,label){
  const {browser,page,getHits}=await boot(engine,label);
  try{
-  const liveText=await page.locator('#stats').innerText();
+  const liveText=await page.locator('#stats').textContent()||'';
   if(await page.locator('#opsDashboard652').count())throw new Error(label+' live operations dashboard still rendered');
   if(liveText.includes('실시간 운영현황'))throw new Error(label+' stats still contains live operations text');
 
   await page.evaluate(()=>{currentView='settings';renderSettings()});
-  await page.waitForSelector('.autoGameCard656');
-  const card=await page.locator('.autoGameCard656').innerText();
+  await page.waitForSelector('.autoGameCard656',{state:'attached'});
+  const card=await page.locator('.autoGameCard656').textContent()||'';
   if(!card.includes('자동게임편성')||!card.includes('AI 자동 최적화')||!card.includes('OFF'))throw new Error(label+' auto card initial state wrong: '+card);
   await page.evaluate(()=>openAutoGameSettings656());
   const setup=await page.locator('#modalSheet').innerText();
@@ -59,7 +59,7 @@ async function managerFlow(engine,label){
   await page.evaluate(()=>closeModal());
 
   await page.evaluate(()=>toggleAutoGame656());
-  await page.waitForFunction(()=>S?.autoGame?.enabled===true&&Array.isArray(S?.pendingGames)&&S.pendingGames.length===1,{timeout:6000});
+  await page.waitForFunction(()=>S?.autoGame?.enabled===true&&Array.isArray(S?.pendingGames)&&S.pendingGames.length===1,null,{timeout:6000});
   const hits=getHits();if(hits.autoSetHits<1||hits.autoTickHits<1)throw new Error(label+' auto API was not exercised '+JSON.stringify(hits));
   const pg=await page.evaluate(()=>S.pendingGames[0]);
   if(pg.createdByMode!=='auto'||pg.autoEnabledByName!=='관리자'||pg.autoEnabledByRole!=='모임장')throw new Error(label+' auto provenance missing '+JSON.stringify(pg));
