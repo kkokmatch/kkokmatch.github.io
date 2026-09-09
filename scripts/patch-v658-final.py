@@ -17,25 +17,32 @@ function queueMeta658(){
   [...box.querySelectorAll('.queueCard54,.queueCard53,.queueCard')].forEach((card,i)=>{
    const meta=card.querySelector('.queueInfo53 .compactMeta53')||card.querySelector('.queueInfo53 .meta')||[...card.querySelectorAll('.meta')].find(x=>/대기/.test(String(x.textContent||'')));
    if(!meta)return;
-   meta.classList.add('queueWaitMeta658');
+   if(!meta.classList.contains('queueWaitMeta658'))meta.classList.add('queueWaitMeta658');
    let count=card.querySelector('.gamecnt');
    if(!count){
     const id=String(q[i]||'');
     const n=id&&typeof dailyCount==='function'?Math.max(0,Number(dailyCount(id))||0):0;
-    count=document.createElement('span');count.className='gamecnt';count.textContent=`게임 ${n}회`;
-   }
-   count.classList.add('queueGameCount658');
-   meta.querySelectorAll('.queueMetaSep658').forEach(x=>x.remove());
-   const sep=document.createElement('span');sep.className='queueMetaSep658';sep.textContent='·';
+    count=document.createElement('span');count.className='gamecnt queueGameCount658';count.textContent=`게임 ${n}회`;
+   }else if(!count.classList.contains('queueGameCount658'))count.classList.add('queueGameCount658');
    const waitSep=meta.querySelector('.waitSep70');
-   if(waitSep){waitSep.before(sep,count)}else if(count.parentElement!==meta){meta.append(sep,count)}
+   if(waitSep){
+    let sep=meta.querySelector('.queueMetaSep658');
+    const already=count.parentNode===meta&&count.nextSibling===waitSep&&sep&&sep.parentNode===meta&&sep.nextSibling===count;
+    if(!already){
+     if(!sep){sep=document.createElement('span');sep.className='queueMetaSep658';sep.textContent='·'}
+     waitSep.before(sep,count);
+    }
+   }else if(count.parentElement!==meta){
+    let sep=meta.querySelector('.queueMetaSep658');if(!sep){sep=document.createElement('span');sep.className='queueMetaSep658';sep.textContent='·'}
+    meta.append(sep,count);
+   }
   });
  }catch{}
 }
 function frame658(){
  try{
-  const isDev=me?.globalAdmin===true;
-  document.documentElement.classList.toggle('kokmatchDeveloper658',isDev);
+  const isDev=me?.globalAdmin===true,root=document.documentElement;
+  if(root.classList.contains('kokmatchDeveloper658')!==isDev)root.classList.toggle('kokmatchDeveloper658',isDev);
   document.querySelectorAll('#members .devChallenger658,#queue .devChallenger658,#playing .devChallenger658').forEach(el=>{
    const host=el.closest('.memberCard,.queueCard,.pendingSlot,.playingPlayer53,.p,.slot,.card');
    if(host&&!host.querySelector('.roleBadge.role-global'))el.classList.remove('devChallenger658');
@@ -43,9 +50,9 @@ function frame658(){
   document.querySelectorAll('.roleBadge.role-global').forEach(b=>{
    const host=b.closest('.memberCard,.queueCard,.pendingSlot,.playingPlayer53,.p,.slot,.card');if(!host)return;
    const av=host.querySelector(':scope > .profileIdentity21,:scope > .avatar,.profileIdentity21,.profileAvatar53,.profilePreview53,.avatar');
-   if(av)av.classList.add('devChallenger658');
+   if(av&&!av.classList.contains('devChallenger658'))av.classList.add('devChallenger658');
   });
-  if(isDev){const mine=document.querySelector('#profileCard53 .profilePreview53');if(mine)mine.classList.add('devChallenger658')}
+  if(isDev){const mine=document.querySelector('#profileCard53 .profilePreview53');if(mine&&!mine.classList.contains('devChallenger658'))mine.classList.add('devChallenger658')}
  }catch{}
 }
 function purge658(){
@@ -98,4 +105,4 @@ html.kokmatchDeveloper658 #profileCard53 .profilePreview53{
 @media (prefers-reduced-motion:reduce){html.kokmatchDeveloper658 #profileCard53 .profilePreview53{animation:none}}
 '''
 css.write_text(c,encoding='utf-8')
-print('v6.58 final badge, developer frame and queue metadata guards appended')
+print('v6.58 final idempotent badge, developer frame and queue metadata guards appended')
