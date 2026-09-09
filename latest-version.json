@@ -1,8 +1,8 @@
 {
-  "version": 94,
-  "label": "v6.54",
-  "semanticVersion": "6.54",
-  "build": "v6.54",
-  "updatedAt": "2026-09-09T10:18:48+09:00",
-  "note": "v6.54 회원명부 지연 개선 · 경량 roster API · 6.5초 허용 · 8초 자동우회 · 24시간 모임별 영구캐시 · 재실행 즉시복원"
+  "version": 95,
+  "label": "v6.55",
+  "semanticVersion": "6.55",
+  "build": "v6.55",
+  "updatedAt": "2026-09-09T10:46:58+09:00",
+  "note": "v6.55 실시간 운영현황-회원명부 충돌 제거 · 경량 상태조회 전체명단 보존 · 중복 reentry 강제조회 제거"
 }
