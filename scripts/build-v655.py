@@ -41,6 +41,41 @@ new_compact=""" /* compact-preserve-full-roster-v655: operational polling must n
 assert old_compact in js, 'compactState46 assignment block changed'
 js=js.replace(old_compact,new_compact,1)
 
+# A complete canonical roster is already valid for normal tab entry. Never turn a non-force
+# Members navigation into another network roster request. Explicit refresh(force=true) still fetches.
+old_fetch_head="""async function fetchRoster42(force=false){
+ if(!T||!currentGroupId)return null;const gid=String(currentGroupId);
+"""
+new_fetch_head="""async function fetchRoster42(force=false){
+ if(!T||!currentGroupId)return null;const gid=String(currentGroupId);
+ if(!force&&hasFullRoster42()){
+  memberReady42=true;memberGroup42=gid;memberLoadedAt42=Date.now();cacheRoster654(gid,S.members,S?.adminBadgeVisibility);
+  return {members:S.members,memberCount:S.members.length,localFullRoster:true};
+ }
+"""
+assert old_fetch_head in js, 'fetchRoster42 header changed'
+js=js.replace(old_fetch_head,new_fetch_head,1)
+
+# The legacy v4.1 Members entry wrapper used to invalidate a perfectly complete roster on every
+# tab switch. Only request a roster when the canonical state is genuinely incomplete.
+old_go="""const goViewPrev42=goView;
+goView=function(id){
+ const target=String(id||''),prev=currentView;if(target==='members'&&prev!=='members')invalidateMembers42();
+ const r=goViewPrev42(id);
+ if(target==='members'&&prev!=='members')queueMicrotask(()=>{if(currentView==='members')enterMembers42(false)});
+ return r;
+};"""
+new_go="""const goViewPrev42=goView;
+goView=function(id){
+ const target=String(id||''),prev=currentView,needRoster42=target==='members'&&prev!=='members'&&!hasFullRoster42();
+ if(needRoster42)invalidateMembers42();
+ const r=goViewPrev42(id);
+ if(needRoster42)queueMicrotask(()=>{if(currentView==='members')enterMembers42(false)});
+ return r;
+};"""
+assert old_go in js, 'legacy member-entry wrapper changed'
+js=js.replace(old_go,new_go,1)
+
 # Keep the live dashboard, but make its headline explicit that it uses the preserved canonical roster.
 js=js.replace("<p>${esc652(group?.name||'현재 모임')} · 상태 자동동기화 약 10초</p>","<p>${esc652(group?.name||'현재 모임')} · 운영상태 자동동기화 · 전체 회원명부 보존</p>",1)
 
@@ -57,11 +92,13 @@ for name in ['kokmatch-sw.js','sw.js','manifest.webmanifest']:
 latest={
  'version':95,'label':'v6.55','semanticVersion':'6.55','build':'v6.55',
  'updatedAt':datetime.now(ZoneInfo('Asia/Seoul')).isoformat(timespec='seconds'),
- 'note':'v6.55 실시간 운영현황-회원명부 충돌 제거 · 경량 상태조회가 전체명단을 덮어쓰지 않음 · 명단 재조회 루프 차단'
+ 'note':'v6.55 실시간 운영현황-회원명부 충돌 제거 · 경량 상태조회가 전체명단을 덮어쓰지 않음 · 완전명단 탭전환 서버재조회 0회'
 }
 (ROOT/'latest-version.json').write_text(json.dumps(latest,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
 
 assert 'compact-preserve-full-roster-v655' in js
+assert 'localFullRoster:true' in js
+assert "needRoster42=target==='members'&&prev!=='members'&&!hasFullRoster42()" in js
 assert 'opsDashboard652' in js, 'live dashboard unexpectedly removed'
 assert f'app-v{NEW}.js?v={NEW}' in idx and f'app-v{NEW}.css?v={NEW}' in idx
 print('v6.55 dashboard/roster conflict build OK')
