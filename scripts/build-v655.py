@@ -76,6 +76,15 @@ goView=function(id){
 assert old_go in js, 'legacy member-entry wrapper changed'
 js=js.replace(old_go,new_go,1)
 
+# V6_ROSTER_REENTRY was an older emergency repair shim and still forced enterMembers42(true)
+# on every tab re-entry, bypassing the new local-full-roster guard. Keep its DOM repair purpose,
+# but never perform network I/O when the canonical roster is already complete. If genuinely
+# incomplete, use the normal non-force path exactly once.
+old_reentry="""(()=>{'use strict';let busy=false;async function repair(){if(busy||currentView!=='members')return;busy=true;try{const input=document.getElementById('memberSearchInput46');if(input)input.value='';try{window.__kokmatchMemberPage46=1}catch{}if(typeof window.enterMembers42==='function'){await window.enterMembers42(true)}else if(typeof window.refreshMembers46==='function'){await window.refreshMembers46()}else if(typeof renderMembers==='function'){renderMembers()}try{window.resetMemberList46?.()}catch{}try{window.__kokmatchFinalizeRoster22?.()}catch{}}catch(e){console.warn('v6 roster reentry',e);try{typeof renderMembers==='function'&&renderMembers();window.__kokmatchFinalizeRoster22?.()}catch{}}finally{busy=false}}const old=goView;goView=function(id,...args){const was=currentView,r=old(id,...args);if(id==='members'&&was!=='members'){queueMicrotask(()=>repair());requestAnimationFrame(()=>repair())}return r};window.goView=goView;window.__kokmatchRepairRosterV6=repair;})();"""
+new_reentry="""(()=>{'use strict';const V6_ROSTER_REENTRY_LOCAL_V655=true;let busy=false;function complete(){try{const got=Array.isArray(S?.members)?S.members.length:0,gid=String(currentGroupId||''),eg=String(window.__kokmatchMemberCountGroup46||gid),expected=eg===gid?Number(window.__kokmatchMemberCount46||0):0;return got>0&&(!expected||got>=expected)}catch{return false}}async function repair(){if(busy||currentView!=='members')return;busy=true;try{const input=document.getElementById('memberSearchInput46');if(input)input.value='';try{window.__kokmatchMemberPage46=1}catch{}if(complete()){if(typeof renderMembers==='function')renderMembers()}else if(typeof window.enterMembers42==='function'){await window.enterMembers42(false)}else if(typeof renderMembers==='function'){renderMembers()}try{window.resetMemberList46?.()}catch{}try{window.__kokmatchFinalizeRoster22?.()}catch{}}catch(e){console.warn('v6 roster reentry',e);try{typeof renderMembers==='function'&&renderMembers();window.__kokmatchFinalizeRoster22?.()}catch{}}finally{busy=false}}const old=goView;goView=function(id,...args){const was=currentView,r=old(id,...args);if(id==='members'&&was!=='members')queueMicrotask(()=>repair());return r};window.goView=goView;window.__kokmatchRepairRosterV6=repair;})();"""
+assert old_reentry in js, 'V6_ROSTER_REENTRY block changed'
+js=js.replace(old_reentry,new_reentry,1)
+
 # Keep the live dashboard, but make its headline explicit that it uses the preserved canonical roster.
 js=js.replace("<p>${esc652(group?.name||'현재 모임')} · 상태 자동동기화 약 10초</p>","<p>${esc652(group?.name||'현재 모임')} · 운영상태 자동동기화 · 전체 회원명부 보존</p>",1)
 
@@ -92,13 +101,14 @@ for name in ['kokmatch-sw.js','sw.js','manifest.webmanifest']:
 latest={
  'version':95,'label':'v6.55','semanticVersion':'6.55','build':'v6.55',
  'updatedAt':datetime.now(ZoneInfo('Asia/Seoul')).isoformat(timespec='seconds'),
- 'note':'v6.55 실시간 운영현황-회원명부 충돌 제거 · 경량 상태조회가 전체명단을 덮어쓰지 않음 · 완전명단 탭전환 서버재조회 0회'
+ 'note':'v6.55 실시간 운영현황-회원명부 충돌 제거 · 경량 상태조회 전체명단 보존 · 중복 reentry 강제조회 제거'
 }
 (ROOT/'latest-version.json').write_text(json.dumps(latest,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
 
 assert 'compact-preserve-full-roster-v655' in js
 assert 'localFullRoster:true' in js
 assert "needRoster42=target==='members'&&prev!=='members'&&!hasFullRoster42()" in js
+assert 'V6_ROSTER_REENTRY_LOCAL_V655=true' in js
 assert 'opsDashboard652' in js, 'live dashboard unexpectedly removed'
 assert f'app-v{NEW}.js?v={NEW}' in idx and f'app-v{NEW}.css?v={NEW}' in idx
 print('v6.55 dashboard/roster conflict build OK')
