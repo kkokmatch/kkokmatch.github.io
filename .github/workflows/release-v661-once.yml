@@ -89,9 +89,9 @@ jobs:
         run: |
           git config user.name 'kkokmatch-release-bot'
           git config user.email 'actions@users.noreply.github.com'
-          git rm scripts/build-v661.py scripts/qa-v661-frame.mjs scripts/check-v661-frame-chunks.py scripts/frame-v661-part*.b64 .github/workflows/release-v661-once.yml
+          git rm -f scripts/build-v661.py scripts/qa-v661-frame.mjs scripts/check-v661-frame-chunks.py scripts/frame-v661-part*.b64 .github/workflows/release-v661-once.yml
           git add app-v6.61.js app-v6.61.css assets/dev-challenger-frame-v661.webp index.html latest-version.json manifest.webmanifest kokmatch-sw.js sw.js versions/v6.60
           git commit -m 'Release v6.61 fix developer profile frame visibility'
           git push
 
-# retry: exact frame chunks verified before binary reconstruction
+# final retry: cleanup QA source with force after it is intentionally patched for the run
