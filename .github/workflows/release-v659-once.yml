@@ -30,6 +30,7 @@ jobs:
           grep -F 'compactAuto659' app-v6.59.js >/dev/null
           grep -F 'devChallenger659' app-v6.59.js >/dev/null
           grep -F 'roles.some' app-v6.59.js >/dev/null
+          grep -F '__kokmatchCleanRosterCards659' app-v6.59.js >/dev/null
           grep -F 'app-v6.59.js?v=6.59' index.html >/dev/null
           grep -F 'app-v6.59.css?v=6.59' index.html >/dev/null
           ! grep -F 'app-v6.58.js' index.html
@@ -87,4 +88,4 @@ jobs:
           git commit -m 'Release v6.59 compact auto controls and Challenger profile crest'
           git push
 
-# retry: separate manager control QA from developer crest QA; linked member roles stabilize permissions
+# retry: remove legacy 5px member-card accent border and shadow completely
