@@ -7,11 +7,15 @@ on:
       - 'latest-version.json'
       - 'app-v*.js'
       - 'app-v*.css'
+      - 'edge-functions/kokmatch-auto-v656/**'
+      - 'edge-functions/kokmatch-atomic-api/**'
       - 'scripts/qa-boot-diagnostic.mjs'
       - 'scripts/qa-current-runtime.mjs'
       - 'scripts/qa-partner-poll-current.mjs'
       - 'scripts/qa-save-layout-current.mjs'
       - 'scripts/qa-role-layout-current.mjs'
+      - 'scripts/qa-auto-priority-v673.mjs'
+      - 'scripts/qa-auto-ui-v673.mjs'
       - '.github/workflows/qa-current-runtime.yml'
   workflow_dispatch:
 
@@ -28,6 +32,8 @@ jobs:
           node-version: 22
       - name: Validate standalone runtime
         run: node scripts/validate-standalone-runtime.mjs
+      - name: Automatic matching priority QA
+        run: node scripts/qa-auto-priority-v673.mjs
       - name: Install Playwright
         run: |
           npm install --no-save playwright@1.55.0
@@ -56,6 +62,8 @@ jobs:
           s=s.replace("if(url.pathname.endsWith('/kokmatch-v60-api')){if(body.op==='member_save')", "if(url.pathname.endsWith('/kokmatch-v60-api')||url.pathname.endsWith('/kokmatch-member-v646')){if(body.op==='member_save')")
           p.write_text(s,encoding='utf-8')
           PY
+      - name: Automatic and manual conflict UI QA
+        run: node scripts/qa-auto-ui-v673.mjs
       - name: Current runtime boot diagnostic
         run: node scripts/qa-boot-diagnostic.mjs
       - name: Mobile roster smoke QA
