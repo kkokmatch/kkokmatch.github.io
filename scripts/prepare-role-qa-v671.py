@@ -21,8 +21,14 @@ old="""if(width<600){if(ir&&ar.top<ir.bottom-2)failures.push('phone info/actions
 new="""if(width<600){if(ir&&ar.top<ir.bottom-2)failures.push('phone info/actions overlap')}else if(ir&&ir.right>ar.left+2){const cs=getComputedStyle(info),as=getComputedStyle(actions);failures.push(`tablet info/actions overlap id=${cardId(card)} info=${Math.round(ir.left)}-${Math.round(ir.right)} action=${Math.round(ar.left)}-${Math.round(ar.right)} card=${Math.round(cr.left)}-${Math.round(cr.right)} infoWidth=${cs.width} infoGrid=${cs.gridColumnStart}/${cs.gridColumnEnd} actionWidth=${as.width} actionGrid=${as.gridColumnStart}/${as.gridColumnEnd}`)}"""
 if old in s:s=s.replace(old,new,1)
 
+# Playwright waitForFunction uses (fn, arg, options). Keep the 5s refresh assertion
+# as an actual timeout instead of accidentally passing the options object as fn arg.
+s=s.replace("page.waitForFunction(()=>Number(window.S?.refreshSerial)===1,{timeout:5000})", "page.waitForFunction(()=>Number(window.S?.refreshSerial)===1,null,{timeout:5000})")
+s=s.replace("page.waitForFunction(()=>Number(window.S?.refreshSerial)===2,{timeout:5000})", "page.waitForFunction(()=>Number(window.S?.refreshSerial)===2,null,{timeout:5000})")
+
 if "displayName:'박태영'" not in s: raise SystemExit('developer QA identity patch failed')
 if "name:'박태영'" not in s or "role:'admin'" not in s: raise SystemExit('developer roster evidence patch failed')
 if 'new MutationObserver(kill)' not in s: raise SystemExit('robust prompt guard patch failed')
+if 'refreshSerial)===1,null,{timeout:5000}' not in s: raise SystemExit('refresh wait timeout patch failed')
 p.write_text(s,encoding='utf-8')
-print('prepared persistent role QA with real developer auth contract and tablet diagnostics')
+print('prepared persistent role QA with real developer auth contract, tablet diagnostics and deterministic refresh waits')
