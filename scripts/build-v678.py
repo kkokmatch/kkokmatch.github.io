@@ -61,7 +61,7 @@ function canonicalQueue678(){
    meta.classList.add('queueWaitMeta658','queueWaitMeta677','queueWaitMeta678');
    const waitText=`현재 ${Math.max(0,typeof waitMins==='function'?Number(waitMins(m))||0:0)}분 대기중`;
    const count=Math.max(0,typeof dailyCount==='function'?Number(dailyCount(id))||0:0);
-   meta.dataset.gameCount678=`게임 ${count}회`;
+   const gameText=`게임 ${count}회`;if(meta.dataset.gameCount678!==gameText)meta.dataset.gameCount678=gameText;
    let wait=meta.querySelector(':scope > .waitCurrent678');
    const canonical=wait&&meta.children.length===1&&meta.firstElementChild===wait&&String(wait.textContent||'')===waitText;
    if(!canonical){
@@ -91,7 +91,7 @@ function polishMonthly678(){
    first.classList.add('statsName678');
    let badge=first.querySelector(':scope > .statsRank678');
    if(!badge){badge=document.createElement('span');badge.className='statsRank678';first.prepend(badge)}
-   badge.textContent=String(rank);
+   const rankText=String(rank);if(badge.textContent!==rankText)badge.textContent=rankText;
   });
  }finally{statsPolishing678=false}
 }
