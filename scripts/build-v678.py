@@ -78,20 +78,17 @@ function armQueueObserver678(){const box=document.getElementById('queue');if(!bo
 window.__kokmatchCanonicalQueue678=canonicalQueue678;
 setInterval(()=>{if(me&&currentView==='queue')canonicalQueue678()},15000);
 
-/* 3) Monthly ranking: remove the separate number column and pin numbered circles inside the left side of the name cell. */
+/* 3) Monthly ranking: hide the legacy number column and pin numbered circles inside the left side of the name cell. */
 let statsPolishing678=false;
 function polishMonthly678(){
  if(statsPolishing678)return;statsPolishing678=true;
  try{
   const table=document.querySelector('#stats .statsMonthlyTable628');if(!table)return;
-  table.querySelectorAll('col.cNo675').forEach(x=>x.remove());
-  table.querySelectorAll('th.statsNoHead675').forEach(x=>x.remove());
-  table.querySelectorAll('td.statsNo675').forEach(x=>x.remove());
   let rank=0;
   [...table.querySelectorAll('tbody tr')].forEach(tr=>{
-   const empty=tr.querySelector('.statsEmpty628');if(empty){empty.setAttribute('colspan','6');return}
+   if(tr.querySelector('.statsEmpty628'))return;
    const first=tr.children[0];if(!first)return;rank+=1;
-   first.classList.remove('statsName675');first.classList.add('statsName678');
+   first.classList.add('statsName678');
    let badge=first.querySelector(':scope > .statsRank678');
    if(!badge){badge=document.createElement('span');badge.className='statsRank678';first.prepend(badge)}
    badge.textContent=String(rank);
@@ -121,7 +118,7 @@ css+=r'''
 #queue .queueCard .queueWaitMeta678::after{content:attr(data-game-count678);display:inline-flex!important;align-items:center!important;background:#eef8f2!important;color:var(--green)!important;border-radius:999px!important;padding:3px 7px!important;font-size:11px!important;font-weight:900!important;line-height:1.2!important;margin-left:3px!important;white-space:nowrap!important;flex:0 0 auto!important}
 #queue .queueCard .queueWaitMeta678 .waitSep70,#queue .queueCard .queueWaitMeta678 .waitTotal70,#queue .queueCard .gamecnt{display:none!important}
 
-/* v6.78: no standalone number column; circle sequence sits in the empty left area of the name cell. */
+/* v6.78: no visible standalone number column; circle sequence sits in the empty left area of the name cell. */
 .statsMonthlyTable628 col.cNo675,.statsMonthlyTable628 th.statsNoHead675,.statsMonthlyTable628 td.statsNo675{display:none!important;width:0!important;min-width:0!important;padding:0!important;border:0!important}
 .statsMonthlyTable628 .cName628{width:30%!important}.statsMonthlyTable628 .cYear628{width:14%!important}.statsMonthlyTable628 .cAge628{width:17%!important}.statsMonthlyTable628 .cRole628{width:15%!important}.statsMonthlyTable628 .cAttend628{width:12%!important}.statsMonthlyTable628 .cGames628{width:12%!important}
 .statsMonthlyTable628 th:first-child,.statsMonthlyTable628 td.statsName678{text-align:center!important}
