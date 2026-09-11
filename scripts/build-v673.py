@@ -33,47 +33,49 @@ if(window.__kokmatchAutoManualGuard673)return;window.__kokmatchAutoManualGuard67
 let deferred673=null,promptOpen673=false,bypassUntil673=0,lastNotice673=0;
 function autoOn673(){try{return typeof autoEnabled656==='function'&&autoEnabled656()}catch{return S?.autoGame?.enabled===true}}
 function controller673(){try{return typeof canControlAuto656==='function'&&canControlAuto656()}catch{return !!me&&(me?.globalAdmin||me?.role==='manager'||me?.role==='organizer')}}
-function intentNode673(target){
- const el=target instanceof Element?target:null;if(!el||!el.closest('#queue'))return null;
- if(el.closest('.autoGameQueue658'))return null;
- const button=el.closest('button');
- if(button){
-  const oc=String(button.getAttribute('onclick')||'');
-  if(/toggleAutoGame656|openAutoGameSettings656|openCourtStart|draftRemove|clearDraft/.test(oc))return null;
-  if(button.closest('.composer54,.composer,.pendingCard54,.pendingCard'))return button;
+function openConflict673(run,label='수동 게임편성'){
+ if(promptOpen673)return false;promptOpen673=true;deferred673={run,label};
+ openModal(`<h3>자동게임편성 작동 중</h3><div class="note">현재 자동게임편성이 ON이라 ${label} 동작을 잠시 막았습니다.</div><div class="autoManualExplain673"><b>어떻게 진행할까요?</b><span><strong>자동기능 유지</strong>를 선택하면 방금 수동 동작은 취소되고 자동편성이 계속됩니다.</span><span><strong>자동기능 끄고 직접 편성</strong>을 선택하면 자동편성을 OFF로 전환한 뒤 방금 하려던 수동 동작을 이어서 실행합니다.</span></div><div class="autoManualChoices673"><button id="autoManualKeep673" type="button" class="btn ghost" onclick="keepAutoManual673()">자동기능 유지</button><button id="autoManualDisable673" type="button" class="btn pri" onclick="disableAutoManual673()">자동기능 끄고 직접 편성</button></div>`);
+ return true;
+}
+function gate673(run,label='수동 게임편성'){
+ if(Date.now()<bypassUntil673||!autoOn673())return run();
+ if(!controller673()){
+  if(Date.now()-lastNotice673>900){lastNotice673=Date.now();alert('자동게임편성이 작동 중입니다. 개발자·모임장·운영진이 자동기능을 끈 뒤 수동 편성을 진행할 수 있습니다.')}
+  return;
  }
- const card=el.closest('.queueCard');if(card&&card.closest('#queue'))return card;
- const slot=el.closest('.pendingSlot.clickable');if(slot&&slot.closest('.pendingCard54,.pendingCard'))return slot;
- return null;
+ openConflict673(run,label);return;
 }
-function stop673(ev){try{ev.preventDefault();ev.stopPropagation();ev.stopImmediatePropagation()}catch{}}
-function openConflict673(node){
- if(promptOpen673)return;promptOpen673=true;deferred673={node};
- openModal(`<h3>자동게임편성 작동 중</h3><div class="note">현재 자동게임편성이 ON이라 수동 게임편성 동작을 잠시 막았습니다.</div><div class="autoManualExplain673"><b>어떻게 진행할까요?</b><span><strong>자동기능 유지</strong>를 선택하면 방금 수동 동작은 취소되고 자동편성이 계속됩니다.</span><span><strong>자동기능 끄고 직접 편성</strong>을 선택하면 자동편성을 OFF로 전환한 뒤 방금 하려던 수동 동작을 이어서 실행합니다.</span></div><div class="autoManualChoices673"><button id="autoManualKeep673" type="button" class="btn ghost" onclick="keepAutoManual673()">자동기능 유지</button><button id="autoManualDisable673" type="button" class="btn pri" onclick="disableAutoManual673()">자동기능 끄고 직접 편성</button></div>`);
-}
+window.__kokmatchManualGate673=gate673;
 window.keepAutoManual673=function(){deferred673=null;promptOpen673=false;closeModal();setTimeout(()=>{try{runAuto656(false)}catch{}},120)};
 window.disableAutoManual673=async function(){
  const intent=deferred673,btn=document.getElementById('autoManualDisable673');if(btn){btn.disabled=true;btn.textContent='자동기능 끄는 중...'}
  try{
   const x=await autoRequest656('set',{enabled:false});
   if(x?.data){S=x.data;window.S=x.data;normalizeClient()}else if(S?.autoGame)S.autoGame.enabled=false;
-  deferred673=null;promptOpen673=false;bypassUntil673=Date.now()+1600;closeModal();
+  deferred673=null;promptOpen673=false;bypassUntil673=Date.now()+1800;closeModal();
   try{window.__kokmatchPaintCompactAuto659?.()}catch{}
-  setTimeout(()=>{try{intent?.node?.click?.()}catch(e){showError(e)}},0);
+  setTimeout(()=>{try{const r=intent?.run?.();Promise.resolve(r).catch(showError)}catch(e){showError(e)}},0);
  }catch(e){if(btn?.isConnected){btn.disabled=false;btn.textContent='자동기능 끄고 직접 편성'}showError(e)}
 };
-function intercept673(ev){
- if(Date.now()<bypassUntil673||!autoOn673())return;
- const node=intentNode673(ev.target);if(!node)return;
- stop673(ev);
- if(!controller673()){
-  if(Date.now()-lastNotice673>900){lastNotice673=Date.now();alert('자동게임편성이 작동 중입니다. 개발자·모임장·운영진이 자동기능을 끈 뒤 수동 편성을 진행할 수 있습니다.')}
-  return;
- }
- openConflict673(node);
+
+/* Put the guard inside the canonical composition functions themselves. This runs before both
+   the v2.8 fast touch router and ordinary inline onclick handlers, so iOS/Android cannot bypass it. */
+const guarded673={
+ draftClick:'회원 선택',recommendDraft:'추천 구성',registerDraft:'대기 등록',
+ openFillPending:'빈자리 채우기',openMoveMember:'편성 이동',removePending:'편성 인원 변경',
+ cancelPending:'편성 취소',movePendingOrder:'편성 순서 변경',fillFromQueue:'빈자리 채우기',
+ fillFromPending:'편성 이동',moveToPartial:'편성 이동',partnerRedo67:'파트너 재편성',
+ partnerKeep67:'파트너 편성',partnerSwap67:'파트너 변경',partnerIgnore67:'파트너 예외 편성',
+ repeatManual:'수동 재편성',repeatRecommend:'추천 재편성'
+};
+for(const [name,label] of Object.entries(guarded673)){
+ try{
+  const prev=eval(name);if(typeof prev!=='function')continue;
+  const wrapped=function(...args){const self=this;return gate673(()=>prev.apply(self,args),label)};
+  eval(name+'=wrapped');try{window[name]=wrapped}catch{}
+ }catch{}
 }
-window.addEventListener('pointerup',intercept673,{capture:true,passive:false});
-window.addEventListener('click',intercept673,{capture:true,passive:false});
 })();
 '''
 js+=manual_guard
@@ -97,4 +99,4 @@ for name in ['index.html','manifest.webmanifest','kokmatch-sw.js','sw.js']:
  'version':113,'label':'v6.73','semanticVersion':'6.73','build':'v6.73','updatedAt':'2026-09-11T11:42:00+09:00',
  'note':'v6.73 자동게임 우선순위 강화 · 대기시간→게임수→당일파트너→성별보정 급수밸런스→3회 반복회피 · 자동/수동 충돌 선택창'
 },ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
-print('built v6.73 automatic priority and manual conflict guard')
+print('built v6.73 automatic priority and canonical manual conflict guard')
