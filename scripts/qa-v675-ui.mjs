@@ -33,16 +33,24 @@ try{
  await page.locator('.autoGameQueue658 .autoSettingsBtn656').click();await page.waitForSelector('#modal.on');assert((await page.locator('#modalSheet').innerText()).includes('자동게임설정'),'settings modal did not open');await page.locator('#modalSheet button',{hasText:'닫기'}).click();
  await page.locator('.autoGameQueue658 .autoToggle656').click();await page.waitForFunction(()=>S?.autoGame?.enabled===true&&S?.pendingGames?.length===1,{timeout:7000});assert(autoCalls.includes('get')&&autoCalls.includes('set')&&autoCalls.includes('tick'),'verified auto path did not call get/set/tick');
  await page.evaluate(()=>{currentView='stats';renderStats();goView('stats')});
- await page.waitForSelector('#stats #opsDashboard652');await page.waitForSelector('.statsMonthlyTable628 .statsNoHead675');await page.waitForFunction(()=>document.querySelectorAll('.statsMonthlyTable628 tbody tr').length>=4);
- const heads=(await page.locator('.statsMonthlyTable628 thead tr').innerText()).replace(/\s+/g,' ').trim();assert(heads.startsWith('이름 번호'),`header order wrong: ${heads}`);
- const nums=await page.locator('.statsMonthlyTable628 tbody tr .statsNo675').allTextContents();assert.deepEqual(nums.slice(0,4),['1','2','3','4'],'monthly sequence numbers wrong');
- const aligned=await page.evaluate(()=>{const th=document.querySelector('.statsMonthlyTable628 thead th:first-child'),td=document.querySelector('.statsMonthlyTable628 tbody td.statsName675');const a=th?.getBoundingClientRect(),b=td?.getBoundingClientRect();return{align:getComputedStyle(td).textAlign,delta:a&&b?Math.abs((a.left+a.right)/2-(b.left+b.right)/2):99}});assert.equal(aligned.align,'center','name cell not centered');assert(aligned.delta<2,`name not under name header: ${JSON.stringify(aligned)}`);
+ const modern=await page.evaluate(()=>window.__kokmatchUiStability678==='6.78');
+ const liveSelector=modern?'#opsPersistentHost678 #opsDashboard652':'#stats #opsDashboard652';
+ await page.waitForSelector(liveSelector);await page.waitForSelector('.statsMonthlyTable628');await page.waitForFunction(()=>document.querySelectorAll('.statsMonthlyTable628 tbody tr').length>=4);
+ if(modern){
+  const visibleNo=await page.locator('.statsMonthlyTable628 .statsNoHead675,.statsMonthlyTable628 td.statsNo675').evaluateAll(els=>els.filter(el=>getComputedStyle(el).display!=='none').length);assert.equal(visibleNo,0,'legacy number column is visible');
+  const ranks=await page.locator('.statsMonthlyTable628 tbody tr:not(:has(.statsEmpty628)) td:first-child .statsRank678').allTextContents();assert.deepEqual(ranks.slice(0,4),['1','2','3','4'],'monthly rank circles wrong');
+  const heads=(await page.locator('.statsMonthlyTable628 thead tr').innerText()).replace(/\s+/g,' ').trim();assert(!heads.includes('번호'),`number header should be hidden: ${heads}`);
+ }else{
+  const heads=(await page.locator('.statsMonthlyTable628 thead tr').innerText()).replace(/\s+/g,' ').trim();assert(heads.startsWith('이름 번호'),`header order wrong: ${heads}`);
+  const nums=await page.locator('.statsMonthlyTable628 tbody tr .statsNo675').allTextContents();assert.deepEqual(nums.slice(0,4),['1','2','3','4'],'monthly sequence numbers wrong');
+ }
+ const aligned=await page.evaluate(()=>{const th=document.querySelector('.statsMonthlyTable628 thead th:first-child'),td=document.querySelector('.statsMonthlyTable628 tbody td.statsName678,.statsMonthlyTable628 tbody td.statsName675');const a=th?.getBoundingClientRect(),b=td?.getBoundingClientRect();return{align:getComputedStyle(td).textAlign,delta:a&&b?Math.abs((a.left+a.right)/2-(b.left+b.right)/2):99}});assert.equal(aligned.align,'center','name cell not centered');assert(aligned.delta<3,`name not under name header: ${JSON.stringify(aligned)}`);
  await page.evaluate(()=>window.__liveRef675=document.getElementById('opsDashboard652'));
  await page.evaluate(d=>changeStatsDate628(d),yesterday);await page.waitForFunction(d=>document.querySelector('.statsDateTitle628')?.dataset.date===d,yesterday,{timeout:5000});await page.waitForTimeout(250);
  assert(await page.evaluate(()=>document.getElementById('opsDashboard652')===window.__liveRef675),'today live dashboard node was removed/recreated during stats refresh');
- assert(await page.locator('#stats #opsDashboard652').isVisible(),'today live dashboard disappeared');
+ assert(await page.locator(liveSelector).isVisible(),'today live dashboard disappeared');
  if(errors.length)throw new Error('page errors: '+errors.join(' | '));
- console.log('PASS v6.75 auto settings open + server-synced toggle/tick UI path');
- console.log('PASS monthly member record name alignment + right-side 1,2,3 numbering');
+ console.log('PASS auto settings open + server-synced toggle/tick UI path');
+ console.log(modern?'PASS current monthly rank circles + hidden legacy number column':'PASS legacy monthly numbering');
  console.log('PASS today live dashboard persists through async stats refresh');
 }finally{await browser.close()}
