@@ -91,14 +91,15 @@ try{
  await page.evaluate(()=>goView('queue'));
  await page.waitForSelector('#queue .queueCard .queueWaitMeta678');
  const meta=page.locator('#queue .queueCard').first().locator('.queueWaitMeta678');
+ const expectedGameText=await page.evaluate(()=>{const id=sortedQueue()[0];return `게임 ${dailyCount(id)}회`});
  const pill=await meta.evaluate(el=>({content:getComputedStyle(el,'::after').content,bg:getComputedStyle(el,'::after').backgroundColor,r:getComputedStyle(el,'::after').borderRadius}));
- assert(pill.content.includes('게임 2회'),`green badge content wrong: ${pill.content}`);assert.notEqual(pill.bg,'rgba(0, 0, 0, 0)');assert.notEqual(pill.r,'0px');
- await meta.evaluate(el=>{el.innerHTML='<span class="waitCurrent70">현재 20분 대기중</span><span class="waitSep70"> · </span><span class="waitTotal70">오늘 총 88분 대기</span><span class="legacyGreyGame">게임 2회</span>'});
+ assert(pill.content.includes(expectedGameText),`green badge content wrong: expected ${expectedGameText}, got ${pill.content}`);assert.notEqual(pill.bg,'rgba(0, 0, 0, 0)');assert.notEqual(pill.r,'0px');
+ await meta.evaluate((el,gameText)=>{el.innerHTML=`<span class="waitCurrent70">현재 20분 대기중</span><span class="waitSep70"> · </span><span class="waitTotal70">오늘 총 88분 대기</span><span class="legacyGreyGame">${gameText}</span>`},expectedGameText);
  const immediatePill=await meta.evaluate(el=>getComputedStyle(el,'::after').content);
- assert(immediatePill.includes('게임 2회'),'green game badge disappeared during legacy rewrite');
+ assert(immediatePill.includes(expectedGameText),'green game badge disappeared during legacy rewrite');
  await page.waitForTimeout(60);
  const cleaned=(await meta.innerText()).replace(/\s+/g,' ').trim();
- assert(!cleaned.includes('오늘 총'),'legacy total-wait grey text survived');assert(!cleaned.includes('게임 2회'),'grey game-count text survived beside green badge');
+ assert(!cleaned.includes('오늘 총'),'legacy total-wait grey text survived');assert(!cleaned.includes(expectedGameText),'grey game-count text survived beside green badge');
  assert.equal(await meta.locator(':scope > .waitCurrent678').count(),1,'canonical wait row was not restored');
 
  // Preserve automatic/manual conflict popup while automatic matching keeps running.
@@ -115,7 +116,7 @@ try{
  console.log(`PASS v6.78 phone roster profile/name gap ${phoneGap.toFixed(1)}px`);
  console.log('PASS v6.78 no-flash member roster retained');
  console.log('PASS v6.78 persistent live operations without priority/court panels');
- console.log('PASS v6.78 permanent green queue game-count pill survives legacy rewrites');
+ console.log(`PASS v6.78 permanent green queue game-count pill ${expectedGameText} survives legacy rewrites`);
  console.log('PASS v6.78 monthly rank circles sit left inside name cells with no visible number column');
  console.log('PASS v6.78 automatic matching continues while manual conflict popup stays open');
 }finally{await browser.close()}
