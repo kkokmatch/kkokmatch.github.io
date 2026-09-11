@@ -52,7 +52,7 @@ jobs:
           cat /tmp/kokmatch-v671-http.log
           exit 1
 
-      - name: Prepare deterministic QA prompt guards
+      - name: Prepare deterministic QA fixtures
         run: |
           python3 - <<'PY'
           from pathlib import Path
@@ -68,19 +68,11 @@ jobs:
           p=Path('scripts/qa-save-layout-current.mjs'); s=p.read_text(encoding='utf-8')
           s=s.replace("if(url.pathname.endsWith('/kokmatch-v60-api')){if(body.op==='member_save')", "if(url.pathname.endsWith('/kokmatch-v60-api')||url.pathname.endsWith('/kokmatch-member-v646')){if(body.op==='member_save')")
           p.write_text(s,encoding='utf-8')
-          p=Path('scripts/qa-role-layout-current.mjs'); s=p.read_text(encoding='utf-8')
-          short="""await page.addInitScript(()=>{try{localStorage.setItem('kokmatch_push_denied_notice629',String(Date.now()));localStorage.setItem('kokmatch_install_guide631_seen','1');sessionStorage.setItem('kokmatch_install_later630','1')}catch{}});"""
-          s=s.replace(short,guard)
-          p.write_text(s,encoding='utf-8')
           PY
-          python3 scripts/instrument-role-qa-v671.py
+          python3 scripts/prepare-role-qa-v671.py
 
       - name: Role and responsive layout QA
         run: node scripts/qa-role-layout-current.mjs
-
-      - name: Restore role QA instrumentation
-        if: always()
-        run: git checkout -- scripts/qa-role-layout-current.mjs
 
       - name: Current production core regression QA
         run: |
@@ -112,9 +104,9 @@ jobs:
           git config user.name 'kkokmatch-release-bot'
           git config user.email 'actions@users.noreply.github.com'
           git add app-v6.71.js app-v6.71.css index.html manifest.webmanifest kokmatch-sw.js sw.js latest-version.json scripts/qa-role-layout-current.mjs .github/workflows/qa-current-runtime.yml
-          git rm -f --ignore-unmatch scripts/build-v671.py scripts/patch-v671-fix.py scripts/instrument-role-qa-v671.py .github/workflows/release-v671-once.yml
+          git rm -f --ignore-unmatch scripts/build-v671.py scripts/patch-v671-fix.py scripts/prepare-role-qa-v671.py scripts/instrument-role-qa-v671.py .github/workflows/release-v671-once.yml
           git diff --cached --quiet && exit 0
           git commit -m 'Release v6.71 refresh and role layout stability'
           git push origin HEAD:main
 
-# developer role render diagnostics
+# real developer auth contract QA rerun
