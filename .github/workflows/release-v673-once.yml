@@ -9,6 +9,7 @@ on:
 permissions:
   contents: write
 
+# Retry 2: repeat/partner QA fixtures now equalize higher-priority game counts.
 jobs:
   build-qa-release:
     runs-on: ubuntu-24.04
