@@ -28,12 +28,43 @@ if js.count(old_render)!=1:
 js=js.replace(old_render,new_render,1)
 JS.write_text(js,encoding='utf-8')
 
-# Older phone rules set flex-basis independently from width. Explicitly reset the
-# flex basis in the final canonical section. Apply this to every visible button in
-# the roster action rail as well as the canonical class so an older class name
-# cannot physically collapse a valid role button after rendering.
 css=CSS.read_text(encoding='utf-8')
 css += r'''
+
+/* v6.71 final member-info positioning: remove obsolete v77 0.5cm offset/top shift.
+   Grid column gap now owns spacing, so the info block must stay inside column 2. */
+#members .memberCard>.memberInfo48,
+#members .memberCard>.memberInfoV6,
+#members .memberCard>.memberInfoV618,
+#members .memberCard73.memberCard71>.memberInfo48{
+ margin:0!important;margin-left:0!important;margin-right:0!important;
+ position:static!important;left:auto!important;right:auto!important;top:auto!important;bottom:auto!important;
+ transform:none!important;min-width:0!important;max-width:100%!important;box-sizing:border-box!important;
+}
+@media(max-width:599px){
+ #members .memberCard>.memberInfo48,
+ #members .memberCard>.memberInfoV6,
+ #members .memberCard>.memberInfoV618,
+ #members .memberCard73.memberCard71>.memberInfo48{
+  grid-column:2!important;grid-row:1!important;width:100%!important;max-width:100%!important;justify-self:stretch!important;
+ }
+}
+@media(min-width:600px){
+ #members .memberCard>.memberInfo48,
+ #members .memberCard>.memberInfoV6,
+ #members .memberCard>.memberInfoV618,
+ #members .memberCard73.memberCard71>.memberInfo48{
+  grid-column:2!important;grid-row:1!important;width:auto!important;max-width:100%!important;justify-self:stretch!important;overflow:hidden!important;
+ }
+ #members .memberCard>.kmRosterActions621,
+ #members .memberCard>.v6MemberActions,
+ #members .memberCard>.memberActions48,
+ #members .memberCard>.memberActions60,
+ #members .memberCard>.memberActions64,
+ #members .memberCard>.memberActions65{
+  grid-column:3!important;grid-row:1!important;margin:0!important;justify-self:end!important;
+ }
+}
 
 /* v6.71 final physical action-button sizing: defeat legacy flex-basis constraints. */
 @media(max-width:599px){
@@ -77,7 +108,9 @@ CSS.write_text(css,encoding='utf-8')
 assert 'obsolete roster rail rewriting disabled' in js
 assert 'if(!force&&Date.now()<Number(window.__kokmatchResumeNoRailReplaceUntil638||0)&&!needs637())return;' in js
 assert 'stabilize637(true);schedule637(false)' in js
+assert 'remove obsolete v77 0.5cm offset/top shift' in css
+assert 'margin-left:0!important' in css
 assert 'flex-basis:46px!important' in css
 assert '#members .kmRosterActions621 button' in css
 assert 'flex-basis:48px!important' in css
-print('patched v6.71 canonical roster ownership, sync role controls and physical button sizing')
+print('patched v6.71 canonical roster ownership, offsets, sync role controls and physical button sizing')
