@@ -30,9 +30,16 @@ manual_guard=r'''
 (()=>{
 'use strict';
 if(window.__kokmatchAutoManualGuard673)return;window.__kokmatchAutoManualGuard673='6.73';
+const AUTO673='https://wjelumpbjklfrdjxbesj.supabase.co/functions/v1/kokmatch-auto-v656';
 let deferred673=null,promptOpen673=false,bypassUntil673=0,lastNotice673=0;
-function autoOn673(){try{return typeof autoEnabled656==='function'&&autoEnabled656()}catch{return S?.autoGame?.enabled===true}}
-function controller673(){try{return typeof canControlAuto656==='function'&&canControlAuto656()}catch{return !!me&&(me?.globalAdmin||me?.role==='manager'||me?.role==='organizer')}}
+function autoOn673(){return S?.autoGame?.enabled===true}
+function controller673(){return !!me&&(me?.globalAdmin===true||me?.role==='manager'||me?.role==='organizer')}
+async function setAuto673(enabled){
+ const r=await fetch(AUTO673,{method:'POST',headers:{'content-type':'application/json','authorization':'Bearer '+String(T||'')},body:JSON.stringify({action:'set',groupId:currentGroupId,enabled:enabled===true}),cache:'no-store'});
+ const x=await r.json().catch(()=>({}));
+ if(!r.ok){if(r.status===401){try{reloginLatest()}catch{};throw new Error('로그인이 만료되었습니다.')}throw new Error(x.error||'자동게임편성 설정 변경에 실패했습니다.')}
+ return x;
+}
 function openConflict673(run,label='수동 게임편성'){
  if(promptOpen673)return false;promptOpen673=true;deferred673={run,label};
  openModal(`<h3>자동게임편성 작동 중</h3><div class="note">현재 자동게임편성이 ON이라 ${label} 동작을 잠시 막았습니다.</div><div class="autoManualExplain673"><b>어떻게 진행할까요?</b><span><strong>자동기능 유지</strong>를 선택하면 방금 수동 동작은 취소되고 자동편성이 계속됩니다.</span><span><strong>자동기능 끄고 직접 편성</strong>을 선택하면 자동편성을 OFF로 전환한 뒤 방금 하려던 수동 동작을 이어서 실행합니다.</span></div><div class="autoManualChoices673"><button id="autoManualKeep673" type="button" class="btn ghost" onclick="keepAutoManual673()">자동기능 유지</button><button id="autoManualDisable673" type="button" class="btn pri" onclick="disableAutoManual673()">자동기능 끄고 직접 편성</button></div>`);
@@ -47,12 +54,12 @@ function gate673(run,label='수동 게임편성'){
  openConflict673(run,label);return;
 }
 window.__kokmatchManualGate673=gate673;
-window.keepAutoManual673=function(){deferred673=null;promptOpen673=false;closeModal();setTimeout(()=>{try{runAuto656(false)}catch{}},120)};
+window.keepAutoManual673=function(){deferred673=null;promptOpen673=false;closeModal();setTimeout(()=>{try{window.__kokmatchRunAuto656?.(false)}catch{}},120)};
 window.disableAutoManual673=async function(){
  const intent=deferred673,btn=document.getElementById('autoManualDisable673');if(btn){btn.disabled=true;btn.textContent='자동기능 끄는 중...'}
  try{
-  const x=await autoRequest656('set',{enabled:false});
-  if(x?.data){S=x.data;window.S=x.data;normalizeClient()}else if(S?.autoGame)S.autoGame.enabled=false;
+  const x=await setAuto673(false);
+  if(x?.data){S=x.data;window.S=x.data;normalizeClient()}else{S.autoGame={...(S?.autoGame||{}),enabled:false};window.S=S}
   deferred673=null;promptOpen673=false;bypassUntil673=Date.now()+1800;closeModal();
   try{window.__kokmatchPaintCompactAuto659?.()}catch{}
   setTimeout(()=>{try{const r=intent?.run?.();Promise.resolve(r).catch(showError)}catch(e){showError(e)}},0);
@@ -99,4 +106,4 @@ for name in ['index.html','manifest.webmanifest','kokmatch-sw.js','sw.js']:
  'version':113,'label':'v6.73','semanticVersion':'6.73','build':'v6.73','updatedAt':'2026-09-11T11:42:00+09:00',
  'note':'v6.73 자동게임 우선순위 강화 · 대기시간→게임수→당일파트너→성별보정 급수밸런스→3회 반복회피 · 자동/수동 충돌 선택창'
 },ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
-print('built v6.73 automatic priority and canonical manual conflict guard')
+print('built v6.73 automatic priority and scope-safe manual conflict guard')
