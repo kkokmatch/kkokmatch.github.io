@@ -48,7 +48,7 @@ restore=r'''
 'use strict';
 if(window.__kokmatchDeveloperVisible674)return;window.__kokmatchDeveloperVisible674='6.74';
 const DEV_FRAME674='/assets/dev-prism-frame-v662.webp?v=6.74';
-function forceDeveloperVisible674(){try{if(S&&typeof S==='object')S.adminBadgeVisibility='all'}catch{}}
+function forceDeveloperVisible674(){try{if(S&&typeof S==='object'&&S.adminBadgeVisibility!=='all')S.adminBadgeVisibility='all'}catch{}}
 window.profileTarget659=function(host){
  if(!host)return null;
  return host.querySelector(':scope > .profileIdentity21,:scope > .profileAvatar53,:scope > .avatar,.profileIdentity21,.profileAvatar53,.avatar,.profilePreview53');
@@ -81,7 +81,7 @@ function ensureDeveloperBadge674(host,m){
  host.querySelectorAll('.roleBadge.role-member44').forEach(x=>x.remove());
  let badge=host.querySelector('.roleBadge.role-global');
  if(!badge){badge=document.createElement('span');badge.className='roleBadge role-global';badge.textContent='개발자';badgeLine674(host)?.appendChild(badge)}
- else badge.textContent='개발자';
+ else if(String(badge.textContent||'').trim()!=='개발자')badge.textContent='개발자';
 }
 function syncDeveloper674(){
  forceDeveloperVisible674();
@@ -113,7 +113,9 @@ for(const name of ['renderMembers','renderQueue','renderPlaying','renderSettings
 try{const prev=renderAll;renderAll=function(...args){forceDeveloperVisible674();const r=prev.apply(this,args);syncDeveloper674();queueMicrotask(syncDeveloper674);return r}}catch{}
 window.__kokmatchSyncDeveloper674=syncDeveloper674;
 forceDeveloperVisible674();
-const boot=()=>{syncDeveloper674();try{new MutationObserver(()=>queueMicrotask(syncDeveloper674)).observe(document.body,{childList:true,subtree:true})}catch{};setTimeout(syncDeveloper674,80);setTimeout(syncDeveloper674,350)};
+let observerQueued674=false;
+function scheduleDeveloper674(){if(observerQueued674)return;observerQueued674=true;requestAnimationFrame(()=>{observerQueued674=false;syncDeveloper674()})}
+const boot=()=>{syncDeveloper674();try{new MutationObserver(scheduleDeveloper674).observe(document.body,{childList:true,subtree:true})}catch{};setTimeout(syncDeveloper674,80);setTimeout(syncDeveloper674,350)};
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
 })();
 '''
