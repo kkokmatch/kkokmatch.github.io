@@ -45,24 +45,25 @@ async function tick(gid:string,u:any,global:boolean){
  let s:any=row.data||{};if(!validateMemberSession(u,s,global))return {created:false,reason:'invalid_session'};
  let cfg=cfgOf(s);if(!cfg.enabled)return {created:false,reason:'disabled',data:s,config:cfg};
  let cap=capacityReason(s);if(cap.stop)return {created:false,reason:cap.reason,data:s,config:cfg};
- let best=bestFour(s);if(!best)return {created:false,reason:'not_enough_waiting',data:s,config:cfg};
+ const baseRevision=Number(row.revision||0),started=Date.now();
+ const best=bestFour(s),computeMs=Date.now()-started;
+ if(!best)return {created:false,reason:'not_enough_waiting',data:s,config:cfg,computeMs};
 
- // Re-read immediately before the atomic write. This prevents a stale tick from creating a game
- // after an operator has switched automatic mode off or changed the waiting/pending state.
- row=await loadRow(gid);if(!row)return {created:false,reason:'missing_state'};s=row.data||{};cfg=cfgOf(s);
- if(!cfg.enabled)return {created:false,reason:'disabled_before_write',data:s,config:cfg};
- cap=capacityReason(s);if(cap.stop)return {created:false,reason:cap.reason,data:s,config:cfg};
- best=bestFour(s);if(!best)return {created:false,reason:'not_enough_waiting',data:s,config:cfg};
+ row=await loadRow(gid);if(!row)return {created:false,reason:'missing_state'};
+ s=row.data||{};cfg=cfgOf(s);
+ if(!cfg.enabled)return {created:false,reason:'disabled_before_write',data:s,config:cfg,computeMs};
+ cap=capacityReason(s);if(cap.stop)return {created:false,reason:cap.reason,data:s,config:cfg,computeMs};
+ if(Number(row.revision||0)!==baseRevision)return {created:false,reason:'state_changed',data:s,config:cfg,computeMs};
 
  const enabledBy=cfg.updatedBy||{};
  const body={players:best.players,forceRepeat:true,createdByMemberId:'',createdByName:'AI 자동편성',createdByRole:'시스템',createdByMode:'auto',autoEnabledByName:String(enabledBy.name||''),autoEnabledByRole:String(enabledBy.roleLabel||roleLabel(String(enabledBy.role||'')))};
  const {data,error}=await db.rpc('kokmatch_atomic_game_action',{p_gid:gid,p_action:'create_pending',p_body:body});
  if(error){
   const msg=String(error.message||'');
-  if(/개인 게임대기|중복 인원|회원/.test(msg)){const latest=await loadRow(gid);return {created:false,reason:'state_changed',data:latest?.data||s,config:cfg}}
+  if(/개인 게임대기|중복 인원|회원/.test(msg)){const latest=await loadRow(gid);return {created:false,reason:'state_changed',data:latest?.data||s,config:cfg,computeMs}}
   throw error;
  }
- return {created:true,players:best.players,decision:best.metrics,data,config:cfg};
+ return {created:true,players:best.players,decision:best.metrics,data,config:cfg,computeMs};
 }
 
 Deno.serve(async(req:Request)=>{
