@@ -24,6 +24,7 @@ jobs:
           python3 scripts/build-v677.py
           python3 scripts/patch-v677-stability.py
           python3 scripts/patch-v677-finalizer.py
+          python3 scripts/patch-v677-renderall.py
       - name: Syntax and standalone invariants
         run: |
           node --check app-v6.77.js
@@ -32,6 +33,7 @@ jobs:
           grep -F 'app-v6.77.css?v=6.77' index.html >/dev/null
           grep -F "window.__kokmatchUiStability677='6.77'" app-v6.77.js >/dev/null
           grep -F "window.__kokmatchRosterFinalizerStable677='6.77'" app-v6.77.js >/dev/null
+          grep -F "window.__kokmatchMemberRenderGate677='6.77'" app-v6.77.js >/dev/null
       - name: Automatic priority and compute regression
         run: node scripts/qa-auto-priority-v673.mjs
       - name: Install Playwright
@@ -83,7 +85,7 @@ jobs:
           git config user.name 'kkokmatch-release-bot'
           git config user.email 'actions@users.noreply.github.com'
           git add app-v6.77.js app-v6.77.css index.html manifest.webmanifest kokmatch-sw.js sw.js latest-version.json scripts/qa-v677-final.mjs
-          git rm -f --ignore-unmatch scripts/build-v677.py scripts/patch-v677-stability.py scripts/patch-v677-finalizer.py
+          git rm -f --ignore-unmatch scripts/build-v677.py scripts/patch-v677-stability.py scripts/patch-v677-finalizer.py scripts/patch-v677-renderall.py
           git diff --cached --quiet && exit 0
           git commit -m 'Release v6.77 eliminate roster flash restore game badge preserve auto popup'
           git push origin HEAD:main
