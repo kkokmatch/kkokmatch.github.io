@@ -109,4 +109,4 @@ jobs:
           git commit -m 'Release v6.71 refresh and role layout stability'
           git push origin HEAD:main
 
-# real developer auth contract QA rerun
+# measured tablet geometry QA rerun
