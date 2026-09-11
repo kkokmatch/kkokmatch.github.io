@@ -7,6 +7,9 @@ on:
       - 'latest-version.json'
       - 'app-v*.js'
       - 'app-v*.css'
+      - 'kokmatch-sw.js'
+      - 'sw.js'
+      - 'manifest.webmanifest'
       - 'edge-functions/kokmatch-auto-v656/**'
       - 'edge-functions/kokmatch-atomic-api/**'
       - 'scripts/qa-boot-diagnostic.mjs'
@@ -20,6 +23,8 @@ on:
       - 'scripts/qa-v675-ui.mjs'
       - 'scripts/qa-v676-auto-toggle.mjs'
       - 'scripts/qa-v678-ui.mjs'
+      - 'scripts/qa-v679-ios-update.mjs'
+      - 'scripts/qa-v679-webkit-smoke.mjs'
       - '.github/workflows/qa-current-runtime.yml'
   workflow_dispatch:
 
@@ -49,10 +54,10 @@ jobs:
           if(ms>1500)throw new Error('24-player scoring too slow: '+ms+'ms');
           console.log('PASS 24-player scoring 20x in '+ms+'ms');
           NODE
-      - name: Install Playwright
+      - name: Install Playwright Chromium and WebKit
         run: |
-          npm install --no-save playwright@1.55.0
-          npx playwright install --with-deps chromium
+          npm install --no-save --package-lock=false playwright@1.55.0
+          npx playwright install --with-deps chromium webkit
       - name: Start local static server
         run: |
           python3 -m http.server 4173 >/tmp/kokmatch-http.log 2>&1 &
@@ -77,6 +82,10 @@ jobs:
           s=s.replace("if(url.pathname.endsWith('/kokmatch-v60-api')){if(body.op==='member_save')", "if(url.pathname.endsWith('/kokmatch-v60-api')||url.pathname.endsWith('/kokmatch-member-v646')){if(body.op==='member_save')")
           p.write_text(s,encoding='utf-8')
           PY
+      - name: v6.79 iPhone update recovery and stats alignment QA
+        run: node scripts/qa-v679-ios-update.mjs
+      - name: v6.79 WebKit iPhone cold boot QA
+        run: node scripts/qa-v679-webkit-smoke.mjs
       - name: Automatic and manual conflict UI QA
         run: node scripts/qa-auto-ui-v673.mjs
       - name: Developer visibility and persistent queue badge QA
