@@ -11,6 +11,7 @@ on:
       - 'scripts/qa-current-runtime.mjs'
       - 'scripts/qa-partner-poll-current.mjs'
       - 'scripts/qa-save-layout-current.mjs'
+      - 'scripts/qa-role-layout-current.mjs'
       - '.github/workflows/qa-current-runtime.yml'
   workflow_dispatch:
 
@@ -46,3 +47,5 @@ jobs:
         run: node scripts/qa-partner-poll-current.mjs
       - name: Save speed and stats layout QA
         run: node scripts/qa-save-layout-current.mjs
+      - name: Role and responsive layout QA
+        run: node scripts/qa-role-layout-current.mjs
