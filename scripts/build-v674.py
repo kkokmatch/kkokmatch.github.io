@@ -25,11 +25,10 @@ move_queue=r'''function moveQueueCount658(){
    meta.classList.add('queueWaitMeta658');
    const counts=[...card.querySelectorAll('.gamecnt')];
    let badge=counts.find(x=>meta.contains(x))||counts.find(x=>name.contains(x))||counts[0]||null;
-   if(!badge){
-    const id=String(q[i]||'');
-    const n=id&&typeof dailyCount==='function'?Math.max(0,Number(dailyCount(id))||0):0;
-    badge=document.createElement('span');badge.className='gamecnt';badge.textContent=`게임 ${n}회`;
-   }
+   const id=String(q[i]||'');
+   const n=id&&typeof dailyCount==='function'?Math.max(0,Number(dailyCount(id))||0):0;
+   if(!badge){badge=document.createElement('span');badge.className='gamecnt';badge.textContent=`게임 ${n}회`}
+   else if(String(badge.textContent||'').trim()!==`게임 ${n}회`)badge.textContent=`게임 ${n}회`;
    counts.filter(x=>x!==badge).forEach(x=>x.remove());
    if(badge.parentElement!==meta){badge.remove();meta.appendChild(badge)}
    badge.classList.add('queueGameCount658');
@@ -83,6 +82,27 @@ function ensureDeveloperBadge674(host,m){
  if(!badge){badge=document.createElement('span');badge.className='roleBadge role-global';badge.textContent='개발자';badgeLine674(host)?.appendChild(badge)}
  else if(String(badge.textContent||'').trim()!=='개발자')badge.textContent='개발자';
 }
+function positionQueueGameBadges674(){
+ try{
+  const box=document.getElementById('queue');if(!box)return;
+  const q=typeof sortedQueue==='function'?sortedQueue():[];
+  [...box.querySelectorAll('.queueCard54,.queueCard53,.queueCard')].forEach((card,i)=>{
+   const name=card.querySelector('.name,.queueMain47,.compactLine53');
+   const meta=card.querySelector('.queueInfo53 .compactMeta53')||card.querySelector('.queueInfo53 .meta')||[...card.querySelectorAll('.meta')].find(x=>/대기/.test(String(x.textContent||'')));
+   if(!meta)return;
+   meta.classList.add('queueWaitMeta658');
+   const all=[...card.querySelectorAll('.gamecnt')];
+   let badge=all.find(x=>meta.contains(x))||all[0]||null;
+   const id=String(q[i]||''),n=id&&typeof dailyCount==='function'?Math.max(0,Number(dailyCount(id))||0):0,txt=`게임 ${n}회`;
+   if(!badge){badge=document.createElement('span');badge.className='gamecnt';badge.textContent=txt}
+   else if(String(badge.textContent||'').trim()!==txt)badge.textContent=txt;
+   all.filter(x=>x!==badge).forEach(x=>x.remove());
+   if(badge.parentElement!==meta){badge.remove();meta.appendChild(badge)}
+   badge.classList.add('gamecnt','queueGameCount658');
+   name?.querySelectorAll?.('.gamecnt').forEach(x=>{if(x!==badge)x.remove()});
+  });
+ }catch{}
+}
 function syncDeveloper674(){
  forceDeveloperVisible674();
  try{
@@ -104,6 +124,7 @@ function syncDeveloper674(){
   const isDev=me?.globalAdmin===true||String(me?.role||'')==='admin'||String(linked?.role||'')==='admin';
   document.documentElement.classList.toggle('kokmatchDeveloper659',isDev);
   const mine=document.querySelector('#profileCard53 .profilePreview53');if(mine&&isDev){mine.classList.add('devChallenger659');window.ensureDevFrame661(mine)}
+  positionQueueGameBadges674();
  }catch{}
 }
 try{const prev=normalizeClient;normalizeClient=function(...args){const r=prev.apply(this,args);forceDeveloperVisible674();return r}}catch{}
@@ -112,6 +133,7 @@ for(const name of ['renderMembers','renderQueue','renderPlaying','renderSettings
 }
 try{const prev=renderAll;renderAll=function(...args){forceDeveloperVisible674();const r=prev.apply(this,args);syncDeveloper674();queueMicrotask(syncDeveloper674);return r}}catch{}
 window.__kokmatchSyncDeveloper674=syncDeveloper674;
+window.__kokmatchPositionQueueGameBadges674=positionQueueGameBadges674;
 forceDeveloperVisible674();
 let observerQueued674=false;
 function scheduleDeveloper674(){if(observerQueued674)return;observerQueued674=true;requestAnimationFrame(()=>{observerQueued674=false;syncDeveloper674()})}
@@ -126,7 +148,7 @@ css+=r'''
 /* v6.74: green game count lives on the waiting-time row. */
 #queue .queueWaitMeta658{display:flex!important;align-items:center!important;gap:5px!important;flex-wrap:wrap!important;min-width:0!important}
 #queue .queueWaitMeta658 .queueGameCount658{margin-left:3px!important;vertical-align:middle!important;white-space:nowrap!important;flex:0 0 auto!important}
-#queue .queueMain47>.gamecnt,#queue .compactLine53>.gamecnt{display:none!important}
+#queue .queueMain47>.gamecnt,#queue .compactLine53>.gamecnt,#queue .name>.gamecnt{display:none!important}
 /* Developer visibility is no longer configurable: the badge and original Challenger frame are universal. */
 html body .devChallenger659>img.devFrame661{display:block!important;visibility:visible!important}
 '''
