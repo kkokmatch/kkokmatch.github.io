@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="ko" data-kokmatch-version="6.78" data-kokmatch-build="v6.78">
+<html lang="ko" data-kokmatch-version="6.79" data-kokmatch-build="v6.79">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
@@ -10,20 +10,20 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <title>콕매치 v6.78</title>
-  <link rel="manifest" href="/manifest.webmanifest?v=6.78">
-  <link rel="apple-touch-icon" sizes="180x180" href="/icons/kokmatch-180.png?v=6.78">
+  <title>콕매치 v6.79</title>
+  <link rel="manifest" href="/manifest.webmanifest?v=6.79">
+  <link rel="apple-touch-icon" sizes="180x180" href="/icons/kokmatch-180.png?v=6.79">
   <meta name="application-name" content="콕매치">
   <meta name="mobile-web-app-capable" content="yes">
   <link rel="preconnect" href="https://wjelumpbjklfrdjxbesj.supabase.co" crossorigin>
   <link rel="dns-prefetch" href="//wjelumpbjklfrdjxbesj.supabase.co">
-  <link rel="stylesheet" href="/app-v6.78.css?v=6.78">
+  <link rel="stylesheet" href="/app-v6.79.css?v=6.79">
   <script>
   (()=>{
     'use strict';
-    window.__kokmatchStandalone='6.78';
-    window.__kokmatchVersionLock='6.78';
-    window.__kokmatchBuild='v6.78';
+    window.__kokmatchStandalone='6.79';
+    window.__kokmatchVersionLock='6.79';
+    window.__kokmatchBuild='v6.79';
     if('serviceWorker' in navigator){
       navigator.serviceWorker.register('/kokmatch-sw.js',{scope:'/',updateViaCache:'none'}).then(r=>{try{r.waiting?.postMessage({type:'SKIP_WAITING'})}catch{}}).catch(()=>{});
     }
@@ -31,7 +31,36 @@
     window.__kokmatchEntryResumeMode='session-coordinator-v672';
   })();
   </script>
-  <script defer src="/app-v6.78.js?v=6.78"></script>
+  <script>
+  (()=>{
+    'use strict';
+    const APP='6.79',BOOT_KEY='kokmatch_boot_recovery_679',SW_KEY='kokmatch_sw_controller_reload_679';
+    const shellReady=()=>!!(document.body&&document.body.querySelector('.app')&&document.getElementById('login'));
+    function showRecovery(msg){
+      let el=document.getElementById('bootFallback679');
+      if(!el){el=document.createElement('main');el.id='bootFallback679';document.body.appendChild(el)}
+      el.style.cssText='min-height:100vh;display:grid;place-items:center;padding:24px;box-sizing:border-box;background:#f5f7fb;font-family:-apple-system,BlinkMacSystemFont,system-ui;color:#172033';
+      el.innerHTML='<section style="width:min(360px,100%);background:#fff;border:1px solid #dbe3f1;border-radius:20px;padding:24px;text-align:center;box-shadow:0 6px 24px #233d8b14"><h2 style="margin:0 0 10px;font-size:20px">콕매치 업데이트 복구</h2><p style="margin:0 0 16px;color:#64748b;line-height:1.6;font-size:14px">'+(msg||'앱을 다시 불러오고 있어요.')+'</p><button onclick="location.reload()" style="border:0;border-radius:12px;padding:11px 18px;background:#2453d4;color:#fff;font-weight:800">다시 불러오기</button></section>';
+    }
+    async function heal(reason){
+      if(shellReady())return;
+      let tried=false;try{tried=sessionStorage.getItem(BOOT_KEY)==='1'}catch{}
+      if(tried){showRecovery('최신 파일을 불러오지 못했어. 네트워크를 확인한 뒤 다시 불러오기를 눌러줘.');return}
+      try{sessionStorage.setItem(BOOT_KEY,'1')}catch{}
+      showRecovery('업데이트 파일을 다시 맞추는 중이야.');
+      try{if('caches'in window){const keys=await caches.keys();await Promise.all(keys.filter(k=>k.startsWith('kokmatch-static-')||/kkokmatch/i.test(k)).map(k=>caches.delete(k)))}}catch{}
+      try{if('serviceWorker'in navigator){const regs=await navigator.serviceWorker.getRegistrations();await Promise.all(regs.map(async r=>{try{await r.update();if(r.waiting)r.waiting.postMessage({type:'SKIP_WAITING'})}catch{}}))}}catch{}
+      try{await fetch('/latest-version.json?boot679='+Date.now(),{cache:'no-store'})}catch{}
+      location.replace('/?km-recover=679&t='+Date.now());
+    }
+    window.__kokmatchBootFailed679=heal;
+    window.addEventListener('kokmatch-asset-error',()=>heal('asset'));
+    window.addEventListener('error',e=>{const t=e&&e.target;if(t&&(t.tagName==='SCRIPT'||t.tagName==='LINK'))heal('resource')},true);
+    document.addEventListener('DOMContentLoaded',()=>setTimeout(()=>{if(shellReady()){try{sessionStorage.removeItem(BOOT_KEY)}catch{}}else heal('timeout')},4200),{once:true});
+    if('serviceWorker'in navigator)navigator.serviceWorker.addEventListener('controllerchange',()=>{let done=false;try{done=sessionStorage.getItem(SW_KEY)==='1'}catch{}if(done)return;try{sessionStorage.setItem(SW_KEY,'1')}catch{}setTimeout(()=>location.reload(),80)});
+  })();
+  </script>
+  <script defer src="/app-v6.79.js?v=6.79" onerror="window.__kokmatchBootFailed679&&window.__kokmatchBootFailed679('script')"></script>
 </head>
-<body></body>
+<body><main id="bootFallback679" style="min-height:100vh;display:grid;place-items:center;padding:24px;box-sizing:border-box;background:#f5f7fb;font-family:-apple-system,BlinkMacSystemFont,system-ui;color:#172033"><section style="width:min(360px,100%);background:#fff;border:1px solid #dbe3f1;border-radius:20px;padding:24px;text-align:center;box-shadow:0 6px 24px #233d8b14"><h2 style="margin:0 0 10px;font-size:20px">콕매치 불러오는 중</h2><p style="margin:0;color:#64748b;line-height:1.6;font-size:14px">업데이트 상태를 확인하고 있어.</p></section></main></body>
 </html>
