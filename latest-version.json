@@ -1,8 +1,8 @@
 {
-  "version": 115,
-  "label": "v6.75",
-  "semanticVersion": "6.75",
-  "build": "v6.75",
-  "updatedAt": "2026-09-11T14:10:00+09:00",
-  "note": "v6.75 자동게임설정 서버동기화/즉시검증 · 월간회원기록 이름정렬+번호열 · 오늘의 운동 LIVE 상시 유지"
+  "version": 116,
+  "label": "v6.76",
+  "semanticVersion": "6.76",
+  "build": "v6.76",
+  "updatedAt": "2026-09-11T15:15:00+09:00",
+  "note": "v6.76 자동편성 22명 CPU 한도 초과 해결 · ON/OFF 저장과 첫 편성 실행 분리 · 서버 오류 메시지 정확화"
 }
