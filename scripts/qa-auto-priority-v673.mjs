@@ -37,19 +37,21 @@ function ids(x){return new Set(x.players)}
 // 4. Gender-adjusted skill: female C equals male D.
 assert.equal(adjustedSkill({cls:'C',gender:'여'}),adjustedSkill({cls:'D',gender:'남'}),'female C must equal male D for balance');
 
-// 5. Non-partner combinations seen 3+ times today are avoided when prior criteria tie.
+// 5. Non-partner combinations seen 3+ times today are avoided when wait and game priorities tie.
 {
- const ms=[m('ra'),m('rb'),m('c'),m('d'),m('e')];
+ // ra/rb each receive three games through repeats; c/d/e get three independent games too.
+ const ms=[m('ra'),m('rb'),m('c',{games:3}),m('d',{games:3}),m('e',{games:3})];
  const repeats=Array.from({length:3},(_,i)=>({id:`r${i}`,players:['ra','rb','q1','q2'],endedAt:min(90+i)}));
  const r=bestFour(state(ms,repeats),NOW);assert(r);assert(!(ids(r).has('ra')&&ids(r).has('rb')),'3+ repeat non-partner pair should be avoided when an equal alternative exists');
 }
 
-// 5b. The repeat rule does not penalize an active partner pair.
+// 5b. A today's partner pair is exempt from the 3+ repeat avoidance rule after higher priorities tie.
 {
  const day='2026-09-11';
- const ms=[m('pa',{partnerId:'pb',partnerDay:day}),m('pb',{partnerId:'pa',partnerDay:day}),m('c'),m('d'),m('e')];
+ // pa/pb each receive four games through partner repeats; c/d/e also get four independent games.
+ const ms=[m('pa',{partnerId:'pb',partnerDay:day}),m('pb',{partnerId:'pa',partnerDay:day}),m('c',{games:4}),m('d',{games:4}),m('e',{games:4})];
  const repeats=Array.from({length:4},(_,i)=>({id:`p${i}`,players:['pa','pb','q1','q2'],endedAt:min(90+i)}));
- const r=bestFour(state(ms,repeats),NOW);assert(r);assert(ids(r).has('pa')&&ids(r).has('pb'),'partner exception must allow repeated partner pair');
+ const r=bestFour(state(ms,repeats),NOW);assert(r);assert(ids(r).has('pa')&&ids(r).has('pb'),'partner exception must allow repeated partner pair once higher priorities tie');
 }
 
 console.log('PASS v6.73 auto priority: wait -> games -> partner -> gender/grade balance -> repeat avoidance');
