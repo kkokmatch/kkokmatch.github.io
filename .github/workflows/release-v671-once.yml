@@ -37,6 +37,7 @@ jobs:
           grep -F "window.__kokmatchRefreshCurrent635=forceUpdateApp" app-v6.71.js >/dev/null
           grep -F 'obsolete roster rail rewriting disabled' app-v6.71.js >/dev/null
           grep -F 'stabilize637(true);schedule637(false)' app-v6.71.js >/dev/null
+          grep -F 'margin-left:0!important' app-v6.71.css >/dev/null
           grep -F 'flex-basis:46px!important' app-v6.71.css >/dev/null
           grep -F 'KokMatch v6.71: canonical responsive role-safe roster layout.' app-v6.71.css >/dev/null
 
@@ -109,4 +110,4 @@ jobs:
           git commit -m 'Release v6.71 refresh and role layout stability'
           git push origin HEAD:main
 
-# measured tablet geometry QA rerun
+# removed obsolete v77 member-info offset; rerun full role matrix
