@@ -9,7 +9,7 @@ on:
 permissions:
   contents: write
 
-# Retry 3: automatic-mode ownership is enforced inside canonical manual composition handlers.
+# Retry 4: manual conflict guard reads canonical S.autoGame state and calls the auto API directly across private scopes.
 jobs:
   build-qa-release:
     runs-on: ubuntu-24.04
@@ -32,6 +32,7 @@ jobs:
           grep -F 'app-v6.73.css?v=6.73' index.html >/dev/null
           grep -F "window.__kokmatchVersionLock='6.73'" app-v6.73.js >/dev/null
           grep -F "window.__kokmatchAutoManualGuard673='6.73'" app-v6.73.js >/dev/null
+          grep -F "function autoOn673(){return S?.autoGame?.enabled===true}" app-v6.73.js >/dev/null
           grep -F 'const guarded673=' app-v6.73.js >/dev/null
           grep -F '① 대기시간 최우선' app-v6.73.js >/dev/null
           grep -F '여자 C조를 남자 D조' app-v6.73.js >/dev/null
