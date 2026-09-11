@@ -19,7 +19,7 @@ on:
       - 'scripts/qa-developer-visibility-v674.mjs'
       - 'scripts/qa-v675-ui.mjs'
       - 'scripts/qa-v676-auto-toggle.mjs'
-      - 'scripts/qa-v677-final.mjs'
+      - 'scripts/qa-v678-ui.mjs'
       - '.github/workflows/qa-current-runtime.yml'
   workflow_dispatch:
 
@@ -79,14 +79,14 @@ jobs:
           PY
       - name: Automatic and manual conflict UI QA
         run: node scripts/qa-auto-ui-v673.mjs
-      - name: Developer visibility and queue badge QA
+      - name: Developer visibility and persistent queue badge QA
         run: node scripts/qa-developer-visibility-v674.mjs
-      - name: v6.75 auto and stats live QA
+      - name: Auto settings and stats live QA
         run: node scripts/qa-v675-ui.mjs
       - name: v6.76 resilient auto toggle QA
         run: node scripts/qa-v676-auto-toggle.mjs
-      - name: v6.77 roster game-badge persistent-popup QA
-        run: node scripts/qa-v677-final.mjs
+      - name: v6.78 live badge stats mobile and popup QA
+        run: node scripts/qa-v678-ui.mjs
       - name: Current runtime boot diagnostic
         run: node scripts/qa-boot-diagnostic.mjs
       - name: Mobile roster smoke QA
