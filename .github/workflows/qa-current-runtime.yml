@@ -18,6 +18,7 @@ on:
       - 'scripts/qa-auto-ui-v673.mjs'
       - 'scripts/qa-developer-visibility-v674.mjs'
       - 'scripts/qa-v675-ui.mjs'
+      - 'scripts/qa-v676-auto-toggle.mjs'
       - '.github/workflows/qa-current-runtime.yml'
   workflow_dispatch:
 
@@ -34,8 +35,19 @@ jobs:
           node-version: 22
       - name: Validate standalone runtime
         run: node scripts/validate-standalone-runtime.mjs
-      - name: Automatic matching priority QA
-        run: node scripts/qa-auto-priority-v673.mjs
+      - name: Automatic matching priority and compute QA
+        run: |
+          node scripts/qa-auto-priority-v673.mjs
+          node --input-type=module <<'NODE'
+          import {bestFour,businessDay} from './edge-functions/kokmatch-auto-v656/scoring.mjs';
+          const now=Date.now(),day=businessDay(now);
+          const members=Array.from({length:24},(_,i)=>({id:'m'+i,name:'회원'+i,state:'waiting',joinedAt:now-(20+i)*60000,waitDay:day,waitTotalMs:(i%6)*60000,cls:['A','B','C','D','E'][i%5],gender:i%2?'여':'남'}));
+          const history=Array.from({length:12},(_,i)=>({id:'g'+i,endedAt:now-(i+1)*300000,players:['m'+(i%24),'m'+((i+3)%24),'m'+((i+7)%24),'m'+((i+11)%24)]}));
+          const s={members,queue:members.map(x=>x.id),history,pendingGames:[],games:[],pairCounts:{},courtCount:5};
+          const t=Date.now();for(let i=0;i<20;i++){const r=bestFour(s,now+i);if(!r||r.players.length!==4)throw new Error('bestFour failed')};const ms=Date.now()-t;
+          if(ms>1500)throw new Error('24-player scoring too slow: '+ms+'ms');
+          console.log('PASS 24-player scoring 20x in '+ms+'ms');
+          NODE
       - name: Install Playwright
         run: |
           npm install --no-save playwright@1.55.0
@@ -70,6 +82,8 @@ jobs:
         run: node scripts/qa-developer-visibility-v674.mjs
       - name: v6.75 auto and stats live QA
         run: node scripts/qa-v675-ui.mjs
+      - name: v6.76 resilient auto toggle QA
+        run: node scripts/qa-v676-auto-toggle.mjs
       - name: Current runtime boot diagnostic
         run: node scripts/qa-boot-diagnostic.mjs
       - name: Mobile roster smoke QA
