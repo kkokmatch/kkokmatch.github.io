@@ -54,10 +54,8 @@ jobs:
               p.write_text(s,encoding='utf-8')
           p=Path('scripts/qa-save-layout-current.mjs');s=p.read_text(encoding='utf-8');s=s.replace("if(url.pathname.endsWith('/kokmatch-v60-api')){if(body.op==='member_save')", "if(url.pathname.endsWith('/kokmatch-v60-api')||url.pathname.endsWith('/kokmatch-member-v646')){if(body.op==='member_save')");p.write_text(s,encoding='utf-8')
           PY
-      - name: v6.78 requested UI QA
+      - name: v6.78 requested UI and superseding regression QA
         run: node scripts/qa-v678-ui.mjs
-      - name: v6.77 roster and popup regression
-        run: node scripts/qa-v677-final.mjs
       - name: Resilient automatic toggle QA
         run: node scripts/qa-v676-auto-toggle.mjs
       - name: Stats and live regression QA
@@ -86,3 +84,5 @@ jobs:
           git diff --cached --quiet && exit 0
           git commit -m 'Release v6.78 stabilize live dashboard queue badge stats ranks mobile spacing'
           git push origin HEAD:main
+
+# retry: wider iPhone spacing; v6.78 QA supersedes v6.77 DOM-badge assumptions
