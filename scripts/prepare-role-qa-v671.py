@@ -23,12 +23,19 @@ if old in s:s=s.replace(old,new,1)
 
 # Playwright waitForFunction uses (fn, arg, options). Keep the 5s refresh assertion
 # as an actual timeout instead of accidentally passing the options object as fn arg.
-s=s.replace("page.waitForFunction(()=>Number(window.S?.refreshSerial)===1,{timeout:5000})", "page.waitForFunction(()=>Number(window.S?.refreshSerial)===1,null,{timeout:5000})")
-s=s.replace("page.waitForFunction(()=>Number(window.S?.refreshSerial)===2,{timeout:5000})", "page.waitForFunction(()=>Number(window.S?.refreshSerial)===2,null,{timeout:5000})")
+s=s.replace("page.waitForFunction(()=>Number(window.S?.refreshSerial)===1,{timeout:5000})", "page.waitForFunction(()=>Number(S?.refreshSerial)===1,null,{timeout:5000})")
+s=s.replace("page.waitForFunction(()=>Number(window.S?.refreshSerial)===2,{timeout:5000})", "page.waitForFunction(()=>Number(S?.refreshSerial)===2,null,{timeout:5000})")
+s=s.replace("page.waitForFunction(()=>Number(window.S?.refreshSerial)===1,null,{timeout:5000})", "page.waitForFunction(()=>Number(S?.refreshSerial)===1,null,{timeout:5000})")
+s=s.replace("page.waitForFunction(()=>Number(window.S?.refreshSerial)===2,null,{timeout:5000})", "page.waitForFunction(()=>Number(S?.refreshSerial)===2,null,{timeout:5000})")
+
+# S is a top-level lexical binding (`let S`), so assigning a new server object to S
+# intentionally does not retarget the synthetic window.S reference created by QA.
+# Observe the canonical binding directly when proving refresh freshness.
+s=s.replace("Number(window.S?.refreshSerial)", "Number(S?.refreshSerial)")
 
 if "displayName:'박태영'" not in s: raise SystemExit('developer QA identity patch failed')
 if "name:'박태영'" not in s or "role:'admin'" not in s: raise SystemExit('developer roster evidence patch failed')
 if 'new MutationObserver(kill)' not in s: raise SystemExit('robust prompt guard patch failed')
-if 'refreshSerial)===1,null,{timeout:5000}' not in s: raise SystemExit('refresh wait timeout patch failed')
+if 'Number(S?.refreshSerial)===1' not in s or 'Number(S?.refreshSerial)===2' not in s: raise SystemExit('canonical refresh state assertion patch failed')
 p.write_text(s,encoding='utf-8')
-print('prepared persistent role QA with real developer auth contract, tablet diagnostics and deterministic refresh waits')
+print('prepared persistent role QA with real auth contract and canonical refresh-state assertions')
