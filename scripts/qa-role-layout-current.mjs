@@ -81,25 +81,45 @@ async function assertViewFits(page,label,view){
 
 async function assertRoster(page,label,width,roleKey,identity){
  const result=await page.evaluate(({width,roleKey,selfId})=>{
-  const failures=[];const cards=[...document.querySelectorAll('#members .memberCard')];
+  const failures=[],details=[];const cards=[...document.querySelectorAll('#members .memberCard')];
+  const stateLabels=new Set(['입장','관람','퇴장']);
+  const visibleButtons=actions=>actions?[...actions.querySelectorAll('button')].filter(b=>{const cs=getComputedStyle(b),r=b.getBoundingClientRect();return cs.display!=='none'&&cs.visibility!=='hidden'&&r.width>1&&r.height>1}):[];
+  const actionRail=card=>card.querySelector(':scope > .kmRosterActions621,:scope > .v6MemberActions,:scope > .memberActions48,:scope > .memberActions60,:scope > .memberActions64,:scope > .memberActions65');
+  const cardId=card=>String(card.dataset.memberId22||card.dataset.memberId||card.dataset.memberId46||card.dataset.memberId80||'');
   for(const card of cards){
-   const cr=card.getBoundingClientRect(),info=card.querySelector('.memberInfo48'),actions=card.querySelector(':scope > .kmRosterActions621');
-   if(!actions){failures.push('missing canonical actions');continue}
+   const cr=card.getBoundingClientRect(),info=card.querySelector('.memberInfo48'),actions=actionRail(card);
+   if(!actions){failures.push('missing action rail');continue}
    const ar=actions.getBoundingClientRect(),ir=info?.getBoundingClientRect();
    if(ar.left<cr.left-2||ar.right>cr.right+2||ar.top<cr.top-2||ar.bottom>cr.bottom+2)failures.push('actions outside card');
    if(width<600){if(ir&&ar.top<ir.bottom-2)failures.push('phone info/actions overlap')}else{if(ir&&ir.right>ar.left+2)failures.push('tablet info/actions overlap')}
-   const status=actions.querySelector('.status'),sr=status?.getBoundingClientRect();
+   const status=actions.querySelector('.status');
    if(status&&status.scrollWidth>status.clientWidth+2)failures.push('status clipped');
-   const buttons=[...actions.querySelectorAll('.kmRosterAction621')].filter(b=>{const r=b.getBoundingClientRect();return r.width>1&&getComputedStyle(b).visibility!=='hidden'});
-   let prev=null;
-   for(const b of buttons){const r=b.getBoundingClientRect();if(r.left<ar.left-2||r.right>ar.right+2)failures.push('button outside actions');if(prev&&r.left<prev.right-1)failures.push('button overlap');if(b.scrollWidth>b.clientWidth+2)failures.push('button text clipped');if(r.width<(width<600?41:44))failures.push('button too narrow');prev=r}
+   const buttons=visibleButtons(actions);let prev=null;
+   for(const b of buttons){
+    const r=b.getBoundingClientRect();
+    if(r.left<ar.left-2||r.right>ar.right+2)failures.push('button outside actions');
+    if(prev&&r.left<prev.right-1&&Math.abs(r.top-prev.top)<8)failures.push('button overlap');
+    if(b.scrollWidth>b.clientWidth+2)failures.push('button text clipped');
+    if(r.width<(width<600?41:44))failures.push('button too narrow');
+    prev=r;
+   }
+   details.push({id:cardId(card),labels:buttons.map(b=>(b.textContent||'').trim()),widths:buttons.map(b=>Math.round(b.getBoundingClientRect().width))});
   }
-  const own=cards.find(c=>String(c.dataset.memberId22||c.dataset.memberId||c.dataset.memberId46||c.dataset.memberId80||'')===String(selfId));
-  const ownButtons=own?[...own.querySelectorAll('.kmRosterAction621')].filter(b=>getComputedStyle(b).visibility!=='hidden'&&b.getBoundingClientRect().width>1).map(b=>(b.textContent||'').trim()):[];
-  if(['member','guest'].includes(roleKey)&&ownButtons.length!==2)failures.push(`self action count ${ownButtons.length} for ${roleKey}`);
-  if(roleKey==='temp'&&cards.filter(c=>c.querySelectorAll('.kmRosterAction621').length>=2).length<3)failures.push('temp organizer action rail missing');
-  if(['developer','manager','organizer'].includes(roleKey)&&cards.filter(c=>c.querySelectorAll('.kmRosterAction621').length>=3).length<3)failures.push('privileged edit rails missing');
-  return {failures:[...new Set(failures)],cards:cards.length,ownButtons};
+  const own=cards.find(c=>cardId(c)===String(selfId)),ownActions=actionRail(own),ownButtons=visibleButtons(ownActions).map(b=>(b.textContent||'').trim()),ownState=ownButtons.filter(x=>stateLabels.has(x));
+  if(['member','guest'].includes(roleKey)){
+   if(ownState.length!==2)failures.push(`self state action count ${ownState.length} for ${roleKey}`);
+   if(ownButtons.includes('수정'))failures.push(`${roleKey} unexpectedly has edit action`);
+  }
+  if(roleKey==='temp'){
+   const stateRails=details.filter(d=>d.labels.filter(x=>stateLabels.has(x)).length>=2).length;
+   if(stateRails<3)failures.push('temp organizer state rails missing');
+   if(details.some(d=>d.labels.includes('수정')))failures.push('temp organizer unexpectedly has edit action');
+  }
+  if(['developer','manager','organizer'].includes(roleKey)){
+   const editRails=details.filter(d=>d.labels.includes('수정')).length;
+   if(editRails<3)failures.push(`privileged edit rails missing: ${editRails}`);
+  }
+  return {failures:[...new Set(failures)],cards:cards.length,ownButtons,details:failures.length?details:undefined};
  },{width,roleKey,selfId:identity.memberId});
  if(result.failures.length)throw new Error(`${label}/members roster ${JSON.stringify(result)}`);
 }
