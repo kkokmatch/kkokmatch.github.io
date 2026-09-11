@@ -15,25 +15,53 @@ js=js.replace(needle,needle+" // v6.71: obsolete roster rail rewriting disabled;
 JS.write_text(js,encoding='utf-8')
 
 # Older phone rules set flex-basis independently from width. Explicitly reset the
-# flex basis in the final canonical section so physical button width is actually
-# readable on iPhone/tablet, not just the grid track width.
+# flex basis in the final canonical section. Apply this to every visible button in
+# the roster action rail as well as the canonical class so an older class name
+# cannot physically collapse a valid role button after rendering.
 css=CSS.read_text(encoding='utf-8')
 css += r'''
 
 /* v6.71 final physical action-button sizing: defeat legacy flex-basis constraints. */
 @media(max-width:599px){
- #members .kmRosterAction621{flex:0 0 46px!important;flex-basis:46px!important;width:46px!important;min-width:46px!important;max-width:46px!important}
+ #members .kmRosterAction621,
+ #members .kmRosterActions621 button,
+ #members .v6MemberActions button,
+ #members .memberActions48 button,
+ #members .memberActions60 button,
+ #members .memberActions64 button,
+ #members .memberActions65 button{
+  flex:0 0 46px!important;flex-basis:46px!important;width:46px!important;min-width:46px!important;max-width:46px!important;
+  height:34px!important;min-height:34px!important;max-height:34px!important;box-sizing:border-box!important;
+ }
 }
 @media(max-width:359px){
- #members .kmRosterAction621{flex:0 0 43px!important;flex-basis:43px!important;width:43px!important;min-width:43px!important;max-width:43px!important}
+ #members .kmRosterAction621,
+ #members .kmRosterActions621 button,
+ #members .v6MemberActions button,
+ #members .memberActions48 button,
+ #members .memberActions60 button,
+ #members .memberActions64 button,
+ #members .memberActions65 button{
+  flex:0 0 43px!important;flex-basis:43px!important;width:43px!important;min-width:43px!important;max-width:43px!important;
+ }
 }
 @media(min-width:600px){
- #members .kmRosterAction621{flex:0 0 48px!important;flex-basis:48px!important;width:48px!important;min-width:48px!important;max-width:48px!important}
+ #members .kmRosterAction621,
+ #members .kmRosterActions621 button,
+ #members .v6MemberActions button,
+ #members .memberActions48 button,
+ #members .memberActions60 button,
+ #members .memberActions64 button,
+ #members .memberActions65 button{
+  flex:0 0 48px!important;flex-basis:48px!important;width:48px!important;min-width:48px!important;max-width:48px!important;
+  height:34px!important;min-height:34px!important;max-height:34px!important;box-sizing:border-box!important;
+ }
 }
 '''
 CSS.write_text(css,encoding='utf-8')
 
 assert 'obsolete roster rail rewriting disabled' in js
 assert 'flex-basis:46px!important' in css
+assert '#members .kmRosterActions621 button' in css
 assert 'flex-basis:48px!important' in css
 print('patched v6.71 canonical roster ownership and physical button sizing')
