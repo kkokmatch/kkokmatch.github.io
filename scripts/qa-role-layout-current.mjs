@@ -7,7 +7,7 @@ if(!VERSION)throw new Error('latest-version.json semanticVersion is missing');
 const today=new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Seoul',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
 
 const identities={
-  developer:{memberId:'dev',displayName:'개발자',role:'admin',globalAdmin:true,tempOrganizer:false,groupId:'qa'},
+  developer:{memberId:'dev',displayName:'박태영',role:'admin',globalAdmin:true,tempOrganizer:false,groupId:'qa'},
   manager:{memberId:'mgr',displayName:'모임장',role:'manager',globalAdmin:false,tempOrganizer:false,groupId:'qa'},
   organizer:{memberId:'org',displayName:'운영진',role:'organizer',globalAdmin:false,tempOrganizer:false,groupId:'qa'},
   member:{memberId:'mem',displayName:'일반회원',role:'member',globalAdmin:false,tempOrganizer:false,groupId:'qa'},
@@ -17,7 +17,7 @@ const identities={
 
 function makeState(){
  const members=[
-  {id:'dev',name:'개발자',year:1988,gender:'남',age:'30',cls:'S',type:'member',role:'member',state:'out',totalGames:9},
+  {id:'dev',name:'박태영',year:1988,gender:'남',age:'30',cls:'S',type:'member',role:'admin',state:'out',totalGames:9},
   {id:'mgr',name:'모임장',year:1987,gender:'남',age:'30',cls:'A',type:'member',role:'manager',state:'waiting',joinedAt:Date.now()-360000,totalGames:8},
   {id:'org',name:'운영진',year:1990,gender:'여',age:'30',cls:'B',type:'member',role:'organizer',state:'spectator',joinedAt:Date.now()-240000,totalGames:7},
   {id:'mem',name:'일반회원',year:1992,gender:'남',age:'30',cls:'C',type:'member',role:'member',state:'out',totalGames:6},
@@ -91,7 +91,7 @@ async function assertRoster(page,label,width,roleKey,identity){
    if(!actions){failures.push('missing action rail');continue}
    const ar=actions.getBoundingClientRect(),ir=info?.getBoundingClientRect();
    if(ar.left<cr.left-2||ar.right>cr.right+2||ar.top<cr.top-2||ar.bottom>cr.bottom+2)failures.push('actions outside card');
-   if(width<600){if(ir&&ar.top<ir.bottom-2)failures.push('phone info/actions overlap')}else{if(ir&&ir.right>ar.left+2)failures.push('tablet info/actions overlap')}
+   if(width<600){if(ir&&ar.top<ir.bottom-2)failures.push('phone info/actions overlap')}else if(ir&&ir.right>ar.left+2){const cs=getComputedStyle(info),as=getComputedStyle(actions);failures.push(`tablet info/actions overlap id=${cardId(card)} info=${Math.round(ir.left)}-${Math.round(ir.right)} action=${Math.round(ar.left)}-${Math.round(ar.right)} card=${Math.round(cr.left)}-${Math.round(cr.right)} infoWidth=${cs.width} infoGrid=${cs.gridColumnStart}/${cs.gridColumnEnd} actionWidth=${as.width} actionGrid=${as.gridColumnStart}/${as.gridColumnEnd}`)}
    const status=actions.querySelector('.status');
    if(status&&status.scrollWidth>status.clientWidth+2)failures.push('status clipped');
    const buttons=visibleButtons(actions);let prev=null;
@@ -130,7 +130,7 @@ for(const vp of viewports){
   const context=await browser.newContext({viewport:{width:vp.width,height:vp.height},isMobile:vp.isMobile,hasTouch:true});
   const page=await context.newPage();const pageErrors=[];
   page.on('pageerror',e=>pageErrors.push(String(e?.stack||e)));
-  await page.addInitScript(()=>{try{localStorage.setItem('kokmatch_push_denied_notice629',String(Date.now()));localStorage.setItem('kokmatch_install_guide631_seen','1');sessionStorage.setItem('kokmatch_install_later630','1')}catch{}});
+  await page.addInitScript(()=>{try{localStorage.setItem('kokmatch_push_denied_notice629',String(Date.now()));localStorage.setItem('kokmatch_install_guide631_seen','1');sessionStorage.setItem('kokmatch_install_later630','1');const kill=()=>document.getElementById('pwaPrompt629')?.remove();new MutationObserver(kill).observe(document,{childList:true,subtree:true});addEventListener('DOMContentLoaded',kill)}catch{}});
   await installRoutes(page,state,identity);
   await page.goto('http://127.0.0.1:4173/?qa=roles',{waitUntil:'networkidle'});
   await page.waitForFunction(v=>window.__kokmatchVersionLock===v&&typeof window.renderAll==='function',VERSION,{timeout:15000});
@@ -149,12 +149,13 @@ for(const vp of viewports){
 for(const vp of viewports){
  const identity=identities.member,state=makeState();
  const context=await browser.newContext({viewport:{width:vp.width,height:vp.height},isMobile:vp.isMobile,hasTouch:true});const page=await context.newPage();
- await page.addInitScript(()=>{try{localStorage.setItem('kokmatch_push_denied_notice629',String(Date.now()));localStorage.setItem('kokmatch_install_guide631_seen','1');sessionStorage.setItem('kokmatch_install_later630','1')}catch{}});await installRoutes(page,state,identity);
+ await page.addInitScript(()=>{try{localStorage.setItem('kokmatch_push_denied_notice629',String(Date.now()));localStorage.setItem('kokmatch_install_guide631_seen','1');sessionStorage.setItem('kokmatch_install_later630','1');const kill=()=>document.getElementById('pwaPrompt629')?.remove();new MutationObserver(kill).observe(document,{childList:true,subtree:true});addEventListener('DOMContentLoaded',kill)}catch{}});await installRoutes(page,state,identity);
  await page.goto('http://127.0.0.1:4173/?qa=refresh',{waitUntil:'networkidle'});await page.waitForFunction(v=>window.__kokmatchVersionLock===v&&typeof window.renderAll==='function',VERSION,{timeout:15000});
  await page.evaluate(({state,identity})=>{T='qa-token';localStorage.setItem('kokmatch_token',T);currentGroupId='qa';currentView='members';S=JSON.parse(JSON.stringify(state));window.S=S;me=identity;group={groupId:'qa',name:'QA 모임'};groups=[];normalizeClient();renderAll();document.getElementById('login')?.classList.add('hide');},{state:clone(state),identity});
- await page.evaluate(()=>goView('stats'));const before=page.url();state.refreshSerial=1;await page.locator('#headerRefreshV6').click();await page.waitForFunction(()=>Number(window.S?.refreshSerial)===1,{timeout:5000});
+ await page.evaluate(()=>goView('stats'));const before=page.url();state.refreshSerial=1;await page.locator('#headerRefreshV6').click();await page.waitForFunction(()=>Number(S?.refreshSerial)===1,null,{timeout:5000});
+ await page.waitForFunction(()=>document.getElementById('headerRefreshV6')?.textContent?.trim()==='↻ 새로고침',null,{timeout:5000});
  let view=await page.evaluate(()=>({currentView,stats:document.getElementById('stats')?.classList.contains('on'),label:document.getElementById('headerRefreshV6')?.textContent?.trim()}));if(view.currentView!=='stats'||!view.stats||page.url()!==before||view.label!=='↻ 새로고침')throw new Error(`${vp.name} header refresh left current screen: ${JSON.stringify(view)} url=${page.url()} before=${before}`);
- await page.evaluate(()=>goView('settings'));state.refreshSerial=2;await page.locator('#forceUpdateBtn').click();await page.waitForFunction(()=>Number(window.S?.refreshSerial)===2,{timeout:5000});view=await page.evaluate(()=>({currentView,settings:document.getElementById('settings')?.classList.contains('on'),label:document.getElementById('forceUpdateBtn')?.textContent?.trim()}));if(view.currentView!=='settings'||!view.settings||view.label!=='↻ 새로고침')throw new Error(`${vp.name} settings refresh left current screen: ${JSON.stringify(view)}`);
+ await page.evaluate(()=>goView('settings'));state.refreshSerial=2;await page.locator('#forceUpdateBtn').click();await page.waitForFunction(()=>Number(S?.refreshSerial)===2,null,{timeout:5000});await page.waitForFunction(()=>document.getElementById('forceUpdateBtn')?.textContent?.trim()==='↻ 새로고침',null,{timeout:5000});view=await page.evaluate(()=>({currentView,settings:document.getElementById('settings')?.classList.contains('on'),label:document.getElementById('forceUpdateBtn')?.textContent?.trim()}));if(view.currentView!=='settings'||!view.settings||view.label!=='↻ 새로고침')throw new Error(`${vp.name} settings refresh left current screen: ${JSON.stringify(view)}`);
  await context.close();
 }
 
