@@ -48,13 +48,22 @@ for(const [roleKey,identity] of roles){
  assert.equal(await devQueue.locator('.roleBadge.role-global').count(),1,`${roleKey}: developer badge missing in queue`);
  await devQueue.locator('.devChallenger659 > img.devFrame661').first().waitFor({state:'visible'});
  const nameGame=await devQueue.locator('.name .gamecnt').count();
- assert.equal(nameGame,0,`${roleKey}: green game-count badge still sits on name line`);
- const waitMeta=devQueue.locator('.queueInfo53 .queueWaitMeta658').first();await waitMeta.waitFor({state:'visible'});
+ assert.equal(nameGame,0,`${roleKey}: game-count badge still sits on name line`);
+ const modern=await page.evaluate(()=>window.__kokmatchUiStability678==='6.78');
+ const waitMeta=devQueue.locator(modern?'.queueInfo53 .queueWaitMeta678':'.queueInfo53 .queueWaitMeta658').first();await waitMeta.waitFor({state:'visible'});
  const waitText=(await waitMeta.innerText()).replace(/\s+/g,' ');
  assert(waitText.includes('대기중'),`${roleKey}: waiting text missing`);
- assert(waitText.includes('게임 2회'),`${roleKey}: game count was not placed to the right of waiting text`);
- assert.equal(await waitMeta.locator('.queueGameCount658').count(),1,`${roleKey}: queue game badge class missing`);
+ if(modern){
+  const pill=await waitMeta.evaluate(el=>({content:getComputedStyle(el,'::after').content,bg:getComputedStyle(el,'::after').backgroundColor,r:getComputedStyle(el,'::after').borderRadius}));
+  assert(pill.content.includes('게임 2회'),`${roleKey}: persistent green game count missing: ${pill.content}`);
+  assert.notEqual(pill.bg,'rgba(0, 0, 0, 0)',`${roleKey}: persistent game count lost green background`);
+  assert.notEqual(pill.r,'0px',`${roleKey}: persistent game count lost pill shape`);
+  assert.equal(await waitMeta.locator('.queueGameCount658').count(),0,`${roleKey}: obsolete DOM game badge survived v6.78`);
+ }else{
+  assert(waitText.includes('게임 2회'),`${roleKey}: game count was not placed to the right of waiting text`);
+  assert.equal(await waitMeta.locator('.queueGameCount658').count(),1,`${roleKey}: queue game badge class missing`);
+ }
  await context.close();
 }
 await browser.close();
-console.log('PASS v6.74 developer badge/frame visible for developer, member, guest + game count on waiting row');
+console.log('PASS developer badge/frame visible for developer, member, guest + current persistent green game count');
