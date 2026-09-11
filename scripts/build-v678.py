@@ -127,8 +127,8 @@ css+=r'''
 
 /* v6.78: phone-only breathing room between profile frame and identity text; tablet spacing stays unchanged. */
 @media(max-width:599px){
- #members .memberCard,#members .memberCard57,#members .memberCard71,#members .memberCard73{column-gap:14px!important}
- #members .memberCard .memberInfo48,#members .memberCard57 .memberInfo48,#members .memberCard71 .memberInfo48,#members .memberCard73 .memberInfo48{padding-left:2px!important}
+ #members .memberCard,#members .memberCard57,#members .memberCard71,#members .memberCard73{column-gap:18px!important}
+ #members .memberCard .memberInfo48,#members .memberCard57 .memberInfo48,#members .memberCard71 .memberInfo48,#members .memberCard73 .memberInfo48{padding-left:3px!important}
 }
 '''
 Path(f'app-v{NEW}.css').write_text(css,encoding='utf-8')
