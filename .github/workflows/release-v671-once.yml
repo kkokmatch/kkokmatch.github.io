@@ -111,4 +111,4 @@ jobs:
           git commit -m 'Release v6.71 refresh and role layout stability'
           git push origin HEAD:main
 
-# guaranteed fresh full-state refresh after draining any in-flight background request
+# canonical lexical-state refresh assertion rerun
