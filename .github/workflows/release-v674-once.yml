@@ -9,6 +9,7 @@ on:
 permissions:
   contents: write
 
+# Retry: developer visibility sync is idempotent and frame/badge observers are throttled.
 jobs:
   build-qa-release:
     runs-on: ubuntu-24.04
