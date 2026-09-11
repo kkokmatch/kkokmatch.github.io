@@ -17,6 +17,7 @@ on:
       - 'scripts/qa-auto-priority-v673.mjs'
       - 'scripts/qa-auto-ui-v673.mjs'
       - 'scripts/qa-developer-visibility-v674.mjs'
+      - 'scripts/qa-v675-ui.mjs'
       - '.github/workflows/qa-current-runtime.yml'
   workflow_dispatch:
 
@@ -67,6 +68,8 @@ jobs:
         run: node scripts/qa-auto-ui-v673.mjs
       - name: Developer visibility and queue badge QA
         run: node scripts/qa-developer-visibility-v674.mjs
+      - name: v6.75 auto and stats live QA
+        run: node scripts/qa-v675-ui.mjs
       - name: Current runtime boot diagnostic
         run: node scripts/qa-boot-diagnostic.mjs
       - name: Mobile roster smoke QA
