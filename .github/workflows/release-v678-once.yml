@@ -85,4 +85,4 @@ jobs:
           git commit -m 'Release v6.78 stabilize live dashboard queue badge stats ranks mobile spacing'
           git push origin HEAD:main
 
-# retry: wider iPhone spacing; v6.78 QA supersedes v6.77 DOM-badge assumptions
+# retry 2: stop stats mutation loop after persistent dashboard validation
