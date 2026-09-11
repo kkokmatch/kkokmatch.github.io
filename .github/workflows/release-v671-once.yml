@@ -111,4 +111,4 @@ jobs:
           git commit -m 'Release v6.71 refresh and role layout stability'
           git push origin HEAD:main
 
-# rerun after canonical roster ownership fix
+# semantic visible-control QA rerun
