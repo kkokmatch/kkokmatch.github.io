@@ -33,7 +33,8 @@ try{
  await page.locator('.autoGameQueue658 .autoSettingsBtn656').click();await page.waitForSelector('#modal.on');assert((await page.locator('#modalSheet').innerText()).includes('자동게임설정'),'settings modal did not open');await page.locator('#modalSheet button',{hasText:'닫기'}).click();
  await page.locator('.autoGameQueue658 .autoToggle656').click();await page.waitForFunction(()=>S?.autoGame?.enabled===true&&S?.pendingGames?.length===1,{timeout:7000});assert(autoCalls.includes('get')&&autoCalls.includes('set')&&autoCalls.includes('tick'),'verified auto path did not call get/set/tick');
  await page.evaluate(()=>{currentView='stats';renderStats();goView('stats')});
- const modern=await page.evaluate(()=>window.__kokmatchUiStability678==='6.78');
+ // v6.78 introduced the persistent live-dashboard host. Detect the feature, not a hardcoded semantic version, so later releases stay on the modern path.
+ const modern=await page.evaluate(()=>!!window.__kokmatchUiStability678);
  const liveSelector=modern?'#opsPersistentHost678 #opsDashboard652':'#stats #opsDashboard652';
  await page.waitForSelector(liveSelector);await page.waitForSelector('.statsMonthlyTable628');await page.waitForFunction(()=>document.querySelectorAll('.statsMonthlyTable628 tbody tr').length>=4);
  if(modern){
