@@ -16,6 +16,7 @@ on:
       - 'scripts/qa-role-layout-current.mjs'
       - 'scripts/qa-auto-priority-v673.mjs'
       - 'scripts/qa-auto-ui-v673.mjs'
+      - 'scripts/qa-developer-visibility-v674.mjs'
       - '.github/workflows/qa-current-runtime.yml'
   workflow_dispatch:
 
@@ -64,6 +65,8 @@ jobs:
           PY
       - name: Automatic and manual conflict UI QA
         run: node scripts/qa-auto-ui-v673.mjs
+      - name: Developer visibility and queue badge QA
+        run: node scripts/qa-developer-visibility-v674.mjs
       - name: Current runtime boot diagnostic
         run: node scripts/qa-boot-diagnostic.mjs
       - name: Mobile roster smoke QA
