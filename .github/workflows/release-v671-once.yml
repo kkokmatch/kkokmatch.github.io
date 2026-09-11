@@ -21,7 +21,9 @@ jobs:
           node-version: 22
 
       - name: Build v6.71 from current standalone runtime
-        run: python3 scripts/build-v671.py
+        run: |
+          python3 scripts/build-v671.py
+          python3 scripts/patch-v671-fix.py
 
       - name: Syntax and standalone invariants
         run: |
@@ -31,8 +33,10 @@ jobs:
           grep -F 'app-v6.71.css?v=6.71' index.html >/dev/null
           grep -F "KOKMATCH_SW_VERSION='6.71'" kokmatch-sw.js >/dev/null
           grep -F 'kokmatch-sw.js?v=6.71' sw.js >/dev/null
-          grep -F "b.textContent='↻ 새로고침'" app-v6.71.js >/dev/null || grep -F "text='↻ 새로고침'" app-v6.71.js >/dev/null
+          grep -F "text='↻ 새로고침'" app-v6.71.js >/dev/null
           grep -F "window.__kokmatchRefreshCurrent635=forceUpdateApp" app-v6.71.js >/dev/null
+          grep -F 'obsolete roster rail rewriting disabled' app-v6.71.js >/dev/null
+          grep -F 'flex-basis:46px!important' app-v6.71.css >/dev/null
           grep -F 'KokMatch v6.71: canonical responsive role-safe roster layout.' app-v6.71.css >/dev/null
 
       - name: Install Playwright browser
@@ -63,7 +67,6 @@ jobs:
           p=Path('scripts/qa-save-layout-current.mjs'); s=p.read_text(encoding='utf-8')
           s=s.replace("if(url.pathname.endsWith('/kokmatch-v60-api')){if(body.op==='member_save')", "if(url.pathname.endsWith('/kokmatch-v60-api')||url.pathname.endsWith('/kokmatch-member-v646')){if(body.op==='member_save')")
           p.write_text(s,encoding='utf-8')
-          # The new role QA keeps this guard permanently because it creates multiple browser contexts.
           p=Path('scripts/qa-role-layout-current.mjs'); s=p.read_text(encoding='utf-8')
           short="""await page.addInitScript(()=>{try{localStorage.setItem('kokmatch_push_denied_notice629',String(Date.now()));localStorage.setItem('kokmatch_install_guide631_seen','1');sessionStorage.setItem('kokmatch_install_later630','1')}catch{}});"""
           s=s.replace(short,guard)
@@ -103,7 +106,7 @@ jobs:
           git config user.name 'kkokmatch-release-bot'
           git config user.email 'actions@users.noreply.github.com'
           git add app-v6.71.js app-v6.71.css index.html manifest.webmanifest kokmatch-sw.js sw.js latest-version.json scripts/qa-role-layout-current.mjs .github/workflows/qa-current-runtime.yml
-          git rm -f --ignore-unmatch scripts/build-v671.py .github/workflows/release-v671-once.yml
+          git rm -f --ignore-unmatch scripts/build-v671.py scripts/patch-v671-fix.py .github/workflows/release-v671-once.yml
           git diff --cached --quiet && exit 0
           git commit -m 'Release v6.71 refresh and role layout stability'
           git push origin HEAD:main
