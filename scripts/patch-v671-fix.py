@@ -26,6 +26,79 @@ new_render="renderMembers=function(...args){const r=baseRender637.apply(this,arg
 if js.count(old_render)!=1:
     raise SystemExit(f'canonical render wrapper patch point count={js.count(old_render)}')
 js=js.replace(old_render,new_render,1)
+
+# Manual refresh must not reuse a compact-state request that started before the
+# button press, and it must still fetch on Members (v46 intentionally skips normal
+# loadState there). Drain any in-flight load first, then perform one fresh full-state
+# request through the authenticated canonical state API and apply that exact response.
+old_refresh="""forceUpdateApp=async function(){
+ if(refreshBusy635)return false;
+ const view=String(currentView||'members');
+ const gid=String(currentGroupId||'');
+ const y=Math.max(0,Number(window.scrollY)||0);
+ refreshBusy635=true;refreshButtons635('↻ 새로고침 중...',true);
+ try{
+  try{sessionStorage.removeItem(REFRESH_KEY)}catch{}
+  if(gid)currentGroupId=gid;
+  await loadState(true);
+  if(view==='groups'&&me?.globalAdmin&&typeof loadGroups==='function')await loadGroups().catch(()=>{});
+  currentView=view;
+  document.querySelectorAll('.view').forEach(el=>el.classList.toggle('on',el.id===view));
+  document.querySelectorAll('nav button').forEach(el=>el.classList.toggle('on',el.dataset.v===view));
+  if(view==='members')try{window.__kokmatchStabilizeRoster637?.(true)}catch{}
+  await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
+  window.scrollTo(0,y);
+  return true;
+ }catch(e){
+  try{showError(e)}catch{alert(e?.message||String(e))}
+  return false;
+ }finally{
+  refreshBusy635=false;refreshButtons635('↻ 새로고침',false);
+ }
+};"""
+new_refresh="""forceUpdateApp=async function(){
+ if(refreshBusy635)return false;
+ const view=String(currentView||'members');
+ const gid=String(currentGroupId||'');
+ const y=Math.max(0,Number(window.scrollY)||0);
+ refreshBusy635=true;refreshButtons635('↻ 새로고침 중...',true);
+ try{
+  try{sessionStorage.removeItem(REFRESH_KEY)}catch{}
+  if(gid)currentGroupId=gid;
+  // Drain a compact/background request that may have started before this click.
+  try{await loadState(true)}catch(e){if(!T)throw e}
+  // The manual refresh itself always owns a brand-new full-state request.
+  const fresh=await request('state','GET',null,{groupId:gid||currentGroupId,manualRefresh:Date.now()});
+  if(!fresh?.data)throw new Error('최신 상태를 불러오지 못했습니다.');
+  if(gid&&String(currentGroupId||'')!==gid)return false;
+  S=fresh.data;
+  if(fresh.user)me=fresh.user;
+  if(fresh.group)group=fresh.group;
+  if(Array.isArray(fresh.groups))groups=fresh.groups;
+  currentGroupId=String(fresh.group?.groupId||gid||currentGroupId||'');
+  if(currentGroupId)localStorage.setItem(GROUP_KEY,currentGroupId);
+  normalizeClient();
+  try{if(currentGroupId&&Array.isArray(S?.members)&&S.members.length)window.__kokmatchSaveRoster654?.(currentGroupId,S.members,S?.adminBadgeVisibility)}catch{}
+  currentView=view;
+  renderAll();
+  if(view==='groups'&&me?.globalAdmin&&typeof loadGroups==='function')await loadGroups().catch(()=>{});
+  currentView=view;
+  document.querySelectorAll('.view').forEach(el=>el.classList.toggle('on',el.id===view));
+  document.querySelectorAll('nav button').forEach(el=>el.classList.toggle('on',el.dataset.v===view));
+  if(view==='members')try{window.__kokmatchStabilizeRoster637?.(true)}catch{}
+  await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
+  window.scrollTo(0,y);
+  return true;
+ }catch(e){
+  try{showError(e)}catch{alert(e?.message||String(e))}
+  return false;
+ }finally{
+  refreshBusy635=false;refreshButtons635('↻ 새로고침',false);
+ }
+};"""
+if js.count(old_refresh)!=1:
+    raise SystemExit(f'manual fresh-state patch point count={js.count(old_refresh)}')
+js=js.replace(old_refresh,new_refresh,1)
 JS.write_text(js,encoding='utf-8')
 
 css=CSS.read_text(encoding='utf-8')
@@ -108,9 +181,11 @@ CSS.write_text(css,encoding='utf-8')
 assert 'obsolete roster rail rewriting disabled' in js
 assert 'if(!force&&Date.now()<Number(window.__kokmatchResumeNoRailReplaceUntil638||0)&&!needs637())return;' in js
 assert 'stabilize637(true);schedule637(false)' in js
+assert "manualRefresh:Date.now()" in js
+assert "const fresh=await request('state','GET'" in js
 assert 'remove obsolete v77 0.5cm offset/top shift' in css
 assert 'margin-left:0!important' in css
 assert 'flex-basis:46px!important' in css
 assert '#members .kmRosterActions621 button' in css
 assert 'flex-basis:48px!important' in css
-print('patched v6.71 canonical roster ownership, offsets, sync role controls and physical button sizing')
+print('patched v6.71 canonical roster layout and guaranteed fresh in-place refresh')
