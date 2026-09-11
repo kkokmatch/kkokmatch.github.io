@@ -19,7 +19,8 @@ const clone=x=>JSON.parse(JSON.stringify(x));
 const browser=await chromium.launch({headless:true});
 for(const [roleKey,identity] of roles){
  const state=makeState(),context=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true});const page=await context.newPage();
- await page.addInitScript(()=>{try{localStorage.setItem('kokmatch_push_denied_notice629',String(Date.now()));localStorage.setItem('kokmatch_install_guide631_seen','1');sessionStorage.setItem('kokmatch_install_later630','1')}catch{}});
+ const pageErrors=[];page.on('pageerror',e=>pageErrors.push(String(e?.stack||e)));
+ await page.addInitScript(()=>{try{localStorage.setItem('kokmatch_push_denied_notice629',String(Date.now()));localStorage.setItem('kokmatch_install_guide631_seen','1');sessionStorage.setItem('kokmatch_install_later630','1');const kill=()=>document.getElementById('pwaPrompt629')?.remove();new MutationObserver(kill).observe(document,{childList:true,subtree:true});addEventListener('DOMContentLoaded',kill)}catch{}});
  await page.route('https://wjelumpbjklfrdjxbesj.supabase.co/functions/v1/**',async route=>{
    const req=route.request(),url=new URL(req.url());let body={};try{body=JSON.parse(req.postData()||'{}')}catch{}
    if(url.pathname.endsWith('/kokmatch-auto-v656')){
@@ -30,7 +31,7 @@ for(const [roleKey,identity] of roles){
    return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({success:true,data:clone(state),group:{groupId:'qa',name:'QA'},user:identity,groups:[]})});
  });
  await page.goto('http://127.0.0.1:4173/?qa=auto673',{waitUntil:'networkidle'});
- await page.waitForFunction(v=>window.__kokmatchVersionLock===v&&window.__kokmatchAutoManualGuard673===v,VERSION,{timeout:15000});
+ await page.waitForFunction(v=>window.__kokmatchVersionLock===v&&window.__kokmatchAutoManualGuard673===v&&typeof window.__kokmatchManualGate673==='function',VERSION,{timeout:15000});
  await page.evaluate(({state,identity})=>{T='qa-token';localStorage.setItem('kokmatch_token',T);currentGroupId='qa';S=JSON.parse(JSON.stringify(state));window.S=S;me=identity;group={groupId:'qa',name:'QA'};groups=[];normalizeClient();currentView='queue';renderAll();document.getElementById('login')?.classList.add('hide');goView('queue')},{state:clone(state),identity});
  await page.waitForTimeout(120);
  // Rules text must match the requested order and gender equivalence.
@@ -38,19 +39,20 @@ for(const [roleKey,identity] of roles){
  const rules=(await page.locator('#modalSheet').innerText()).replace(/\s+/g,' ');
  for(const t of ['① 대기시간 최우선','② 당일 게임수','③ 오늘 파트너 우선','④ 급수·남녀 밸런스','여자 C조를 남자 D조','⑤ 반복조합 최소화','3회 이상'])assert(rules.includes(t),`${roleKey} missing rule ${t}`);
  await page.locator('#modalSheet button',{hasText:'닫기'}).click();
- // First manual attempt must be blocked while auto remains on.
+ // First manual attempt must be blocked while auto remains on, regardless of the fast touch router.
  const first=page.locator('#queue .queueCard').first();await first.click();
- await page.waitForSelector('#autoManualKeep673');
+ await page.waitForSelector('#autoManualKeep673',{timeout:5000});
  assert.equal(await page.evaluate(()=>draft.filter(Boolean).length),0,`${roleKey} draft changed before conflict choice`);
  await page.locator('#autoManualKeep673').click();
  await page.waitForTimeout(80);
  assert.equal(await page.evaluate(()=>S.autoGame.enabled),true,`${roleKey} keep did not preserve auto`);
  assert.equal(await page.evaluate(()=>draft.filter(Boolean).length),0,`${roleKey} keep unexpectedly resumed manual action`);
- // Second attempt: turn auto off and replay the exact manual click.
- await first.click();await page.waitForSelector('#autoManualDisable673');await page.locator('#autoManualDisable673').click();
+ // Second attempt: turn auto off and replay the exact manual operation.
+ await first.click();await page.waitForSelector('#autoManualDisable673',{timeout:5000});await page.locator('#autoManualDisable673').click();
  await page.waitForFunction(()=>S?.autoGame?.enabled===false&&draft.filter(Boolean).length===1,{timeout:5000});
  assert.equal(await page.evaluate(()=>S.autoGame.enabled),false,`${roleKey} auto did not turn off`);
  assert.equal(await page.evaluate(()=>draft.filter(Boolean).length),1,`${roleKey} manual action was not resumed after disabling auto`);
+ if(pageErrors.length)throw new Error(`${roleKey} page errors: ${pageErrors.join(' | ')}`);
  await context.close();
 }
 await browser.close();
