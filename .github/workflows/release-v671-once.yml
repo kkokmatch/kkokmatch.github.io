@@ -97,4 +97,4 @@ jobs:
           git commit -m 'Release v6.71 refresh and role layout stability'
           git push origin HEAD:main
 
-# application-only release; workflow files are updated separately through the connected GitHub app
+# full refresh lifecycle assertion rerun
