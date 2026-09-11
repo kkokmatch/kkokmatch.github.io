@@ -52,8 +52,9 @@ export function pairCountToday(a,b,s,now=Date.now()){
 }
 
 export function adjustedSkill(m){
-  const base=GRADE[String(m?.cls||'').toUpperCase()]||1;
-  return Math.max(0,base-(String(m?.gender||'')==='여'?1:0));
+  const cls=String(m?.cls||'').toUpperCase();
+  if(String(m?.gender||'')==='여'&&cls==='C')return GRADE.D;
+  return GRADE[cls]||1;
 }
 
 function partnerDayValid(day,now){
@@ -96,11 +97,19 @@ function pairingMetrics(ids,ms,byId,now){
   return best;
 }
 
+function lexGreater(a,b){
+  const n=Math.max(a.length,b.length);
+  for(let i=0;i<n;i++){const av=Number(a[i]??0),bv=Number(b[i]??0);if(av!==bv)return av>bv}
+  return false;
+}
+
 function selectionMetrics(ids,s,byId,now){
   const ms=ids.map(id=>byId.get(id));
   const waits=ms.map(m=>({current:currentWaitMin(m,now),total:totalWaitMin(m,now)}));
-  const waitBand=waits.reduce((n,w)=>n+Math.floor(w.current/5)*2+Math.floor(w.total/10),0);
-  const waitExact=waits.reduce((n,w)=>n+w.current*2+w.total,0);
+  // Current wait after the last game + today's total wait are both primary. 5-minute bands
+  // let the next requested priorities decide only among members whose waiting burden is effectively similar.
+  const waitVector=waits.map(w=>Math.floor((w.current+w.total)/5)).sort((a,b)=>b-a);
+  const waitExactVector=waits.map(w=>w.current+w.total).sort((a,b)=>b-a);
   const games=ids.map(id=>gameCountToday(id,s,now));
   const gameTotal=games.reduce((a,b)=>a+b,0),gameSpread=Math.max(...games)-Math.min(...games);
   const partners=partnerPairs(ids,byId,now).length;
@@ -110,13 +119,13 @@ function selectionMetrics(ids,s,byId,now){
     if(isPartnerPair(ids[i],ids[j],byId,now))continue;
     const c=pairCountToday(ids[i],ids[j],s,now);repeatTotal+=c;if(c>=3)hardRepeat++;
   }
-  return {waitBand,waitExact,gameTotal,gameSpread,partners,balance:pairing?.balance??999,splitPartners:pairing?.splitPartners??99,hardRepeat,repeatTotal,pairing,waits,games};
+  return {waitVector,waitExactVector,gameTotal,gameSpread,partners,balance:pairing?.balance??999,splitPartners:pairing?.splitPartners??99,hardRepeat,repeatTotal,pairing,waits,games};
 }
 
 function better(a,b){
   if(!b)return true;
   const A=a.metrics,B=b.metrics;
-  if(A.waitBand!==B.waitBand)return A.waitBand>B.waitBand;
+  if(A.waitVector.join('|')!==B.waitVector.join('|'))return lexGreater(A.waitVector,B.waitVector);
   if(A.gameTotal!==B.gameTotal)return A.gameTotal<B.gameTotal;
   if(A.gameSpread!==B.gameSpread)return A.gameSpread<B.gameSpread;
   if(A.partners!==B.partners)return A.partners>B.partners;
@@ -124,7 +133,7 @@ function better(a,b){
   if(A.balance!==B.balance)return A.balance<B.balance;
   if(A.hardRepeat!==B.hardRepeat)return A.hardRepeat<B.hardRepeat;
   if(A.repeatTotal!==B.repeatTotal)return A.repeatTotal<B.repeatTotal;
-  if(A.waitExact!==B.waitExact)return A.waitExact>B.waitExact;
+  if(A.waitExactVector.join('|')!==B.waitExactVector.join('|'))return lexGreater(A.waitExactVector,B.waitExactVector);
   return a.ids.join('|')<b.ids.join('|');
 }
 
@@ -133,10 +142,10 @@ export function bestFour(s,now=Date.now()){
   let queue=(Array.isArray(s?.queue)?s.queue:[]).map(String).filter(id=>byId.has(id)&&String(byId.get(id)?.state||'')==='waiting');
   queue.sort((a,b)=>{
     const ma=byId.get(a),mb=byId.get(b);
-    const ba=Math.floor(currentWaitMin(ma,now)/5)*2+Math.floor(totalWaitMin(ma,now)/10),bb=Math.floor(currentWaitMin(mb,now)/5)*2+Math.floor(totalWaitMin(mb,now)/10);
-    if(ba!==bb)return bb-ba;
+    const wa=Math.floor((currentWaitMin(ma,now)+totalWaitMin(ma,now))/5),wb=Math.floor((currentWaitMin(mb,now)+totalWaitMin(mb,now))/5);
+    if(wa!==wb)return wb-wa;
     const ga=gameCountToday(a,s,now),gb=gameCountToday(b,s,now);if(ga!==gb)return ga-gb;
-    const ea=currentWaitMin(ma,now)*2+totalWaitMin(ma,now),eb=currentWaitMin(mb,now)*2+totalWaitMin(mb,now);if(ea!==eb)return eb-ea;
+    const ea=currentWaitMin(ma,now)+totalWaitMin(ma,now),eb=currentWaitMin(mb,now)+totalWaitMin(mb,now);if(ea!==eb)return eb-ea;
     return String(ma?.name||a).localeCompare(String(mb?.name||b),'ko');
   });
   const pool=queue.slice(0,Math.min(24,queue.length));if(pool.length<4)return null;
