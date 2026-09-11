@@ -1,0 +1,38 @@
+name: Probe auto 676 once
+
+on:
+  push:
+    paths:
+      - '.github/workflows/probe-auto-676-once.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Probe cloned production state
+        shell: bash
+        run: |
+          set -euo pipefail
+          URL='https://wjelumpbjklfrdjxbesj.supabase.co/functions/v1/kokmatch-auto-v656'
+          TOKEN='qa-auto-repro-676-token'
+          call(){
+            local BODY="$1"
+            local OUT
+            OUT=$(mktemp)
+            local CODE
+            CODE=$(curl -sS -o "$OUT" -w '%{http_code}' -X POST "$URL" -H 'content-type: application/json' -H "authorization: Bearer $TOKEN" --data "$BODY")
+            echo "HTTP=$CODE"
+            cat "$OUT"
+            echo
+            rm -f "$OUT"
+          }
+          echo '--- GET ---'
+          call '{"action":"get","groupId":"qa_auto_repro_676"}'
+          echo '--- TICK ---'
+          call '{"action":"tick","groupId":"qa_auto_repro_676"}'
+          echo '--- GET AFTER ---'
+          call '{"action":"get","groupId":"qa_auto_repro_676"}'
