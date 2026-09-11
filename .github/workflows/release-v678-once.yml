@@ -85,4 +85,4 @@ jobs:
           git commit -m 'Release v6.78 stabilize live dashboard queue badge stats ranks mobile spacing'
           git push origin HEAD:main
 
-# retry 2: stop stats mutation loop after persistent dashboard validation
+# retry 3: validate green badge against actual sorted queue member
