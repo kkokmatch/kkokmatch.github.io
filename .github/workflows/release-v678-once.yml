@@ -79,10 +79,10 @@ jobs:
         run: |
           git config user.name 'kkokmatch-release-bot'
           git config user.email 'actions@users.noreply.github.com'
-          git add app-v6.78.js app-v6.78.css index.html manifest.webmanifest kokmatch-sw.js sw.js latest-version.json scripts/qa-v678-ui.mjs scripts/qa-v675-ui.mjs
+          git add app-v6.78.js app-v6.78.css index.html manifest.webmanifest kokmatch-sw.js sw.js latest-version.json scripts/qa-v678-ui.mjs scripts/qa-v675-ui.mjs scripts/qa-developer-visibility-v674.mjs
           git rm -f --ignore-unmatch scripts/build-v678.py
           git diff --cached --quiet && exit 0
           git commit -m 'Release v6.78 stabilize live dashboard queue badge stats ranks mobile spacing'
           git push origin HEAD:main
 
-# retry 4: update legacy stats/live QA for persistent v6.78 dashboard
+# retry 5: update developer visibility regression for persistent CSS game-count badge
