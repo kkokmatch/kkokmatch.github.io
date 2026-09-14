@@ -25,6 +25,7 @@ on:
       - 'scripts/qa-v678-ui.mjs'
       - 'scripts/qa-v679-ios-update.mjs'
       - 'scripts/qa-v679-webkit-smoke.mjs'
+      - 'scripts/qa-pending-eta.mjs'
       - '.github/workflows/qa-current-runtime.yml'
   workflow_dispatch:
 
@@ -82,6 +83,8 @@ jobs:
           s=s.replace("if(url.pathname.endsWith('/kokmatch-v60-api')){if(body.op==='member_save')", "if(url.pathname.endsWith('/kokmatch-v60-api')||url.pathname.endsWith('/kokmatch-member-v646')){if(body.op==='member_save')")
           p.write_text(s,encoding='utf-8')
           PY
+      - name: Pending start ETA calculation and desktop iPhone QA
+        run: node scripts/qa-pending-eta.mjs
       - name: v6.79 iPhone update recovery and stats alignment QA
         run: node scripts/qa-v679-ios-update.mjs
       - name: v6.79 WebKit iPhone cold boot QA
