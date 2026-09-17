@@ -43,34 +43,33 @@ jobs:
           s=replace_one(s,"typeof memberQuery46==='undefined'?'':String(memberQuery46||''),typeof memberPage46==='undefined'?1:Number(memberPage46)||1,members]);","'',Number(window.__kokmatchMemberPageRequested46||window.__kokmatchMemberPage46||1),members]);",'v677 roster structure signature')
           s=replace_one(s,"function memberSig46(){try{return JSON.stringify([currentGroupId,me?.role,me?.globalAdmin,","function memberSig46(){try{return JSON.stringify([currentGroupId,Number(window.__kokmatchMemberPageRequested46||window.__kokmatchMemberPage46||1),me?.role,me?.globalAdmin,",'member render signature')
 
+          # The app has many historical settings/renderAll wrappers. Add one final guard
+          # so a focused court-count draft is never replaced by a background rerender.
           tail=(
-              "\n\n/* v6.81 final settings stability guard. */\n"
+              "\n\n/* v6.81 final court-count focus/draft guard. */\n"
               "(()=>{\n"
               "'use strict';\n"
               "if(window.__kokmatchCourtInputGuard681)return;window.__kokmatchCourtInputGuard681='6.81';\n"
-              "let roleSyncing681=false;\n"
               "function protect681(){return currentView==='settings'&&document.activeElement?.id==='courtCountInput'}\n"
               "function restore681(value,start,end,y){const next=document.getElementById('courtCountInput');if(!next)return;if(String(next.value)!==String(value))next.value=String(value);try{next.focus({preventScroll:true})}catch{try{next.focus()}catch{}}try{if(start!==null&&start!==undefined)next.setSelectionRange(start,end??start)}catch{}try{window.scrollTo(0,Math.max(0,Number(y)||0))}catch{}}\n"
-              "function armRoleObserver681(){const box=document.getElementById('settings');if(!box||box.__kokmatchRoleObserver681)return;const mo=new MutationObserver(()=>{if(!roleSyncing681)queueMicrotask(syncRoleCardTail681)});mo.observe(box,{childList:true});box.__kokmatchRoleObserver681=mo}\n"
-              "function syncRoleCardTail681(){if(roleSyncing681)return;roleSyncing681=true;try{const box=document.getElementById('settings');if(!box)return;armRoleObserver681();const allowed=!!me&&(!!me.globalAdmin||me.role==='manager'||me.role==='organizer');let card=document.getElementById('roleFrameSetting681');if(!allowed){card?.remove();return}const mode=String(S?.adminBadgeVisibility||'hidden')==='all'?'all':'hidden';document.documentElement.classList.toggle('kokmatchRoleFramesHidden681',mode!=='all');if(!card){card=document.createElement('div');card.id='roleFrameSetting681';card.className='card roleFrameSetting681';const head=document.createElement('div');head.className='between roleFrameHead681';const copy=document.createElement('div');const title=document.createElement('b');title.textContent='역할 테두리 효과';const meta=document.createElement('div');meta.className='meta';meta.textContent='개발자·모임장·운영진 프로필의 테두리 효과를 이 모임 전체에서 동일하게 적용합니다. 본인 포함 모든 인원에게 적용됩니다.';copy.append(title,meta);const tag=document.createElement('span');tag.className='tag';head.append(copy,tag);const buttons=document.createElement('div');buttons.className='roleFrameButtons681';for(const item of [['hidden','숨기기'],['all','보이기']]){const b=document.createElement('button');b.type='button';b.dataset.mode681=item[0];b.textContent=item[1];b.addEventListener('click',()=>window.setRoleFrameVisibility681?.(item[0]));buttons.appendChild(b)}card.append(head,buttons);const version=[...box.querySelectorAll(':scope > .card')].find(c=>String(c.textContent||'').includes('프로그램 버전'));if(version)version.before(card);else box.appendChild(card)}const tag=card.querySelector('.tag'),tagText=mode==='all'?'보이기':'숨기기';if(tag&&tag.textContent!==tagText)tag.textContent=tagText;card.querySelectorAll('button[data-mode681]').forEach(b=>{const on=b.dataset.mode681===mode,next='btn '+(on?'pri':'ghost');if(b.className!==next)b.className=next})}finally{roleSyncing681=false}}\n"
-              "window.__kokmatchSyncRoleCard681=syncRoleCardTail681;\n"
-              "try{const baseSettings681=renderSettings;renderSettings=function(...args){if(protect681())return;const r=baseSettings681.apply(this,args);const fix=()=>{try{syncRoleCardTail681()}catch{}};fix();queueMicrotask(fix);requestAnimationFrame(fix);setTimeout(fix,0);setTimeout(fix,40);return r};window.renderSettings=renderSettings}catch(e){console.warn('v6.81 settings guard',e)}\n"
+              "try{const baseSettings681=renderSettings;renderSettings=function(...args){if(protect681())return;return baseSettings681.apply(this,args)};window.renderSettings=renderSettings}catch(e){console.warn('v6.81 settings focus guard',e)}\n"
               "try{const baseAll681=renderAll;renderAll=function(...args){const active=document.activeElement,keep=currentView==='settings'&&active?.id==='courtCountInput';if(!keep)return baseAll681.apply(this,args);const value=active.value,start=active.selectionStart,end=active.selectionEnd,y=window.scrollY;const r=baseAll681.apply(this,args);restore681(value,start,end,y);queueMicrotask(()=>{if(document.activeElement?.id!=='courtCountInput')restore681(value,start,end,y)});return r};window.renderAll=renderAll}catch(e){console.warn('v6.81 court renderAll guard',e)}\n"
-              "armRoleObserver681();if(currentView==='settings')queueMicrotask(syncRoleCardTail681);\n"
               "})();\n"
           )
           s+=tail
           p.write_text(s,encoding='utf-8')
 
+          # Keep the mocked server identity aligned with each role being verified.
+          # The old QA always returned manager credentials from background profile/state
+          # calls, which downgraded the synthetic developer before its assertion.
           q=Path('scripts/qa-v681-settings.mjs')
           qs=q.read_text(encoding='utf-8')
-          needle="assert.equal(await page.locator('#roleFrameSetting681').count(),1,identity.displayName+' setting missing')"
-          diag=("console.log('role-debug',identity.displayName,JSON.stringify(await page.evaluate(()=>({me:{memberId:me?.memberId,role:me?.role,globalAdmin:me?.globalAdmin},currentView,active:document.activeElement?.id||'',settings:!!document.getElementById('settings'),card:document.querySelectorAll('#roleFrameSetting681').length,sync:typeof window.__kokmatchSyncRoleCard681,settingsText:(document.getElementById('settings')?.textContent||'').slice(0,260)}))));"
-                "if(identity.globalAdmin){await page.evaluate(()=>window.__kokmatchSyncRoleCard681?.());await page.waitForTimeout(5);console.log('role-debug-explicit',identity.displayName,JSON.stringify(await page.evaluate(()=>({me:{memberId:me?.memberId,role:me?.role,globalAdmin:me?.globalAdmin},card:document.querySelectorAll('#roleFrameSetting681').length,settings:!!document.getElementById('settings')}))))};"
-                +needle)
-          if qs.count(needle)!=1:
-              raise SystemExit(f'role diagnostic target count={qs.count(needle)}')
-          q.write_text(qs.replace(needle,diag,1),encoding='utf-8')
+          qs=replace_one(qs,"const settingsCalls=[];","const settingsCalls=[];\nlet qaIdentity681={memberId:'mgr',displayName:'모임장',role:'manager',globalAdmin:false,tempOrganizer:false,groupId:'qa'};",'QA identity state')
+          qs=replace_one(qs,"user:{memberId:'mgr',displayName:'모임장',role:'manager',globalAdmin:false,tempOrganizer:false,groupId:'qa'}","user:{...qaIdentity681,groupId:'qa'}",'QA state identity')
+          qs=replace_one(qs,"user:{memberId:'mgr',displayName:'모임장',role:'manager',globalAdmin:false},groups:[]","user:{...qaIdentity681,groupId:'qa'},groups:[]",'QA fallback identity')
+          qs=replace_one(qs,"]){await page.evaluate(identity=>{me=identity;renderSettings()},identity);","]){qaIdentity681={...identity,tempOrganizer:false,groupId:'qa'};await page.evaluate(identity=>{me=identity;renderSettings()},identity);",'QA role identity switch')
+          qs=replace_one(qs,"await page.evaluate(()=>{me={memberId:'m0',displayName:'회원01',role:'member',globalAdmin:false};renderSettings()});","qaIdentity681={memberId:'m0',displayName:'회원01',role:'member',globalAdmin:false,tempOrganizer:false,groupId:'qa'};await page.evaluate(()=>{me={memberId:'m0',displayName:'회원01',role:'member',globalAdmin:false};renderSettings()});",'QA general identity switch')
+          q.write_text(qs,encoding='utf-8')
           PY
           git checkout -- .github/workflows/qa-current-runtime.yml
       - name: JavaScript syntax check
@@ -84,10 +83,9 @@ jobs:
           grep -F "if(!force&&has&&memberIsMoving46())" app-v6.81.js
           grep -F "document.activeElement?.id!=='courtCountInput'" app-v6.81.js
           grep -F "__kokmatchCourtInputGuard681" app-v6.81.js
-          grep -F "__kokmatchSyncRoleCard681" app-v6.81.js
-          grep -F "__kokmatchRoleObserver681" app-v6.81.js
           grep -F "roleFrameSetting681" app-v6.81.js
           grep -F "kokmatchRoleFramesHidden681" app-v6.81.css
+          grep -F "qaIdentity681" scripts/qa-v681-settings.mjs
           test -f versions/v6.80/app-v6.80.js
           test -f versions/v6.80/app-v6.80.css
       - name: Install Chromium for v6.81 UI QA
