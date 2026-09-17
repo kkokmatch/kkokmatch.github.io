@@ -21,22 +21,25 @@ jobs:
         with:
           node-version: 22
       - name: Generate v6.81 standalone runtime
-        run: node scripts/release-v681.mjs
-      - name: JavaScript syntax check
         run: |
-          set -o pipefail
-          node --check app-v6.81.js 2>&1 | tee syntax-check.txt
-      - name: Upload syntax diagnostics
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: v681-syntax-diagnostics
-          path: syntax-check.txt
+          node scripts/release-v681.mjs
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('app-v6.81.js')
+          s=p.read_text(encoding='utf-8')
+          bad="if(pager)return falseif(btn.closest?.('#members .title')"
+          good="if(pager)return false;if(btn.closest?.('#members .title')"
+          if bad not in s:
+              raise SystemExit('pager router syntax target missing')
+          p.write_text(s.replace(bad,good,1),encoding='utf-8')
+          PY
+      - name: JavaScript syntax check
+        run: node --check app-v6.81.js
       - name: Validate standalone runtime
         run: node scripts/validate-standalone-runtime.mjs
       - name: Validate requested fixes are present
         run: |
-          grep -F "if(pager)return false" app-v6.81.js
+          grep -F "if(pager)return false;" app-v6.81.js
           grep -F "document.activeElement?.id!=='courtCountInput'" app-v6.81.js
           grep -F "roleFrameSetting681" app-v6.81.js
           grep -F "kokmatchRoleFramesHidden681" app-v6.81.css
