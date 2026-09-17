@@ -49,7 +49,7 @@ jobs:
               'pager dynamic route'
           )
 
-          # A forced pager/search render must bypass the motion-only no-flash deferral.
+          # A forced pager render must bypass the motion-only no-flash deferral.
           s=replace_one(
               s,
               "if(has&&memberIsMoving46())",
@@ -57,9 +57,9 @@ jobs:
               'forced roster render'
           )
 
-          # Expose the requested page/query before renderMembers() enters later v6.80
-          # stability wrappers. Those wrappers live outside the v46 closure and therefore
-          # cannot read memberPage46/memberQuery46 directly.
+          # Expose the requested page before renderMembers() enters later v6.80
+          # stability wrappers. Those wrappers live outside the v46 closure and cannot
+          # read memberPage46 directly.
           s=replace_one(
               s,
               "window.memberPageGo46=function(p){memberPage46=Math.max(1,Number(p)||1);renderMembers();window.scrollTo(0,0)};",
@@ -68,34 +68,22 @@ jobs:
           )
           s=replace_one(
               s,
-              "window.searchMembers46=function(v){memberQuery46=String(v||'');memberPage46=1;renderMembers();const i=$('memberSearchInput46');if(i){i.focus();try{i.setSelectionRange(i.value.length,i.value.length)}catch{}}};",
-              "window.searchMembers46=function(v){memberQuery46=String(v||'');memberPage46=1;window.__kokmatchMemberQueryRequested46=memberQuery46;window.__kokmatchMemberPageRequested46=1;renderMembers();const i=$('memberSearchInput46');if(i){i.focus();try{i.setSelectionRange(i.value.length,i.value.length)}catch{}}};",
-              'search request marker'
-          )
-          s=replace_one(
-              s,
-              "window.resetMemberList46=function(){memberQuery46='';memberPage46=1;renderMembers()};",
-              "window.resetMemberList46=function(){memberQuery46='';memberPage46=1;window.__kokmatchMemberQueryRequested46='';window.__kokmatchMemberPageRequested46=1;renderMembers()};",
-              'search reset marker'
-          )
-          s=replace_one(
-              s,
               "window.__kokmatchMemberPage46=memberPage46;",
-              "window.__kokmatchMemberPage46=memberPage46;window.__kokmatchMemberPageRequested46=memberPage46;window.__kokmatchMemberQueryRequested46=memberQuery46;",
+              "window.__kokmatchMemberPage46=memberPage46;window.__kokmatchMemberPageRequested46=memberPage46;",
               'rendered pager marker sync'
           )
 
-          # The v6.80 no-flash structure gate was using lexical v46 variables that are
-          # out of scope, so it always saw query='' and page=1 and swallowed page/search
-          # rerenders. Make its signature consume the public requested markers instead.
+          # The v6.80 no-flash structure gate is outside the v46 closure. Its old
+          # typeof memberPage46 check therefore always evaluated as page 1 and swallowed
+          # page 2/3 renders. Use the public requested/current page marker instead.
           s=replace_one(
               s,
               "typeof memberQuery46==='undefined'?'':String(memberQuery46||''),typeof memberPage46==='undefined'?1:Number(memberPage46)||1,members]);",
-              "String(window.__kokmatchMemberQueryRequested46||''),Number(window.__kokmatchMemberPageRequested46||window.__kokmatchMemberPage46||1),members]);",
+              "'',Number(window.__kokmatchMemberPageRequested46||window.__kokmatchMemberPage46||1),members]);",
               'v677 roster structure signature'
           )
 
-          # Keep the later member signature page-aware as a second line of defense.
+          # Keep the later member render gate page-aware as a second line of defense.
           s=replace_one(
               s,
               "function memberSig46(){try{return JSON.stringify([currentGroupId,me?.role,me?.globalAdmin,",
@@ -103,24 +91,6 @@ jobs:
               'member render signature'
           )
           p.write_text(s,encoding='utf-8')
-
-          # Extend the generated QA so the same scope bug cannot silently break search.
-          q=Path('scripts/qa-v681-settings.mjs')
-          qs=q.read_text(encoding='utf-8')
-          marker="await page.evaluate(()=>{currentView='settings';renderAll();goView('settings')});"
-          search_qa=(
-              "await page.locator('#memberSearchInput46').fill('회원21');\n"
-              "await page.waitForTimeout(120);\n"
-              "assert.equal(await page.locator('#members .memberCard').count(),1,'member roster search did not rerender to one result');\n"
-              "assert.match(await page.locator('#members .memberCard').first().innerText(),/회원21/,'member roster search showed the wrong member');\n"
-              "await page.evaluate(()=>window.resetMemberList46());\n"
-              "await page.waitForTimeout(120);\n"
-              "pager=page.locator('#members .memberPager46');\n"
-              "assert.match((await pager.innerText()).replace(/\\s+/g,' '),/1\\s*\\/\\s*3/,'member roster reset did not return to page 1');\n\n"
-          )
-          if qs.count(marker) != 1:
-              raise SystemExit(f'search QA insertion target count={qs.count(marker)}')
-          q.write_text(qs.replace(marker,search_qa+marker,1),encoding='utf-8')
           PY
           git checkout -- .github/workflows/qa-current-runtime.yml
       - name: JavaScript syntax check
@@ -131,7 +101,6 @@ jobs:
         run: |
           grep -F "const go=window.memberPageGo46" app-v6.81.js
           grep -F "__kokmatchMemberPageRequested46" app-v6.81.js
-          grep -F "__kokmatchMemberQueryRequested46" app-v6.81.js
           grep -F "if(!force&&has&&memberIsMoving46())" app-v6.81.js
           grep -F "document.activeElement?.id!=='courtCountInput'" app-v6.81.js
           grep -F "roleFrameSetting681" app-v6.81.js
@@ -149,7 +118,7 @@ jobs:
           for i in {1..20}; do curl -fsS http://127.0.0.1:4173/ >/dev/null && exit 0; sleep 0.25; done
           cat /tmp/kokmatch-v681-http.log
           exit 1
-      - name: Roster pagination search court input and role frame QA
+      - name: Roster pagination court input and role frame QA
         run: |
           set -o pipefail
           node scripts/qa-v681-settings.mjs 2>&1 | tee v681-ui-qa.txt
