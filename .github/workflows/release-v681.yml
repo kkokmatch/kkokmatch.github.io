@@ -25,47 +25,102 @@ jobs:
           node scripts/release-v681.mjs
           python3 - <<'PY'
           from pathlib import Path
+
           p=Path('app-v6.81.js')
           s=p.read_text(encoding='utf-8')
-          bad="if(pager)return falseif(btn.closest?.('#members .title')"
-          good="if(pager)return false;if(btn.closest?.('#members .title')"
-          if bad not in s:
-              raise SystemExit('pager router syntax target missing')
-          s=s.replace(bad,good,1)
-          stale="if(pager)return false;"
-          current="if(pager){const t=String(btn.textContent||'');const cur=Math.max(1,Number(window.__kokmatchMemberPage46)||1);const go=window.memberPageGo46;if(typeof go!=='function')return false;if(t.includes('다음'))callV6(go,cur+1);else if(t.includes('이전'))callV6(go,Math.max(1,cur-1));else return false;return true}"
-          if s.count(stale)!=1:
-              raise SystemExit(f'pager dynamic-route target count={s.count(stale)}')
-          s=s.replace(stale,current,1)
-          moving="if(has&&memberIsMoving46())"
-          immediate="if(!force&&has&&memberIsMoving46())"
-          if s.count(moving)!=1:
-              raise SystemExit(f'forced roster render target count={s.count(moving)}')
-          s=s.replace(moving,immediate,1)
-          page_fn="window.memberPageGo46=function(p){memberPage46=Math.max(1,Number(p)||1);renderMembers();window.scrollTo(0,0)};"
-          page_fn_new="window.memberPageGo46=function(p){memberPage46=Math.max(1,Number(p)||1);window.__kokmatchMemberPageRequested46=memberPage46;renderMembers();window.scrollTo(0,0)};"
-          if s.count(page_fn)!=1:
-              raise SystemExit(f'page request marker target count={s.count(page_fn)}')
-          s=s.replace(page_fn,page_fn_new,1)
-          sig="function memberSig46(){try{return JSON.stringify([currentGroupId,me?.role,me?.globalAdmin,"
-          sig_new="function memberSig46(){try{return JSON.stringify([currentGroupId,Number(window.__kokmatchMemberPageRequested46||window.__kokmatchMemberPage46||1),me?.role,me?.globalAdmin,"
-          if s.count(sig)!=1:
-              raise SystemExit(f'page signature target count={s.count(sig)}')
-          s=s.replace(sig,sig_new,1)
+
+          def replace_one(src, old, new, label):
+              count=src.count(old)
+              if count != 1:
+                  raise SystemExit(f'{label} target count={count}')
+              return src.replace(old,new,1)
+
+          # Repair the pager capture router produced by the v6.81 generator.
+          s=replace_one(
+              s,
+              "if(pager)return falseif(btn.closest?.('#members .title')",
+              "if(pager)return false;if(btn.closest?.('#members .title')",
+              'pager router syntax'
+          )
+          s=replace_one(
+              s,
+              "if(pager)return false;",
+              "if(pager){const t=String(btn.textContent||'');const cur=Math.max(1,Number(window.__kokmatchMemberPage46)||1);const go=window.memberPageGo46;if(typeof go!=='function')return false;if(t.includes('다음'))callV6(go,cur+1);else if(t.includes('이전'))callV6(go,Math.max(1,cur-1));else return false;return true}",
+              'pager dynamic route'
+          )
+
+          # A forced pager/search render must bypass the motion-only no-flash deferral.
+          s=replace_one(
+              s,
+              "if(has&&memberIsMoving46())",
+              "if(!force&&has&&memberIsMoving46())",
+              'forced roster render'
+          )
+
+          # Expose the requested page/query before renderMembers() enters later v6.80
+          # stability wrappers. Those wrappers live outside the v46 closure and therefore
+          # cannot read memberPage46/memberQuery46 directly.
+          s=replace_one(
+              s,
+              "window.memberPageGo46=function(p){memberPage46=Math.max(1,Number(p)||1);renderMembers();window.scrollTo(0,0)};",
+              "window.memberPageGo46=function(p){memberPage46=Math.max(1,Number(p)||1);window.__kokmatchMemberPageRequested46=memberPage46;renderMembers();window.scrollTo(0,0)};",
+              'pager request marker'
+          )
+          s=replace_one(
+              s,
+              "window.searchMembers46=function(v){memberQuery46=String(v||'');memberPage46=1;renderMembers();const i=$('memberSearchInput46');if(i){i.focus();try{i.setSelectionRange(i.value.length,i.value.length)}catch{}}};",
+              "window.searchMembers46=function(v){memberQuery46=String(v||'');memberPage46=1;window.__kokmatchMemberQueryRequested46=memberQuery46;window.__kokmatchMemberPageRequested46=1;renderMembers();const i=$('memberSearchInput46');if(i){i.focus();try{i.setSelectionRange(i.value.length,i.value.length)}catch{}}};",
+              'search request marker'
+          )
+          s=replace_one(
+              s,
+              "window.resetMemberList46=function(){memberQuery46='';memberPage46=1;renderMembers()};",
+              "window.resetMemberList46=function(){memberQuery46='';memberPage46=1;window.__kokmatchMemberQueryRequested46='';window.__kokmatchMemberPageRequested46=1;renderMembers()};",
+              'search reset marker'
+          )
+          s=replace_one(
+              s,
+              "window.__kokmatchMemberPage46=memberPage46;",
+              "window.__kokmatchMemberPage46=memberPage46;window.__kokmatchMemberPageRequested46=memberPage46;window.__kokmatchMemberQueryRequested46=memberQuery46;",
+              'rendered pager marker sync'
+          )
+
+          # The v6.80 no-flash structure gate was using lexical v46 variables that are
+          # out of scope, so it always saw query='' and page=1 and swallowed page/search
+          # rerenders. Make its signature consume the public requested markers instead.
+          s=replace_one(
+              s,
+              "typeof memberQuery46==='undefined'?'':String(memberQuery46||''),typeof memberPage46==='undefined'?1:Number(memberPage46)||1,members]);",
+              "String(window.__kokmatchMemberQueryRequested46||''),Number(window.__kokmatchMemberPageRequested46||window.__kokmatchMemberPage46||1),members]);",
+              'v677 roster structure signature'
+          )
+
+          # Keep the later member signature page-aware as a second line of defense.
+          s=replace_one(
+              s,
+              "function memberSig46(){try{return JSON.stringify([currentGroupId,me?.role,me?.globalAdmin,",
+              "function memberSig46(){try{return JSON.stringify([currentGroupId,Number(window.__kokmatchMemberPageRequested46||window.__kokmatchMemberPage46||1),me?.role,me?.globalAdmin,",
+              'member render signature'
+          )
           p.write_text(s,encoding='utf-8')
+
+          # Extend the generated QA so the same scope bug cannot silently break search.
           q=Path('scripts/qa-v681-settings.mjs')
           qs=q.read_text(encoding='utf-8')
-          marker="await pager.getByRole('button',{name:'다음'}).click();"
-          diag=("console.log('pager-before',JSON.stringify(await page.evaluate(()=>({page:window.__kokmatchMemberPage46,requested:window.__kokmatchMemberPageRequested46,fn:typeof window.memberPageGo46}))));\n"
-                "await page.evaluate(()=>window.memberPageGo46(2));\n"
-                "await page.waitForTimeout(80);\n"
-                "console.log('pager-direct-2',JSON.stringify({text:(await page.locator('#members .memberPager46').innerText()).replace(/\\s+/g,' '),page:await page.evaluate(()=>window.__kokmatchMemberPage46),requested:await page.evaluate(()=>window.__kokmatchMemberPageRequested46)}));\n"
-                "await page.evaluate(()=>window.memberPageGo46(1));\n"
-                "await page.waitForTimeout(80);\n"
-                "console.log('pager-direct-1',JSON.stringify({text:(await page.locator('#members .memberPager46').innerText()).replace(/\\s+/g,' '),page:await page.evaluate(()=>window.__kokmatchMemberPage46),requested:await page.evaluate(()=>window.__kokmatchMemberPageRequested46)}));\n")
-          if qs.count(marker)!=1:
-              raise SystemExit(f'pager QA marker count={qs.count(marker)}')
-          q.write_text(qs.replace(marker,diag+marker,1),encoding='utf-8')
+          marker="await page.evaluate(()=>{currentView='settings';renderAll();goView('settings')});"
+          search_qa=(
+              "await page.locator('#memberSearchInput46').fill('회원21');\n"
+              "await page.waitForTimeout(120);\n"
+              "assert.equal(await page.locator('#members .memberCard').count(),1,'member roster search did not rerender to one result');\n"
+              "assert.match(await page.locator('#members .memberCard').first().innerText(),/회원21/,'member roster search showed the wrong member');\n"
+              "await page.evaluate(()=>window.resetMemberList46());\n"
+              "await page.waitForTimeout(120);\n"
+              "pager=page.locator('#members .memberPager46');\n"
+              "assert.match((await pager.innerText()).replace(/\\s+/g,' '),/1\\s*\\/\\s*3/,'member roster reset did not return to page 1');\n\n"
+          )
+          if qs.count(marker) != 1:
+              raise SystemExit(f'search QA insertion target count={qs.count(marker)}')
+          q.write_text(qs.replace(marker,search_qa+marker,1),encoding='utf-8')
           PY
           git checkout -- .github/workflows/qa-current-runtime.yml
       - name: JavaScript syntax check
@@ -76,6 +131,7 @@ jobs:
         run: |
           grep -F "const go=window.memberPageGo46" app-v6.81.js
           grep -F "__kokmatchMemberPageRequested46" app-v6.81.js
+          grep -F "__kokmatchMemberQueryRequested46" app-v6.81.js
           grep -F "if(!force&&has&&memberIsMoving46())" app-v6.81.js
           grep -F "document.activeElement?.id!=='courtCountInput'" app-v6.81.js
           grep -F "roleFrameSetting681" app-v6.81.js
@@ -93,7 +149,7 @@ jobs:
           for i in {1..20}; do curl -fsS http://127.0.0.1:4173/ >/dev/null && exit 0; sleep 0.25; done
           cat /tmp/kokmatch-v681-http.log
           exit 1
-      - name: Roster pagination, court input focus and role frame QA
+      - name: Roster pagination search court input and role frame QA
         run: |
           set -o pipefail
           node scripts/qa-v681-settings.mjs 2>&1 | tee v681-ui-qa.txt
