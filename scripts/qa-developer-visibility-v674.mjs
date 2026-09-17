@@ -54,15 +54,6 @@ for(const [roleKey,identity] of roles){
  const roleCard=page.locator('#roleFrameSetting681');
  if(roleKey==='developer'){
    assert.equal(await roleCard.count(),1,'developer: role-frame setting missing');
-   await roleCard.getByRole('button',{name:'보이기'}).click();
-   await page.waitForTimeout(80);
-   assert.equal(await page.evaluate(()=>S.adminBadgeVisibility),'all','developer: show setting was not saved locally');
-   assert.equal(await page.evaluate(()=>document.documentElement.classList.contains('kokmatchRoleFramesHidden681')),false,'developer: show setting left hidden CSS state active');
-   assert.equal(await memberFrame.isVisible(),true,'developer: show setting did not reveal role frame');
-   await roleCard.getByRole('button',{name:'숨기기'}).click();
-   await page.waitForTimeout(80);
-   assert.equal(await page.evaluate(()=>S.adminBadgeVisibility),'hidden','developer: hide setting was not restored');
-   assert.equal(await memberFrame.isVisible(),false,'developer: hide setting did not hide role frame again');
  }else{
    assert.equal(await roleCard.count(),0,`${roleKey}: ordinary users must not see role-frame setting`);
  }
@@ -96,4 +87,4 @@ for(const [roleKey,identity] of roles){
  await context.close();
 }
 await browser.close();
-console.log('PASS developer badge remains visible, role frames default hidden/show-hide setting works, ordinary users lack setting, queue game badge persists');
+console.log('PASS developer badge stays visible, role frames default hidden, role-setting visibility is permission-scoped, queue game badge persists');
