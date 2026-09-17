@@ -41,17 +41,28 @@ jobs:
           immediate="if(!force&&has&&memberIsMoving46())"
           if s.count(moving)!=1:
               raise SystemExit(f'forced roster render target count={s.count(moving)}')
-          p.write_text(s.replace(moving,immediate,1),encoding='utf-8')
+          s=s.replace(moving,immediate,1)
+          page_fn="window.memberPageGo46=function(p){memberPage46=Math.max(1,Number(p)||1);renderMembers();window.scrollTo(0,0)};"
+          page_fn_new="window.memberPageGo46=function(p){memberPage46=Math.max(1,Number(p)||1);window.__kokmatchMemberPageRequested46=memberPage46;renderMembers();window.scrollTo(0,0)};"
+          if s.count(page_fn)!=1:
+              raise SystemExit(f'page request marker target count={s.count(page_fn)}')
+          s=s.replace(page_fn,page_fn_new,1)
+          sig="function memberSig46(){try{return JSON.stringify([currentGroupId,me?.role,me?.globalAdmin,"
+          sig_new="function memberSig46(){try{return JSON.stringify([currentGroupId,Number(window.__kokmatchMemberPageRequested46||window.__kokmatchMemberPage46||1),me?.role,me?.globalAdmin,"
+          if s.count(sig)!=1:
+              raise SystemExit(f'page signature target count={s.count(sig)}')
+          s=s.replace(sig,sig_new,1)
+          p.write_text(s,encoding='utf-8')
           q=Path('scripts/qa-v681-settings.mjs')
           qs=q.read_text(encoding='utf-8')
           marker="await pager.getByRole('button',{name:'다음'}).click();"
-          diag=("console.log('pager-before',JSON.stringify(await page.evaluate(()=>({page:window.__kokmatchMemberPage46,fn:typeof window.memberPageGo46}))));\n"
+          diag=("console.log('pager-before',JSON.stringify(await page.evaluate(()=>({page:window.__kokmatchMemberPage46,requested:window.__kokmatchMemberPageRequested46,fn:typeof window.memberPageGo46}))));\n"
                 "await page.evaluate(()=>window.memberPageGo46(2));\n"
                 "await page.waitForTimeout(80);\n"
-                "console.log('pager-direct-2',JSON.stringify({text:(await page.locator('#members .memberPager46').innerText()).replace(/\\s+/g,' '),page:await page.evaluate(()=>window.__kokmatchMemberPage46)}));\n"
+                "console.log('pager-direct-2',JSON.stringify({text:(await page.locator('#members .memberPager46').innerText()).replace(/\\s+/g,' '),page:await page.evaluate(()=>window.__kokmatchMemberPage46),requested:await page.evaluate(()=>window.__kokmatchMemberPageRequested46)}));\n"
                 "await page.evaluate(()=>window.memberPageGo46(1));\n"
                 "await page.waitForTimeout(80);\n"
-                "console.log('pager-direct-1',JSON.stringify({text:(await page.locator('#members .memberPager46').innerText()).replace(/\\s+/g,' '),page:await page.evaluate(()=>window.__kokmatchMemberPage46)}));\n")
+                "console.log('pager-direct-1',JSON.stringify({text:(await page.locator('#members .memberPager46').innerText()).replace(/\\s+/g,' '),page:await page.evaluate(()=>window.__kokmatchMemberPage46),requested:await page.evaluate(()=>window.__kokmatchMemberPageRequested46)}));\n")
           if qs.count(marker)!=1:
               raise SystemExit(f'pager QA marker count={qs.count(marker)}')
           q.write_text(qs.replace(marker,diag+marker,1),encoding='utf-8')
@@ -64,6 +75,7 @@ jobs:
       - name: Validate requested fixes are present
         run: |
           grep -F "const go=window.memberPageGo46" app-v6.81.js
+          grep -F "__kokmatchMemberPageRequested46" app-v6.81.js
           grep -F "if(!force&&has&&memberIsMoving46())" app-v6.81.js
           grep -F "document.activeElement?.id!=='courtCountInput'" app-v6.81.js
           grep -F "roleFrameSetting681" app-v6.81.js
