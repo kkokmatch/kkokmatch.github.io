@@ -61,6 +61,16 @@ jobs:
           )
           s+=tail
           p.write_text(s,encoding='utf-8')
+
+          q=Path('scripts/qa-v681-settings.mjs')
+          qs=q.read_text(encoding='utf-8')
+          needle="assert.equal(await page.locator('#roleFrameSetting681').count(),1,identity.displayName+' setting missing')"
+          diag=("console.log('role-debug',identity.displayName,JSON.stringify(await page.evaluate(()=>({me:{memberId:me?.memberId,role:me?.role,globalAdmin:me?.globalAdmin},currentView,active:document.activeElement?.id||'',settings:!!document.getElementById('settings'),card:document.querySelectorAll('#roleFrameSetting681').length,sync:typeof window.__kokmatchSyncRoleCard681,settingsText:(document.getElementById('settings')?.textContent||'').slice(0,260)}))));"
+                "if(identity.globalAdmin){await page.evaluate(()=>window.__kokmatchSyncRoleCard681?.());await page.waitForTimeout(5);console.log('role-debug-explicit',identity.displayName,JSON.stringify(await page.evaluate(()=>({me:{memberId:me?.memberId,role:me?.role,globalAdmin:me?.globalAdmin},card:document.querySelectorAll('#roleFrameSetting681').length,settings:!!document.getElementById('settings')}))))};"
+                +needle)
+          if qs.count(needle)!=1:
+              raise SystemExit(f'role diagnostic target count={qs.count(needle)}')
+          q.write_text(qs.replace(needle,diag,1),encoding='utf-8')
           PY
           git checkout -- .github/workflows/qa-current-runtime.yml
       - name: JavaScript syntax check
