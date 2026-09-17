@@ -42,18 +42,16 @@ jobs:
           if s.count(moving)!=1:
               raise SystemExit(f'forced roster render target count={s.count(moving)}')
           p.write_text(s.replace(moving,immediate,1),encoding='utf-8')
-
           q=Path('scripts/qa-v681-settings.mjs')
           qs=q.read_text(encoding='utf-8')
           marker="await pager.getByRole('button',{name:'다음'}).click();"
-          diag="""console.log('pager-before',JSON.stringify(await page.evaluate(()=>({page:window.__kokmatchMemberPage46,fn:typeof window.memberPageGo46}))));
-await page.evaluate(()=>window.memberPageGo46(2));
-await page.waitForTimeout(80);
-console.log('pager-direct-2',JSON.stringify({text:(await page.locator('#members .memberPager46').innerText()).replace(/\\s+/g,' '),page:await page.evaluate(()=>window.__kokmatchMemberPage46)}));
-await page.evaluate(()=>window.memberPageGo46(1));
-await page.waitForTimeout(80);
-console.log('pager-direct-1',JSON.stringify({text:(await page.locator('#members .memberPager46').innerText()).replace(/\\s+/g,' '),page:await page.evaluate(()=>window.__kokmatchMemberPage46)}));
-"""
+          diag=("console.log('pager-before',JSON.stringify(await page.evaluate(()=>({page:window.__kokmatchMemberPage46,fn:typeof window.memberPageGo46}))));\n"
+                "await page.evaluate(()=>window.memberPageGo46(2));\n"
+                "await page.waitForTimeout(80);\n"
+                "console.log('pager-direct-2',JSON.stringify({text:(await page.locator('#members .memberPager46').innerText()).replace(/\\s+/g,' '),page:await page.evaluate(()=>window.__kokmatchMemberPage46)}));\n"
+                "await page.evaluate(()=>window.memberPageGo46(1));\n"
+                "await page.waitForTimeout(80);\n"
+                "console.log('pager-direct-1',JSON.stringify({text:(await page.locator('#members .memberPager46').innerText()).replace(/\\s+/g,' '),page:await page.evaluate(()=>window.__kokmatchMemberPage46)}));\n")
           if qs.count(marker)!=1:
               raise SystemExit(f'pager QA marker count={qs.count(marker)}')
           q.write_text(qs.replace(marker,diag+marker,1),encoding='utf-8')
