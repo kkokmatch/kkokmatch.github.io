@@ -90,6 +90,45 @@ jobs:
               "function memberSig46(){try{return JSON.stringify([currentGroupId,Number(window.__kokmatchMemberPageRequested46||window.__kokmatchMemberPage46||1),me?.role,me?.globalAdmin,",
               'member render signature'
           )
+
+          # Final input guard: the runtime has many historical render wrappers, some of
+          # which retain older renderSettings references. Protect the focused court-count
+          # draft at the tail so polling/renderAll can never replace it mid-edit.
+          s += r'''
+
+/* v6.81 final court-count input focus/draft guard. */
+(()=>{
+'use strict';
+if(window.__kokmatchCourtInputGuard681)return;
+window.__kokmatchCourtInputGuard681='6.81';
+function protect681(){return currentView==='settings'&&document.activeElement?.id==='courtCountInput'}
+function restore681(value,start,end,y){
+ const next=document.getElementById('courtCountInput');if(!next)return;
+ if(String(next.value)!==String(value))next.value=String(value);
+ try{next.focus({preventScroll:true})}catch{try{next.focus()}catch{}}
+ try{if(start!==null&&start!==undefined)next.setSelectionRange(start,end??start)}catch{}
+ try{window.scrollTo(0,Math.max(0,Number(y)||0))}catch{}
+}
+try{
+ const baseSettings681=renderSettings;
+ renderSettings=function(...args){if(protect681())return;return baseSettings681.apply(this,args)};
+ window.renderSettings=renderSettings;
+}catch(e){console.warn('v6.81 court settings guard',e)}
+try{
+ const baseAll681=renderAll;
+ renderAll=function(...args){
+  const active=document.activeElement,keep=currentView==='settings'&&active?.id==='courtCountInput';
+  if(!keep)return baseAll681.apply(this,args);
+  const value=active.value,start=active.selectionStart,end=active.selectionEnd,y=window.scrollY;
+  const r=baseAll681.apply(this,args);
+  restore681(value,start,end,y);
+  queueMicrotask(()=>{if(document.activeElement?.id!=='courtCountInput')restore681(value,start,end,y)});
+  return r;
+ };
+ window.renderAll=renderAll;
+}catch(e){console.warn('v6.81 court renderAll guard',e)}
+})();
+'''
           p.write_text(s,encoding='utf-8')
           PY
           git checkout -- .github/workflows/qa-current-runtime.yml
@@ -103,6 +142,7 @@ jobs:
           grep -F "__kokmatchMemberPageRequested46" app-v6.81.js
           grep -F "if(!force&&has&&memberIsMoving46())" app-v6.81.js
           grep -F "document.activeElement?.id!=='courtCountInput'" app-v6.81.js
+          grep -F "__kokmatchCourtInputGuard681" app-v6.81.js
           grep -F "roleFrameSetting681" app-v6.81.js
           grep -F "kokmatchRoleFramesHidden681" app-v6.81.css
           test -f versions/v6.80/app-v6.80.js
