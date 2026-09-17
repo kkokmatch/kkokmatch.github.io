@@ -59,16 +59,20 @@ jobs:
           s+=tail
           p.write_text(s,encoding='utf-8')
 
-          # Keep the mocked server identity aligned with each role being verified.
-          # The old QA always returned manager credentials from background profile/state
-          # calls, which downgraded the synthetic developer before its assertion.
+          # Keep mocked server identity aligned with the role being verified. Drain any
+          # request started by the previous identity, then assert the role UI synchronously
+          # so an old queued mock response cannot invalidate the authorization test.
           q=Path('scripts/qa-v681-settings.mjs')
           qs=q.read_text(encoding='utf-8')
           qs=replace_one(qs,"const settingsCalls=[];","const settingsCalls=[];\nlet qaIdentity681={memberId:'mgr',displayName:'모임장',role:'manager',globalAdmin:false,tempOrganizer:false,groupId:'qa'};",'QA identity state')
           qs=replace_one(qs,"user:{memberId:'mgr',displayName:'모임장',role:'manager',globalAdmin:false,tempOrganizer:false,groupId:'qa'}","user:{...qaIdentity681,groupId:'qa'}",'QA state identity')
           qs=replace_one(qs,"user:{memberId:'mgr',displayName:'모임장',role:'manager',globalAdmin:false},groups:[]","user:{...qaIdentity681,groupId:'qa'},groups:[]",'QA fallback identity')
-          qs=replace_one(qs,"]){await page.evaluate(identity=>{me=identity;renderSettings()},identity);","]){qaIdentity681={...identity,tempOrganizer:false,groupId:'qa'};await page.evaluate(identity=>{me=identity;renderSettings()},identity);",'QA role identity switch')
-          qs=replace_one(qs,"await page.evaluate(()=>{me={memberId:'m0',displayName:'회원01',role:'member',globalAdmin:false};renderSettings()});","qaIdentity681={memberId:'m0',displayName:'회원01',role:'member',globalAdmin:false,tempOrganizer:false,groupId:'qa'};await page.evaluate(()=>{me={memberId:'m0',displayName:'회원01',role:'member',globalAdmin:false};renderSettings()});",'QA general identity switch')
+          old_loop="]){await page.evaluate(identity=>{me=identity;renderSettings()},identity);await page.waitForTimeout(30);assert.equal(await page.locator('#roleFrameSetting681').count(),1,identity.displayName+' setting missing')}"
+          new_loop="]){qaIdentity681={...identity,tempOrganizer:false,groupId:'qa'};await page.waitForTimeout(80);const roleCheck=await page.evaluate(identity=>{me=identity;renderSettings();return{count:document.querySelectorAll('#roleFrameSetting681').length,role:String(me?.role||''),globalAdmin:!!me?.globalAdmin}},identity);assert.equal(roleCheck.count,1,identity.displayName+' setting missing')}"
+          qs=replace_one(qs,old_loop,new_loop,'QA role identity switch')
+          old_general="await page.evaluate(()=>{me={memberId:'m0',displayName:'회원01',role:'member',globalAdmin:false};renderSettings()});await page.waitForTimeout(30);\nassert.equal(await page.locator('#roleFrameSetting681').count(),0,'general member must not see role-frame setting');"
+          new_general="qaIdentity681={memberId:'m0',displayName:'회원01',role:'member',globalAdmin:false,tempOrganizer:false,groupId:'qa'};await page.waitForTimeout(80);const generalRoleCheck=await page.evaluate(()=>{me={memberId:'m0',displayName:'회원01',role:'member',globalAdmin:false};renderSettings();return document.querySelectorAll('#roleFrameSetting681').length});\nassert.equal(generalRoleCheck,0,'general member must not see role-frame setting');"
+          qs=replace_one(qs,old_general,new_general,'QA general identity switch')
           q.write_text(qs,encoding='utf-8')
           PY
           git checkout -- .github/workflows/qa-current-runtime.yml
