@@ -42,6 +42,7 @@ jobs:
           s=replace_one(s,"window.__kokmatchMemberPage46=memberPage46;","window.__kokmatchMemberPage46=memberPage46;window.__kokmatchMemberPageRequested46=memberPage46;",'rendered pager marker sync')
           s=replace_one(s,"typeof memberQuery46==='undefined'?'':String(memberQuery46||''),typeof memberPage46==='undefined'?1:Number(memberPage46)||1,members]);","'',Number(window.__kokmatchMemberPageRequested46||window.__kokmatchMemberPage46||1),members]);",'v677 roster structure signature')
           s=replace_one(s,"function memberSig46(){try{return JSON.stringify([currentGroupId,me?.role,me?.globalAdmin,","function memberSig46(){try{return JSON.stringify([currentGroupId,Number(window.__kokmatchMemberPageRequested46||window.__kokmatchMemberPage46||1),me?.role,me?.globalAdmin,",'member render signature')
+          s=replace_one(s,"function canRoleFrameSetting681(){try{return !!me&&(!!me.globalAdmin||me.role==='manager'||me.role==='organizer')}catch{return false}}","function canRoleFrameSetting681(){try{if(!me)return false;const direct=String(me.role||'');const id=String(me.memberId||me.id||'');const linked=Array.isArray(S?.members)?S.members.find(m=>String(m?.id||'')===id):null;const linkedRole=String(linked?.role||'');return !!me.globalAdmin||['admin','manager','organizer'].includes(direct)||['admin','manager','organizer'].includes(linkedRole)}catch{return false}}",'role frame permission source')
 
           # The app has many historical settings/renderAll wrappers. Add one final guard
           # so a focused court-count draft is never replaced by a background rerender.
@@ -60,8 +61,7 @@ jobs:
           p.write_text(s,encoding='utf-8')
 
           # Keep mocked server identity aligned with the role being verified. Drain any
-          # request started by the previous identity, then assert the role UI synchronously
-          # so an old queued mock response cannot invalidate the authorization test.
+          # request started by the previous identity, then assert the role UI synchronously.
           q=Path('scripts/qa-v681-settings.mjs')
           qs=q.read_text(encoding='utf-8')
           qs=replace_one(qs,"const settingsCalls=[];","const settingsCalls=[];\nlet qaIdentity681={memberId:'mgr',displayName:'모임장',role:'manager',globalAdmin:false,tempOrganizer:false,groupId:'qa'};",'QA identity state')
@@ -87,6 +87,7 @@ jobs:
           grep -F "if(!force&&has&&memberIsMoving46())" app-v6.81.js
           grep -F "document.activeElement?.id!=='courtCountInput'" app-v6.81.js
           grep -F "__kokmatchCourtInputGuard681" app-v6.81.js
+          grep -F "linkedRole" app-v6.81.js
           grep -F "roleFrameSetting681" app-v6.81.js
           grep -F "kokmatchRoleFramesHidden681" app-v6.81.css
           grep -F "qaIdentity681" scripts/qa-v681-settings.mjs
