@@ -25,28 +25,56 @@ for(const [roleKey,identity] of roles){
  await page.route('https://wjelumpbjklfrdjxbesj.supabase.co/functions/v1/**',async route=>{
    const url=new URL(route.request().url());
    if(url.pathname.endsWith('/kokmatch-state-v46'))return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({data:clone(state),group:{groupId:'qa',name:'QA'},user:identity,memberCount:state.members.length})});
-   if(url.pathname.endsWith('/kokmatch-roster-v654')||url.pathname.endsWith('/kokmatch-roster-v653'))return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({members:clone(state.members),memberCount:state.members.length,adminBadgeVisibility:'hidden'})});
+   if(url.pathname.endsWith('/kokmatch-roster-v654')||url.pathname.endsWith('/kokmatch-roster-v653'))return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({members:clone(state.members),memberCount:state.members.length,adminBadgeVisibility:state.adminBadgeVisibility})});
+   if(url.pathname.endsWith('/kokmatch-settings-v43')){
+     const body=JSON.parse(route.request().postData()||'{}');
+     state.adminBadgeVisibility=body.mode==='all'?'all':'hidden';
+     return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({success:true,mode:state.adminBadgeVisibility,data:clone(state)})});
+   }
    return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({success:true,data:clone(state),group:{groupId:'qa',name:'QA'},user:identity,groups:[]})});
  });
  await page.goto('http://127.0.0.1:4173/?qa=dev674',{waitUntil:'networkidle'});
  await page.waitForFunction(v=>window.__kokmatchVersionLock===v&&window.__kokmatchDeveloperVisible674===v,VERSION,{timeout:15000});
  await page.evaluate(({state,identity})=>{T='qa-token';localStorage.setItem('kokmatch_token',T);currentGroupId='qa';S=JSON.parse(JSON.stringify(state));window.S=S;me=identity;group={groupId:'qa',name:'QA'};groups=[];normalizeClient();document.getElementById('login')?.classList.add('hide');currentView='members';renderAll();goView('members')},{state:clone(state),identity});
  await page.waitForTimeout(180);
- assert.equal(await page.evaluate(()=>S.adminBadgeVisibility),'all',`${roleKey}: legacy hidden developer visibility survived`);
+ assert.equal(await page.evaluate(()=>S.adminBadgeVisibility),'hidden',`${roleKey}: role-frame visibility did not keep the group default hidden`);
+ assert.equal(await page.evaluate(()=>document.documentElement.classList.contains('kokmatchRoleFramesHidden681')),true,`${roleKey}: hidden role-frame mode CSS state missing`);
+
  const devMember=page.locator('#members .memberCard').filter({hasText:'박태영'}).first();
  await devMember.waitFor({state:'visible'});
  assert.equal(await devMember.locator('.roleBadge.role-global').count(),1,`${roleKey}: developer badge missing in member roster`);
  assert.equal(await devMember.locator('.roleBadge.role-member44').count(),0,`${roleKey}: developer was masked as general member`);
  const memberFrame=devMember.locator('.devChallenger659 > img.devFrame661').first();
- await memberFrame.waitFor({state:'visible'});
+ await memberFrame.waitFor({state:'attached'});
  assert((await memberFrame.getAttribute('src'))?.includes('dev-prism-frame-v662.webp'),`${roleKey}: developer Challenger frame asset missing`);
+ assert.equal(await memberFrame.isVisible(),false,`${roleKey}: developer frame ignored hidden group setting`);
+
+ await page.evaluate(()=>{currentView='settings';renderSettings();goView('settings')});
+ await page.waitForTimeout(80);
+ const roleCard=page.locator('#roleFrameSetting681');
+ if(roleKey==='developer'){
+   assert.equal(await roleCard.count(),1,'developer: role-frame setting missing');
+   await roleCard.getByRole('button',{name:'보이기'}).click();
+   await page.waitForTimeout(80);
+   assert.equal(await page.evaluate(()=>S.adminBadgeVisibility),'all','developer: show setting was not saved locally');
+   assert.equal(await page.evaluate(()=>document.documentElement.classList.contains('kokmatchRoleFramesHidden681')),false,'developer: show setting left hidden CSS state active');
+   assert.equal(await memberFrame.isVisible(),true,'developer: show setting did not reveal role frame');
+   await roleCard.getByRole('button',{name:'숨기기'}).click();
+   await page.waitForTimeout(80);
+   assert.equal(await page.evaluate(()=>S.adminBadgeVisibility),'hidden','developer: hide setting was not restored');
+   assert.equal(await memberFrame.isVisible(),false,'developer: hide setting did not hide role frame again');
+ }else{
+   assert.equal(await roleCard.count(),0,`${roleKey}: ordinary users must not see role-frame setting`);
+ }
 
  await page.evaluate(()=>{currentView='queue';renderQueue();goView('queue')});
  await page.waitForTimeout(220);
  const devQueue=page.locator('#queue .queueCard').filter({hasText:'박태영'}).first();
  await devQueue.waitFor({state:'visible'});
  assert.equal(await devQueue.locator('.roleBadge.role-global').count(),1,`${roleKey}: developer badge missing in queue`);
- await devQueue.locator('.devChallenger659 > img.devFrame661').first().waitFor({state:'visible'});
+ const queueFrame=devQueue.locator('.devChallenger659 > img.devFrame661').first();
+ await queueFrame.waitFor({state:'attached'});
+ assert.equal(await queueFrame.isVisible(),false,`${roleKey}: queue developer frame ignored hidden group setting`);
  const nameGame=await devQueue.locator('.name .gamecnt').count();
  assert.equal(nameGame,0,`${roleKey}: game-count badge still sits on name line`);
  // v6.78 introduced the persistent CSS ::after game-count pill. Detect that feature, not the exact release string, so later versions keep the modern path.
@@ -68,4 +96,4 @@ for(const [roleKey,identity] of roles){
  await context.close();
 }
 await browser.close();
-console.log('PASS developer badge/frame visible for developer, member, guest + current persistent green game count');
+console.log('PASS developer badge remains visible, role frames default hidden/show-hide setting works, ordinary users lack setting, queue game badge persists');
