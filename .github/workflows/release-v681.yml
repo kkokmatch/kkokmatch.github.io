@@ -23,7 +23,15 @@ jobs:
       - name: Generate v6.81 standalone runtime
         run: node scripts/release-v681.mjs
       - name: JavaScript syntax check
-        run: node --check app-v6.81.js
+        run: |
+          set -o pipefail
+          node --check app-v6.81.js 2>&1 | tee syntax-check.txt
+      - name: Upload syntax diagnostics
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: v681-syntax-diagnostics
+          path: syntax-check.txt
       - name: Validate standalone runtime
         run: node scripts/validate-standalone-runtime.mjs
       - name: Validate requested fixes are present
