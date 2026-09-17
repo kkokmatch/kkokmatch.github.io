@@ -35,62 +35,29 @@ jobs:
                   raise SystemExit(f'{label} target count={count}')
               return src.replace(old,new,1)
 
-          s=replace_one(
-              s,
-              "if(pager)return falseif(btn.closest?.('#members .title')",
-              "if(pager)return false;if(btn.closest?.('#members .title')",
-              'pager router syntax'
-          )
-          s=replace_one(
-              s,
-              "if(pager)return false;",
-              "if(pager){const t=String(btn.textContent||'');const cur=Math.max(1,Number(window.__kokmatchMemberPage46)||1);const go=window.memberPageGo46;if(typeof go!=='function')return false;if(t.includes('다음'))callV6(go,cur+1);else if(t.includes('이전'))callV6(go,Math.max(1,cur-1));else return false;return true}",
-              'pager dynamic route'
-          )
-          s=replace_one(
-              s,
-              "if(has&&memberIsMoving46())",
-              "if(!force&&has&&memberIsMoving46())",
-              'forced roster render'
-          )
-          s=replace_one(
-              s,
-              "window.memberPageGo46=function(p){memberPage46=Math.max(1,Number(p)||1);renderMembers();window.scrollTo(0,0)};",
-              "window.memberPageGo46=function(p){memberPage46=Math.max(1,Number(p)||1);window.__kokmatchMemberPageRequested46=memberPage46;renderMembers();window.scrollTo(0,0)};",
-              'pager request marker'
-          )
-          s=replace_one(
-              s,
-              "window.__kokmatchMemberPage46=memberPage46;",
-              "window.__kokmatchMemberPage46=memberPage46;window.__kokmatchMemberPageRequested46=memberPage46;",
-              'rendered pager marker sync'
-          )
-          s=replace_one(
-              s,
-              "typeof memberQuery46==='undefined'?'':String(memberQuery46||''),typeof memberPage46==='undefined'?1:Number(memberPage46)||1,members]);",
-              "'',Number(window.__kokmatchMemberPageRequested46||window.__kokmatchMemberPage46||1),members]);",
-              'v677 roster structure signature'
-          )
-          s=replace_one(
-              s,
-              "function memberSig46(){try{return JSON.stringify([currentGroupId,me?.role,me?.globalAdmin,",
-              "function memberSig46(){try{return JSON.stringify([currentGroupId,Number(window.__kokmatchMemberPageRequested46||window.__kokmatchMemberPage46||1),me?.role,me?.globalAdmin,",
-              'member render signature'
-          )
+          s=replace_one(s,"if(pager)return falseif(btn.closest?.('#members .title')","if(pager)return false;if(btn.closest?.('#members .title')",'pager router syntax')
+          s=replace_one(s,"if(pager)return false;","if(pager){const t=String(btn.textContent||'');const cur=Math.max(1,Number(window.__kokmatchMemberPage46)||1);const go=window.memberPageGo46;if(typeof go!=='function')return false;if(t.includes('다음'))callV6(go,cur+1);else if(t.includes('이전'))callV6(go,Math.max(1,cur-1));else return false;return true}",'pager dynamic route')
+          s=replace_one(s,"if(has&&memberIsMoving46())","if(!force&&has&&memberIsMoving46())",'forced roster render')
+          s=replace_one(s,"window.memberPageGo46=function(p){memberPage46=Math.max(1,Number(p)||1);renderMembers();window.scrollTo(0,0)};","window.memberPageGo46=function(p){memberPage46=Math.max(1,Number(p)||1);window.__kokmatchMemberPageRequested46=memberPage46;renderMembers();window.scrollTo(0,0)};",'pager request marker')
+          s=replace_one(s,"window.__kokmatchMemberPage46=memberPage46;","window.__kokmatchMemberPage46=memberPage46;window.__kokmatchMemberPageRequested46=memberPage46;",'rendered pager marker sync')
+          s=replace_one(s,"typeof memberQuery46==='undefined'?'':String(memberQuery46||''),typeof memberPage46==='undefined'?1:Number(memberPage46)||1,members]);","'',Number(window.__kokmatchMemberPageRequested46||window.__kokmatchMemberPage46||1),members]);",'v677 roster structure signature')
+          s=replace_one(s,"function memberSig46(){try{return JSON.stringify([currentGroupId,me?.role,me?.globalAdmin,","function memberSig46(){try{return JSON.stringify([currentGroupId,Number(window.__kokmatchMemberPageRequested46||window.__kokmatchMemberPage46||1),me?.role,me?.globalAdmin,",'member render signature')
 
-          focus_guard=(
-              "\n\n/* v6.81 final court-count input focus/draft guard. */\n"
+          tail=(
+              "\n\n/* v6.81 final settings stability guard. */\n"
               "(()=>{\n"
               "'use strict';\n"
-              "if(window.__kokmatchCourtInputGuard681)return;\n"
-              "window.__kokmatchCourtInputGuard681='6.81';\n"
+              "if(window.__kokmatchCourtInputGuard681)return;window.__kokmatchCourtInputGuard681='6.81';\n"
               "function protect681(){return currentView==='settings'&&document.activeElement?.id==='courtCountInput'}\n"
               "function restore681(value,start,end,y){const next=document.getElementById('courtCountInput');if(!next)return;if(String(next.value)!==String(value))next.value=String(value);try{next.focus({preventScroll:true})}catch{try{next.focus()}catch{}}try{if(start!==null&&start!==undefined)next.setSelectionRange(start,end??start)}catch{}try{window.scrollTo(0,Math.max(0,Number(y)||0))}catch{}}\n"
-              "try{const baseSettings681=renderSettings;renderSettings=function(...args){if(protect681())return;return baseSettings681.apply(this,args)};window.renderSettings=renderSettings}catch(e){console.warn('v6.81 court settings guard',e)}\n"
+              "function syncRoleCardTail681(){const box=document.getElementById('settings');if(!box)return;const allowed=!!me&&(!!me.globalAdmin||me.role==='manager'||me.role==='organizer');let card=document.getElementById('roleFrameSetting681');if(!allowed){card?.remove();return}const mode=String(S?.adminBadgeVisibility||'hidden')==='all'?'all':'hidden';document.documentElement.classList.toggle('kokmatchRoleFramesHidden681',mode!=='all');if(!card){card=document.createElement('div');card.id='roleFrameSetting681';card.className='card roleFrameSetting681';const head=document.createElement('div');head.className='between roleFrameHead681';const copy=document.createElement('div');const title=document.createElement('b');title.textContent='역할 테두리 효과';const meta=document.createElement('div');meta.className='meta';meta.textContent='개발자·모임장·운영진 프로필의 테두리 효과를 이 모임 전체에서 동일하게 적용합니다. 본인 포함 모든 인원에게 적용됩니다.';copy.append(title,meta);const tag=document.createElement('span');tag.className='tag';head.append(copy,tag);const buttons=document.createElement('div');buttons.className='roleFrameButtons681';for(const item of [['hidden','숨기기'],['all','보이기']]){const b=document.createElement('button');b.type='button';b.dataset.mode681=item[0];b.textContent=item[1];b.addEventListener('click',()=>window.setRoleFrameVisibility681?.(item[0]));buttons.appendChild(b)}card.append(head,buttons);const version=[...box.querySelectorAll(':scope > .card')].find(c=>String(c.textContent||'').includes('프로그램 버전'));if(version)version.before(card);else box.appendChild(card)}const tag=card.querySelector('.tag');if(tag)tag.textContent=mode==='all'?'보이기':'숨기기';card.querySelectorAll('button[data-mode681]').forEach(b=>{const on=b.dataset.mode681===mode;b.className='btn '+(on?'pri':'ghost')})}\n"
+              "window.__kokmatchSyncRoleCard681=syncRoleCardTail681;\n"
+              "try{const baseSettings681=renderSettings;renderSettings=function(...args){if(protect681())return;const r=baseSettings681.apply(this,args);const fix=()=>{try{syncRoleCardTail681()}catch{}};fix();queueMicrotask(fix);requestAnimationFrame(fix);setTimeout(fix,0);return r};window.renderSettings=renderSettings}catch(e){console.warn('v6.81 settings guard',e)}\n"
               "try{const baseAll681=renderAll;renderAll=function(...args){const active=document.activeElement,keep=currentView==='settings'&&active?.id==='courtCountInput';if(!keep)return baseAll681.apply(this,args);const value=active.value,start=active.selectionStart,end=active.selectionEnd,y=window.scrollY;const r=baseAll681.apply(this,args);restore681(value,start,end,y);queueMicrotask(()=>{if(document.activeElement?.id!=='courtCountInput')restore681(value,start,end,y)});return r};window.renderAll=renderAll}catch(e){console.warn('v6.81 court renderAll guard',e)}\n"
+              "if(currentView==='settings')queueMicrotask(syncRoleCardTail681);\n"
               "})();\n"
           )
-          s+=focus_guard
+          s+=tail
           p.write_text(s,encoding='utf-8')
           PY
           git checkout -- .github/workflows/qa-current-runtime.yml
@@ -105,6 +72,7 @@ jobs:
           grep -F "if(!force&&has&&memberIsMoving46())" app-v6.81.js
           grep -F "document.activeElement?.id!=='courtCountInput'" app-v6.81.js
           grep -F "__kokmatchCourtInputGuard681" app-v6.81.js
+          grep -F "__kokmatchSyncRoleCard681" app-v6.81.js
           grep -F "roleFrameSetting681" app-v6.81.js
           grep -F "kokmatchRoleFramesHidden681" app-v6.81.css
           test -f versions/v6.80/app-v6.80.js
