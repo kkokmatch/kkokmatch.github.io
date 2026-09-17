@@ -34,7 +34,7 @@
   <script>
   (()=>{
     'use strict';
-    const APP='6.81',BOOT_KEY='kokmatch_boot_recovery_679',SW_KEY='kokmatch_sw_controller_reload_679';
+    const APP='6.81',BOOT_KEY='kokmatch_boot_recovery_679',SW_KEY='kokmatch_sw_controller_reload_'+APP;
     const shellReady=()=>!!(document.body&&document.body.querySelector('.app')&&document.getElementById('login'));
     function showRecovery(msg){
       let el=document.getElementById('bootFallback679');
