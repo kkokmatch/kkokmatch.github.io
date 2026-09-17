@@ -23,13 +23,7 @@ jobs:
       - name: Generate v6.81 standalone runtime
         run: node scripts/release-v681.mjs
       - name: JavaScript syntax check
-        run: node --check app-v6.81.js 2>&1 | tee syntax-check.txt
-      - name: Upload syntax diagnostics
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: v681-syntax-diagnostics
-          path: syntax-check.txt
+        run: node --check app-v6.81.js
       - name: Validate standalone runtime
         run: node scripts/validate-standalone-runtime.mjs
       - name: Validate requested fixes are present
@@ -40,10 +34,10 @@ jobs:
           grep -F "kokmatchRoleFramesHidden681" app-v6.81.css
           test -f versions/v6.80/app-v6.80.js
           test -f versions/v6.80/app-v6.80.css
-      - name: Commit generated release
+      - name: Commit generated release branch
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add -A
           git commit -m "release: KokMatch v6.81 roster court input and role frames"
-          git push origin HEAD:main
+          git push --force origin HEAD:release/v6.81-generated
