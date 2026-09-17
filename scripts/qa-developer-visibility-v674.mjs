@@ -58,8 +58,14 @@ for(const [roleKey,identity] of roles){
    assert.equal(await roleCard.count(),0,`${roleKey}: ordinary users must not see role-frame setting`);
  }
 
- await page.evaluate(()=>{currentView='queue';renderQueue();goView('queue')});
- await page.waitForTimeout(220);
+ // This regression test validates queue decoration, not navigation. Activate the queue
+ // deterministically so late mocked state responses cannot leave the test on settings.
+ await page.evaluate(()=>{
+   currentView='queue';renderQueue();
+   document.querySelectorAll('.view').forEach(v=>v.classList.toggle('on',v.id==='queue'));
+   document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',b.dataset.v==='queue'));
+ });
+ await page.waitForTimeout(120);
  const devQueue=page.locator('#queue .queueCard').filter({hasText:'박태영'}).first();
  await devQueue.waitFor({state:'visible'});
  assert.equal(await devQueue.locator('.roleBadge.role-global').count(),1,`${roleKey}: developer badge missing in queue`);
