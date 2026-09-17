@@ -36,7 +36,12 @@ jobs:
           current="if(pager){const t=String(btn.textContent||'');const cur=Math.max(1,Number(window.__kokmatchMemberPage46)||1);const go=window.memberPageGo46;if(typeof go!=='function')return false;if(t.includes('다음'))callV6(go,cur+1);else if(t.includes('이전'))callV6(go,Math.max(1,cur-1));else return false;return true}"
           if s.count(stale)!=1:
               raise SystemExit(f'pager dynamic-route target count={s.count(stale)}')
-          p.write_text(s.replace(stale,current,1),encoding='utf-8')
+          s=s.replace(stale,current,1)
+          moving="if(has&&memberIsMoving46())"
+          immediate="if(!force&&has&&memberIsMoving46())"
+          if s.count(moving)!=1:
+              raise SystemExit(f'forced roster render target count={s.count(moving)}')
+          p.write_text(s.replace(moving,immediate,1),encoding='utf-8')
           PY
           git checkout -- .github/workflows/qa-current-runtime.yml
       - name: JavaScript syntax check
@@ -46,6 +51,7 @@ jobs:
       - name: Validate requested fixes are present
         run: |
           grep -F "const go=window.memberPageGo46" app-v6.81.js
+          grep -F "if(!force&&has&&memberIsMoving46())" app-v6.81.js
           grep -F "document.activeElement?.id!=='courtCountInput'" app-v6.81.js
           grep -F "roleFrameSetting681" app-v6.81.js
           grep -F "kokmatchRoleFramesHidden681" app-v6.81.css
