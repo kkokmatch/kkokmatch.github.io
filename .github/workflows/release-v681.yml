@@ -1,0 +1,43 @@
+name: Release KokMatch v6.81
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/release-v681.mjs'
+      - '.github/workflows/release-v681.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Generate v6.81 standalone runtime
+        run: node scripts/release-v681.mjs
+      - name: JavaScript syntax check
+        run: node --check app-v6.81.js
+      - name: Validate standalone runtime
+        run: node scripts/validate-standalone-runtime.mjs
+      - name: Validate requested fixes are present
+        run: |
+          grep -F "if(pager)return false" app-v6.81.js
+          grep -F "document.activeElement?.id!=='courtCountInput'" app-v6.81.js
+          grep -F "roleFrameSetting681" app-v6.81.js
+          grep -F "kokmatchRoleFramesHidden681" app-v6.81.css
+          test -f versions/v6.80/app-v6.80.js
+          test -f versions/v6.80/app-v6.80.css
+      - name: Commit generated release
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "release: KokMatch v6.81 roster court input and role frames"
+          git push origin HEAD:main
