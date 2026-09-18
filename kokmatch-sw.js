@@ -1,16 +1,16 @@
-const KOKMATCH_SW_VERSION='6.82';
+const KOKMATCH_SW_VERSION='6.83';
 const KOKMATCH_CACHE_PREFIX='kokmatch-static-';
 const KOKMATCH_STATIC_CACHE=KOKMATCH_CACHE_PREFIX+KOKMATCH_SW_VERSION;
 const KOKMATCH_SHELL_KEY='/__kokmatch_shell__';
 const KOKMATCH_REQUIRED=[
-  '/app-v6.82.css?v=6.82',
-  '/app-v6.82.js?v=6.82'
+  '/app-v6.83.css?v=6.83',
+  '/app-v6.83.js?v=6.83'
 ];
 const KOKMATCH_OPTIONAL=[
-  '/assets/dev-prism-frame-v662.webp?v=6.82',
-  '/assets/organizer-silver-aura-v665.webp?v=6.82',
-  '/manifest.webmanifest?v=6.82',
-  '/icons/kokmatch-180.png?v=6.82',
+  '/assets/dev-prism-frame-v662.webp?v=6.83',
+  '/assets/organizer-silver-aura-v665.webp?v=6.83',
+  '/manifest.webmanifest?v=6.83',
+  '/icons/kokmatch-180.png?v=6.83',
   '/icons/kokmatch-192.png'
 ];
 async function fetchFresh679(url){
@@ -21,7 +21,7 @@ async function fetchFresh679(url){
 self.addEventListener('install',event=>{event.waitUntil((async()=>{
  const c=await caches.open(KOKMATCH_STATIC_CACHE);
  for(const u of KOKMATCH_REQUIRED){const r=await fetchFresh679(u);await c.put(u,r.clone())}
- try{const shell=await fetch('/?km-sw-precache=6.82&t='+Date.now(),{cache:'reload'});if(shell&&shell.ok)await c.put(KOKMATCH_SHELL_KEY,shell.clone())}catch{}
+ try{const shell=await fetch('/?km-sw-precache=6.83&t='+Date.now(),{cache:'reload'});if(shell&&shell.ok)await c.put(KOKMATCH_SHELL_KEY,shell.clone())}catch{}
  await Promise.allSettled(KOKMATCH_OPTIONAL.map(async u=>{const r=await fetch(u,{cache:'reload'});if(r&&r.ok)await c.put(u,r.clone())}));
  await self.skipWaiting();
 })())});
