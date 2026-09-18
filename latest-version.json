@@ -1,8 +1,8 @@
 {
-  "version": 124,
-  "label": "v6.84",
-  "semanticVersion": "6.84",
-  "build": "v6.84",
-  "updatedAt": "2026-09-18T03:19:00.000Z",
-  "note": "v6.84 편성대기 상세정보 복구 · 경기합계/같이한사람 요약만 제거"
+  "version": 125,
+  "label": "v6.85",
+  "semanticVersion": "6.85",
+  "build": "v6.85",
+  "updatedAt": "2026-09-18T04:52:00.000Z",
+  "note": "v6.85 자동 연속편성 · 종료임박 합류대기 · 최근 반복조합 회피"
 }
