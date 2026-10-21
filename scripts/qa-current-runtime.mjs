@@ -25,9 +25,9 @@ page.on('request',req=>{try{const u=new URL(req.url());if(/^\/app-v[^/]+\.(?:js|
 
 await page.route('https://wjelumpbjklfrdjxbesj.supabase.co/functions/v1/**',async route=>{
   const req=route.request(),url=new URL(req.url());
-  if(url.pathname.endsWith('/kokmatch-v60-api')){
+  if(url.pathname.endsWith('/kokmatch-v60-api')||url.pathname.endsWith('/kokmatch-atomic-api')){
     let body={};try{body=JSON.parse(req.postData()||'{}')}catch{}
-    if(body.op==='action'&&(body.action==='set_member_attendance'||body.action==='set_my_attendance')){
+    if((body.action==='set_member_attendance'||body.action==='set_my_attendance')){
       const id=body.action==='set_my_attendance'?'mgr':String(body.memberId||'');
       const m=state.members.find(x=>String(x.id)===id);
       if(m){state.queue=state.queue.filter(x=>String(x)!==id);m.state=String(body.mode||'out');m.joinedAt=m.state==='out'?null:Date.now();if(m.state==='waiting'&&!state.queue.includes(id))state.queue.push(id)}
