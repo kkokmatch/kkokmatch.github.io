@@ -1,8 +1,8 @@
 {
-  "version": 126,
-  "label": "v6.86",
-  "semanticVersion": "6.86",
-  "build": "v6.86",
-  "updatedAt": "2026-10-21T05:00:00.000Z",
-  "note": "v6.86 보조 기능 인증 오류와 실제 세션 만료 분리"
+  "version": 127,
+  "label": "v6.87",
+  "semanticVersion": "6.87",
+  "build": "v6.87",
+  "updatedAt": "2026-10-21T07:00:00.000Z",
+  "note": "자동편성 및 통계 연결 복구, 3게임 반복 편성 확인"
 }

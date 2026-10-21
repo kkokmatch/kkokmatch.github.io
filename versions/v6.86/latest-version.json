@@ -1,0 +1,8 @@
+{
+  "version": 126,
+  "label": "v6.86",
+  "semanticVersion": "6.86",
+  "build": "v6.86",
+  "updatedAt": "2026-10-21T05:00:00.000Z",
+  "note": "v6.86 보조 기능 인증 오류와 실제 세션 만료 분리"
+}

@@ -1,21 +1,23 @@
+import {repeatPairs687} from "./repeat.mjs";
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.55.0";
+import postgres from "npm:postgres@3.4.7";
 import { bestFour, soonestRunningFinish } from "./scoring.mjs";
 
-const db=createClient(Deno.env.get('SUPABASE_URL')!,Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!);
+const sql=postgres(Deno.env.get("SUPABASE_DB_URL")!,{prepare:false,max:3,idle_timeout:10,connect_timeout:5});
 const GLOBAL='__global__',enc=new TextEncoder();
 const cors={'Access-Control-Allow-Origin':'*','Access-Control-Allow-Headers':'authorization, x-client-info, apikey, content-type','Access-Control-Allow-Methods':'POST, OPTIONS','Cache-Control':'no-store'};
 const ok=(x:any,s=200)=>Response.json(x,{status:s,headers:cors});
 const err=(m:string,s=400,extra:any={})=>ok({error:m,...extra},s);
 async function sha(v:string){const b=await crypto.subtle.digest('SHA-256',enc.encode(String(v)));return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')}
-async function session(req:Request){const raw=(req.headers.get('authorization')||'').replace(/^Bearer\s+/i,'');if(!raw)return null;const {data,error}=await db.from('kokmatch_sessions').select('club_id,role,member_id,display_name,expires_at').eq('token_hash',await sha(raw)).gt('expires_at',new Date().toISOString()).maybeSingle();if(error)throw new Error('세션 확인 서버에 연결하지 못했습니다. 잠시 후 다시 시도해주세요.');return data||null}
+async function session(req:Request){const raw=(req.headers.get('authorization')||'').replace(/^Bearer\s+/i,'');if(!raw)return null;const rows=await sql`select club_id,role,member_id,display_name,expires_at from public.kokmatch_sessions where token_hash=${await sha(raw)} and expires_at>now() limit 1`;return rows[0]||null}
+
 function roleOf(m:any){const r=String(m?.role||'member');return r==='admin'?'admin':r==='manager'?'manager':r==='organizer'?'organizer':'member'}
 function roleLabel(r:string){return r==='admin'?'개발자':r==='manager'?'모임장':r==='organizer'?'운영진':'일반'}
 function cfgOf(s:any){const c=s?.autoGame||{};return {enabled:c.enabled===true,mode:'priority_v685',updatedAt:Number(c.updatedAt)||0,updatedBy:c.updatedBy&&typeof c.updatedBy==='object'?c.updatedBy:{}}}
-async function loadRow(gid:string){const {data,error}=await db.from('kokmatch_state').select('data,revision').eq('club_id',gid).maybeSingle();if(error)throw error;return data}
+async function loadRow(gid:string){return (await sql`select data,revision from public.kokmatch_state where club_id=${gid} limit 1`)[0]}
 function validateMemberSession(u:any,s:any,global:boolean){if(global)return true;const a=(s?.members||[]).find((m:any)=>String(m.id)===String(u.member_id||''));return !!a&&roleOf(a)===String(u.role||'')}
 function validateStaff(u:any,s:any,global:boolean){return validateMemberSession(u,s,global)&&(global||u.role==='manager'||u.role==='organizer')}
-async function writeConfig(gid:string,u:any,global:boolean,enabled:boolean){for(let i=0;i<4;i++){const row=await loadRow(gid);if(!row)throw new Error('모임 상태를 찾을 수 없습니다.');const s:any=row.data||{};if(!validateStaff(u,s,global))throw new Error('개발자·모임장·운영진만 자동게임편성을 설정할 수 있습니다.');const role=global?'admin':String(u.role||'');const config={enabled,mode:'priority_v685',updatedAt:Date.now(),updatedBy:{memberId:String(u.member_id||''),name:String(u.display_name||'').trim(),role,roleLabel:roleLabel(role)}};const next={...s,autoGame:config};const {data,error}=await db.from('kokmatch_state').update({data:next,revision:Number(row.revision||0)+1,updated_at:new Date().toISOString()}).eq('club_id',gid).eq('revision',Number(row.revision||0)).select('data,revision').maybeSingle();if(error)throw error;if(data)return {data:data.data,config}}throw new Error('다른 작업과 겹쳐 설정 저장이 지연됐습니다. 다시 시도해주세요.')}
+async function writeConfig(gid:string,u:any,global:boolean,enabled:boolean){for(let i=0;i<4;i++){const row=await loadRow(gid);if(!row)throw new Error('모임 상태를 찾을 수 없습니다.');const s:any=row.data||{};if(!validateStaff(u,s,global))throw new Error('개발자·모임장·운영진만 자동게임편성을 설정할 수 있습니다.');const role=global?'admin':String(u.role||'');const config={enabled,mode:'priority_v685',updatedAt:Date.now(),updatedBy:{memberId:String(u.member_id||''),name:String(u.display_name||'').trim(),role,roleLabel:roleLabel(role)}};const next={...s,autoGame:config};const data=(await sql`update public.kokmatch_state set data=${sql.json(next)},revision=revision+1,updated_at=now() where club_id=${gid} and revision=${Number(row.revision||0)} returning data,revision`)[0];if(data)return {data:data.data,config}}throw new Error('다른 작업과 겹쳐 설정 저장이 지연됐습니다. 다시 시도해주세요.')}
 const HOLD_WINDOW_MIN=5,MAX_GROUPS_PER_TICK=8;
 function waitingIds(s:any){
  const members=new Map((Array.isArray(s?.members)?s.members:[]).map((m:any)=>[String(m.id),m]));
@@ -35,7 +37,7 @@ function holdForSoonFinish(s:any){
  if(!soon||!Number.isFinite(Number(soon.remainingMin))||Number(soon.remainingMin)>HOLD_WINDOW_MIN)return null;
  return {...soon,waitingCount:waiting.length,holdWindowMin:HOLD_WINDOW_MIN};
 }
-async function tick(gid:string,u:any,global:boolean){
+async function tick(gid:string,u:any,global:boolean,confirmed:any=null){
  let row=await loadRow(gid);
  if(!row)return {created:false,reason:'missing_state'};
  let s:any=row.data||{};
@@ -64,12 +66,19 @@ async function tick(gid:string,u:any,global:boolean){
   }
   const enabledBy=cfg.updatedBy||{};
   const body={players:best.players,forceRepeat:true,createdByMemberId:'',createdByName:'AI 자동편성',createdByRole:'시스템',createdByMode:'auto',autoEnabledByName:String(enabledBy.name||''),autoEnabledByRole:String(enabledBy.roleLabel||roleLabel(String(enabledBy.role||'')))};
-  const {data,error}=await db.rpc('kokmatch_atomic_game_action',{p_gid:gid,p_action:'create_pending',p_body:body});
-  if(error){
-   const msg=String(error.message||'');
-   if(/개인 게임대기|중복 인원|회원/.test(msg)){const latest=await loadRow(gid);s=latest?.data||s;row=latest||row;reason='state_changed';break}
-   throw error;
-  }
+  const result=await sql.begin(async tx=>{
+   const locked=(await tx`select data,revision from public.kokmatch_state where club_id=${gid} for update`)[0];
+   if(!locked||Number(locked.revision)!==decisionRevision||!cfgOf(locked.data).enabled)return {retry:true};
+   if(!validateMemberSession(u,locked.data,global))throw new Error('현재 회원정보를 확인해주세요.');
+   const repeats=repeatPairs687(locked.data,best.players);
+   const accepted=confirmed&&Number(confirmed.revision)===decisionRevision&&JSON.stringify(confirmed.players)===JSON.stringify(best.players);
+   if(repeats.length&&!accepted)return {warning:true,repeatPairs:repeats,players:best.players,revision:decisionRevision};
+   await tx`select public.kokmatch_atomic_game_action(${gid},'create_pending',${tx.json(body)})`;
+   return {created:true};
+  });
+  if(result.retry){const latest=await loadRow(gid);if(!latest)break;row=latest;s=row.data;reason='state_changed';if(++stateRetries>=5)break;continue}
+  if(result.warning)return {created:createdGroups.length>0,groups:createdGroups,data:s,config:cfg,reason:'repeat_confirmation',...result};
+  confirmed=null;
   createdGroups.push({players:best.players,decision:best.metrics});
   batch+=1;stateRetries=0;
   row=await loadRow(gid);
@@ -81,5 +90,5 @@ async function tick(gid:string,u:any,global:boolean){
  if(createdGroups.length>=MAX_GROUPS_PER_TICK&&waitingIds(s).length>=4&&!hold)reason='batch_limit';
  return {created:createdGroups.length>0,createdCount:createdGroups.length,groups:createdGroups,reason,hold,data:s,config:cfg,computeMs};
 }
-Deno.serve(async(req:Request)=>{if(req.method==='OPTIONS')return new Response('ok',{headers:cors});if(req.method!=='POST')return err('Not found',404);try{const u=await session(req);if(!u)return err('로그인이 필요합니다.',401);const b=await req.json().catch(()=>({}));const global=u.role==='admin'&&u.club_id===GLOBAL;const gid=global?String(b.groupId||'').trim():String(u.club_id||'').trim();if(!gid)return err('모임을 선택해주세요.',409);if(!global&&b.groupId&&String(b.groupId)!==gid)return err('다른 모임은 관리할 수 없습니다.',403);const action=String(b.action||'get');if(action==='get'){const row=await loadRow(gid);if(!row)return err('모임 상태를 찾을 수 없습니다.',404);if(!validateStaff(u,row.data||{},global))return err('개발자·모임장·운영진만 사용할 수 있습니다.',403);return ok({success:true,config:cfgOf(row.data||{}),data:row.data})}if(action==='set'){const x=await writeConfig(gid,u,global,b.enabled===true);return ok({success:true,...x})}if(action==='tick'){const x=await tick(gid,u,global);return ok({success:true,...x})}return err('지원하지 않는 작업입니다.',404)}catch(e){console.error(e);return err(e instanceof Error?e.message:'자동게임편성 처리 중 오류가 발생했습니다.',500)}});
+Deno.serve(async(req:Request)=>{if(req.method==='OPTIONS')return new Response('ok',{headers:cors});if(req.method!=='POST')return err('Not found',404);try{const u=await session(req);if(!u)return err('로그인이 필요합니다.',401);const b=await req.json().catch(()=>({}));const global=u.role==='admin'&&u.club_id===GLOBAL;const gid=global?String(b.groupId||'').trim():String(u.club_id||'').trim();if(!gid)return err('모임을 선택해주세요.',409);if(!global&&b.groupId&&String(b.groupId)!==gid)return err('다른 모임은 관리할 수 없습니다.',403);const action=String(b.action||'get');if(action==='get'){const row=await loadRow(gid);if(!row)return err('모임 상태를 찾을 수 없습니다.',404);if(!validateStaff(u,row.data||{},global))return err('개발자·모임장·운영진만 사용할 수 있습니다.',403);return ok({success:true,config:cfgOf(row.data||{}),data:row.data})}if(action==='set'){const x=await writeConfig(gid,u,global,b.enabled===true);return ok({success:true,...x})}if(action==='tick'){const x=await tick(gid,u,global,b.confirmed);return ok({success:true,...x})}return err('지원하지 않는 작업입니다.',404)}catch(e){console.error(e);return err(e instanceof Error?e.message:'자동게임편성 처리 중 오류가 발생했습니다.',500)}});
 
