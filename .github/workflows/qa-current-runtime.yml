@@ -12,6 +12,7 @@ on:
       - 'manifest.webmanifest'
       - 'edge-functions/kokmatch-auto-v656/**'
       - 'edge-functions/kokmatch-atomic-api/**'
+      - 'scripts/qa-session-current.mjs'
       - 'scripts/qa-boot-diagnostic.mjs'
       - 'scripts/qa-current-runtime.mjs'
       - 'scripts/qa-partner-poll-current.mjs'
@@ -83,6 +84,8 @@ jobs:
           s=s.replace("if(url.pathname.endsWith('/kokmatch-v60-api')){if(body.op==='member_save')", "if(url.pathname.endsWith('/kokmatch-v60-api')||url.pathname.endsWith('/kokmatch-member-v646')){if(body.op==='member_save')")
           p.write_text(s,encoding='utf-8')
           PY
+      - name: Login session regression
+        run: node scripts/qa-session-current.mjs
       - name: Pending start ETA calculation and desktop iPhone QA
         run: node scripts/qa-pending-eta.mjs
       - name: v6.79 iPhone update recovery and stats alignment QA
@@ -109,3 +112,14 @@ jobs:
         run: node scripts/qa-save-layout-current.mjs
       - name: Role and responsive layout QA
         run: node scripts/qa-role-layout-current.mjs
+
+      - name: Verify deployed session release
+        if: github.ref == 'refs/heads/main'
+        env:
+          QA_URL: https://kkokmatch.github.io
+        run: |
+          for i in {1..30}; do
+            if curl -fsS "https://kkokmatch.github.io/latest-version.json?qa=$RANDOM" | python3 -c 'import sys,json; assert json.load(sys.stdin)["semanticVersion"]==json.load(open("latest-version.json"))["semanticVersion"]'; then break; fi
+            sleep 10
+          done
+          node scripts/qa-session-current.mjs
