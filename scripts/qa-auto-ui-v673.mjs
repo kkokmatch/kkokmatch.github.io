@@ -37,7 +37,7 @@ for(const [roleKey,identity] of roles){
  // Rules text must match the requested order and gender equivalence.
  await page.locator('.autoGameQueue658 .autoSettingsBtn656').click();
  const rules=(await page.locator('#modalSheet').innerText()).replace(/\s+/g,' ');
- for(const t of ['① 대기시간 최우선','② 당일 게임수','③ 오늘 파트너 우선','④ 급수·남녀 밸런스','여자 C조를 남자 D조','⑤ 반복조합 최소화','3회 이상'])assert(rules.includes(t),`${roleKey} missing rule ${t}`);
+ for(const t of ['① 대기시간 최우선','② 당일 게임수','③ 오늘 파트너 우선','④ 최근 반복조합 최소화','여자 C조를 남자 D조','⑤ 급수·남녀 밸런스','최근 1시간'])assert(rules.includes(t),`${roleKey} missing rule ${t}`);
  await page.locator('#modalSheet button',{hasText:'닫기'}).click();
  // First manual attempt must be blocked while auto remains on, regardless of the fast touch router.
  const first=page.locator('#queue .queueCard').first();await first.click();
