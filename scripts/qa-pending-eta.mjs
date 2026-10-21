@@ -95,6 +95,20 @@ for(const [engine,width] of [[chromium,1280],[chromium,390],[webkit,390],[webkit
  fixture=clone(state);fixture.games[0].players=['m16','m17','m18','m19'];fixture.games[1].players=['m20','m21','m22','m23'];
  await page.evaluate(({s,t})=>{const wall=window.__etaRealNow();Date.now=()=>t+window.__etaRealNow()-wall;S=s;renderAll();goView('playing')},{s:clone(fixture),t:now+10*minute});
  await page.waitForTimeout(500);
+ const elapsed=page.locator('[data-game-elapsed691="g1"]');
+ assert.equal(await elapsed.innerText(),'게임 중 20분째');
+ assert.equal(await page.locator('[data-game-elapsed691="g2"]').innerText(),'게임 중 15분째');
+ await page.evaluate(t=>{window.__elapsedNode691=document.querySelector('[data-game-elapsed691="g1"]');window.__elapsedButton691=document.querySelector('[onclick="finishGameNow(\'g1\')"]');Date.now=()=>t},now+11*minute);
+ // Verify the real periodic refresh once; other engines verify foreground resume.
+ if(engine===chromium&&width===1280)await page.waitForFunction(()=>document.querySelector('[data-game-elapsed691="g1"]')?.textContent==='게임 중 21분째',{},{timeout:20000});
+ else await page.evaluate(()=>document.dispatchEvent(new Event('visibilitychange')));
+ assert.equal(await elapsed.innerText(),'게임 중 21분째');
+ assert(await page.evaluate(()=>window.__elapsedNode691===document.querySelector('[data-game-elapsed691="g1"]')&&window.__elapsedButton691===document.querySelector('[onclick="finishGameNow(\'g1\')"]')),'elapsed refresh must preserve card controls');
+ await page.evaluate(t=>{S.games[0].startedAt=t-30000;renderPlaying()},now+11*minute);assert.equal(await elapsed.innerText(),'게임 중 1분 미만');
+ await page.evaluate(t=>{S.games[0].startedAt=new Date(t-7*60000).toISOString();renderPlaying()},now+11*minute);assert.equal(await elapsed.innerText(),'게임 중 7분째');
+ await page.evaluate(()=>{S.games[0].startedAt='invalid';renderPlaying()});assert.equal(await elapsed.innerText(),'게임 시간 확인 중');
+ await page.evaluate(({s,t})=>{const wall=window.__etaRealNow();Date.now=()=>t+window.__etaRealNow()-wall;S=s;renderPlaying()},{s:clone(fixture),t:now+10*minute});
+ await page.waitForTimeout(500);
  const dialogs=[];page.on('dialog',d=>{dialogs.push(d.type()+': '+d.message());return d.accept()});
  await page.evaluate(()=>{window.__finishCalls=0;const original=finishGameNow;finishGameNow=async(...args)=>{window.__finishCalls++;return original(...args)}});
  const press=async selector=>{const el=page.locator(selector);await el.scrollIntoViewIfNeeded();await page.waitForTimeout(200);if(width<500)await el.tap();else await el.click()};
@@ -106,6 +120,6 @@ for(const [engine,width] of [[chromium,1280],[chromium,390],[webkit,390],[webkit
  await page.waitForFunction(()=>S.games.some(g=>g.id==='new-game'));assert.equal(begun,1);
  assert.equal(await page.locator('[data-pending-eta680="p0"]').count(),0);
  assert(assets.every(a=>a.includes(`app-v${version}.`)),'cross-version asset loaded');assert.deepEqual(errors,[]);
- console.log(`PASS ${engine.name()} ${width}px: login, ETA timer/node stability, finish/start buttons, removal, reorder, group switch, layout, current assets, no page errors`);
+ console.log(`PASS ${engine.name()} ${width}px: login, ETA timer/node stability, elapsed timer/resume/node stability, finish/start buttons, removal, reorder, group switch, layout, current assets, no page errors`);
  }finally{await browser.close()}
 }
