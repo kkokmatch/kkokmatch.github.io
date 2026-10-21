@@ -13,6 +13,7 @@ on:
       - 'edge-functions/kokmatch-auto-v656/**'
       - 'edge-functions/kokmatch-atomic-api/**'
       - 'scripts/qa-session-current.mjs'
+      - 'scripts/qa-scroll-install-current.mjs'
       - 'scripts/qa-operations-*.mjs'
       - 'edge-functions/kokmatch-stats-v54/**'
       - 'edge-functions/kokmatch-create-v641/**'
@@ -63,6 +64,10 @@ jobs:
         run: |
           npm install --no-save --package-lock=false playwright@1.55.0
           npx playwright install --with-deps chromium webkit
+      - name: Desktop scroll and daily install prompt regression
+        run: |
+          node scripts/qa-scroll-install-current.mjs
+          QA_BROWSER=webkit node scripts/qa-scroll-install-current.mjs
       - name: Start local static server
         run: |
           python3 -m http.server 4173 >/tmp/kokmatch-http.log 2>&1 &
