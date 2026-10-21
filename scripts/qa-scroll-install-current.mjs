@@ -60,13 +60,7 @@ try{
   await desktop.evaluate(view=>goView(view),view);await desktop.waitForTimeout(700);
   const range=await desktop.evaluate(()=>document.scrollingElement.scrollHeight-innerHeight);
   assert.ok(range>100,view+' fixture must overflow the viewport');
-  await wheel(desktop);const scrolled=await desktop.evaluate(()=>({y:scrollY,html:getComputedStyle(document.documentElement).overflow,body:getComputedStyle(document.body).overflow,overscroll:getComputedStyle(document.body).overscrollBehaviorY,top:document.elementFromPoint(640,500)?.outerHTML.slice(0,200),prompt:document.getElementById('pwaPrompt629')?.textContent}));if(scrolled.y===0){
-   for(const css of ['html{overscroll-behavior:auto!important}', 'html,body{overflow:visible!important;overscroll-behavior:auto!important}', '*{overscroll-behavior:auto!important}']){
-    await desktop.addStyleTag({content:css});await wheel(desktop);console.log('SCROLL DIAGNOSTIC',css,await desktop.evaluate(()=>({y:scrollY,root:document.scrollingElement.tagName,height:document.scrollingElement.scrollHeight})));
-   }
-   const blank=await scrollCtx.newPage();await blank.setContent('<div style="height:4000px">Wheel control</div>');await wheel(blank);console.log('SCROLL CONTROL',await blank.evaluate(()=>scrollY));await blank.close();
-  }
-  assert.ok(scrolled.y>100,view+' must scroll with a physical wheel: '+JSON.stringify(scrolled));
+  await wheel(desktop);const scrolled=await desktop.evaluate(()=>({y:scrollY,html:getComputedStyle(document.documentElement).overflow,body:getComputedStyle(document.body).overflow,overscroll:getComputedStyle(document.body).overscrollBehaviorY,top:document.elementFromPoint(640,500)?.outerHTML.slice(0,200),prompt:document.getElementById('pwaPrompt629')?.textContent}));assert.ok(scrolled.y>100,view+' must scroll with a physical wheel: '+JSON.stringify(scrolled));
   const before=await desktop.evaluate(()=>scrollY);await wheel(desktop,640,450,-300);
   assert.ok(await desktop.evaluate(()=>scrollY)<before,view+' must scroll upward');
   const nav=await desktop.locator('#nav').boundingBox();assert.ok(Math.abs(nav.y+nav.height-800)<30,'bottom nav must stay fixed');

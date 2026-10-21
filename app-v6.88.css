@@ -73,7 +73,6 @@ button:active,.btn:active{filter:brightness(.97)}
 /* v48: responsive layout for phone / fold / tablet / desktop */
 html,body{min-width:0!important;width:100%;max-width:100%}
 /* Keep the document as the only page scroll container. */
-html{overflow-x:clip}
 .app{width:100%;max-width:760px}
 .view{min-width:0}
 .card,.composer,.pendingCard,.courtCard,.groupCard{min-width:0;max-width:100%}
@@ -4568,7 +4567,7 @@ html.kokmatchRoleFramesHidden681 #profileCard53 .profilePreview53>img:not(.devFr
 
 
 /* v6.88: viewport-fixed bottom nav across iPhone, Android, Fold and tablets. */
-html{overscroll-behavior-y:none}
+
 @supports (height:100dvh){
  html,body,.app{min-height:100dvh}
 }
