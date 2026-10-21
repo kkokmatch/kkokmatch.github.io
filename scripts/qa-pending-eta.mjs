@@ -66,6 +66,8 @@ for(const [engine,width] of [[chromium,1280],[chromium,390],[webkit,390],[webkit
  await page.evaluate(({s,t})=>{
   // Isolated fixture: no live API calls, token, or operational writes.
   const realNow=Date.now;window.__etaRealNow=realNow;Date.now=()=>t;
+  // Keep the already-dismissed install guide aligned with this ETA fixture's date.
+  localStorage.setItem('kokmatch_install_prompt_day',new Date(t+9*3600000).toISOString().slice(0,10));
   S=s;window.S=S;me={memberId:'m0',displayName:'테스트회원0',role:'manager',globalAdmin:false,groupId:'eta-qa'};
   group={groupId:'eta-qa',name:'예상 시작 QA'};currentGroupId='eta-qa';T='eta-qa-token';localStorage.setItem(TOKEN_KEY,T);localStorage.setItem(SESSION_DAY_BASE_V670,authBusinessDayV670());groups=[];draft=[null,null,null,null];normalizeClient();currentView='queue';renderAll();goView('queue');document.getElementById('login').classList.add('hide');
  },{s:clone(state),t:now});
