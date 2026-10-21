@@ -13,6 +13,8 @@ on:
       - 'edge-functions/kokmatch-auto-v656/**'
       - 'edge-functions/kokmatch-atomic-api/**'
       - 'scripts/qa-session-current.mjs'
+      - 'scripts/qa-entry-current.mjs'
+      - 'edge-functions/kokmatch-v60-api/**'
       - 'scripts/qa-scroll-install-current.mjs'
       - 'scripts/qa-operations-*.mjs'
       - 'edge-functions/kokmatch-stats-v54/**'
@@ -64,6 +66,10 @@ jobs:
         run: |
           npm install --no-save --package-lock=false playwright@1.55.0
           npx playwright install --with-deps chromium webkit
+      - name: Entry authentication and attendance regression
+        run: |
+          node scripts/qa-entry-current.mjs
+          QA_BROWSER=webkit node scripts/qa-entry-current.mjs
       - name: Desktop scroll and daily install prompt regression
         run: |
           QA_BROWSER=webkit node scripts/qa-scroll-install-current.mjs
