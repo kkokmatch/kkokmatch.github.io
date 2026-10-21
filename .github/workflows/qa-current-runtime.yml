@@ -66,8 +66,8 @@ jobs:
           npx playwright install --with-deps chromium webkit
       - name: Desktop scroll and daily install prompt regression
         run: |
-          node scripts/qa-scroll-install-current.mjs
           QA_BROWSER=webkit node scripts/qa-scroll-install-current.mjs
+          node scripts/qa-scroll-install-current.mjs
       - name: Start local static server
         run: |
           python3 -m http.server 4173 >/tmp/kokmatch-http.log 2>&1 &

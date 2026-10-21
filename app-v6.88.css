@@ -73,7 +73,7 @@ button:active,.btn:active{filter:brightness(.97)}
 /* v48: responsive layout for phone / fold / tablet / desktop */
 html,body{min-width:0!important;width:100%;max-width:100%}
 /* Keep the document as the only page scroll container. */
-html{overflow-x:hidden}
+html{overflow-x:clip}
 .app{width:100%;max-width:760px}
 .view{min-width:0}
 .card,.composer,.pendingCard,.courtCard,.groupCard{min-width:0;max-width:100%}
