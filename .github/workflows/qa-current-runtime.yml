@@ -13,6 +13,9 @@ on:
       - 'edge-functions/kokmatch-auto-v656/**'
       - 'edge-functions/kokmatch-atomic-api/**'
       - 'scripts/qa-session-current.mjs'
+      - 'scripts/qa-operations-*.mjs'
+      - 'edge-functions/kokmatch-stats-v54/**'
+      - 'edge-functions/kokmatch-create-v641/**'
       - 'scripts/qa-boot-diagnostic.mjs'
       - 'scripts/qa-current-runtime.mjs'
       - 'scripts/qa-partner-poll-current.mjs'
@@ -84,6 +87,10 @@ jobs:
           s=s.replace("if(url.pathname.endsWith('/kokmatch-v60-api')){if(body.op==='member_save')", "if(url.pathname.endsWith('/kokmatch-v60-api')||url.pathname.endsWith('/kokmatch-member-v646')){if(body.op==='member_save')")
           p.write_text(s,encoding='utf-8')
           PY
+      - name: Operations backend and browser regression
+        run: |
+          node scripts/qa-operations-backend.mjs
+          node scripts/qa-operations-ui.mjs
       - name: Login session regression
         run: node scripts/qa-session-current.mjs
       - name: Pending start ETA calculation and desktop iPhone QA
@@ -123,3 +130,4 @@ jobs:
             sleep 10
           done
           node scripts/qa-session-current.mjs
+          node scripts/qa-operations-ui.mjs
