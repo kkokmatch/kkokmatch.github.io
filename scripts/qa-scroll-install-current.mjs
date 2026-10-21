@@ -50,7 +50,7 @@ async function login(p){await p.evaluate(state=>{
  me={memberId:'m0',displayName:'검증회원00',role:'manager',groupId:'qa',globalAdmin:false};
  group={groupId:'qa',name:'스크롤 검증 모임'};groups=[];normalizeClient();renderAll();document.getElementById('login').classList.add('hide');goView('members');
 },state);}
-async function wheel(p,x=640,y=500,dy=550){await p.mouse.move(x,y);await p.waitForTimeout(100);await p.mouse.wheel(0,dy);await p.waitForTimeout(350);}
+async function wheel(p,x=640,y=500,dy=550){await p.mouse.move(x,y);await p.waitForTimeout(100);for(let i=0;i<3;i++){await p.mouse.wheel(0,dy);await p.waitForTimeout(350);}}
 
 try{
  const scrollCtx=await context();
