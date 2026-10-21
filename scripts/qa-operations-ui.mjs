@@ -11,10 +11,10 @@ try{for(const [engine,name,opts] of [[chromium,'desktop',{viewport:{width:1280,h
  await ctx.addInitScript(()=>{localStorage.setItem('kokmatch_install_guide631_seen','1');sessionStorage.setItem('kokmatch_install_later630','1');localStorage.setItem('kokmatch_push_denied_notice629',String(Date.now()))});
  const now=Date.now(),identity={memberId:'a',displayName:'가회원',role:'manager',groupId:'qa',globalAdmin:false};
  let state={courtCount:2,courtNames:['1코트','2코트'],members:['a','b','c','d'].map((id,i)=>({id,name:['가회원','나회원','다회원','라회원'][i],type:'member',role:i?'member':'manager',state:'waiting',cls:'C',gender:'남',joinedAt:now-3600000})),queue:['a','b','c','d'],games:[],pendingGames:[],history:[1,2].map(i=>({id:'h'+i,players:['a','b'],endedAt:now-i*60000,startedAt:now-i*60000-600000})),pairCounts:{'a|b':2},autoGame:{enabled:true},attendancePolls:[]};
- let creates=0,sets=[],statsCalls=0;
+ let creates=0,sets=[],statsCalls=0,autoWarnings=false;
  const result=()=>({success:true,data:state,user:identity,group:{groupId:'qa',name:'검증 모임'},groups:[]});
  await ctx.route('https://wjelumpbjklfrdjxbesj.supabase.co/**',async route=>{const url=new URL(route.request().url());let b={};try{b=route.request().postDataJSON()||{}}catch{}let x=result();
- if(url.pathname.endsWith('kokmatch-auto-v656')){if(b.action==='set'){state.autoGame.enabled=b.enabled;sets.push(b.enabled)}x={...result(),config:state.autoGame};if(b.action==='tick'&&state.autoGame.enabled)x={...x,reason:'repeat_confirmation',players:['a','b','c','d'],revision:1,repeatPairs:repeatPairs687(state,['a','b','c','d'])};}
+ if(url.pathname.endsWith('kokmatch-auto-v656')){if(b.action==='set'){state.autoGame.enabled=b.enabled;sets.push(b.enabled)}x={...result(),config:state.autoGame};if(b.action==='tick'&&state.autoGame.enabled&&autoWarnings)x={...x,reason:'repeat_confirmation',players:['a','b','c','d'],revision:1,repeatPairs:repeatPairs687(state,['a','b','c','d'])};}
  if(url.pathname.endsWith('kokmatch-create-v641')){creates++;assert.equal(b.forceRepeat,true);state.pendingGames.push({id:'p1',players:b.players,createdAt:now});state.queue=[];state.members.forEach(m=>m.state='matched');x=result()}
  if(url.pathname.endsWith('kokmatch-stats-v54')){statsCalls++;x={success:true,groupId:'qa',today:new Date(now+4*3600000).toISOString().slice(0,10),from:url.searchParams.get('from'),to:url.searchParams.get('to'),month:url.searchParams.get('month'),members:state.members,rangeGames:[],monthGames:[],baselines:[]};}
  await route.fulfill({status:200,contentType:'application/json',body:JSON.stringify(x)});
@@ -32,7 +32,8 @@ try{for(const [engine,name,opts] of [[chromium,'desktop',{viewport:{width:1280,h
  assert.equal(await warning.evaluate(el=>getComputedStyle(el).color),'rgb(196, 91, 8)');
  await page.evaluate(()=>renderAll());await page.waitForTimeout(500);assert.equal(await warning.count(),1,'cleanup must preserve warning');assert.equal(creates,1);
  await page.evaluate(()=>goView('stats'));await page.waitForTimeout(600);assert.ok(statsCalls>0);assert.ok(!/통계 조회 중 오류|통계를 불러오지 못/.test(await page.locator('#stats').innerText()));
- await page.evaluate(()=>{goView('queue');window.__kokmatchShowAutoRepeat687({reason:'repeat_confirmation',players:['a','b','c','d'],revision:1,repeatPairs:[{aName:'가회원',bName:'나회원',count:3}]})});
+ autoWarnings=true;state.autoGame.enabled=true;
+ await page.evaluate(()=>{goView('queue');S.autoGame.enabled=true;return window.__kokmatchRunAuto656(true)});
  await page.getByRole('button',{name:'다른 사람으로 변경',exact:true}).click();await page.waitForFunction(()=>!document.querySelector('#modal').classList.contains('on'));assert.equal(sets.at(-1),false);
  assert.deepEqual(errors,[]);fs.mkdirSync('qa-results',{recursive:true});await page.screenshot({path:`qa-results/operations-${name}.png`});console.log('PASS',name,'OFF, stats, repeat cancel/keep, persistent orange warning, auto alternative');
  }finally{await browser.close()}
