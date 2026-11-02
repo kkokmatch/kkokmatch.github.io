@@ -1,3 +1,4 @@
+import {boardFixture} from './qa-board-fixture.mjs';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import {chromium} from 'playwright';
@@ -50,6 +51,7 @@ await page.route('https://wjelumpbjklfrdjxbesj.supabase.co/functions/v1/**',asyn
 });
 
 try{
+ await boardFixture(page,()=>state,{role:'manager'});
  await page.goto('http://127.0.0.1:4173/?qa=v678',{waitUntil:'networkidle'});
  await page.waitForFunction(v=>window.__kokmatchVersionLock===v&&window.__kokmatchUiStability678===v,VERSION,{timeout:15000});
  await page.evaluate(s=>{T='qa-token';localStorage.setItem('kokmatch_token',T);currentGroupId='qa';S=JSON.parse(JSON.stringify(s));window.S=S;me={memberId:'mgr',displayName:'모임장',role:'manager',globalAdmin:false,tempOrganizer:false,groupId:'qa'};group={groupId:'qa',name:'QA'};groups=[];normalizeClient();currentView='members';renderAll();document.getElementById('login')?.classList.add('hide');goView('members')},clone(state));
@@ -89,21 +91,10 @@ try{
  assert.equal(rankStyle.w,rankStyle.h,'rank marker is not circular');assert.notEqual(rankStyle.r,'0px','rank marker lost circle radius');
 
  await page.evaluate(()=>goView('queue'));
- await page.waitForSelector('#queue .queueCard .queueWaitMeta678');
- const meta=page.locator('#queue .queueCard').first().locator('.queueWaitMeta678');
- const expectedGameText=await page.evaluate(()=>{const id=sortedQueue()[0];return `게임 ${dailyCount(id)}회`});
- const pill=await meta.evaluate(el=>({content:getComputedStyle(el,'::after').content,bg:getComputedStyle(el,'::after').backgroundColor,r:getComputedStyle(el,'::after').borderRadius}));
- assert(pill.content.includes(expectedGameText),`green badge content wrong: expected ${expectedGameText}, got ${pill.content}`);assert.notEqual(pill.bg,'rgba(0, 0, 0, 0)');assert.notEqual(pill.r,'0px');
- await meta.evaluate((el,gameText)=>{el.innerHTML=`<span class="waitCurrent70">현재 20분 대기중</span><span class="waitSep70"> · </span><span class="waitTotal70">오늘 총 88분 대기</span><span class="legacyGreyGame">${gameText}</span>`},expectedGameText);
- const immediatePill=await meta.evaluate(el=>getComputedStyle(el,'::after').content);
- assert(immediatePill.includes(expectedGameText),'green game badge disappeared during legacy rewrite');
- await page.waitForTimeout(60);
- const cleaned=(await meta.innerText()).replace(/\s+/g,' ').trim();
- assert(!cleaned.includes('오늘 총'),'legacy total-wait grey text survived');assert(!cleaned.includes(expectedGameText),'grey game-count text survived beside green badge');
- assert.equal(await meta.locator(':scope > .waitCurrent678').count(),1,'canonical wait row was not restored');
-
+ const magnet=page.locator('#queue .mbMagnet').first();await magnet.waitFor();
+ assert.match(await magnet.getAttribute('aria-label'),/분 대기.*게임/);
  // Preserve automatic/manual conflict popup while automatic matching keeps running.
- await page.locator('#queue .queueCard').first().click();
+ await page.locator('#queue .mbMagnet').first().click();
  await page.waitForSelector('#autoManualKeep673');
  await page.evaluate(()=>window.__kokmatchRunAuto656(true));
  await page.waitForFunction(()=>S?.pendingGames?.length===1,{timeout:5000});
@@ -116,7 +107,7 @@ try{
  console.log(`PASS v6.78 phone roster profile/name gap ${phoneGap.toFixed(1)}px`);
  console.log('PASS v6.78 no-flash member roster retained');
  console.log('PASS v6.78 persistent live operations without priority/court panels');
- console.log(`PASS v6.78 permanent green queue game-count pill ${expectedGameText} survives legacy rewrites`);
+ console.log('PASS inline magnet wait and game count');
  console.log('PASS v6.78 monthly rank circles sit left inside name cells with no visible number column');
  console.log('PASS v6.78 automatic matching continues while manual conflict popup stays open');
 }finally{await browser.close()}

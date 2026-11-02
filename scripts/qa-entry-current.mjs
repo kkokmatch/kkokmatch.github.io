@@ -56,12 +56,14 @@ try{for(const [name,opts] of profiles){
   if(rel==='index.html')return route.fulfill({contentType:'text/html',body:fs.readFileSync(file,'utf8').replaceAll(latest.semanticVersion,version)});
   return route.fulfill({path:file});
  });
+ let expireOnNextAttendance=false;
  const response=()=>({success:true,data:structuredClone(state),user:{memberId:role==='member'?'member':'manager',displayName:'검증사용자',role,groupId:'qa',globalAdmin:false},group:{groupId:'qa',name:'입장 검증'},groups:[],profiles:{},config:{enabled:false}});
  await ctx.route('https://wjelumpbjklfrdjxbesj.supabase.co/**',async route=>{
   const r=route.request(),url=new URL(r.url());let status=200,result=response();
   if(url.pathname.endsWith('/kokmatch-v60-api')){legacyCalls++;status=401;result={error:'로그인이 필요합니다.'}}
   else if(url.pathname.endsWith('/kokmatch-atomic-api')){
    atomicCalls++;
+   if(expireOnNextAttendance){valid=false;expireOnNextAttendance=false;}
    if(atomicFailure){status=atomicFailure;result={error:'서버 인증 처리 오류'}}
    else{const rr=await atomic(new Request(r.url(),{method:'POST',headers:r.headers(),body:r.postData()}));status=rr.status;result=await rr.json()}
   }else if(url.pathname.endsWith('/kokmatch-multi-api')&&!valid){status=401;result={error:'로그인이 필요합니다.'}}
@@ -85,7 +87,9 @@ try{for(const [name,opts] of profiles){
   atomicFailure=failure;const before=writes;await click('member','퇴장');await page.waitForTimeout(1000);
   assert.equal(writes,before);assert.equal(state.members[1].state,'waiting');assert.equal(await page.evaluate(()=>S.members.find(m=>m.id==='member').state),'waiting');assert.equal(await page.evaluate(()=>T),'fixture');assert.ok(!alerts.at(-1).includes('만료'),'a valid session must not be reported as expired');
  }
- atomicFailure=0;valid=false;await click('member','퇴장');await page.waitForFunction(()=>!T);assert.ok(await page.locator('#loginName').isVisible());assert.match(alerts.at(-1),/만료/);
+ // Expire this request after the tap. A background poll can otherwise log out
+ // correctly before the test gets to press the button.
+ atomicFailure=0;expireOnNextAttendance=true;await click('member','퇴장');await page.waitForFunction(()=>!T);assert.ok(await page.locator('#loginName').isVisible());assert.match(alerts.at(-1),/만료/);
  valid=true;await seed();await click('member','퇴장');await page.waitForTimeout(900);assert.equal(state.members[1].state,'out');assert.deepEqual(errors,[]);
  console.log('PASS',engine.name(),name,'roster enter/watch/exit; single write; self/settings/entry; rollback; valid/expired session; recovery');await ctx.close();
 }}finally{await browser.close()}

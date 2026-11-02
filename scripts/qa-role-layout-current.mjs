@@ -1,3 +1,4 @@
+import {boardFixture} from './qa-board-fixture.mjs';
 import fs from 'node:fs';
 import { chromium } from 'playwright';
 
@@ -57,6 +58,8 @@ async function installRoutes(page,state,identity){
   if(url.pathname.endsWith('/kokmatch-multi-api')&&url.searchParams.get('api')==='groups')return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({success:true,groups:[{groupId:'qa',name:'QA 모임',isActive:true,memberCount:state.members.length}]})});
   return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify(genericPayload(state,identity))});
  });
+ await boardFixture(page,()=>state,identity);
+
 }
 
 async function assertViewFits(page,label,view){
@@ -168,13 +171,13 @@ for(const vp of viewports){
  await page.goto('http://127.0.0.1:4173/?qa=queue-stability',{waitUntil:'networkidle'});await page.waitForFunction(v=>window.__kokmatchVersionLock===v&&window.__kokmatchQueueStable672===v,VERSION,{timeout:15000});
  await page.evaluate(({state,identity})=>{T='qa-token';localStorage.setItem('kokmatch_token',T);currentGroupId='qa';localStorage.setItem('kokmatch_group_id','qa');currentView='queue';S=JSON.parse(JSON.stringify(state));me=identity;group={groupId:'qa',name:'QA 모임'};groups=[];normalizeClient();renderAll();document.getElementById('login')?.classList.add('hide');},{state:clone(state),identity});
  await page.waitForTimeout(350);
- const before=await page.evaluate(()=>{const q=document.querySelector('#queue .queueCard54,#queue .queueCard53,#queue .queueCard');const a=document.querySelector('#queue .autoGameQueue658');window.__qaQueueNode672=q;window.__qaAutoNode672=a;return{wait:q?.querySelector('.queueInfo53 .compactMeta53,.queueInfo53 .meta')?.textContent||'',auto:!!a}});
- if(!before.auto)throw new Error('queue stability QA missing auto-game card');
- const target=state.members.find(m=>m.id==='mgr');target.joinedAt=Number(target.joinedAt||Date.now())-60000;
- await page.evaluate(()=>loadState(true));await page.waitForTimeout(350);
- const after=await page.evaluate(()=>{const q=document.querySelector('#queue .queueCard54,#queue .queueCard53,#queue .queueCard');const a=document.querySelector('#queue .autoGameQueue658');return{sameQueue:window.__qaQueueNode672===q,sameAuto:window.__qaAutoNode672===a,wait:q?.querySelector('.queueInfo53 .compactMeta53,.queueInfo53 .meta')?.textContent||''}});
- if(!after.sameQueue||!after.sameAuto)throw new Error(`queue wait-only update replaced DOM: ${JSON.stringify({before,after})}`);
- if(after.wait===before.wait)throw new Error(`queue wait text did not update in place: ${JSON.stringify({before,after})}`);
+ await page.evaluate(()=>goView('queue'));
+ const chip=page.locator('#kmBoard692 [data-id=mgr]');await chip.waitFor();
+ const before=await chip.locator('em').textContent();
+ await chip.evaluate(el=>{window.__qaQueueNode=el});
+ state.members.find(m=>m.id==='mgr').joinedAt-=60000;
+ await page.waitForFunction(prev=>document.querySelector('#kmBoard692 [data-id=mgr] em')?.textContent!==prev,before,{timeout:10000});
+ if(!await chip.evaluate(el=>window.__qaQueueNode===el))throw Error('Clock-only poll replaced magnet');
  await context.close();
 }
 
