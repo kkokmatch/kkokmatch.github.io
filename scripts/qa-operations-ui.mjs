@@ -1,3 +1,4 @@
+import {boardFixture} from './qa-board-fixture.mjs';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import {spawn} from 'node:child_process';
@@ -19,6 +20,7 @@ try{for(const [engine,name,opts] of [[chromium,'desktop',{viewport:{width:1280,h
  if(url.pathname.endsWith('kokmatch-stats-v54')){statsCalls++;x={success:true,groupId:'qa',today:new Date(now+4*3600000).toISOString().slice(0,10),from:url.searchParams.get('from'),to:url.searchParams.get('to'),month:url.searchParams.get('month'),members:state.members,rangeGames:[],monthGames:[],baselines:[]};}
  await route.fulfill({status:200,contentType:'application/json',body:JSON.stringify(x)});
  });
+ await boardFixture(ctx,()=>state,identity);
  const page=await ctx.newPage(),errors=[];page.on('pageerror',e=>errors.push(String(e)));page.on('dialog',d=>d.accept());
  await page.goto(base+'/?qa=operations',{waitUntil:'networkidle'});
  await page.evaluate(({state,identity})=>{T='qa-token';localStorage.setItem(TOKEN_KEY,T);currentGroupId='qa';S=state;window.S=S;me=identity;group={groupId:'qa',name:'검증 모임'};normalizeClient();document.querySelector('#login').classList.add('hide');renderAll();goView('queue')},{state,identity});
@@ -28,7 +30,7 @@ try{for(const [engine,name,opts] of [[chromium,'desktop',{viewport:{width:1280,h
  assert.match(await page.locator('#modalSheet').innerText(),/가회원.*나회원/s);
  await page.getByRole('button',{name:'다른 사람으로 변경',exact:true}).click();assert.equal(creates,0);assert.equal(await page.evaluate(()=>draft.filter(Boolean).length),4);
  await page.evaluate(()=>registerDraft());await page.getByRole('button',{name:'그대로 편성',exact:true}).click();await page.waitForFunction(()=>S.pendingGames.some(p=>p.id==='p1'));
- const warning=page.locator('.pendingCard .repeatWarning687');await warning.waitFor();assert.match(await warning.innerText(),/가회원.*나회원.*3게임/);
+ const warning=page.locator('#mbArea-queue .repeatWarning687');await warning.waitFor();assert.match(await warning.innerText(),/가회원.*나회원.*3게임/);
  assert.equal(await warning.evaluate(el=>getComputedStyle(el).color),'rgb(196, 91, 8)');
  await page.evaluate(()=>renderAll());await page.waitForTimeout(500);assert.equal(await warning.count(),1,'cleanup must preserve warning');assert.equal(creates,1);
  await page.evaluate(()=>goView('stats'));await page.waitForTimeout(600);assert.ok(statsCalls>0);assert.ok(!/통계 조회 중 오류|통계를 불러오지 못/.test(await page.locator('#stats').innerText()));

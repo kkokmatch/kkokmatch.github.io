@@ -1,8 +1,8 @@
 {
-  "version": 132,
-  "label": "v6.92",
-  "semanticVersion": "6.92",
-  "build": "v6.92",
-  "updatedAt": "2026-11-02",
-  "note": "자석판 게임편성 및 선수별 대기시간"
+  "version": 133,
+  "label": "v6.93",
+  "semanticVersion": "6.93",
+  "build": "v6.93",
+  "updatedAt": "2026-11-02T05:27:54.073491+00:00",
+  "note": "게임대기 탭 세로 자석판 및 급수별 자석 색상"
 }

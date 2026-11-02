@@ -1,3 +1,4 @@
+import {boardFixture} from './qa-board-fixture.mjs';
 import fs from 'node:fs';
 import assert from 'node:assert/strict';
 import {chromium} from 'playwright';
@@ -30,6 +31,7 @@ for(const [roleKey,identity] of roles){
    if(url.pathname.endsWith('/kokmatch-state-v46'))return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({data:clone(state),group:{groupId:'qa',name:'QA'},user:identity,memberCount:state.members.length})});
    return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({success:true,data:clone(state),group:{groupId:'qa',name:'QA'},user:identity,groups:[]})});
  });
+ await boardFixture(page,()=>state,identity);
  await page.goto('http://127.0.0.1:4173/?qa=auto673',{waitUntil:'networkidle'});
  await page.waitForFunction(v=>window.__kokmatchVersionLock===v&&window.__kokmatchAutoManualGuard673===v&&typeof window.__kokmatchManualGate673==='function',VERSION,{timeout:15000});
  await page.evaluate(({state,identity})=>{T='qa-token';localStorage.setItem('kokmatch_token',T);currentGroupId='qa';S=JSON.parse(JSON.stringify(state));window.S=S;me=identity;group={groupId:'qa',name:'QA'};groups=[];normalizeClient();currentView='queue';renderAll();document.getElementById('login')?.classList.add('hide');goView('queue')},{state:clone(state),identity});
@@ -40,7 +42,7 @@ for(const [roleKey,identity] of roles){
  for(const t of ['① 대기시간 최우선','② 당일 게임수','③ 오늘 파트너 우선','④ 최근 반복조합 최소화','여자 C조를 남자 D조','⑤ 급수·남녀 밸런스','최근 1시간'])assert(rules.includes(t),`${roleKey} missing rule ${t}`);
  await page.locator('#modalSheet button',{hasText:'닫기'}).click();
  // First manual attempt must be blocked while auto remains on, regardless of the fast touch router.
- const first=page.locator('#queue .queueCard').first();await first.click();
+ const first=page.locator('#queue .mbMagnet').first();await first.click();
  await page.waitForSelector('#autoManualKeep673',{timeout:5000});
  assert.equal(await page.evaluate(()=>draft.filter(Boolean).length),0,`${roleKey} draft changed before conflict choice`);
  await page.locator('#autoManualKeep673').click();
@@ -49,9 +51,9 @@ for(const [roleKey,identity] of roles){
  assert.equal(await page.evaluate(()=>draft.filter(Boolean).length),0,`${roleKey} keep unexpectedly resumed manual action`);
  // Second attempt: turn auto off and replay the exact manual operation.
  await first.click();await page.waitForSelector('#autoManualDisable673',{timeout:5000});await page.locator('#autoManualDisable673').click();
- await page.waitForFunction(()=>S?.autoGame?.enabled===false&&draft.filter(Boolean).length===1,{timeout:5000});
+ await page.waitForFunction(()=>S?.autoGame?.enabled===false&&document.querySelector('.mbMagnet[aria-pressed=true]'),{timeout:5000});
  assert.equal(await page.evaluate(()=>S.autoGame.enabled),false,`${roleKey} auto did not turn off`);
- assert.equal(await page.evaluate(()=>draft.filter(Boolean).length),1,`${roleKey} manual action was not resumed after disabling auto`);
+ assert.equal(await page.locator('.mbMagnet[aria-pressed=true]').count(),1,`${roleKey} manual action was not resumed after disabling auto`);
  if(pageErrors.length)throw new Error(`${roleKey} page errors: ${pageErrors.join(' | ')}`);
  await context.close();
 }

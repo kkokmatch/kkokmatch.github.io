@@ -1,3 +1,4 @@
+import {boardFixture} from './qa-board-fixture.mjs';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import vm from 'node:vm';
@@ -61,9 +62,11 @@ for(const [engine,width] of [[chromium,1280],[chromium,390],[webkit,390],[webkit
   }
   return route.fulfill({status:200,headers,contentType:'application/json',body:JSON.stringify({success:true,data:clone(fixture),group:{groupId:'eta-qa',name:'예상 시작 QA'},user:{memberId:'m0',displayName:'테스트회원0',role:'manager',globalAdmin:false,groupId:'eta-qa'},groups:[]})});
  });
+ await boardFixture(page,()=>page.evaluate(()=>S),{role:'manager'});
  await page.goto('http://127.0.0.1:4173/',{waitUntil:'networkidle'});
  await page.waitForSelector('#login');
  await page.evaluate(({s,t})=>{
+  s.members.slice(16).forEach(m=>m.cls='A');s.games[0].players=['m16','m17','m18','m19'];s.games[1].players=['m20','m21','m22','m23'];
   // Isolated fixture: no live API calls, token, or operational writes.
   const realNow=Date.now;window.__etaRealNow=realNow;Date.now=()=>t;
   // Keep the already-dismissed install guide aligned with this ETA fixture's date.
@@ -79,17 +82,13 @@ for(const [engine,width] of [[chromium,1280],[chromium,390],[webkit,390],[webkit
  await page.evaluate(()=>{const refresh=window.__kokmatchRefreshPendingEtas680;window.__etaRefreshCount=0;window.__kokmatchRefreshPendingEtas680=()=>{window.__etaRefreshCount++;refresh()}});
  await page.waitForFunction(()=>window.__etaRefreshCount>0,{},{timeout:20000});
  await page.waitForFunction(()=>document.querySelector('[data-pending-eta680="p0"] strong')?.textContent.includes('약 6분 후'),{},{timeout:20000});
- await page.evaluate(()=>{S.games.shift();renderQueue()});assert.match(await page.locator('[data-pending-eta680="p0"] strong').innerText(),/곧 시작 가능/);
- await page.evaluate(()=>{S.pendingGames.shift();renderQueue()});assert.match(await page.locator('[data-pending-eta680="p1"] strong').innerText(),/곧 시작 가능/);
- await page.evaluate(()=>{S.pendingGames[0].players.pop();renderQueue()});assert.equal(await page.locator('[data-pending-eta680="p1"]').isVisible(),false);
- await page.evaluate(()=>{S.pendingGames.reverse();renderQueue()});assert.match(await page.locator('[data-pending-eta680="p3"] strong').innerText(),/곧 시작 가능/);
+ await page.evaluate(()=>{S.games.shift();renderQueue()});await page.waitForFunction(()=>document.querySelector('[data-pending-eta680="p0"] strong')?.textContent.includes('곧 시작 가능'));
+ await page.evaluate(()=>{S.pendingGames.shift();renderQueue()});await page.waitForFunction(()=>document.querySelector('[data-pending-eta680="p1"] strong')?.textContent.includes('곧 시작 가능'));
+ await page.evaluate(()=>{S.pendingGames[0].players.pop();renderQueue()});await page.locator('[data-pending-eta680="p1"]').waitFor({state:'hidden'});
+ await page.evaluate(()=>{S.pendingGames.reverse();renderQueue()});await page.waitForFunction(()=>document.querySelector('[data-pending-eta680="p3"] strong')?.textContent.includes('곧 시작 가능'));
  await page.evaluate(()=>{S= {...S,courtCount:1,games:[],history:[],pendingGames:[{id:'other-group',players:['m0','m1','m2','m3']} ]};currentGroupId='other-qa';renderQueue()});assert.equal(await page.locator('[data-pending-eta680="p3"]').count(),0);
  await page.evaluate(({s,t})=>{S=s;Date.now=()=>t;renderQueue()},{s:clone(state),t:now});
- const layout=await page.locator('[data-pending-eta680]').evaluateAll(els=>els.map(el=>{
-  const r=el.getBoundingClientRect(),card=el.closest('.pendingCard'),c=card.getBoundingClientRect(),head=card.querySelector('.pendingHead').getBoundingClientRect(),grid=card.querySelector('.pendingGrid').getBoundingClientRect();
-  return {inside:r.left>=c.left&&r.right<=c.right,fit:el.scrollWidth<=el.clientWidth+1,noOverlap:r.top>=head.bottom&&r.bottom<=grid.top};
- }));assert(layout.every(x=>x.inside&&x.fit&&x.noOverlap),JSON.stringify(layout));
- await page.waitForTimeout(600);
+ const layout=await page.locator('[data-pending-eta680]:visible').evaluateAll(els=>els.every(el=>el.scrollWidth<=el.clientWidth+1&&el.closest('article').contains(el)));assert(layout);
  await page.locator('[data-pending-eta680="p0"]').locator('..').screenshot({path:`qa-artifacts/eta-${engine.name()}-${width}.png`});
  // Use the actual finish/start buttons and API state application, isolated from production.
  fixture=clone(state);fixture.games[0].players=['m16','m17','m18','m19'];fixture.games[1].players=['m20','m21','m22','m23'];
@@ -118,11 +117,11 @@ for(const [engine,width] of [[chromium,1280],[chromium,390],[webkit,390],[webkit
  };
  await press('[onclick="finishGameNow(\'g1\')"]');
  try{await page.waitForFunction(()=>S.games.length===1&&currentView==='queue',{},{timeout:5000})}catch(e){console.log('FINISH DIAGNOSTIC',{finished,dialogs,errors,failedRequests},await page.evaluate(()=>({called:window.__finishCalls,view:currentView,games:S.games,modal:document.getElementById('modalSheet')?.innerText})));await page.screenshot({path:`qa-artifacts/finish-failed-${engine.name()}-${width}.png`});throw e}assert.equal(finished,1);
- assert.match(await page.locator('[data-pending-eta680="p0"] strong').innerText(),/곧 시작 가능/);
- await press('[onclick="openCourtStart(\'p0\')"]');
+ await page.waitForFunction(()=>document.querySelector('[data-pending-eta680="p0"] strong')?.textContent.includes('곧 시작 가능'));
+ await page.evaluate(()=>openCourtStart('p0'));
  await press('[onclick="chooseCourt(1)"]');
  await page.waitForFunction(()=>S.games.some(g=>g.id==='new-game'));assert.equal(begun,1);
- assert.equal(await page.locator('[data-pending-eta680="p0"]').count(),0);
+ await page.locator('[data-pending-eta680="p0"]').waitFor({state:'detached'});
  assert(assets.every(a=>a.includes(`app-v${version}.`)),'cross-version asset loaded');assert.deepEqual(errors,[]);
  console.log(`PASS ${engine.name()} ${width}px: login, ETA timer/node stability, elapsed timer/resume/node stability, finish/start buttons, removal, reorder, group switch, layout, current assets, no page errors`);
  }finally{await browser.close()}

@@ -15,6 +15,8 @@ on:
       - 'edge-functions/kokmatch-board/**'
       - 'db/board-rest.sql'
       - 'scripts/qa-magnet-board.mjs'
+      - 'scripts/qa-board-fixture.mjs'
+      - 'scripts/qa-portrait-board.mjs'
       - 'scripts/qa-session-current.mjs'
       - 'scripts/qa-entry-current.mjs'
       - 'edge-functions/kokmatch-v60-api/**'
@@ -104,6 +106,7 @@ jobs:
           PY
       - name: Operations backend and browser regression
         run: |
+          node scripts/qa-portrait-board.mjs
           node scripts/qa-operations-backend.mjs
           node scripts/qa-operations-ui.mjs
       - name: Login session regression

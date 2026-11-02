@@ -1,3 +1,4 @@
+import {boardFixture} from './qa-board-fixture.mjs';
 import fs from 'node:fs';
 import assert from 'node:assert/strict';
 import {chromium} from 'playwright';
@@ -33,6 +34,7 @@ for(const [roleKey,identity] of roles){
    }
    return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({success:true,data:clone(state),group:{groupId:'qa',name:'QA'},user:identity,groups:[]})});
  });
+ await boardFixture(page,()=>state,identity);
  await page.goto('http://127.0.0.1:4173/?qa=dev674',{waitUntil:'networkidle'});
  await page.waitForFunction(v=>window.__kokmatchVersionLock===v&&window.__kokmatchDeveloperVisible674===v,VERSION,{timeout:15000});
  await page.evaluate(({state,identity})=>{T='qa-token';localStorage.setItem('kokmatch_token',T);currentGroupId='qa';S=JSON.parse(JSON.stringify(state));window.S=S;me=identity;group={groupId:'qa',name:'QA'};groups=[];normalizeClient();document.getElementById('login')?.classList.add('hide');currentView='members';renderAll();goView('members')},{state:clone(state),identity});
@@ -66,31 +68,10 @@ for(const [roleKey,identity] of roles){
    document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',b.dataset.v==='queue'));
  });
  await page.waitForTimeout(120);
- const devQueue=page.locator('#queue .queueCard').filter({hasText:'박태영'}).first();
- await devQueue.waitFor({state:'visible'});
- assert.equal(await devQueue.locator('.roleBadge.role-global').count(),1,`${roleKey}: developer badge missing in queue`);
- const queueFrame=devQueue.locator('.devChallenger659 > img.devFrame661').first();
- await queueFrame.waitFor({state:'attached'});
- assert.equal(await queueFrame.isVisible(),false,`${roleKey}: queue developer frame ignored hidden group setting`);
- const nameGame=await devQueue.locator('.name .gamecnt').count();
- assert.equal(nameGame,0,`${roleKey}: game-count badge still sits on name line`);
- // v6.78 introduced the persistent CSS ::after game-count pill. Detect that feature, not the exact release string, so later versions keep the modern path.
- const modern=await page.evaluate(()=>!!window.__kokmatchUiStability678);
- const waitMeta=devQueue.locator(modern?'.queueInfo53 .queueWaitMeta678':'.queueInfo53 .queueWaitMeta658').first();await waitMeta.waitFor({state:'visible'});
- const waitText=(await waitMeta.innerText()).replace(/\s+/g,' ');
- assert(waitText.includes('대기중'),`${roleKey}: waiting text missing`);
- if(modern){
-  const pill=await waitMeta.evaluate(el=>({content:getComputedStyle(el,'::after').content,bg:getComputedStyle(el,'::after').backgroundColor,r:getComputedStyle(el,'::after').borderRadius}));
-  assert(pill.content.includes('게임 2회'),`${roleKey}: persistent green game count missing: ${pill.content}`);
-  assert.notEqual(pill.bg,'rgba(0, 0, 0, 0)',`${roleKey}: persistent game count lost green background`);
-  assert.notEqual(pill.r,'0px',`${roleKey}: persistent game count lost pill shape`);
-  assert(!waitText.includes('게임 2회'),`${roleKey}: legacy grey game-count text coexists with persistent green pill`);
-  assert.equal(await waitMeta.locator('.queueGameCount658').count(),0,`${roleKey}: obsolete DOM game badge survived v6.78+`);
- }else{
-  assert(waitText.includes('게임 2회'),`${roleKey}: game count was not placed to the right of waiting text`);
-  assert.equal(await waitMeta.locator('.queueGameCount658').count(),1,`${roleKey}: queue game badge class missing`);
- }
+ const magnet=page.locator('#queue .mbMagnet[data-id="dev"]');await magnet.waitFor();
+ assert.match(await magnet.getAttribute('aria-label'),/박태영.*B조.*대기.*2게임.*개발자/);
+ assert.equal(await magnet.evaluate(el=>getComputedStyle(el).backgroundColor),'rgb(0, 207, 198)');
  await context.close();
 }
 await browser.close();
-console.log('PASS developer badge stays visible, role frames default hidden, role-setting visibility is permission-scoped, queue game badge persists');
+console.log('PASS developer badge stays visible, role frames default hidden, role-setting visibility is permission-scoped, magnet retains grade and accessible game count');

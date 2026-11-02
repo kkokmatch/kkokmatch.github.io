@@ -1,3 +1,4 @@
+import {boardFixture} from './qa-board-fixture.mjs';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -22,6 +23,7 @@ async function context(opts={}){
   if(relative==='index.html')return r.fulfill({contentType:'text/html',body:fs.readFileSync(file,'utf8').replaceAll(latest.semanticVersion,version)});
   return r.fulfill({path:file});
  });
+ await boardFixture(ctx,()=>state,{role:'manager'});
  ctx.on('page',p=>p.on('pageerror',e=>errors.push(String(e))));
  return ctx;
 }
