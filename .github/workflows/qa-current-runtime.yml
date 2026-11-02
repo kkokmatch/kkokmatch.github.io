@@ -12,6 +12,9 @@ on:
       - 'manifest.webmanifest'
       - 'edge-functions/kokmatch-auto-v656/**'
       - 'edge-functions/kokmatch-atomic-api/**'
+      - 'edge-functions/kokmatch-board/**'
+      - 'db/board-rest.sql'
+      - 'scripts/qa-magnet-board.mjs'
       - 'scripts/qa-session-current.mjs'
       - 'scripts/qa-entry-current.mjs'
       - 'edge-functions/kokmatch-v60-api/**'
@@ -51,6 +54,7 @@ jobs:
         run: node scripts/validate-standalone-runtime.mjs
       - name: Automatic matching priority and compute QA
         run: |
+          node scripts/qa-magnet-board.mjs
           node scripts/qa-auto-priority-v673.mjs
           node --input-type=module <<'NODE'
           import {bestFour,businessDay} from './edge-functions/kokmatch-auto-v656/scoring.mjs';

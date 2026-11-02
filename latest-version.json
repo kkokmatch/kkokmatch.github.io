@@ -1,8 +1,8 @@
 {
-  "version": 131,
-  "label": "v6.91",
-  "semanticVersion": "6.91",
-  "build": "v6.91",
-  "updatedAt": "2026-10-21T08:29:15.885494+00:00",
-  "note": "게임 중 코트 시작 시각을 경과 시간으로 변경, 자동 갱신"
+  "version": 132,
+  "label": "v6.92",
+  "semanticVersion": "6.92",
+  "build": "v6.92",
+  "updatedAt": "2026-11-02",
+  "note": "자석판 게임편성 및 선수별 대기시간"
 }
