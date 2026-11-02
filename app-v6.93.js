@@ -9161,7 +9161,8 @@ const magnetBoard692=(()=>{
  function panel(z,court){
    const ids=board.zones[z],playing=!!board.games[z],full=ids.every(Boolean);
    const pid=board.groups[z],repeat=pid?repeatSummary687(ids.filter(Boolean),pid):'';
-   const details=pid?'<div class="pendingEta680" data-pending-eta680="'+html(pid)+'" hidden><strong></strong></div>'+(repeat?'<div class="repeatWarning687">'+repeat+'</div>':''):'';
+   const eta=pid&&full?'<div class="pendingEta680" data-pending-eta680="'+html(pid)+'" hidden><strong></strong></div>':'';
+   const details=eta+(repeat?'<div class="repeatWarning687">'+repeat+'</div>':'');
    return '<article><header><button data-do="rename" data-z="'+z+'" '+(!reply.edit?'disabled':'')+'>'+html(board.names[z])+(reply.edit?' ✎':'')+'</button>'+(!court&&full&&reply.edit?'<button data-do="stageMenu" data-z="'+z+'">코트로</button>':'')+'</header><div class="'+(court?'mbCourt':'mbQueue')+'">'+(court?courtLines:'')+ids.map((_,i)=>slot(z,i)).join('')+'</div>'+(court?'<button class="mbAction" data-do="'+(playing?'finish':'start')+'" data-z="'+z+'" '+((playing?reply.finish:full&&reply.edit)?'':'disabled')+'>'+(playing?'경기 종료':full?'경기 시작':'4명 배치 후 시작')+'</button>':'')+details+'</article>';
  }
  function paint(){
@@ -9241,7 +9242,7 @@ const magnetBoard692=(()=>{
    if(!q||!me||!T||currentView!=='queue'||!q.classList.contains('on')){if(scope||root)close();return;}
    if(!currentGroupId||currentGroupId==='__global__'){close();show();message('모임을 선택해주세요.');return;}
    const key=currentGroupId+'|'+T;
-   if(scope===key && root?.parentNode===q)return;
+   if(scope===key && root?.parentNode===q){window.__kokmatchRefreshPendingEtas680?.();return;}
    close();scope=key;show();window.__kokmatchPaintCompactAuto659?.();request();
    poll=setInterval(()=>request(),5000);clock=setInterval(clocks,1000);
  }
