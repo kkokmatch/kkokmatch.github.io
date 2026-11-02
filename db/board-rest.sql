@@ -23,8 +23,22 @@ declare
   original text := pg_get_functiondef('public.kokmatch_atomic_game_action(text,text,jsonb)'::regprocedure);
   previous text := 'update kokmatch_state set data=s, revision=revision+1, updated_at=clock_timestamp() where club_id=p_gid;';
   replacement text := 'update kokmatch_state set data=s, revision=revision+1, updated_at=clock_timestamp() where club_id=p_gid returning data into s;';
+  attendance_anchor text := $anchor$if not exists(select 1 from jsonb_array_elements(s->'members') m where m->>'id'=mid) then raise exception '회원을 찾을 수 없습니다.'; end if;$anchor$;
+  attendance_guard text := $guard$
+    -- A delayed roster tap cannot remove an already assigned player or restart the wait clock.
+    if exists(select from jsonb_array_elements((s->'games') || (s->'pendingGames')) assigned where (assigned->'players') ? mid) then
+      raise exception '편성 중이거나 경기 중인 선수입니다.';
+    end if;
+    if exists(select from jsonb_array_elements(s->'members') m where m->>'id'=mid and m->>'state'=mode) then return s; end if;
+$guard$;
 begin
-  if strpos(original,replacement)>0 then return; end if;
-  if strpos(original,previous)=0 then raise exception 'Atomic game function changed. Review migration before applying.'; end if;
-  execute replace(original,previous,replacement);
+  if strpos(original,replacement)=0 then
+    if strpos(original,previous)=0 then raise exception 'Review changed game write before applying.'; end if;
+    original := replace(original,previous,replacement);
+  end if;
+  if strpos(original,attendance_guard)=0 then
+    if strpos(original,attendance_anchor)=0 then raise exception 'Review changed attendance rule before applying.'; end if;
+    original := replace(original,attendance_anchor,attendance_anchor || attendance_guard);
+  end if;
+  execute original;
 end $migration$;
