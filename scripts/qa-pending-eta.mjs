@@ -37,6 +37,10 @@ s=clone(state);s.history=Array.from({length:16},(_,i)=>({id:'h'+i,endedAt:now-(1
 const trend=sandbox.etaModel680(s,now).estimate(groups[0].players).minutes;assert(trend>16&&trend<20,'recent matches should shift the daily mean');
 console.log('PASS ETA parallel courts, order, incomplete groups, fallback, learning, duration-only history, invalid records, reset, overrun and clock');
 
+// The live board enforces a single placement per player. Use separate players of
+// the same skill mix for running games and pending groups in the browser fixture.
+state.members.slice(16).forEach(m=>m.cls='A');
+state.games[0].players=['m16','m17','m18','m19'];state.games[1].players=['m20','m21','m22','m23'];
 fs.mkdirSync('qa-artifacts',{recursive:true});
 for(const [engine,width] of [[chromium,1280],[chromium,390],[webkit,390],[webkit,375]]){
  if(process.env.QA_ENGINE&&process.env.QA_ENGINE!==`${engine.name()}-${width}`)continue;
@@ -65,8 +69,6 @@ for(const [engine,width] of [[chromium,1280],[chromium,390],[webkit,390],[webkit
  await boardFixture(page,()=>fixture,{role:'manager'});
  await page.goto('http://127.0.0.1:4173/',{waitUntil:'networkidle'});
  await page.waitForSelector('#login');
- fixture.members.slice(16).forEach(m=>m.cls='A');
- fixture.games[0].players=['m16','m17','m18','m19'];fixture.games[1].players=['m20','m21','m22','m23'];
  await page.evaluate(({s,t})=>{
   const realNow=Date.now;window.__etaRealNow=realNow;Date.now=()=>t;
   // Keep the already-dismissed install guide aligned with this ETA fixture's date.
@@ -99,7 +101,7 @@ for(const [engine,width] of [[chromium,1280],[chromium,390],[webkit,390],[webkit
  const layout=await page.locator('[data-pending-eta680]:visible').evaluateAll(els=>els.every(el=>el.scrollWidth<=el.clientWidth+1&&el.closest('article').contains(el)));assert(layout);
  await page.locator('[data-pending-eta680="p0"]').locator('..').screenshot({path:`qa-artifacts/eta-${engine.name()}-${width}.png`});
  // Use the actual finish/start buttons and API state application, isolated from production.
- fixture=clone(state);fixture.games[0].players=['m16','m17','m18','m19'];fixture.games[1].players=['m20','m21','m22','m23'];
+ fixture=clone(state);
  await page.evaluate(({s,t})=>{const wall=window.__etaRealNow();Date.now=()=>t+window.__etaRealNow()-wall;S=s;renderAll();goView('playing')},{s:clone(fixture),t:now+10*minute});
  await page.waitForTimeout(500);
  const elapsed=page.locator('[data-game-elapsed691="g1"]');
