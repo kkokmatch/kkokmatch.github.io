@@ -1,0 +1,22 @@
+import assert from 'node:assert/strict';
+import {project,change} from '../edge-functions/kokmatch-board/board.mjs';
+const ids=Array.from({length:29},(_,i)=>'member-'+i);
+const s={courtCount:8,members:ids.map(id=>({id,name:id,cls:'C',state:'waiting',joinedAt:1000})),queue:[...ids],games:[],pendingGames:[]};
+const actor={createdByMemberId:'manager'};
+function move(id,zone,index){change(s,{action:'move',id,zone,index},project(s),62000,actor);}
+let v=project(s);
+assert.equal(v.zones['free-8'][0],ids[28]);
+assert.equal(Object.keys(v.zones).filter(z=>z.startsWith('court-')).length,8);
+for(let i=0;i<16;i++)move(ids[i],'wait-'+(1+Math.floor(i/4)),i%4);
+for(let i=0;i<4;i++)move(ids[i],'court-2',i);
+assert.equal(project(s).players[ids[0]].since,1000);
+move(ids[0],'wait-3',2);v=project(s);
+assert.equal(v.zones['court-2'][0],ids[10]);assert.equal(v.zones['wait-3'][2],ids[0]);
+assert.equal(s.games.length,0);assert.equal(s.queue.length,13);
+move(ids[0],'rest',0);assert.equal(project(s).players[ids[0]].since,null);
+change(s,{action:'leave',id:ids[0]},project(s),62000,actor);assert.equal(project(s).players[ids[0]],undefined);
+change(s,{action:'undo'},project(s),62000,actor);assert.equal(project(s).zones.rest[0],ids[0]);
+move(ids[0],'free-6',0);assert.equal(project(s).players[ids[0]].since,62000);
+s.members.find(m=>m.id===ids[0]).joinedAt=null;assert.equal(project(s).players[ids[0]].since,null);
+s.autoGame={enabled:true};assert.throws(()=>move(ids[0],'court-2',0),/자동편성/);
+console.log('PASS board projection, capacity, existing court count, fixed groups, slot swaps, unknown waits, rest, leave and undo, auto guard');
