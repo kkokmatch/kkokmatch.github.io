@@ -111,7 +111,11 @@ for(const [engine,width] of [[chromium,1280],[chromium,390],[webkit,390],[webkit
  await page.waitForTimeout(500);
  const dialogs=[];page.on('dialog',d=>{dialogs.push(d.type()+': '+d.message());return d.accept()});
  await page.evaluate(()=>{window.__finishCalls=0;const original=finishGameNow;finishGameNow=async(...args)=>{window.__finishCalls++;return original(...args)}});
- const press=async selector=>{const el=page.locator(selector);await el.scrollIntoViewIfNeeded();await page.waitForTimeout(200);if(width<500)await el.tap();else await el.click()};
+ const press=async selector=>{
+  const button=page.locator(selector);
+  // Tap and click locate the live control again if the polling render replaces it.
+  if(width<500)await button.tap();else await button.click();
+ };
  await press('[onclick="finishGameNow(\'g1\')"]');
  try{await page.waitForFunction(()=>S.games.length===1&&currentView==='queue',{},{timeout:5000})}catch(e){console.log('FINISH DIAGNOSTIC',{finished,dialogs,errors,failedRequests},await page.evaluate(()=>({called:window.__finishCalls,view:currentView,games:S.games,modal:document.getElementById('modalSheet')?.innerText})));await page.screenshot({path:`qa-artifacts/finish-failed-${engine.name()}-${width}.png`});throw e}assert.equal(finished,1);
  assert.match(await page.locator('[data-pending-eta680="p0"] strong').innerText(),/곧 시작 가능/);
