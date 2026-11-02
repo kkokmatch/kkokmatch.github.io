@@ -9237,7 +9237,7 @@ window.__kokmatchCleanQueue683=cleanQueue683;
 // Full-screen game formation view shares the current session and the existing queue screen.
 const magnetBoard692=(()=>{
  const api='https://wjelumpbjklfrdjxbesj.supabase.co/functions/v1/kokmatch-board';
- let root,board,reply,scope='',selected='',drag=null,suppress=0,reading=false,writing=false,serial=0;
+ let root,board,reply,scope='',selected='',drag=null,suppressedChip='',suppress=0,reading=false,writing=false,serial=0;
  let baseTime=0,baseTick=0,manualList=false,poll,clock,panelObserver,contextKey='';
  const html=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
  function playerTime(p,z){
@@ -9255,7 +9255,7 @@ const magnetBoard692=(()=>{
  const courtLines='<svg aria-hidden="true" viewBox="0 0 160 114" preserveAspectRatio="none"><g fill="none" stroke="white" stroke-width="1.2"><rect x="7" y="4" width="146" height="106"/><path d="M15 4V110 M145 4V110 M7 12H153 M7 102H153 M7 38H153 M7 76H153 M80 4V38 M80 76V110 M3 57H157"/></g></svg>';
  function panel(z,court){
    const ids=board.zones[z],playing=!!board.games[z],full=ids.every(Boolean);
-   return '<article><header><button data-do="rename" data-z="'+z+'" '+(!reply.edit?'disabled':'')+'>'+html(board.names[z])+(reply.edit?' ✎':'')+'</button></header><div class="'+(court?'mbCourt':'mbQueue')+'">'+(court?courtLines:'')+ids.map((_,i)=>slot(z,i)).join('')+'</div>'+(court?'<button class="mbAction" data-do="'+(playing?'finish':'start')+'" data-z="'+z+'" '+((playing?reply.finish:full&&reply.edit)?'':'disabled')+'>'+(playing?'경기 종료':full?'경기 시작':'4명 배치 후 시작')+'</button>':'')+'</article>';
+   return '<article><header><button data-do="rename" data-z="'+z+'" '+(!reply.edit?'disabled':'')+'>'+html(board.names[z])+(reply.edit?' ✎':'')+'</button>'+(!court&&full&&reply.edit?'<button data-do="stageMenu" data-z="'+z+'">코트로</button>':'')+'</header><div class="'+(court?'mbCourt':'mbQueue')+'">'+(court?courtLines:'')+ids.map((_,i)=>slot(z,i)).join('')+'</div>'+(court?'<button class="mbAction" data-do="'+(playing?'finish':'start')+'" data-z="'+z+'" '+((playing?reply.finish:full&&reply.edit)?'':'disabled')+'>'+(playing?'경기 종료':full?'경기 시작':'4명 배치 후 시작')+'</button>':'')+'</article>';
  }
  function paint(){
    if(!root||!board||drag||root.querySelector('.mbMenu'))return;
@@ -9265,8 +9265,11 @@ const magnetBoard692=(()=>{
    root.querySelectorAll('.mbScroll').forEach((e,i)=>{if(offsets[i]){e.scrollLeft=offsets[i][0];e.scrollTop=offsets[i][1];}});
    // Fit unusually long names and three-digit wait labels inside the circle.
    for(const m of root.querySelectorAll('.mbMagnet')) for(const line of m.children){
-     if(line.scrollWidth>line.clientWidth&&line.scrollWidth)line.style.transform='scaleX('+line.clientWidth/line.scrollWidth+')';
+     fitLine(m,line);
    }
+ }
+ function fitLine(m,line){
+   const width=line.offsetWidth;line.style.transform=width?'scaleX('+Math.min(1,m.clientWidth*.80/width)+')':'';
  }
  function message(t){const e=root?.querySelector('.mbMessage')||document.querySelector('#mbLaunchStatus');if(e)e.textContent=t;}
  function clocks(){
@@ -9274,7 +9277,7 @@ const magnetBoard692=(()=>{
    for(const btn of root.querySelectorAll('.mbMagnet')){
      const p=board.players[btn.dataset.id];if(!p)continue;
      const t=playerTime(p,btn.parentNode.dataset.zone);
-     if(btn.lastElementChild.textContent!==t){btn.lastElementChild.textContent=t;btn.setAttribute('aria-label',[p.name,btn.children[1].textContent,t].join(' '));}
+     if(btn.lastElementChild.textContent!==t){btn.lastElementChild.textContent=t;fitLine(btn,btn.lastElementChild);btn.setAttribute('aria-label',[p.name,btn.children[1].textContent,t].join(' '));}
    }
  }
  function close(){
@@ -9298,6 +9301,7 @@ const magnetBoard692=(()=>{
      const res=await fetch(api,{method:'POST',headers:{authorization:'Bearer '+token,'content-type':'application/json'},body:JSON.stringify({groupId,action,stamp:expected,...args}),cache:'no-store',signal:AbortSignal.timeout(15000)});
      const x=await res.json();
      if(seq!==serial||groupId!==currentGroupId||token!==T||(!mut&&(writing||drag||expected!==reply?.stamp)))return;
+     if(res.status===401||res.status===403 && !mut){manualList=true;close();sync();message(x.error||'모임 권한을 확인해주세요.');if(res.status===401)reloginLatest(token).catch(()=>{});return;}
      if(!res.ok||!x.board){
        if(x.warning==='repeat'&&mut&&confirm(x.error)){writing=false;return request(action,{...args,forceRepeat:true});}
        throw Error(x.error||'편성판 연결을 확인해주세요.');
@@ -9330,13 +9334,18 @@ const magnetBoard692=(()=>{
  function select(id){selected=id;paint();}
  function move(target,id=selected){if(!target||!id||writing)return;request('move',{id,zone:target.dataset.zone,index:Number(target.dataset.index)});}
  function click(e){
-   if(performance.now()<suppress && e.target.closest('.mbSlot')){suppress=0;return;}
+   if(performance.now()<suppress && e.target.closest('[data-id]')?.dataset.id===suppressedChip){suppress=0;return;}
    const btn=e.target.closest('[data-do]'),z=btn?.dataset.z,act=btn?.dataset.do,dlg=root?.querySelector('.mbMenu');
    if(act){
      if(act==='list'){manualList=true;close();sync();loadState().catch(showError);return;}
      if(act==='auto'){manualList=true;close();sync();loadState().catch(showError);document.querySelector('#queue .autoToggle656')?.scrollIntoView({block:'center'});return;}
      if(act==='cancel'){dlg.close();return;}
      if(act==='undo'){request('undo');return;}
+     if(act==='stageMenu'){
+       const available=rows('court-').filter(c=>!board.games[c]&&!board.groups[c]);
+       menu('<strong>대기조를 배치할 코트</strong>'+(available.length?available.map(c=>'<button data-do="stage" data-source="'+z+'" data-z="'+c+'">'+html(board.names[c])+'</button>').join(''):'<p>빈 코트가 없습니다.</p>'));return;
+     }
+     if(act==='stage'){const source=btn.dataset.source;dlg.close();request('stage',{source,zone:z});return;}
      if(act==='rename'){menu('<label>표시 이름<input maxlength="20" value="'+html(board.names[z])+'"></label><button data-do="save" data-z="'+z+'">저장</button><button data-do="reset" data-z="'+z+'">기본 이름 복원</button>');return;}
      if(act==='save'||act==='reset'){const name=act==='reset'?'':dlg.querySelector('input').value;dlg.close();request('rename',{zone:z,name});return;}
      if(act==='pick'){const id=btn.dataset.member;dlg.close();select(id);return;}
@@ -9369,7 +9378,7 @@ const magnetBoard692=(()=>{
  }
  function up(e){
    if(!drag||drag.pointer!==e.pointerId)return;
-   const d=drag;cancelDrag();if(d.ghost){suppress=performance.now()+400;if(d.target&&d.target!==d.btn.parentNode)move(d.target,d.id);else paint();}
+   const d=drag;cancelDrag();if(d.ghost){suppressedChip=d.id;suppress=performance.now()+400;if(d.target&&d.target!==d.btn.parentNode)move(d.target,d.id);else paint();}
  }
  function watch(){
    const q=document.getElementById('queue');if(!q)return;

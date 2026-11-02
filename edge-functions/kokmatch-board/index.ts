@@ -18,15 +18,15 @@ Deno.serve(async(req:Request)=>{
       const global=u.club_id==='__global__'&&u.role==='admin';
       const gid=String(b.groupId||'');
       if(!gid||gid==='__global__'||(!global&&u.club_id!==gid))return send({error:'모임 접근 권한이 없습니다.'},403);
-      const get=async(lock=false)=>(await tx`select data,revision,md5(data::text) as stamp from public.kokmatch_state where club_id=${gid} ${lock?tx`for update`:tx``}`)[0];
+      const get=async(lock=false)=>(await tx`select data,revision,md5(data::text) as stamp, case when data ? 'boardUndo' then md5((data-'boardUndo')::text) end as undo_stamp from public.kokmatch_state where club_id=${gid} ${lock?tx`for update`:tx``}`)[0];
       let row=await get(write);
       if(!row)return send({error:'편성판을 찾을 수 없습니다.'},404);
-      const s=row.data,actor=s.members.find((m:any)=>m.id===u.member_id);
+      const s=row.data,actor=(s.members||[]).find((m:any)=>m.id===u.member_id);
       if(!global&&(!actor||(actor.role||'member')!==u.role))return send({error:'회원 권한을 확인해주세요.'},403);
       const day=new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Seoul'}).format(new Date());
       const edit=global||['manager','organizer'].includes(u.role)||(actor?.role==='member'&&actor.type!=='guest'&&actor.state!=='out'&&actor.tempOrganizerDay===day);
       const owner=String(u.member_id||'__global__');
-      const undo=(r:any)=>r.data.boardUndo?.owner===owner && Number(r.data.boardUndo?.revision)===Number(r.revision);
+      const undo=(r:any)=>r.data.boardUndo?.owner===owner && r.data.boardUndo?.stamp===r.undo_stamp && Number(r.data.boardUndo?.revision)===Number(r.revision);
       if(write) {
         if(!edit && !(b.action==='finish'&&actor&&actor.type!=='guest'))return send({error:'편성 권한이 없습니다.'},403);
         if(b.stamp!==row.stamp)return send({error:'다른 기기에서 편성판을 변경했습니다. 최신 위치를 확인해주세요.'},409);
@@ -42,7 +42,10 @@ Deno.serve(async(req:Request)=>{
           try{change(s,b,v,Date.now(),{createdByMemberId:owner,createdByName:u.display_name,createdByRole:global?'개발자':u.role==='manager'?'모임장':u.role==='organizer'?'운영진':'임시편성자'});}
           catch(e){return send({error:e.message,warning:e.code},409);}
           if(s.boardUndo)s.boardUndo.revision=Number(row.revision)+1;
-          await tx`update public.kokmatch_state set data=${tx.json(s)},revision=revision+1 where club_id=${gid}`;
+          await tx`with next as (select ${tx.json(s)}::jsonb as doc)
+            update public.kokmatch_state set data=case when next.doc ? 'boardUndo'
+              then jsonb_set(next.doc,'{boardUndo,stamp}',to_jsonb(md5((next.doc-'boardUndo')::text)))
+              else next.doc end,revision=revision+1 from next where club_id=${gid}`;
         }
         row=await get();
       }

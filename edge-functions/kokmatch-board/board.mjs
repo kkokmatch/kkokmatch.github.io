@@ -12,7 +12,7 @@ export function project(s) {
   for(let n=1;n<=4;n++) add('wait-'+n);
   for(let n=1;n<=6;n++) add('free-'+n);
   zones.rest=[];
-  const placed=new Set(), members=new Map(s.members.map(m=>[m.id,m]));
+  const placed=new Set(), members=new Map((s.members||[]).map(m=>[m.id,m]));
   function place(z,i,id) {
     const m=members.get(id);
     if(!m || placed.has(id)) return;
@@ -48,7 +48,7 @@ export function project(s) {
     while(!add('free-'+n).includes(null)) n++;
     place('free-'+n,zones['free-'+n].indexOf(null),m.id);
   }
-  for(const m of s.members) if(m.state==='spectator'&&m.boardRest&&m.joinedAt==null) place('rest',zones.rest.length,m.id);
+  for(const m of s.members||[]) if(m.state==='spectator'&&m.boardRest&&m.joinedAt==null) place('rest',zones.rest.length,m.id);
   for(const z of Object.keys(zones)) if(z.startsWith('wait-')) names[z]=s.boardLabels?.[z]||'대기 '+z.slice(5);
   return {zones,groups,games,players,names,auto:s.autoGame?.enabled===true};
 }
@@ -63,7 +63,7 @@ export function change(s,b,v,now,actor) {
     const saved=s.boardUndo?.before;
     if(!saved) fail('취소할 이동이 없습니다.');
     const states=new Map(saved.members);
-    for(const m of s.members) if(states.has(m.id)) {for(const k of keys) delete m[k];Object.assign(m,states.get(m.id));}
+    for(const m of s.members||[]) if(states.has(m.id)) {for(const k of keys) delete m[k];Object.assign(m,states.get(m.id));}
     s.queue=saved.queue;s.pendingGames=saved.pendingGames;delete s.boardUndo;return;
   }
   if(b.action==='rename') {
@@ -72,6 +72,16 @@ export function change(s,b,v,now,actor) {
     if(b.zone.startsWith('court-')) (s.courtNames||=[])[Number(b.zone.slice(6))-1]=name||b.zone.slice(6)+'코트';
     else (s.boardLabels||={})[b.zone]=name;
     delete s.boardUndo;return;
+  }
+  if(b.action==='stage'){
+    const source=b.source, target=b.zone;
+    const pg=s.pendingGames.find(p=>p.id===v.groups[source]);
+    if(!source?.startsWith('wait-')||!target?.startsWith('court-')||!Object.hasOwn(v.zones,target)||!pg||pg.players.length!==4||v.groups[target]||v.games[target])fail('4명 대기조와 빈 코트를 선택해주세요.');
+    const before=structuredClone(snapshot(s));before.members=[];
+    for(const [z,pid] of Object.entries(v.groups)){
+      const p=s.pendingGames.find(g=>g.id===pid);if(p&&!p.boardZone)p.boardZone=z;
+    }
+    pg.boardZone=target;pg.boardSlots=[...v.zones[source]];s.boardUndo={before,owner:actor.createdByMemberId};return;
   }
   if(!['move','leave'].includes(b.action)) fail('지원하지 않는 동작입니다.');
   if(s.autoGame?.enabled && b.action==='move') fail('자동편성을 끈 뒤 이동해주세요.');
@@ -87,7 +97,7 @@ export function change(s,b,v,now,actor) {
     if(from===to&&src===i) fail('이미 같은 자리에 있습니다.');
     const other=slots[i]||null;
     v.zones[from][src]=other;slots[i]=b.id;
-    const members=new Map(s.members.map(m=>[m.id,m]));
+    const members=new Map((s.members||[]).map(m=>[m.id,m]));
     // Persist all visible free positions so moving into a hole never shifts another magnet.
     for(const [z,ids] of Object.entries(v.zones)) if(freeZone(z)) ids.forEach((id,j)=>{if(id)members.get(id).boardSlot={z,i:j}});
     for(const [id,z,old] of [[b.id,to,from],[other,from,to]]) if(id) {
@@ -111,5 +121,7 @@ export function change(s,b,v,now,actor) {
       const p=s.pendingGames.find(g=>g.id===pid);if(p&&!p.boardZone)p.boardZone=z;
     }
   }
+  const current=new Map(snapshot(s).members);
+  before.members=before.members.filter(([id,previous])=>JSON.stringify(previous)!==JSON.stringify(current.get(id)));
   s.boardUndo={before,owner:actor.createdByMemberId};
 }

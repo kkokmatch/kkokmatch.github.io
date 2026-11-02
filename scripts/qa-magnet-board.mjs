@@ -19,4 +19,7 @@ change(s,{action:'undo'},project(s),62000,actor);assert.equal(project(s).zones.r
 move(ids[0],'free-6',0);assert.equal(project(s).players[ids[0]].since,62000);
 s.members.find(m=>m.id===ids[0]).joinedAt=null;assert.equal(project(s).players[ids[0]].since,null);
 s.autoGame={enabled:true};assert.throws(()=>move(ids[0],'court-2',0),/자동편성/);
+change(s,{action:'stage',source:'wait-2',zone:'court-5'},project(s),62000,actor);
+assert.deepEqual(project(s).zones['court-5'],ids.slice(4,8));assert.equal(s.games.length,0);
+change(s,{action:'undo'},project(s),62000,actor);assert.deepEqual(project(s).zones['wait-2'],ids.slice(4,8));
 console.log('PASS board projection, capacity, existing court count, fixed groups, slot swaps, unknown waits, rest, leave and undo, auto guard');

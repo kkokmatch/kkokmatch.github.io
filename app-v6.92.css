@@ -4674,7 +4674,7 @@ html.kokmatchRoleFramesHidden681 #profileCard53 .profilePreview53>img:not(.devFr
 #kmBoard692 .mbFree article{border-right:1px solid #9bb6a1}
 #kmBoard692 .mbRest{max-height:100%;min-height:90px;overflow:auto;background:#e5eee6}
 #kmBoard692 .mbMagnet{box-sizing:border-box;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;width:min(100%,clamp(44px,9vmin,64px));aspect-ratio:1;max-width:100%;height:auto;border-radius:50%;border:1px solid #d5a955;box-shadow:inset 0 1px 1px white,0 1px 2px #43573b55;color:#24402b;background:radial-gradient(circle at 33% 19%,#fffef2,#ffefbf 48%,#f6cd74);padding:0;touch-action:none;user-select:none;-webkit-touch-callout:none;cursor:grab;line-height:1.02}
-#kmBoard692 .mbMagnet>*{max-width:90%;white-space:nowrap;text-align:center;line-height:1.06;transform-origin:center}
+#kmBoard692 .mbMagnet>*{width:max-content;max-width:none;white-space:nowrap;text-align:center;line-height:1.06;transform-origin:center}
 #kmBoard692 .mbMagnet b{font-size:11px}#kmBoard692 .mbMagnet small{font-size:9px}#kmBoard692 .mbMagnet em{font-size:8px;font-weight:700;font-style:normal}
 #kmBoard692 .mbRest .mbMagnet{background:radial-gradient(circle at 33% 19%,white,#e8f0e8 60%,#cbd7ce);border-color:#9eafa2}
 #kmBoard692 .mbMagnet[aria-pressed=true],#kmBoard692 .mbTarget{outline:2px solid #20afff;outline-offset:-2px}
